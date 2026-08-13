@@ -5,4 +5,4 @@
  */
 
 export type * from './models.js';
-export { controlPlaneDocumentValidator, hardwareEvidenceDocumentValidator } from './standalone-validators.js';
+export { controlPlaneDocumentValidator, hardwareEvidenceDocumentValidator, transactionalRecoveryDocumentValidator } from './standalone-validators.js';

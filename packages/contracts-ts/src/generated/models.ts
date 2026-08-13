@@ -282,6 +282,184 @@ export type ComparisonBlockerCodeJson =
 export type ClaimAdmissionStateJson = 'admitted' | 'rejected';
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionalRecoveryDocument".
+ */
+export type TransactionalRecoveryDocumentJson =
+  | TransactionalPlanDocumentJson
+  | PlanApprovalDocumentJson
+  | PlanTransactionDocumentJson
+  | RecoveryCheckpointDocumentJson
+  | DurableJournalEventJson
+  | TransactionReceiptDocumentJson
+  | ProgressSnapshotDocumentJson
+  | ProgressEventDocumentJson
+  | OperationPromotionDocumentJson
+  | SignedOperationRevocationDocumentJson
+  | PrivilegedBrokerRequestJson
+  | PrivilegedBrokerResponseJson
+  | RedactedDiagnosticExportDocumentJson
+  | AdvancedPreferenceProjectionDocumentJson
+  | AdvancedPreferenceIntentDocumentJson
+  | AdvancedPreferenceEventDocumentJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionSchemaVersion".
+ */
+export type TransactionSchemaVersionJson = '1.0';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionIdentifier".
+ */
+export type TransactionIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionHash".
+ */
+export type TransactionHashJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PlanLifecycleState".
+ */
+export type PlanLifecycleStateJson =
+  | 'composed'
+  | 'awaiting-approval'
+  | 'approved'
+  | 'applying'
+  | 'paused'
+  | 'awaiting-restart'
+  | 'recovering'
+  | 'completed'
+  | 'restored'
+  | 'blocked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RiskClass".
+ */
+export type RiskClassJson = 'verified' | 'advanced' | 'experimental' | 'extreme-locked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionText".
+ */
+export type TransactionTextJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CompatibilityVerdict".
+ */
+export type CompatibilityVerdictJson = 'compatible' | 'incompatible' | 'unknown' | 'degraded';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RestartEffect".
+ */
+export type RestartEffectJson = 'none' | 'recommended' | 'required';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ExactOperationState".
+ */
+export type ExactOperationStateJson =
+  ExactPowerSchemeStateJson | UnavailablePowerSchemeStateJson | UnknownPowerSchemeStateJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "WindowsSchemeIdentifier".
+ */
+export type WindowsSchemeIdentifierJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RecoveryMethod".
+ */
+export type RecoveryMethodJson = 'exact-prior-scheme' | 'owned-scheme-removal' | 'system-restore-complement';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RecoveryCoverage".
+ */
+export type RecoveryCoverageJson = 'ready' | 'partial' | 'unavailable' | 'failed';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionIntent".
+ */
+export type TransactionIntentJson =
+  'apply' | 'restore-operation' | 'restore-plan' | 'restore-checkpoint' | 'retry-after-observation';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DurableJournalEvent".
+ */
+export type DurableJournalEventJson =
+  | PreparedJournalEventJson
+  | DispatchReturnedJournalEventJson
+  | ObservedJournalEventJson
+  | VerifiedJournalEventJson
+  | NotAppliedJournalEventJson
+  | UnknownJournalEventJson
+  | DriftJournalEventJson
+  | ConflictJournalEventJson
+  | RestorePreparedJournalEventJson
+  | RestoredJournalEventJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "BrokerOutcome".
+ */
+export type BrokerOutcomeJson = 'observed' | 'accepted' | 'rejected' | 'unavailable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProgressState".
+ */
+export type ProgressStateJson =
+  | 'queued'
+  | 'preparing'
+  | 'applying'
+  | 'observing'
+  | 'verifying'
+  | 'awaiting-restart'
+  | 'paused'
+  | 'recovering'
+  | 'completed'
+  | 'blocked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OperationPromotionDocument".
+ */
+export type OperationPromotionDocumentJson =
+  SimulationPromotionDocumentJson | VmPromotionDocumentJson | OwnerPromotionDocumentJson | FriendsPromotionDocumentJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PromotionVerdict".
+ */
+export type PromotionVerdictJson = 'pending' | 'passed' | 'failed' | 'blocked' | 'revoked';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PrivilegedBrokerRequest".
+ */
+export type PrivilegedBrokerRequestJson =
+  | ObservePowerSchemeRequestJson
+  | DuplicateManagedPowerSchemeRequestJson
+  | ActivateManagedPowerSchemeRequestJson
+  | DeleteOwnedPowerSchemeRequestJson
+  | PrepareRestorePointRequestJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PrivilegedBrokerResponse".
+ */
+export type PrivilegedBrokerResponseJson =
+  | BrokerObservationResponseJson
+  | BrokerAcceptedResponseJson
+  | BrokerRejectedResponseJson
+  | BrokerUnavailableResponseJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceState".
+ */
+export type AdvancedPreferenceStateJson = 'disabled' | 'enabled' | 'revalidation-required';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceIntentKind".
+ */
+export type AdvancedPreferenceIntentKindJson = 'enable' | 'revoke' | 'posture-invalidate' | 'revalidate';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceEventKind".
+ */
+export type AdvancedPreferenceEventKindJson = 'enabled' | 'revoked' | 'posture-invalidated' | 'revalidated';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "WebIdentifier".
  */
 export type WebIdentifierJson = string;
@@ -780,183 +958,6 @@ export type AdminOperationActionJson =
   | 'rollback-configuration'
   | 'execute-privacy-case'
   | 'export-sensitive-data';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionalRecoveryDocument".
- */
-export type TransactionalRecoveryDocumentJson =
-  | TransactionalPlanDocumentJson
-  | PlanApprovalDocumentJson
-  | PlanTransactionDocumentJson
-  | RecoveryCheckpointDocumentJson
-  | DurableJournalEventJson
-  | TransactionReceiptDocumentJson
-  | ProgressSnapshotDocumentJson
-  | ProgressEventDocumentJson
-  | OperationPromotionDocumentJson
-  | SignedOperationRevocationDocumentJson
-  | PrivilegedBrokerRequestJson
-  | PrivilegedBrokerResponseJson
-  | RedactedDiagnosticExportDocumentJson
-  | AdvancedPreferenceProjectionDocumentJson
-  | AdvancedPreferenceIntentDocumentJson
-  | AdvancedPreferenceEventDocumentJson;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionSchemaVersion".
- */
-export type TransactionSchemaVersionJson = '1.0';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionIdentifier".
- */
-export type TransactionIdentifierJson = string;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionHash".
- */
-export type TransactionHashJson = string;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PlanLifecycleState".
- */
-export type PlanLifecycleStateJson =
-  | 'composed'
-  | 'awaiting-approval'
-  | 'approved'
-  | 'applying'
-  | 'paused'
-  | 'awaiting-restart'
-  | 'recovering'
-  | 'completed'
-  | 'restored'
-  | 'blocked';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RiskClass".
- */
-export type RiskClassJson = 'verified' | 'advanced' | 'experimental' | 'extreme-locked';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionText".
- */
-export type TransactionTextJson = string;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "CompatibilityVerdict".
- */
-export type CompatibilityVerdictJson = 'compatible' | 'incompatible' | 'unknown' | 'degraded';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RestartEffect".
- */
-export type RestartEffectJson = 'none' | 'recommended' | 'required';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ExactOperationState".
- */
-export type ExactOperationStateJson =
-  ExactPowerSchemeStateJson | UnavailablePowerSchemeStateJson | UnknownPowerSchemeStateJson;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "WindowsSchemeIdentifier".
- */
-export type WindowsSchemeIdentifierJson = string;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RecoveryMethod".
- */
-export type RecoveryMethodJson = 'exact-prior-scheme' | 'owned-scheme-removal' | 'system-restore-complement';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RecoveryCoverage".
- */
-export type RecoveryCoverageJson = 'ready' | 'partial' | 'unavailable' | 'failed';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionIntent".
- */
-export type TransactionIntentJson =
-  'apply' | 'restore-operation' | 'restore-plan' | 'restore-checkpoint' | 'retry-after-observation';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DurableJournalEvent".
- */
-export type DurableJournalEventJson =
-  | PreparedJournalEventJson
-  | DispatchReturnedJournalEventJson
-  | ObservedJournalEventJson
-  | VerifiedJournalEventJson
-  | NotAppliedJournalEventJson
-  | UnknownJournalEventJson
-  | DriftJournalEventJson
-  | ConflictJournalEventJson
-  | RestorePreparedJournalEventJson
-  | RestoredJournalEventJson;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "BrokerOutcome".
- */
-export type BrokerOutcomeJson = 'observed' | 'accepted' | 'rejected' | 'unavailable';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ProgressState".
- */
-export type ProgressStateJson =
-  | 'queued'
-  | 'preparing'
-  | 'applying'
-  | 'observing'
-  | 'verifying'
-  | 'awaiting-restart'
-  | 'paused'
-  | 'recovering'
-  | 'completed'
-  | 'blocked';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PromotionStage".
- */
-export type PromotionStageJson = 'deterministic-simulation' | 'clean-windows-vm' | 'owner-pc' | 'friends-pc';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PromotionVerdict".
- */
-export type PromotionVerdictJson = 'pending' | 'passed' | 'failed' | 'blocked' | 'revoked';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PrivilegedBrokerRequest".
- */
-export type PrivilegedBrokerRequestJson =
-  | ObservePowerSchemeRequestJson
-  | DuplicateManagedPowerSchemeRequestJson
-  | ActivateManagedPowerSchemeRequestJson
-  | DeleteOwnedPowerSchemeRequestJson
-  | PrepareRestorePointRequestJson;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PrivilegedBrokerResponse".
- */
-export type PrivilegedBrokerResponseJson =
-  | BrokerObservationResponseJson
-  | BrokerAcceptedResponseJson
-  | BrokerRejectedResponseJson
-  | BrokerUnavailableResponseJson;
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceState".
- */
-export type AdvancedPreferenceStateJson = 'disabled' | 'enabled' | 'revalidation-required';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceIntentKind".
- */
-export type AdvancedPreferenceIntentKindJson = 'enable' | 'revoke' | 'posture-invalidate' | 'revalidate';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceEventKind".
- */
-export type AdvancedPreferenceEventKindJson = 'enabled' | 'revoked' | 'posture-invalidated' | 'revalidated';
 
 export interface GeneratedContractRoots {
   messageEnvelope:
@@ -964,8 +965,10 @@ export interface GeneratedContractRoots {
     | InspectSystemResultJson
     | HostToRendererShellEventJson
     | RendererToHostShellCommandJson
-    | HardwareEvidenceDocumentJson;
+    | HardwareEvidenceDocumentJson
+    | TransactionalRecoveryDocumentJson;
   hardwareEvidenceDocument: HardwareEvidenceDocumentJson;
+  transactionalRecoveryDocument: TransactionalRecoveryDocumentJson;
   webDocument:
     | WebRouteRecordJson
     | ClaimEvidenceJson
@@ -2614,6 +2617,1248 @@ export interface ClaimAdmissionJson {
         EvidenceTextJson,
         EvidenceTextJson
       ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionalPlanDocument".
+ */
+export interface TransactionalPlanDocumentJson {
+  kind: 'transactional-plan';
+  schemaVersion: TransactionSchemaVersionJson;
+  planId: TransactionIdentifierJson;
+  revision: number;
+  revisionFingerprint: TransactionHashJson;
+  evidenceFingerprint: TransactionHashJson;
+  device: DeviceAuthorityBindingJson;
+  lifecycle: PlanLifecycleStateJson;
+  riskCeiling: RiskClassJson;
+  effectiveRisk: RiskClassJson;
+  createdAt: string;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  operations: [PlanOperationJson, ...PlanOperationJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  dependencyGroups: [DependencyGroupJson, ...DependencyGroupJson[]];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeviceAuthorityBinding".
+ */
+export interface DeviceAuthorityBindingJson {
+  deviceBindingId: TransactionIdentifierJson;
+  hardwareFingerprint: TransactionHashJson;
+  securityPostureFingerprint: TransactionHashJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PlanOperation".
+ */
+export interface PlanOperationJson {
+  operationVersionId: TransactionIdentifierJson;
+  operationKind: 'managed-power-scheme-v1';
+  purpose: TransactionTextJson;
+  expectedImpact: TransactionTextJson;
+  risk: RiskClassJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  evidence:
+    | [EvidenceReferenceJson]
+    | [EvidenceReferenceJson, EvidenceReferenceJson]
+    | [EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson]
+    | [EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ]
+    | [
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson,
+        EvidenceReferenceJson
+      ];
+  compatibility: CompatibilityAssessmentJson;
+  restartEffect: RestartEffectJson;
+  previousValue: ExactOperationStateJson;
+  requestedValue: ExactOperationStateJson;
+  recoveryMethod: RecoveryMethodJson;
+  dependencyGroupId: TransactionIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "EvidenceReference".
+ */
+export interface EvidenceReferenceJson {
+  evidenceId: EvidenceIdentifierJson;
+  evidenceHash: EvidenceHashJson;
+  capturedAt: string;
+  validUntil: string;
+  quality: EvidenceQualityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CompatibilityAssessment".
+ */
+export interface CompatibilityAssessmentJson {
+  verdict: CompatibilityVerdictJson;
+  /**
+   * @minItems 1
+   * @maxItems 16
+   */
+  reasons:
+    | [TransactionTextJson]
+    | [TransactionTextJson, TransactionTextJson]
+    | [TransactionTextJson, TransactionTextJson, TransactionTextJson]
+    | [TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson]
+    | [TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ]
+    | [
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson,
+        TransactionTextJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ExactPowerSchemeState".
+ */
+export interface ExactPowerSchemeStateJson {
+  state: 'observed';
+  schemeId: WindowsSchemeIdentifierJson;
+  canonicalStateHash: TransactionHashJson;
+  observedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "UnavailablePowerSchemeState".
+ */
+export interface UnavailablePowerSchemeStateJson {
+  state: 'unavailable';
+  reason: TransactionTextJson;
+  observedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "UnknownPowerSchemeState".
+ */
+export interface UnknownPowerSchemeStateJson {
+  state: 'unknown';
+  reason: TransactionTextJson;
+  observedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DependencyGroup".
+ */
+export interface DependencyGroupJson {
+  dependencyGroupId: TransactionIdentifierJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  operationVersionIds: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
+  /**
+   * @minItems 0
+   * @maxItems 16
+   */
+  dependsOnGroupIds:
+    | []
+    | [TransactionIdentifierJson]
+    | [TransactionIdentifierJson, TransactionIdentifierJson]
+    | [TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson]
+    | [TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ]
+    | [
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson,
+        TransactionIdentifierJson
+      ];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PlanApprovalDocument".
+ */
+export interface PlanApprovalDocumentJson {
+  kind: 'plan-approval';
+  schemaVersion: TransactionSchemaVersionJson;
+  approvalId: TransactionIdentifierJson;
+  planId: TransactionIdentifierJson;
+  planRevision: number;
+  revisionFingerprint: TransactionHashJson;
+  evidenceFingerprint: TransactionHashJson;
+  device: DeviceAuthorityBindingJson;
+  approvedRisk: RiskClassJson;
+  compatibility: CompatibilityVerdictJson;
+  recoveryCoverage: RecoveryCoverageJson;
+  intent: TransactionIntentJson;
+  proof: ActionProofReferenceJson;
+  approvedAt: string;
+  audit: AuditReferenceJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  operationVersionIds: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ActionProofReference".
+ */
+export interface ActionProofReferenceJson {
+  proofReference: TransactionIdentifierJson;
+  action: TransactionTextJson;
+  issuedAt: string;
+  expiresAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AuditReference".
+ */
+export interface AuditReferenceJson {
+  auditId: TransactionIdentifierJson;
+  recordedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PlanTransactionDocument".
+ */
+export interface PlanTransactionDocumentJson {
+  kind: 'plan-transaction';
+  schemaVersion: TransactionSchemaVersionJson;
+  transactionId: TransactionIdentifierJson;
+  planId: TransactionIdentifierJson;
+  planRevision: number;
+  revisionFingerprint: TransactionHashJson;
+  approvalId: TransactionIdentifierJson;
+  intent: TransactionIntentJson;
+  startedAt: string;
+  parentTransactionId?: TransactionIdentifierJson;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RecoveryCheckpointDocument".
+ */
+export interface RecoveryCheckpointDocumentJson {
+  kind: 'recovery-checkpoint';
+  schemaVersion: TransactionSchemaVersionJson;
+  checkpointId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  planId: TransactionIdentifierJson;
+  createdAt: string;
+  coverage: RecoveryCoverageJson;
+  exactPriorState: ExactOperationStateJson;
+  restartRequired: boolean;
+  restorePointSequence?: string;
+  restorePointStatus?: TransactionTextJson;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PreparedJournalEvent".
+ */
+export interface PreparedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'prepared';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  recoveryMethod: RecoveryMethodJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DispatchReturnedJournalEvent".
+ */
+export interface DispatchReturnedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'dispatch-returned';
+  brokerRequestId: TransactionIdentifierJson;
+  brokerResponseId: TransactionIdentifierJson;
+  outcome: BrokerOutcomeJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ObservedJournalEvent".
+ */
+export interface ObservedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'observed';
+  exactObservedState: ExactOperationStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "VerifiedJournalEvent".
+ */
+export interface VerifiedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'verified';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "NotAppliedJournalEvent".
+ */
+export interface NotAppliedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'not-applied';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "UnknownJournalEvent".
+ */
+export interface UnknownJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'unknown';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+  reason: TransactionTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DriftJournalEvent".
+ */
+export interface DriftJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'drift';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+  differenceSummary: TransactionTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ConflictJournalEvent".
+ */
+export interface ConflictJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'conflict';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+  differenceSummary: TransactionTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RestorePreparedJournalEvent".
+ */
+export interface RestorePreparedJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'restore-prepared';
+  exactAppliedState: ExactOperationStateJson;
+  exactRestoreTargetState: ExactOperationStateJson;
+  recoveryMethod: RecoveryMethodJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RestoredJournalEvent".
+ */
+export interface RestoredJournalEventJson {
+  kind: 'journal-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  sequence: number;
+  occurredAt: string;
+  previousEventHash: TransactionHashJson;
+  eventHash: TransactionHashJson;
+  audit: AuditReferenceJson;
+  state: 'restored';
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TransactionReceiptDocument".
+ */
+export interface TransactionReceiptDocumentJson {
+  kind: 'transaction-receipt';
+  schemaVersion: TransactionSchemaVersionJson;
+  receiptId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  planId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  completedAt: string;
+  exactPriorState: ExactOperationStateJson;
+  exactRequestedState: ExactOperationStateJson;
+  exactObservedState: ExactOperationStateJson;
+  verification: VerificationReceiptJson;
+  recoveryMethod: RecoveryMethodJson;
+  journalHeadHash: TransactionHashJson;
+  humanSummary: TransactionTextJson;
+  technicalSummary: TransactionTextJson;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "VerificationReceipt".
+ */
+export interface VerificationReceiptJson {
+  state: 'verified';
+  verifiedAt: string;
+  exactObservedState: ExactOperationStateJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProgressSnapshotDocument".
+ */
+export interface ProgressSnapshotDocumentJson {
+  kind: 'progress-snapshot';
+  schemaVersion: TransactionSchemaVersionJson;
+  transactionId: TransactionIdentifierJson;
+  sequence: number;
+  state: ProgressStateJson;
+  completedOperations: number;
+  totalOperations: number;
+  currentOperationVersionId?: TransactionIdentifierJson;
+  updatedAt: string;
+  displayText: TransactionTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ProgressEventDocument".
+ */
+export interface ProgressEventDocumentJson {
+  kind: 'progress-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  sequence: number;
+  previousSequence?: number;
+  state: ProgressStateJson;
+  occurredAt: string;
+  operationVersionId?: TransactionIdentifierJson;
+  displayText: TransactionTextJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SimulationPromotionDocument".
+ */
+export interface SimulationPromotionDocumentJson {
+  kind: 'operation-promotion';
+  schemaVersion: TransactionSchemaVersionJson;
+  promotionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  verdict: PromotionVerdictJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidence: [PromotionEvidenceReferenceJson, ...PromotionEvidenceReferenceJson[]];
+  recordedAt: string;
+  audit: AuditReferenceJson;
+  stage: 'deterministic-simulation';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PromotionEvidenceReference".
+ */
+export interface PromotionEvidenceReferenceJson {
+  evidenceId: EvidenceIdentifierJson;
+  evidenceHash: EvidenceHashJson;
+  capturedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "VmPromotionDocument".
+ */
+export interface VmPromotionDocumentJson {
+  kind: 'operation-promotion';
+  schemaVersion: TransactionSchemaVersionJson;
+  promotionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  verdict: PromotionVerdictJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidence: [PromotionEvidenceReferenceJson, ...PromotionEvidenceReferenceJson[]];
+  recordedAt: string;
+  audit: AuditReferenceJson;
+  stage: 'clean-windows-vm';
+  previousStage: 'deterministic-simulation';
+  previousPromotionId: TransactionIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OwnerPromotionDocument".
+ */
+export interface OwnerPromotionDocumentJson {
+  kind: 'operation-promotion';
+  schemaVersion: TransactionSchemaVersionJson;
+  promotionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  verdict: PromotionVerdictJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidence: [PromotionEvidenceReferenceJson, ...PromotionEvidenceReferenceJson[]];
+  recordedAt: string;
+  audit: AuditReferenceJson;
+  stage: 'owner-pc';
+  previousStage: 'clean-windows-vm';
+  previousPromotionId: TransactionIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FriendsPromotionDocument".
+ */
+export interface FriendsPromotionDocumentJson {
+  kind: 'operation-promotion';
+  schemaVersion: TransactionSchemaVersionJson;
+  promotionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  verdict: PromotionVerdictJson;
+  /**
+   * @minItems 1
+   * @maxItems 64
+   */
+  evidence: [PromotionEvidenceReferenceJson, ...PromotionEvidenceReferenceJson[]];
+  recordedAt: string;
+  audit: AuditReferenceJson;
+  stage: 'friends-pc';
+  previousStage: 'owner-pc';
+  previousPromotionId: TransactionIdentifierJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "SignedOperationRevocationDocument".
+ */
+export interface SignedOperationRevocationDocumentJson {
+  kind: 'operation-revocation';
+  schemaVersion: TransactionSchemaVersionJson;
+  revocationId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  reason: TransactionTextJson;
+  issuedAt: string;
+  signatureKeyId: TransactionIdentifierJson;
+  signedPayloadHash: TransactionHashJson;
+  signature: TransactionIdentifierJson;
+  recoveryRemainsAvailable: true;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ObservePowerSchemeRequest".
+ */
+export interface ObservePowerSchemeRequestJson {
+  kind: 'observe-power-scheme-request';
+  schemaVersion: TransactionSchemaVersionJson;
+  requestId: TransactionIdentifierJson;
+  deviceBindingId: TransactionIdentifierJson;
+  issuedAt: string;
+  nonce: TransactionIdentifierJson;
+  counter: number;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DuplicateManagedPowerSchemeRequest".
+ */
+export interface DuplicateManagedPowerSchemeRequestJson {
+  kind: 'duplicate-managed-power-scheme-request';
+  schemaVersion: TransactionSchemaVersionJson;
+  requestId: TransactionIdentifierJson;
+  deviceBindingId: TransactionIdentifierJson;
+  sourceSchemeId: WindowsSchemeIdentifierJson;
+  destinationSchemeId: WindowsSchemeIdentifierJson;
+  friendlyName: 'Liiiraa Verificado';
+  issuedAt: string;
+  nonce: TransactionIdentifierJson;
+  counter: number;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ActivateManagedPowerSchemeRequest".
+ */
+export interface ActivateManagedPowerSchemeRequestJson {
+  kind: 'activate-managed-power-scheme-request';
+  schemaVersion: TransactionSchemaVersionJson;
+  requestId: TransactionIdentifierJson;
+  deviceBindingId: TransactionIdentifierJson;
+  schemeId: WindowsSchemeIdentifierJson;
+  expectedCurrentSchemeId: WindowsSchemeIdentifierJson;
+  issuedAt: string;
+  nonce: TransactionIdentifierJson;
+  counter: number;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "DeleteOwnedPowerSchemeRequest".
+ */
+export interface DeleteOwnedPowerSchemeRequestJson {
+  kind: 'delete-owned-power-scheme-request';
+  schemaVersion: TransactionSchemaVersionJson;
+  requestId: TransactionIdentifierJson;
+  deviceBindingId: TransactionIdentifierJson;
+  schemeId: WindowsSchemeIdentifierJson;
+  expectedCanonicalStateHash: TransactionHashJson;
+  issuedAt: string;
+  nonce: TransactionIdentifierJson;
+  counter: number;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PrepareRestorePointRequest".
+ */
+export interface PrepareRestorePointRequestJson {
+  kind: 'prepare-restore-point-request';
+  schemaVersion: TransactionSchemaVersionJson;
+  requestId: TransactionIdentifierJson;
+  deviceBindingId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  displaySummary: TransactionTextJson;
+  issuedAt: string;
+  nonce: TransactionIdentifierJson;
+  counter: number;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "BrokerObservationResponse".
+ */
+export interface BrokerObservationResponseJson {
+  kind: 'broker-observation-response';
+  schemaVersion: TransactionSchemaVersionJson;
+  responseId: TransactionIdentifierJson;
+  requestId: TransactionIdentifierJson;
+  outcome: 'observed';
+  exactObservedState: ExactOperationStateJson;
+  completedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "BrokerAcceptedResponse".
+ */
+export interface BrokerAcceptedResponseJson {
+  kind: 'broker-accepted-response';
+  schemaVersion: TransactionSchemaVersionJson;
+  responseId: TransactionIdentifierJson;
+  requestId: TransactionIdentifierJson;
+  outcome: 'accepted';
+  completedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "BrokerRejectedResponse".
+ */
+export interface BrokerRejectedResponseJson {
+  kind: 'broker-rejected-response';
+  schemaVersion: TransactionSchemaVersionJson;
+  responseId: TransactionIdentifierJson;
+  requestId: TransactionIdentifierJson;
+  outcome: 'rejected';
+  reasonCode: TransactionIdentifierJson;
+  completedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "BrokerUnavailableResponse".
+ */
+export interface BrokerUnavailableResponseJson {
+  kind: 'broker-unavailable-response';
+  schemaVersion: TransactionSchemaVersionJson;
+  responseId: TransactionIdentifierJson;
+  requestId: TransactionIdentifierJson;
+  outcome: 'unavailable';
+  reasonCode: TransactionIdentifierJson;
+  completedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RedactedDiagnosticExportDocument".
+ */
+export interface RedactedDiagnosticExportDocumentJson {
+  kind: 'redacted-diagnostic-export';
+  schemaVersion: TransactionSchemaVersionJson;
+  exportId: TransactionIdentifierJson;
+  planId: TransactionIdentifierJson;
+  generatedAt: string;
+  journalHeadHash: TransactionHashJson;
+  /**
+   * @minItems 1
+   * @maxItems 512
+   */
+  entries: [RedactedDiagnosticEntryJson, ...RedactedDiagnosticEntryJson[]];
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  redactionsApplied: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RedactedDiagnosticEntry".
+ */
+export interface RedactedDiagnosticEntryJson {
+  eventId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  state: ProgressStateJson;
+  occurredAt: string;
+  reasonCode?: TransactionIdentifierJson;
+  eventHash: TransactionHashJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceProjectionDocument".
+ */
+export interface AdvancedPreferenceProjectionDocumentJson {
+  kind: 'advanced-preference-projection';
+  schemaVersion: TransactionSchemaVersionJson;
+  preferenceId: TransactionIdentifierJson;
+  device: DeviceAuthorityBindingJson;
+  state: AdvancedPreferenceStateJson;
+  sequence: number;
+  lastEventId: TransactionIdentifierJson;
+  updatedAt: string;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceIntentDocument".
+ */
+export interface AdvancedPreferenceIntentDocumentJson {
+  kind: 'advanced-preference-intent';
+  schemaVersion: TransactionSchemaVersionJson;
+  intentId: TransactionIdentifierJson;
+  preferenceId: TransactionIdentifierJson;
+  device: DeviceAuthorityBindingJson;
+  intent: AdvancedPreferenceIntentKindJson;
+  proof: ActionProofReferenceJson;
+  expectedSequence: number;
+  requestedAt: string;
+  audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "AdvancedPreferenceEventDocument".
+ */
+export interface AdvancedPreferenceEventDocumentJson {
+  kind: 'advanced-preference-event';
+  schemaVersion: TransactionSchemaVersionJson;
+  eventId: TransactionIdentifierJson;
+  preferenceId: TransactionIdentifierJson;
+  device: DeviceAuthorityBindingJson;
+  event: AdvancedPreferenceEventKindJson;
+  proof: ActionProofReferenceJson;
+  sequence: number;
+  occurredAt: string;
+  audit: AuditReferenceJson;
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -5434,1186 +6679,9 @@ export interface AdminOperationCommandJson {
   correlationId: CorrelationIdJson;
   requestedAt: string;
 }
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionalPlanDocument".
- */
-export interface TransactionalPlanDocumentJson {
-  kind: 'transactional-plan';
-  schemaVersion: TransactionSchemaVersionJson;
-  planId: TransactionIdentifierJson;
-  revision: number;
-  revisionFingerprint: TransactionHashJson;
-  evidenceFingerprint: TransactionHashJson;
-  device: DeviceAuthorityBindingJson;
-  lifecycle: PlanLifecycleStateJson;
-  riskCeiling: RiskClassJson;
-  effectiveRisk: RiskClassJson;
-  createdAt: string;
-  /**
-   * @minItems 1
-   * @maxItems 64
-   */
-  operations: [PlanOperationJson, ...PlanOperationJson[]];
-  /**
-   * @minItems 1
-   * @maxItems 32
-   */
-  dependencyGroups: [DependencyGroupJson, ...DependencyGroupJson[]];
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DeviceAuthorityBinding".
- */
-export interface DeviceAuthorityBindingJson {
-  deviceBindingId: TransactionIdentifierJson;
-  hardwareFingerprint: TransactionHashJson;
-  securityPostureFingerprint: TransactionHashJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PlanOperation".
- */
-export interface PlanOperationJson {
-  operationVersionId: TransactionIdentifierJson;
-  operationKind: 'managed-power-scheme-v1';
-  purpose: TransactionTextJson;
-  expectedImpact: TransactionTextJson;
-  risk: RiskClassJson;
-  /**
-   * @minItems 1
-   * @maxItems 16
-   */
-  evidence:
-    | [EvidenceReferenceJson]
-    | [EvidenceReferenceJson, EvidenceReferenceJson]
-    | [EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson]
-    | [EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson, EvidenceReferenceJson]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ]
-    | [
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson,
-        EvidenceReferenceJson
-      ];
-  compatibility: CompatibilityAssessmentJson;
-  restartEffect: RestartEffectJson;
-  previousValue: ExactOperationStateJson;
-  requestedValue: ExactOperationStateJson;
-  recoveryMethod: RecoveryMethodJson;
-  dependencyGroupId: TransactionIdentifierJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "EvidenceReference".
- */
-export interface EvidenceReferenceJson {
-  evidenceId: EvidenceIdentifierJson;
-  evidenceHash: EvidenceHashJson;
-  capturedAt: string;
-  validUntil: string;
-  quality: EvidenceQualityJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "CompatibilityAssessment".
- */
-export interface CompatibilityAssessmentJson {
-  verdict: CompatibilityVerdictJson;
-  /**
-   * @minItems 1
-   * @maxItems 16
-   */
-  reasons:
-    | [TransactionTextJson]
-    | [TransactionTextJson, TransactionTextJson]
-    | [TransactionTextJson, TransactionTextJson, TransactionTextJson]
-    | [TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson]
-    | [TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson, TransactionTextJson]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ]
-    | [
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson,
-        TransactionTextJson
-      ];
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ExactPowerSchemeState".
- */
-export interface ExactPowerSchemeStateJson {
-  state: 'observed';
-  schemeId: WindowsSchemeIdentifierJson;
-  canonicalStateHash: TransactionHashJson;
-  observedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "UnavailablePowerSchemeState".
- */
-export interface UnavailablePowerSchemeStateJson {
-  state: 'unavailable';
-  reason: TransactionTextJson;
-  observedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "UnknownPowerSchemeState".
- */
-export interface UnknownPowerSchemeStateJson {
-  state: 'unknown';
-  reason: TransactionTextJson;
-  observedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DependencyGroup".
- */
-export interface DependencyGroupJson {
-  dependencyGroupId: TransactionIdentifierJson;
-  /**
-   * @minItems 1
-   * @maxItems 64
-   */
-  operationVersionIds: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
-  /**
-   * @minItems 0
-   * @maxItems 16
-   */
-  dependsOnGroupIds:
-    | []
-    | [TransactionIdentifierJson]
-    | [TransactionIdentifierJson, TransactionIdentifierJson]
-    | [TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson]
-    | [TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson, TransactionIdentifierJson]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ]
-    | [
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson,
-        TransactionIdentifierJson
-      ];
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PlanApprovalDocument".
- */
-export interface PlanApprovalDocumentJson {
-  kind: 'plan-approval';
-  schemaVersion: TransactionSchemaVersionJson;
-  approvalId: TransactionIdentifierJson;
-  planId: TransactionIdentifierJson;
-  planRevision: number;
-  revisionFingerprint: TransactionHashJson;
-  evidenceFingerprint: TransactionHashJson;
-  device: DeviceAuthorityBindingJson;
-  approvedRisk: RiskClassJson;
-  compatibility: CompatibilityVerdictJson;
-  recoveryCoverage: RecoveryCoverageJson;
-  intent: TransactionIntentJson;
-  proof: ActionProofReferenceJson;
-  approvedAt: string;
-  audit: AuditReferenceJson;
-  /**
-   * @minItems 1
-   * @maxItems 64
-   */
-  operationVersionIds: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ActionProofReference".
- */
-export interface ActionProofReferenceJson {
-  proofReference: TransactionIdentifierJson;
-  action: TransactionTextJson;
-  issuedAt: string;
-  expiresAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AuditReference".
- */
-export interface AuditReferenceJson {
-  auditId: TransactionIdentifierJson;
-  recordedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PlanTransactionDocument".
- */
-export interface PlanTransactionDocumentJson {
-  kind: 'plan-transaction';
-  schemaVersion: TransactionSchemaVersionJson;
-  transactionId: TransactionIdentifierJson;
-  planId: TransactionIdentifierJson;
-  planRevision: number;
-  revisionFingerprint: TransactionHashJson;
-  approvalId: TransactionIdentifierJson;
-  intent: TransactionIntentJson;
-  startedAt: string;
-  parentTransactionId?: TransactionIdentifierJson;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RecoveryCheckpointDocument".
- */
-export interface RecoveryCheckpointDocumentJson {
-  kind: 'recovery-checkpoint';
-  schemaVersion: TransactionSchemaVersionJson;
-  checkpointId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  planId: TransactionIdentifierJson;
-  createdAt: string;
-  coverage: RecoveryCoverageJson;
-  exactPriorState: ExactOperationStateJson;
-  restartRequired: boolean;
-  restorePointSequence?: string;
-  restorePointStatus?: TransactionTextJson;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PreparedJournalEvent".
- */
-export interface PreparedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'prepared';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  recoveryMethod: RecoveryMethodJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DispatchReturnedJournalEvent".
- */
-export interface DispatchReturnedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'dispatch-returned';
-  brokerRequestId: TransactionIdentifierJson;
-  brokerResponseId: TransactionIdentifierJson;
-  outcome: BrokerOutcomeJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ObservedJournalEvent".
- */
-export interface ObservedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'observed';
-  exactObservedState: ExactOperationStateJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "VerifiedJournalEvent".
- */
-export interface VerifiedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'verified';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "NotAppliedJournalEvent".
- */
-export interface NotAppliedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'not-applied';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "UnknownJournalEvent".
- */
-export interface UnknownJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'unknown';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-  reason: TransactionTextJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DriftJournalEvent".
- */
-export interface DriftJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'drift';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-  differenceSummary: TransactionTextJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ConflictJournalEvent".
- */
-export interface ConflictJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'conflict';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-  differenceSummary: TransactionTextJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RestorePreparedJournalEvent".
- */
-export interface RestorePreparedJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'restore-prepared';
-  exactAppliedState: ExactOperationStateJson;
-  exactRestoreTargetState: ExactOperationStateJson;
-  recoveryMethod: RecoveryMethodJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RestoredJournalEvent".
- */
-export interface RestoredJournalEventJson {
-  kind: 'journal-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  sequence: string;
-  occurredAt: string;
-  previousEventHash: TransactionHashJson;
-  eventHash: TransactionHashJson;
-  audit: AuditReferenceJson;
-  state: 'restored';
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "TransactionReceiptDocument".
- */
-export interface TransactionReceiptDocumentJson {
-  kind: 'transaction-receipt';
-  schemaVersion: TransactionSchemaVersionJson;
-  receiptId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  planId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  completedAt: string;
-  exactPriorState: ExactOperationStateJson;
-  exactRequestedState: ExactOperationStateJson;
-  exactObservedState: ExactOperationStateJson;
-  verification: VerificationReceiptJson;
-  recoveryMethod: RecoveryMethodJson;
-  journalHeadHash: TransactionHashJson;
-  humanSummary: TransactionTextJson;
-  technicalSummary: TransactionTextJson;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "VerificationReceipt".
- */
-export interface VerificationReceiptJson {
-  state: 'verified';
-  verifiedAt: string;
-  exactObservedState: ExactOperationStateJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ProgressSnapshotDocument".
- */
-export interface ProgressSnapshotDocumentJson {
-  kind: 'progress-snapshot';
-  schemaVersion: TransactionSchemaVersionJson;
-  transactionId: TransactionIdentifierJson;
-  sequence: string;
-  state: ProgressStateJson;
-  completedOperations: number;
-  totalOperations: number;
-  currentOperationVersionId?: TransactionIdentifierJson;
-  updatedAt: string;
-  displayText: TransactionTextJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ProgressEventDocument".
- */
-export interface ProgressEventDocumentJson {
-  kind: 'progress-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  sequence: string;
-  state: ProgressStateJson;
-  occurredAt: string;
-  operationVersionId?: TransactionIdentifierJson;
-  displayText: TransactionTextJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "OperationPromotionDocument".
- */
-export interface OperationPromotionDocumentJson {
-  kind: 'operation-promotion';
-  schemaVersion: TransactionSchemaVersionJson;
-  promotionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  stage: PromotionStageJson;
-  verdict: PromotionVerdictJson;
-  /**
-   * @minItems 1
-   * @maxItems 64
-   */
-  evidence: [PromotionEvidenceReferenceJson, ...PromotionEvidenceReferenceJson[]];
-  recordedAt: string;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PromotionEvidenceReference".
- */
-export interface PromotionEvidenceReferenceJson {
-  evidenceId: EvidenceIdentifierJson;
-  evidenceHash: EvidenceHashJson;
-  capturedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "SignedOperationRevocationDocument".
- */
-export interface SignedOperationRevocationDocumentJson {
-  kind: 'operation-revocation';
-  schemaVersion: TransactionSchemaVersionJson;
-  revocationId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  reason: TransactionTextJson;
-  issuedAt: string;
-  signatureKeyId: TransactionIdentifierJson;
-  signedPayloadHash: TransactionHashJson;
-  signature: TransactionIdentifierJson;
-  recoveryRemainsAvailable: true;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ObservePowerSchemeRequest".
- */
-export interface ObservePowerSchemeRequestJson {
-  kind: 'observe-power-scheme-request';
-  schemaVersion: TransactionSchemaVersionJson;
-  requestId: TransactionIdentifierJson;
-  deviceBindingId: TransactionIdentifierJson;
-  issuedAt: string;
-  nonce: TransactionIdentifierJson;
-  counter: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DuplicateManagedPowerSchemeRequest".
- */
-export interface DuplicateManagedPowerSchemeRequestJson {
-  kind: 'duplicate-managed-power-scheme-request';
-  schemaVersion: TransactionSchemaVersionJson;
-  requestId: TransactionIdentifierJson;
-  deviceBindingId: TransactionIdentifierJson;
-  sourceSchemeId: WindowsSchemeIdentifierJson;
-  destinationSchemeId: WindowsSchemeIdentifierJson;
-  friendlyName: 'Liiiraa Verificado';
-  issuedAt: string;
-  nonce: TransactionIdentifierJson;
-  counter: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "ActivateManagedPowerSchemeRequest".
- */
-export interface ActivateManagedPowerSchemeRequestJson {
-  kind: 'activate-managed-power-scheme-request';
-  schemaVersion: TransactionSchemaVersionJson;
-  requestId: TransactionIdentifierJson;
-  deviceBindingId: TransactionIdentifierJson;
-  schemeId: WindowsSchemeIdentifierJson;
-  expectedCurrentSchemeId: WindowsSchemeIdentifierJson;
-  issuedAt: string;
-  nonce: TransactionIdentifierJson;
-  counter: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "DeleteOwnedPowerSchemeRequest".
- */
-export interface DeleteOwnedPowerSchemeRequestJson {
-  kind: 'delete-owned-power-scheme-request';
-  schemaVersion: TransactionSchemaVersionJson;
-  requestId: TransactionIdentifierJson;
-  deviceBindingId: TransactionIdentifierJson;
-  schemeId: WindowsSchemeIdentifierJson;
-  expectedCanonicalStateHash: TransactionHashJson;
-  issuedAt: string;
-  nonce: TransactionIdentifierJson;
-  counter: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PrepareRestorePointRequest".
- */
-export interface PrepareRestorePointRequestJson {
-  kind: 'prepare-restore-point-request';
-  schemaVersion: TransactionSchemaVersionJson;
-  requestId: TransactionIdentifierJson;
-  deviceBindingId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  displaySummary: TransactionTextJson;
-  issuedAt: string;
-  nonce: TransactionIdentifierJson;
-  counter: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "BrokerObservationResponse".
- */
-export interface BrokerObservationResponseJson {
-  kind: 'broker-observation-response';
-  schemaVersion: TransactionSchemaVersionJson;
-  responseId: TransactionIdentifierJson;
-  requestId: TransactionIdentifierJson;
-  outcome: 'observed';
-  exactObservedState: ExactOperationStateJson;
-  completedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "BrokerAcceptedResponse".
- */
-export interface BrokerAcceptedResponseJson {
-  kind: 'broker-accepted-response';
-  schemaVersion: TransactionSchemaVersionJson;
-  responseId: TransactionIdentifierJson;
-  requestId: TransactionIdentifierJson;
-  outcome: 'accepted';
-  completedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "BrokerRejectedResponse".
- */
-export interface BrokerRejectedResponseJson {
-  kind: 'broker-rejected-response';
-  schemaVersion: TransactionSchemaVersionJson;
-  responseId: TransactionIdentifierJson;
-  requestId: TransactionIdentifierJson;
-  outcome: 'rejected';
-  reasonCode: TransactionIdentifierJson;
-  completedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "BrokerUnavailableResponse".
- */
-export interface BrokerUnavailableResponseJson {
-  kind: 'broker-unavailable-response';
-  schemaVersion: TransactionSchemaVersionJson;
-  responseId: TransactionIdentifierJson;
-  requestId: TransactionIdentifierJson;
-  outcome: 'unavailable';
-  reasonCode: TransactionIdentifierJson;
-  completedAt: string;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RedactedDiagnosticExportDocument".
- */
-export interface RedactedDiagnosticExportDocumentJson {
-  kind: 'redacted-diagnostic-export';
-  schemaVersion: TransactionSchemaVersionJson;
-  exportId: TransactionIdentifierJson;
-  planId: TransactionIdentifierJson;
-  generatedAt: string;
-  journalHeadHash: TransactionHashJson;
-  /**
-   * @minItems 1
-   * @maxItems 512
-   */
-  entries: [RedactedDiagnosticEntryJson, ...RedactedDiagnosticEntryJson[]];
-  /**
-   * @minItems 1
-   * @maxItems 32
-   */
-  redactionsApplied: [TransactionIdentifierJson, ...TransactionIdentifierJson[]];
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "RedactedDiagnosticEntry".
- */
-export interface RedactedDiagnosticEntryJson {
-  eventId: TransactionIdentifierJson;
-  transactionId: TransactionIdentifierJson;
-  operationVersionId: TransactionIdentifierJson;
-  state: ProgressStateJson;
-  occurredAt: string;
-  reasonCode?: TransactionIdentifierJson;
-  eventHash: TransactionHashJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceProjectionDocument".
- */
-export interface AdvancedPreferenceProjectionDocumentJson {
-  kind: 'advanced-preference-projection';
-  schemaVersion: TransactionSchemaVersionJson;
-  preferenceId: TransactionIdentifierJson;
-  device: DeviceAuthorityBindingJson;
-  state: AdvancedPreferenceStateJson;
-  sequence: string;
-  lastEventId: TransactionIdentifierJson;
-  updatedAt: string;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceIntentDocument".
- */
-export interface AdvancedPreferenceIntentDocumentJson {
-  kind: 'advanced-preference-intent';
-  schemaVersion: TransactionSchemaVersionJson;
-  intentId: TransactionIdentifierJson;
-  preferenceId: TransactionIdentifierJson;
-  device: DeviceAuthorityBindingJson;
-  intent: AdvancedPreferenceIntentKindJson;
-  proof: ActionProofReferenceJson;
-  expectedSequence: string;
-  requestedAt: string;
-  audit: AuditReferenceJson;
-}
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "AdvancedPreferenceEventDocument".
- */
-export interface AdvancedPreferenceEventDocumentJson {
-  kind: 'advanced-preference-event';
-  schemaVersion: TransactionSchemaVersionJson;
-  eventId: TransactionIdentifierJson;
-  preferenceId: TransactionIdentifierJson;
-  device: DeviceAuthorityBindingJson;
-  event: AdvancedPreferenceEventKindJson;
-  proof: ActionProofReferenceJson;
-  sequence: string;
-  occurredAt: string;
-  audit: AuditReferenceJson;
-}
 
 export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];
 export type HardwareEvidenceDocument = GeneratedContractRoots['hardwareEvidenceDocument'];
+export type TransactionalRecoveryDocument = GeneratedContractRoots['transactionalRecoveryDocument'];
 export type WebDocument = GeneratedContractRoots['webDocument'];
 export type ControlPlaneDocument = GeneratedContractRoots['controlPlaneDocument'];

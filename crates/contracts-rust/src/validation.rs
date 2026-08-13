@@ -7,7 +7,7 @@ use crate::{
     AdminAuditEvent, ClaimEvidence, ContentRecord, ControlPlaneDocument, DiagnosticValue,
     FutureAuthorityCommand, HardwareEvidenceDocument, HostToRendererShellEvent, NoChangeReceipt,
     ReleaseArtifactEvidence, ReleaseRecord, RendererToHostShellCommand, ScreenshotProvenance,
-    ShellNavigationIntent, WebRouteRecord,
+    ShellNavigationIntent, TransactionalRecoveryDocument, WebRouteRecord,
 };
 
 pub const CONTROL_PLANE_DOCUMENT_SCHEMA_ID: &str =
@@ -16,6 +16,8 @@ pub const DIAGNOSTIC_VALUE_SCHEMA_ID: &str = "desktop.diagnostic-value.v1";
 pub const HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID: &str = "desktop.shell.host-to-renderer.v1";
 pub const HARDWARE_EVIDENCE_DOCUMENT_SCHEMA_ID: &str =
     "https://schemas.liiiraa.dev/desktop/v1/hardware-evidence.schema.json";
+pub const TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID: &str =
+    "https://schemas.liiiraa.dev/desktop/v1/transactional-recovery.schema.json";
 pub const RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID: &str = "desktop.shell.renderer-to-host.v1";
 pub const WEB_DOCUMENT_SCHEMA_ID: &str =
     "https://schemas.liiiraa.dev/web/v1/web-document.schema.json";
@@ -28,6 +30,8 @@ const DIAGNOSTIC_VALUE_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/diagnostic-value.schema.json");
 const HARDWARE_EVIDENCE_DOCUMENT_SCHEMA: &str =
     include_str!("../../../contracts/generated/desktop/v1/hardware-evidence.schema.json");
+const TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA: &str =
+    include_str!("../../../contracts/generated/desktop/v1/transactional-recovery.schema.json");
 const CONTROL_PLANE_DOCUMENT_SCHEMA: &str = include_str!(
     "../../../contracts/generated/control-plane/v1/control-plane-document.schema.json"
 );
@@ -46,6 +50,13 @@ static HARDWARE_EVIDENCE_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> =
         let schema: Value = serde_json::from_str(HARDWARE_EVIDENCE_DOCUMENT_SCHEMA)
             .expect("generated hardware evidence JSON schema");
         jsonschema::validator_for(&schema).expect("valid generated hardware evidence JSON schema")
+    });
+static TRANSACTIONAL_RECOVERY_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> =
+    LazyLock::new(|| {
+        let schema: Value = serde_json::from_str(TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA)
+            .expect("generated transactional recovery JSON schema");
+        jsonschema::validator_for(&schema)
+            .expect("valid generated transactional recovery JSON schema")
     });
 static CONTROL_PLANE_DOCUMENT_VALIDATOR: LazyLock<jsonschema::Validator> = LazyLock::new(|| {
     let schema: Value = serde_json::from_str(CONTROL_PLANE_DOCUMENT_SCHEMA)
@@ -316,6 +327,37 @@ pub fn validate_hardware_evidence_document(
         input,
         &HARDWARE_EVIDENCE_DOCUMENT_VALIDATOR,
     )
+}
+
+pub fn validate_transactional_recovery_document(
+    input: &Value,
+) -> Result<TransactionalRecoveryDocument, ContractValidationError> {
+    let document = validate_and_deserialize(
+        TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID,
+        TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID,
+        input,
+        &TRANSACTIONAL_RECOVERY_DOCUMENT_VALIDATOR,
+    )?;
+
+    if input.get("kind").and_then(Value::as_str) == Some("progress-event") {
+        let sequence = input.get("sequence").and_then(Value::as_u64);
+        let previous_sequence = input.get("previousSequence").and_then(Value::as_u64);
+        let contiguous = match sequence {
+            Some(0) => previous_sequence.is_none(),
+            Some(sequence) => previous_sequence == Some(sequence - 1),
+            None => false,
+        };
+
+        if !contiguous {
+            return Err(invalid_semantic_payload(
+                TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID,
+                "$/sequence",
+                "contiguousSequence",
+            ));
+        }
+    }
+
+    Ok(document)
 }
 
 pub fn validate_control_plane_document(

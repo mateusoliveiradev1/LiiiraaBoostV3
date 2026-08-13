@@ -317,7 +317,7 @@ model JournalEventBase {
   operationVersionId: TransactionIdentifier;
 
   @minValue(0)
-  sequence: uint64;
+  sequence: uint32;
 
   occurredAt: utcDateTime;
   previousEventHash: TransactionHash;
@@ -451,7 +451,7 @@ model ProgressSnapshotDocument {
   transactionId: TransactionIdentifier;
 
   @minValue(0)
-  sequence: uint64;
+  sequence: uint32;
 
   state: ProgressState;
   completedOperations: uint32;
@@ -468,7 +468,9 @@ model ProgressEventDocument {
   transactionId: TransactionIdentifier;
 
   @minValue(0)
-  sequence: uint64;
+  sequence: uint32;
+
+  previousSequence?: uint32;
 
   state: ProgressState;
   occurredAt: utcDateTime;
@@ -482,12 +484,11 @@ model PromotionEvidenceReference {
   capturedAt: utcDateTime;
 }
 
-model OperationPromotionDocument {
+model PromotionDocumentBase {
   kind: "operation-promotion";
   schemaVersion: TransactionSchemaVersion;
   promotionId: TransactionIdentifier;
   operationVersionId: TransactionIdentifier;
-  stage: PromotionStage;
   verdict: PromotionVerdict;
 
   @minItems(1)
@@ -496,6 +497,40 @@ model OperationPromotionDocument {
 
   recordedAt: utcDateTime;
   audit: AuditReference;
+}
+
+model SimulationPromotionDocument {
+  ...PromotionDocumentBase;
+  stage: "deterministic-simulation";
+}
+
+model VmPromotionDocument {
+  ...PromotionDocumentBase;
+  stage: "clean-windows-vm";
+  previousStage: "deterministic-simulation";
+  previousPromotionId: TransactionIdentifier;
+}
+
+model OwnerPromotionDocument {
+  ...PromotionDocumentBase;
+  stage: "owner-pc";
+  previousStage: "clean-windows-vm";
+  previousPromotionId: TransactionIdentifier;
+}
+
+model FriendsPromotionDocument {
+  ...PromotionDocumentBase;
+  stage: "friends-pc";
+  previousStage: "owner-pc";
+  previousPromotionId: TransactionIdentifier;
+}
+
+@oneOf
+union OperationPromotionDocument {
+  simulation: SimulationPromotionDocument,
+  vm: VmPromotionDocument,
+  owner: OwnerPromotionDocument,
+  friends: FriendsPromotionDocument,
 }
 
 model SignedOperationRevocationDocument {
@@ -521,7 +556,7 @@ model ObservePowerSchemeRequest {
   nonce: TransactionIdentifier;
 
   @minValue(0)
-  counter: uint64;
+  counter: uint32;
 }
 
 model DuplicateManagedPowerSchemeRequest {
@@ -536,7 +571,7 @@ model DuplicateManagedPowerSchemeRequest {
   nonce: TransactionIdentifier;
 
   @minValue(0)
-  counter: uint64;
+  counter: uint32;
 }
 
 model ActivateManagedPowerSchemeRequest {
@@ -550,7 +585,7 @@ model ActivateManagedPowerSchemeRequest {
   nonce: TransactionIdentifier;
 
   @minValue(0)
-  counter: uint64;
+  counter: uint32;
 }
 
 model DeleteOwnedPowerSchemeRequest {
@@ -564,7 +599,7 @@ model DeleteOwnedPowerSchemeRequest {
   nonce: TransactionIdentifier;
 
   @minValue(0)
-  counter: uint64;
+  counter: uint32;
 }
 
 model PrepareRestorePointRequest {
@@ -578,7 +613,7 @@ model PrepareRestorePointRequest {
   nonce: TransactionIdentifier;
 
   @minValue(0)
-  counter: uint64;
+  counter: uint32;
 }
 
 @oneOf
@@ -674,7 +709,7 @@ model AdvancedPreferenceProjectionDocument {
   state: AdvancedPreferenceState;
 
   @minValue(0)
-  sequence: uint64;
+  sequence: uint32;
 
   lastEventId: TransactionIdentifier;
   updatedAt: utcDateTime;
@@ -691,7 +726,7 @@ model AdvancedPreferenceIntentDocument {
   proof: ActionProofReference;
 
   @minValue(0)
-  expectedSequence: uint64;
+  expectedSequence: uint32;
 
   requestedAt: utcDateTime;
   audit: AuditReference;
@@ -707,7 +742,7 @@ model AdvancedPreferenceEventDocument {
   proof: ActionProofReference;
 
   @minValue(0)
-  sequence: uint64;
+  sequence: uint32;
 
   occurredAt: utcDateTime;
   audit: AuditReference;

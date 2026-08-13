@@ -913,7 +913,8 @@ pub struct ActionProofReference {
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"counter\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"deviceBindingId\": {"]
@@ -952,7 +953,7 @@ pub struct ActionProofReference {
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct ActivateManagedPowerSchemeRequest {
-    pub counter: ::std::string::String,
+    pub counter: u32,
     #[serde(rename = "deviceBindingId")]
     pub device_binding_id: TransactionIdentifier,
     #[serde(rename = "expectedCurrentSchemeId")]
@@ -10228,7 +10229,8 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminTeamMemberProjectio
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    }"]
 #[doc = "  },"]
@@ -10253,7 +10255,7 @@ pub struct AdvancedPreferenceEventDocument {
     pub proof: ActionProofReference,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
 }
 #[doc = "`AdvancedPreferenceEventDocumentKind`"]
 #[doc = r""]
@@ -10434,7 +10436,8 @@ impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceEventK
 #[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
 #[doc = "    },"]
 #[doc = "    \"expectedSequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"intent\": {"]
@@ -10473,7 +10476,7 @@ pub struct AdvancedPreferenceIntentDocument {
     pub audit: AuditReference,
     pub device: DeviceAuthorityBinding,
     #[serde(rename = "expectedSequence")]
-    pub expected_sequence: ::std::string::String,
+    pub expected_sequence: u32,
     pub intent: AdvancedPreferenceIntentKind,
     #[serde(rename = "intentId")]
     pub intent_id: TransactionIdentifier,
@@ -10679,7 +10682,8 @@ impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceIntent
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -10706,7 +10710,7 @@ pub struct AdvancedPreferenceProjectionDocument {
     pub preference_id: TransactionIdentifier,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: AdvancedPreferenceState,
     #[serde(rename = "updatedAt")]
     pub updated_at: ::std::string::String,
@@ -14593,7 +14597,8 @@ impl ::std::convert::TryFrom<::std::string::String> for CompletedMeasurementSess
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -14636,7 +14641,7 @@ pub struct ConflictJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: ConflictJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -16306,7 +16311,8 @@ impl ::std::convert::TryFrom<::std::string::String> for DegradedMeasurementSessi
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"counter\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"deviceBindingId\": {"]
@@ -16345,7 +16351,7 @@ impl ::std::convert::TryFrom<::std::string::String> for DegradedMeasurementSessi
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct DeleteOwnedPowerSchemeRequest {
-    pub counter: ::std::string::String,
+    pub counter: u32,
     #[serde(rename = "deviceBindingId")]
     pub device_binding_id: TransactionIdentifier,
     #[serde(rename = "expectedCanonicalStateHash")]
@@ -18311,7 +18317,8 @@ impl ::std::convert::From<UnavailableDiagnosticValue> for DiagnosticValue {
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -18351,7 +18358,7 @@ pub struct DispatchReturnedJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: DispatchReturnedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -18556,7 +18563,8 @@ impl ::std::convert::TryFrom<::std::string::String> for DispatchReturnedJournalE
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -18599,7 +18607,7 @@ pub struct DriftJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: DriftJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -18760,7 +18768,8 @@ impl ::std::convert::TryFrom<::std::string::String> for DriftJournalEventState {
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"counter\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"destinationSchemeId\": {"]
@@ -18805,7 +18814,7 @@ impl ::std::convert::TryFrom<::std::string::String> for DriftJournalEventState {
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct DuplicateManagedPowerSchemeRequest {
-    pub counter: ::std::string::String,
+    pub counter: u32,
     #[serde(rename = "destinationSchemeId")]
     pub destination_scheme_id: WindowsSchemeIdentifier,
     #[serde(rename = "deviceBindingId")]
@@ -19987,6 +19996,303 @@ impl ::std::convert::TryFrom<&::std::string::String> for FixtureDiagnosticValueK
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for FixtureDiagnosticValueKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPromotionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FriendsPromotionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousPromotionId\","]
+#[doc = "    \"previousStage\","]
+#[doc = "    \"promotionId\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"verdict\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/PromotionEvidenceReference\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"operation-promotion\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousPromotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousStage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"owner-pc\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"promotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends-pc\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verdict\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PromotionVerdict\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FriendsPromotionDocument {
+    pub audit: AuditReference,
+    pub evidence: ::std::vec::Vec<PromotionEvidenceReference>,
+    pub kind: FriendsPromotionDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousPromotionId")]
+    pub previous_promotion_id: TransactionIdentifier,
+    #[serde(rename = "previousStage")]
+    pub previous_stage: FriendsPromotionDocumentPreviousStage,
+    #[serde(rename = "promotionId")]
+    pub promotion_id: TransactionIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub stage: FriendsPromotionDocumentStage,
+    pub verdict: PromotionVerdict,
+}
+#[doc = "`FriendsPromotionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"operation-promotion\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPromotionDocumentKind {
+    #[serde(rename = "operation-promotion")]
+    OperationPromotion,
+}
+impl ::std::fmt::Display for FriendsPromotionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OperationPromotion => f.write_str("operation-promotion"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPromotionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "operation-promotion" => Ok(Self::OperationPromotion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPromotionDocumentPreviousStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"owner-pc\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPromotionDocumentPreviousStage {
+    #[serde(rename = "owner-pc")]
+    OwnerPc,
+}
+impl ::std::fmt::Display for FriendsPromotionDocumentPreviousStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OwnerPc => f.write_str("owner-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPromotionDocumentPreviousStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "owner-pc" => Ok(Self::OwnerPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPromotionDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends-pc\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPromotionDocumentStage {
+    #[serde(rename = "friends-pc")]
+    FriendsPc,
+}
+impl ::std::fmt::Display for FriendsPromotionDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsPc => f.write_str("friends-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPromotionDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends-pc" => Ok(Self::FriendsPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPromotionDocumentStage {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -23079,7 +23385,8 @@ impl ::std::convert::TryFrom<::std::string::String> for NoChangeReceiptNextPhase
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -23120,7 +23427,7 @@ pub struct NotAppliedJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: NotAppliedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -23278,7 +23585,8 @@ impl ::std::convert::TryFrom<::std::string::String> for NotAppliedJournalEventSt
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"counter\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"deviceBindingId\": {"]
@@ -23311,7 +23619,7 @@ impl ::std::convert::TryFrom<::std::string::String> for NotAppliedJournalEventSt
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct ObservePowerSchemeRequest {
-    pub counter: ::std::string::String,
+    pub counter: u32,
     #[serde(rename = "deviceBindingId")]
     pub device_binding_id: TransactionIdentifier,
     #[serde(rename = "issuedAt")]
@@ -23677,7 +23985,8 @@ impl ::std::convert::TryFrom<::std::string::String> for ObservedHardwareFactStat
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -23714,7 +24023,7 @@ pub struct ObservedJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: ObservedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -24349,12 +24658,67 @@ impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
 #[doc = r" ```json"]
 #[doc = "{"]
 #[doc = "  \"$id\": \"OperationPromotionDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SimulationPromotionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/VmPromotionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/OwnerPromotionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/FriendsPromotionDocument\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum OperationPromotionDocument {
+    SimulationPromotionDocument(SimulationPromotionDocument),
+    VmPromotionDocument(VmPromotionDocument),
+    OwnerPromotionDocument(OwnerPromotionDocument),
+    FriendsPromotionDocument(FriendsPromotionDocument),
+}
+impl ::std::convert::From<SimulationPromotionDocument> for OperationPromotionDocument {
+    fn from(value: SimulationPromotionDocument) -> Self {
+        Self::SimulationPromotionDocument(value)
+    }
+}
+impl ::std::convert::From<VmPromotionDocument> for OperationPromotionDocument {
+    fn from(value: VmPromotionDocument) -> Self {
+        Self::VmPromotionDocument(value)
+    }
+}
+impl ::std::convert::From<OwnerPromotionDocument> for OperationPromotionDocument {
+    fn from(value: OwnerPromotionDocument) -> Self {
+        Self::OwnerPromotionDocument(value)
+    }
+}
+impl ::std::convert::From<FriendsPromotionDocument> for OperationPromotionDocument {
+    fn from(value: FriendsPromotionDocument) -> Self {
+        Self::FriendsPromotionDocument(value)
+    }
+}
+#[doc = "`OwnerPromotionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OwnerPromotionDocument.json\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"audit\","]
 #[doc = "    \"evidence\","]
 #[doc = "    \"kind\","]
 #[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousPromotionId\","]
+#[doc = "    \"previousStage\","]
 #[doc = "    \"promotionId\","]
 #[doc = "    \"recordedAt\","]
 #[doc = "    \"schemaVersion\","]
@@ -24382,6 +24746,15 @@ impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
 #[doc = "    \"operationVersionId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
 #[doc = "    },"]
+#[doc = "    \"previousPromotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousStage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"clean-windows-vm\""]
+#[doc = "      ]"]
+#[doc = "    },"]
 #[doc = "    \"promotionId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
 #[doc = "    },"]
@@ -24392,7 +24765,10 @@ impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"stage\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PromotionStage\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"owner-pc\""]
+#[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"verdict\": {"]
 #[doc = "      \"$ref\": \"#/definitions/PromotionVerdict\""]
@@ -24405,22 +24781,26 @@ impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
 #[doc = r" </details>"]
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
-pub struct OperationPromotionDocument {
+pub struct OwnerPromotionDocument {
     pub audit: AuditReference,
     pub evidence: ::std::vec::Vec<PromotionEvidenceReference>,
-    pub kind: OperationPromotionDocumentKind,
+    pub kind: OwnerPromotionDocumentKind,
     #[serde(rename = "operationVersionId")]
     pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousPromotionId")]
+    pub previous_promotion_id: TransactionIdentifier,
+    #[serde(rename = "previousStage")]
+    pub previous_stage: OwnerPromotionDocumentPreviousStage,
     #[serde(rename = "promotionId")]
     pub promotion_id: TransactionIdentifier,
     #[serde(rename = "recordedAt")]
     pub recorded_at: ::std::string::String,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub stage: PromotionStage,
+    pub stage: OwnerPromotionDocumentStage,
     pub verdict: PromotionVerdict,
 }
-#[doc = "`OperationPromotionDocumentKind`"]
+#[doc = "`OwnerPromotionDocumentKind`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
 #[doc = r""]
@@ -24445,18 +24825,18 @@ pub struct OperationPromotionDocument {
     PartialEq,
     PartialOrd,
 )]
-pub enum OperationPromotionDocumentKind {
+pub enum OwnerPromotionDocumentKind {
     #[serde(rename = "operation-promotion")]
     OperationPromotion,
 }
-impl ::std::fmt::Display for OperationPromotionDocumentKind {
+impl ::std::fmt::Display for OwnerPromotionDocumentKind {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
             Self::OperationPromotion => f.write_str("operation-promotion"),
         }
     }
 }
-impl ::std::str::FromStr for OperationPromotionDocumentKind {
+impl ::std::str::FromStr for OwnerPromotionDocumentKind {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
@@ -24465,13 +24845,13 @@ impl ::std::str::FromStr for OperationPromotionDocumentKind {
         }
     }
 }
-impl ::std::convert::TryFrom<&str> for OperationPromotionDocumentKind {
+impl ::std::convert::TryFrom<&str> for OwnerPromotionDocumentKind {
     type Error = self::error::ConversionError;
     fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
     }
 }
-impl ::std::convert::TryFrom<&::std::string::String> for OperationPromotionDocumentKind {
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPromotionDocumentKind {
     type Error = self::error::ConversionError;
     fn try_from(
         value: &::std::string::String,
@@ -24479,7 +24859,141 @@ impl ::std::convert::TryFrom<&::std::string::String> for OperationPromotionDocum
         value.parse()
     }
 }
-impl ::std::convert::TryFrom<::std::string::String> for OperationPromotionDocumentKind {
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPromotionDocumentPreviousStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"clean-windows-vm\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPromotionDocumentPreviousStage {
+    #[serde(rename = "clean-windows-vm")]
+    CleanWindowsVm,
+}
+impl ::std::fmt::Display for OwnerPromotionDocumentPreviousStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPromotionDocumentPreviousStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPromotionDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"owner-pc\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPromotionDocumentStage {
+    #[serde(rename = "owner-pc")]
+    OwnerPc,
+}
+impl ::std::fmt::Display for OwnerPromotionDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OwnerPc => f.write_str("owner-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPromotionDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "owner-pc" => Ok(Self::OwnerPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPromotionDocumentStage {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -25133,7 +25647,8 @@ impl ::std::convert::TryFrom<::std::string::String> for PlanTransactionDocumentK
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"counter\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"deviceBindingId\": {"]
@@ -25172,7 +25687,7 @@ impl ::std::convert::TryFrom<::std::string::String> for PlanTransactionDocumentK
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct PrepareRestorePointRequest {
-    pub counter: ::std::string::String,
+    pub counter: u32,
     #[serde(rename = "deviceBindingId")]
     pub device_binding_id: TransactionIdentifier,
     #[serde(rename = "displaySummary")]
@@ -25317,7 +25832,8 @@ impl ::std::convert::TryFrom<::std::string::String> for PrepareRestorePointReque
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -25358,7 +25874,7 @@ pub struct PreparedJournalEvent {
     pub recovery_method: RecoveryMethod,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: PreparedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -25649,11 +26165,17 @@ impl ::std::convert::From<BrokerUnavailableResponse> for PrivilegedBrokerRespons
 #[doc = "    \"operationVersionId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
 #[doc = "    },"]
+#[doc = "    \"previousSequence\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
 #[doc = "    \"schemaVersion\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -25684,9 +26206,15 @@ pub struct ProgressEventDocument {
         skip_serializing_if = "::std::option::Option::is_none"
     )]
     pub operation_version_id: ::std::option::Option<TransactionIdentifier>,
+    #[serde(
+        rename = "previousSequence",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub previous_sequence: ::std::option::Option<u32>,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: ProgressState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -25799,7 +26327,8 @@ impl ::std::convert::TryFrom<::std::string::String> for ProgressEventDocumentKin
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -25838,7 +26367,7 @@ pub struct ProgressSnapshotDocument {
     pub kind: ProgressSnapshotDocumentKind,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: ProgressState,
     #[serde(rename = "totalOperations")]
     pub total_operations: u32,
@@ -26066,90 +26595,6 @@ pub struct PromotionEvidenceReference {
     pub evidence_hash: EvidenceHash,
     #[serde(rename = "evidenceId")]
     pub evidence_id: EvidenceIdentifier,
-}
-#[doc = "`PromotionStage`"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"$id\": \"PromotionStage.json\","]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
-#[doc = "    \"deterministic-simulation\","]
-#[doc = "    \"clean-windows-vm\","]
-#[doc = "    \"owner-pc\","]
-#[doc = "    \"friends-pc\""]
-#[doc = "  ],"]
-#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(
-    :: serde :: Deserialize,
-    :: serde :: Serialize,
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-)]
-pub enum PromotionStage {
-    #[serde(rename = "deterministic-simulation")]
-    DeterministicSimulation,
-    #[serde(rename = "clean-windows-vm")]
-    CleanWindowsVm,
-    #[serde(rename = "owner-pc")]
-    OwnerPc,
-    #[serde(rename = "friends-pc")]
-    FriendsPc,
-}
-impl ::std::fmt::Display for PromotionStage {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match *self {
-            Self::DeterministicSimulation => f.write_str("deterministic-simulation"),
-            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
-            Self::OwnerPc => f.write_str("owner-pc"),
-            Self::FriendsPc => f.write_str("friends-pc"),
-        }
-    }
-}
-impl ::std::str::FromStr for PromotionStage {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        match value {
-            "deterministic-simulation" => Ok(Self::DeterministicSimulation),
-            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
-            "owner-pc" => Ok(Self::OwnerPc),
-            "friends-pc" => Ok(Self::FriendsPc),
-            _ => Err("invalid value".into()),
-        }
-    }
-}
-impl ::std::convert::TryFrom<&str> for PromotionStage {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<&::std::string::String> for PromotionStage {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: &::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<::std::string::String> for PromotionStage {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: ::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
 }
 #[doc = "`PromotionVerdict`"]
 #[doc = r""]
@@ -28098,7 +28543,8 @@ impl ::std::convert::TryFrom<::std::string::String> for RestartEffect {
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -28139,7 +28585,7 @@ pub struct RestorePreparedJournalEvent {
     pub recovery_method: RecoveryMethod,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: RestorePreparedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -28340,7 +28786,8 @@ impl ::std::convert::TryFrom<::std::string::String> for RestorePreparedJournalEv
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -28381,7 +28828,7 @@ pub struct RestoredJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: RestoredJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -37277,6 +37724,221 @@ impl ::std::convert::TryFrom<::std::string::String> for SignedOperationRevocatio
         value.parse()
     }
 }
+#[doc = "`SimulationPromotionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SimulationPromotionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"promotionId\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"verdict\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/PromotionEvidenceReference\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"operation-promotion\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"promotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"deterministic-simulation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verdict\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PromotionVerdict\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SimulationPromotionDocument {
+    pub audit: AuditReference,
+    pub evidence: ::std::vec::Vec<PromotionEvidenceReference>,
+    pub kind: SimulationPromotionDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "promotionId")]
+    pub promotion_id: TransactionIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub stage: SimulationPromotionDocumentStage,
+    pub verdict: PromotionVerdict,
+}
+#[doc = "`SimulationPromotionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"operation-promotion\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SimulationPromotionDocumentKind {
+    #[serde(rename = "operation-promotion")]
+    OperationPromotion,
+}
+impl ::std::fmt::Display for SimulationPromotionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OperationPromotion => f.write_str("operation-promotion"),
+        }
+    }
+}
+impl ::std::str::FromStr for SimulationPromotionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "operation-promotion" => Ok(Self::OperationPromotion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SimulationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SimulationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SimulationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`SimulationPromotionDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"deterministic-simulation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SimulationPromotionDocumentStage {
+    #[serde(rename = "deterministic-simulation")]
+    DeterministicSimulation,
+}
+impl ::std::fmt::Display for SimulationPromotionDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeterministicSimulation => f.write_str("deterministic-simulation"),
+        }
+    }
+}
+impl ::std::str::FromStr for SimulationPromotionDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "deterministic-simulation" => Ok(Self::DeterministicSimulation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SimulationPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SimulationPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SimulationPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`SourceCapability`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -39682,7 +40344,8 @@ impl ::std::convert::TryFrom<::std::string::String> for UnavailablePowerSchemeSt
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -39724,7 +40387,7 @@ pub struct UnknownJournalEvent {
     pub reason: TransactionText,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: UnknownJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -40224,7 +40887,8 @@ impl ::std::convert::TryFrom<::std::string::String> for VerificationReceiptState
 #[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
 #[doc = "    },"]
 #[doc = "    \"sequence\": {"]
-#[doc = "      \"type\": \"string\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
 #[doc = "    \"state\": {"]
@@ -40265,7 +40929,7 @@ pub struct VerifiedJournalEvent {
     pub previous_event_hash: TransactionHash,
     #[serde(rename = "schemaVersion")]
     pub schema_version: TransactionSchemaVersion,
-    pub sequence: ::std::string::String,
+    pub sequence: u32,
     pub state: VerifiedJournalEventState,
     #[serde(rename = "transactionId")]
     pub transaction_id: TransactionIdentifier,
@@ -40397,6 +41061,303 @@ impl ::std::convert::TryFrom<&::std::string::String> for VerifiedJournalEventSta
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for VerifiedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VmPromotionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"VmPromotionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousPromotionId\","]
+#[doc = "    \"previousStage\","]
+#[doc = "    \"promotionId\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"verdict\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/PromotionEvidenceReference\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"operation-promotion\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousPromotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousStage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"deterministic-simulation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"promotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"clean-windows-vm\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verdict\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PromotionVerdict\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct VmPromotionDocument {
+    pub audit: AuditReference,
+    pub evidence: ::std::vec::Vec<PromotionEvidenceReference>,
+    pub kind: VmPromotionDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousPromotionId")]
+    pub previous_promotion_id: TransactionIdentifier,
+    #[serde(rename = "previousStage")]
+    pub previous_stage: VmPromotionDocumentPreviousStage,
+    #[serde(rename = "promotionId")]
+    pub promotion_id: TransactionIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub stage: VmPromotionDocumentStage,
+    pub verdict: PromotionVerdict,
+}
+#[doc = "`VmPromotionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"operation-promotion\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VmPromotionDocumentKind {
+    #[serde(rename = "operation-promotion")]
+    OperationPromotion,
+}
+impl ::std::fmt::Display for VmPromotionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OperationPromotion => f.write_str("operation-promotion"),
+        }
+    }
+}
+impl ::std::str::FromStr for VmPromotionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "operation-promotion" => Ok(Self::OperationPromotion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VmPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VmPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VmPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VmPromotionDocumentPreviousStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"deterministic-simulation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VmPromotionDocumentPreviousStage {
+    #[serde(rename = "deterministic-simulation")]
+    DeterministicSimulation,
+}
+impl ::std::fmt::Display for VmPromotionDocumentPreviousStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeterministicSimulation => f.write_str("deterministic-simulation"),
+        }
+    }
+}
+impl ::std::str::FromStr for VmPromotionDocumentPreviousStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "deterministic-simulation" => Ok(Self::DeterministicSimulation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VmPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VmPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VmPromotionDocumentPreviousStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VmPromotionDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"clean-windows-vm\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VmPromotionDocumentStage {
+    #[serde(rename = "clean-windows-vm")]
+    CleanWindowsVm,
+}
+impl ::std::fmt::Display for VmPromotionDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
+        }
+    }
+}
+impl ::std::str::FromStr for VmPromotionDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VmPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VmPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VmPromotionDocumentStage {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

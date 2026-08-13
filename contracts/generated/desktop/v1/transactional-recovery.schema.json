@@ -1,0 +1,3159 @@
+{
+  "$defs": {
+    "ActionProofReference": {
+      "$id": "ActionProofReference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "$ref": "TransactionText.json"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "proofReference": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "proofReference",
+        "action",
+        "issuedAt",
+        "expiresAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ActivateManagedPowerSchemeRequest": {
+      "$id": "ActivateManagedPowerSchemeRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "counter": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "expectedCurrentSchemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "activate-managed-power-scheme-request",
+          "type": "string"
+        },
+        "nonce": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "schemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "requestId",
+        "deviceBindingId",
+        "schemeId",
+        "expectedCurrentSchemeId",
+        "issuedAt",
+        "nonce",
+        "counter"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdvancedPreferenceEventDocument": {
+      "$id": "AdvancedPreferenceEventDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "device": {
+          "$ref": "DeviceAuthorityBinding.json"
+        },
+        "event": {
+          "$ref": "AdvancedPreferenceEventKind.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "advanced-preference-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "preferenceId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "proof": {
+          "$ref": "ActionProofReference.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "preferenceId",
+        "device",
+        "event",
+        "proof",
+        "sequence",
+        "occurredAt",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdvancedPreferenceEventKind": {
+      "$id": "AdvancedPreferenceEventKind.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "enabled",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        },
+        {
+          "const": "posture-invalidated",
+          "type": "string"
+        },
+        {
+          "const": "revalidated",
+          "type": "string"
+        }
+      ]
+    },
+    "AdvancedPreferenceIntentDocument": {
+      "$id": "AdvancedPreferenceIntentDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "device": {
+          "$ref": "DeviceAuthorityBinding.json"
+        },
+        "expectedSequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "intent": {
+          "$ref": "AdvancedPreferenceIntentKind.json"
+        },
+        "intentId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "advanced-preference-intent",
+          "type": "string"
+        },
+        "preferenceId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "proof": {
+          "$ref": "ActionProofReference.json"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "intentId",
+        "preferenceId",
+        "device",
+        "intent",
+        "proof",
+        "expectedSequence",
+        "requestedAt",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdvancedPreferenceIntentKind": {
+      "$id": "AdvancedPreferenceIntentKind.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "enable",
+          "type": "string"
+        },
+        {
+          "const": "revoke",
+          "type": "string"
+        },
+        {
+          "const": "posture-invalidate",
+          "type": "string"
+        },
+        {
+          "const": "revalidate",
+          "type": "string"
+        }
+      ]
+    },
+    "AdvancedPreferenceProjectionDocument": {
+      "$id": "AdvancedPreferenceProjectionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "device": {
+          "$ref": "DeviceAuthorityBinding.json"
+        },
+        "kind": {
+          "const": "advanced-preference-projection",
+          "type": "string"
+        },
+        "lastEventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "preferenceId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "AdvancedPreferenceState.json"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "preferenceId",
+        "device",
+        "state",
+        "sequence",
+        "lastEventId",
+        "updatedAt",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "AdvancedPreferenceState": {
+      "$id": "AdvancedPreferenceState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "disabled",
+          "type": "string"
+        },
+        {
+          "const": "enabled",
+          "type": "string"
+        },
+        {
+          "const": "revalidation-required",
+          "type": "string"
+        }
+      ]
+    },
+    "AuditReference": {
+      "$id": "AuditReference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "auditId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "auditId",
+        "recordedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "BrokerAcceptedResponse": {
+      "$id": "BrokerAcceptedResponse.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "broker-accepted-response",
+          "type": "string"
+        },
+        "outcome": {
+          "const": "accepted",
+          "type": "string"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "responseId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "responseId",
+        "requestId",
+        "outcome",
+        "completedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "BrokerObservationResponse": {
+      "$id": "BrokerObservationResponse.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "broker-observation-response",
+          "type": "string"
+        },
+        "outcome": {
+          "const": "observed",
+          "type": "string"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "responseId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "responseId",
+        "requestId",
+        "outcome",
+        "exactObservedState",
+        "completedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "BrokerOutcome": {
+      "$id": "BrokerOutcome.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "observed",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "BrokerRejectedResponse": {
+      "$id": "BrokerRejectedResponse.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "broker-rejected-response",
+          "type": "string"
+        },
+        "outcome": {
+          "const": "rejected",
+          "type": "string"
+        },
+        "reasonCode": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "responseId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "responseId",
+        "requestId",
+        "outcome",
+        "reasonCode",
+        "completedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "BrokerUnavailableResponse": {
+      "$id": "BrokerUnavailableResponse.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "broker-unavailable-response",
+          "type": "string"
+        },
+        "outcome": {
+          "const": "unavailable",
+          "type": "string"
+        },
+        "reasonCode": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "responseId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "responseId",
+        "requestId",
+        "outcome",
+        "reasonCode",
+        "completedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CompatibilityAssessment": {
+      "$id": "CompatibilityAssessment.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "reasons": {
+          "items": {
+            "$ref": "TransactionText.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "verdict": {
+          "$ref": "CompatibilityVerdict.json"
+        }
+      },
+      "required": [
+        "verdict",
+        "reasons"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CompatibilityVerdict": {
+      "$id": "CompatibilityVerdict.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "compatible",
+          "type": "string"
+        },
+        {
+          "const": "incompatible",
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "type": "string"
+        },
+        {
+          "const": "degraded",
+          "type": "string"
+        }
+      ]
+    },
+    "ConflictJournalEvent": {
+      "$id": "ConflictJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "differenceSummary": {
+          "$ref": "TransactionText.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "conflict",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState",
+        "differenceSummary"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeleteOwnedPowerSchemeRequest": {
+      "$id": "DeleteOwnedPowerSchemeRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "counter": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "expectedCanonicalStateHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "delete-owned-power-scheme-request",
+          "type": "string"
+        },
+        "nonce": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "schemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "requestId",
+        "deviceBindingId",
+        "schemeId",
+        "expectedCanonicalStateHash",
+        "issuedAt",
+        "nonce",
+        "counter"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DependencyGroup": {
+      "$id": "DependencyGroup.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "dependencyGroupId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "dependsOnGroupIds": {
+          "items": {
+            "$ref": "TransactionIdentifier.json"
+          },
+          "maxItems": 16,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "operationVersionIds": {
+          "items": {
+            "$ref": "TransactionIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "dependencyGroupId",
+        "operationVersionIds",
+        "dependsOnGroupIds"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DeviceAuthorityBinding": {
+      "$id": "DeviceAuthorityBinding.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "hardwareFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "securityPostureFingerprint": {
+          "$ref": "TransactionHash.json"
+        }
+      },
+      "required": [
+        "deviceBindingId",
+        "hardwareFingerprint",
+        "securityPostureFingerprint"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DispatchReturnedJournalEvent": {
+      "$id": "DispatchReturnedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "brokerRequestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "brokerResponseId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "outcome": {
+          "$ref": "BrokerOutcome.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "dispatch-returned",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "brokerRequestId",
+        "brokerResponseId",
+        "outcome"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DriftJournalEvent": {
+      "$id": "DriftJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "differenceSummary": {
+          "$ref": "TransactionText.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "drift",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState",
+        "differenceSummary"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DuplicateManagedPowerSchemeRequest": {
+      "$id": "DuplicateManagedPowerSchemeRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "counter": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "destinationSchemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        },
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "friendlyName": {
+          "const": "Liiiraa Verificado",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "duplicate-managed-power-scheme-request",
+          "type": "string"
+        },
+        "nonce": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceSchemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "requestId",
+        "deviceBindingId",
+        "sourceSchemeId",
+        "destinationSchemeId",
+        "friendlyName",
+        "issuedAt",
+        "nonce",
+        "counter"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "DurableJournalEvent": {
+      "$id": "DurableJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "PreparedJournalEvent.json"
+        },
+        {
+          "$ref": "DispatchReturnedJournalEvent.json"
+        },
+        {
+          "$ref": "ObservedJournalEvent.json"
+        },
+        {
+          "$ref": "VerifiedJournalEvent.json"
+        },
+        {
+          "$ref": "NotAppliedJournalEvent.json"
+        },
+        {
+          "$ref": "UnknownJournalEvent.json"
+        },
+        {
+          "$ref": "DriftJournalEvent.json"
+        },
+        {
+          "$ref": "ConflictJournalEvent.json"
+        },
+        {
+          "$ref": "RestorePreparedJournalEvent.json"
+        },
+        {
+          "$ref": "RestoredJournalEvent.json"
+        }
+      ]
+    },
+    "EvidenceHash": {
+      "$id": "EvidenceHash.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 71,
+      "minLength": 71,
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EvidenceIdentifier": {
+      "$id": "EvidenceIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "EvidenceQuality": {
+      "$id": "EvidenceQuality.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "valid",
+          "type": "string"
+        },
+        {
+          "const": "degraded",
+          "type": "string"
+        },
+        {
+          "const": "insufficient",
+          "type": "string"
+        },
+        {
+          "const": "invalid",
+          "type": "string"
+        }
+      ]
+    },
+    "EvidenceReference": {
+      "$id": "EvidenceReference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "capturedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "evidenceId": {
+          "$ref": "EvidenceIdentifier.json"
+        },
+        "quality": {
+          "$ref": "EvidenceQuality.json"
+        },
+        "validUntil": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidenceId",
+        "evidenceHash",
+        "capturedAt",
+        "validUntil",
+        "quality"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ExactOperationState": {
+      "$id": "ExactOperationState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ExactPowerSchemeState.json"
+        },
+        {
+          "$ref": "UnavailablePowerSchemeState.json"
+        },
+        {
+          "$ref": "UnknownPowerSchemeState.json"
+        }
+      ]
+    },
+    "ExactPowerSchemeState": {
+      "$id": "ExactPowerSchemeState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "canonicalStateHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemeId": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        },
+        "state": {
+          "const": "observed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "schemeId",
+        "canonicalStateHash",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "FriendsPromotionDocument": {
+      "$id": "FriendsPromotionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "PromotionEvidenceReference.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "operation-promotion",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousPromotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousStage": {
+          "const": "owner-pc",
+          "type": "string"
+        },
+        "promotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "stage": {
+          "const": "friends-pc",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "PromotionVerdict.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "promotionId",
+        "operationVersionId",
+        "verdict",
+        "evidence",
+        "recordedAt",
+        "audit",
+        "stage",
+        "previousStage",
+        "previousPromotionId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "NotAppliedJournalEvent": {
+      "$id": "NotAppliedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "not-applied",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ObservedJournalEvent": {
+      "$id": "ObservedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "observed",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactObservedState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ObservePowerSchemeRequest": {
+      "$id": "ObservePowerSchemeRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "counter": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "observe-power-scheme-request",
+          "type": "string"
+        },
+        "nonce": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "requestId",
+        "deviceBindingId",
+        "issuedAt",
+        "nonce",
+        "counter"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "OperationPromotionDocument": {
+      "$id": "OperationPromotionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "SimulationPromotionDocument.json"
+        },
+        {
+          "$ref": "VmPromotionDocument.json"
+        },
+        {
+          "$ref": "OwnerPromotionDocument.json"
+        },
+        {
+          "$ref": "FriendsPromotionDocument.json"
+        }
+      ]
+    },
+    "OwnerPromotionDocument": {
+      "$id": "OwnerPromotionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "PromotionEvidenceReference.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "operation-promotion",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousPromotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousStage": {
+          "const": "clean-windows-vm",
+          "type": "string"
+        },
+        "promotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "stage": {
+          "const": "owner-pc",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "PromotionVerdict.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "promotionId",
+        "operationVersionId",
+        "verdict",
+        "evidence",
+        "recordedAt",
+        "audit",
+        "stage",
+        "previousStage",
+        "previousPromotionId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PlanApprovalDocument": {
+      "$id": "PlanApprovalDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "approvalId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "approvedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "approvedRisk": {
+          "$ref": "RiskClass.json"
+        },
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "compatibility": {
+          "$ref": "CompatibilityVerdict.json"
+        },
+        "device": {
+          "$ref": "DeviceAuthorityBinding.json"
+        },
+        "evidenceFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "intent": {
+          "$ref": "TransactionIntent.json"
+        },
+        "kind": {
+          "const": "plan-approval",
+          "type": "string"
+        },
+        "operationVersionIds": {
+          "items": {
+            "$ref": "TransactionIdentifier.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "planRevision": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "proof": {
+          "$ref": "ActionProofReference.json"
+        },
+        "recoveryCoverage": {
+          "$ref": "RecoveryCoverage.json"
+        },
+        "revisionFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "approvalId",
+        "planId",
+        "planRevision",
+        "revisionFingerprint",
+        "evidenceFingerprint",
+        "device",
+        "approvedRisk",
+        "compatibility",
+        "recoveryCoverage",
+        "intent",
+        "proof",
+        "approvedAt",
+        "audit",
+        "operationVersionIds"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PlanLifecycleState": {
+      "$id": "PlanLifecycleState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "composed",
+          "type": "string"
+        },
+        {
+          "const": "awaiting-approval",
+          "type": "string"
+        },
+        {
+          "const": "approved",
+          "type": "string"
+        },
+        {
+          "const": "applying",
+          "type": "string"
+        },
+        {
+          "const": "paused",
+          "type": "string"
+        },
+        {
+          "const": "awaiting-restart",
+          "type": "string"
+        },
+        {
+          "const": "recovering",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "type": "string"
+        },
+        {
+          "const": "restored",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "type": "string"
+        }
+      ]
+    },
+    "PlanOperation": {
+      "$id": "PlanOperation.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "compatibility": {
+          "$ref": "CompatibilityAssessment.json"
+        },
+        "dependencyGroupId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "EvidenceReference.json"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "expectedImpact": {
+          "$ref": "TransactionText.json"
+        },
+        "operationKind": {
+          "const": "managed-power-scheme-v1",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousValue": {
+          "$ref": "ExactOperationState.json"
+        },
+        "purpose": {
+          "$ref": "TransactionText.json"
+        },
+        "recoveryMethod": {
+          "$ref": "RecoveryMethod.json"
+        },
+        "requestedValue": {
+          "$ref": "ExactOperationState.json"
+        },
+        "restartEffect": {
+          "$ref": "RestartEffect.json"
+        },
+        "risk": {
+          "$ref": "RiskClass.json"
+        }
+      },
+      "required": [
+        "operationVersionId",
+        "operationKind",
+        "purpose",
+        "expectedImpact",
+        "risk",
+        "evidence",
+        "compatibility",
+        "restartEffect",
+        "previousValue",
+        "requestedValue",
+        "recoveryMethod",
+        "dependencyGroupId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PlanTransactionDocument": {
+      "$id": "PlanTransactionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "approvalId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "intent": {
+          "$ref": "TransactionIntent.json"
+        },
+        "kind": {
+          "const": "plan-transaction",
+          "type": "string"
+        },
+        "parentTransactionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "planRevision": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "revisionFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "transactionId",
+        "planId",
+        "planRevision",
+        "revisionFingerprint",
+        "approvalId",
+        "intent",
+        "startedAt",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PreparedJournalEvent": {
+      "$id": "PreparedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "recoveryMethod": {
+          "$ref": "RecoveryMethod.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "prepared",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "recoveryMethod"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PrepareRestorePointRequest": {
+      "$id": "PrepareRestorePointRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "counter": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deviceBindingId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "displaySummary": {
+          "$ref": "TransactionText.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "prepare-restore-point-request",
+          "type": "string"
+        },
+        "nonce": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "requestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "requestId",
+        "deviceBindingId",
+        "transactionId",
+        "displaySummary",
+        "issuedAt",
+        "nonce",
+        "counter"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PrivilegedBrokerRequest": {
+      "$id": "PrivilegedBrokerRequest.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "ObservePowerSchemeRequest.json"
+        },
+        {
+          "$ref": "DuplicateManagedPowerSchemeRequest.json"
+        },
+        {
+          "$ref": "ActivateManagedPowerSchemeRequest.json"
+        },
+        {
+          "$ref": "DeleteOwnedPowerSchemeRequest.json"
+        },
+        {
+          "$ref": "PrepareRestorePointRequest.json"
+        }
+      ]
+    },
+    "PrivilegedBrokerResponse": {
+      "$id": "PrivilegedBrokerResponse.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "BrokerObservationResponse.json"
+        },
+        {
+          "$ref": "BrokerAcceptedResponse.json"
+        },
+        {
+          "$ref": "BrokerRejectedResponse.json"
+        },
+        {
+          "$ref": "BrokerUnavailableResponse.json"
+        }
+      ]
+    },
+    "ProgressEventDocument": {
+      "$id": "ProgressEventDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "displayText": {
+          "$ref": "TransactionText.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "progress-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousSequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "ProgressState.json"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "sequence",
+        "state",
+        "occurredAt",
+        "displayText"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProgressSnapshotDocument": {
+      "$id": "ProgressSnapshotDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "completedOperations": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "currentOperationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "displayText": {
+          "$ref": "TransactionText.json"
+        },
+        "kind": {
+          "const": "progress-snapshot",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "ProgressState.json"
+        },
+        "totalOperations": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "transactionId",
+        "sequence",
+        "state",
+        "completedOperations",
+        "totalOperations",
+        "updatedAt",
+        "displayText"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "ProgressState": {
+      "$id": "ProgressState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "queued",
+          "type": "string"
+        },
+        {
+          "const": "preparing",
+          "type": "string"
+        },
+        {
+          "const": "applying",
+          "type": "string"
+        },
+        {
+          "const": "observing",
+          "type": "string"
+        },
+        {
+          "const": "verifying",
+          "type": "string"
+        },
+        {
+          "const": "awaiting-restart",
+          "type": "string"
+        },
+        {
+          "const": "paused",
+          "type": "string"
+        },
+        {
+          "const": "recovering",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "type": "string"
+        }
+      ]
+    },
+    "PromotionEvidenceReference": {
+      "$id": "PromotionEvidenceReference.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "capturedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceHash": {
+          "$ref": "EvidenceHash.json"
+        },
+        "evidenceId": {
+          "$ref": "EvidenceIdentifier.json"
+        }
+      },
+      "required": [
+        "evidenceId",
+        "evidenceHash",
+        "capturedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PromotionVerdict": {
+      "$id": "PromotionVerdict.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "pending",
+          "type": "string"
+        },
+        {
+          "const": "passed",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "type": "string"
+        }
+      ]
+    },
+    "RecoveryCheckpointDocument": {
+      "$id": "RecoveryCheckpointDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "checkpointId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "coverage": {
+          "$ref": "RecoveryCoverage.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "recovery-checkpoint",
+          "type": "string"
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "restartRequired": {
+          "type": "boolean"
+        },
+        "restorePointSequence": {
+          "type": "string"
+        },
+        "restorePointStatus": {
+          "$ref": "TransactionText.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "checkpointId",
+        "transactionId",
+        "planId",
+        "createdAt",
+        "coverage",
+        "exactPriorState",
+        "restartRequired",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RecoveryCoverage": {
+      "$id": "RecoveryCoverage.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "ready",
+          "type": "string"
+        },
+        {
+          "const": "partial",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "type": "string"
+        }
+      ]
+    },
+    "RecoveryMethod": {
+      "$id": "RecoveryMethod.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "exact-prior-scheme",
+          "type": "string"
+        },
+        {
+          "const": "owned-scheme-removal",
+          "type": "string"
+        },
+        {
+          "const": "system-restore-complement",
+          "type": "string"
+        }
+      ]
+    },
+    "RedactedDiagnosticEntry": {
+      "$id": "RedactedDiagnosticEntry.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "reasonCode": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "state": {
+          "$ref": "ProgressState.json"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "state",
+        "occurredAt",
+        "eventHash"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RedactedDiagnosticExportDocument": {
+      "$id": "RedactedDiagnosticExportDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "entries": {
+          "items": {
+            "$ref": "RedactedDiagnosticEntry.json"
+          },
+          "maxItems": 512,
+          "minItems": 1,
+          "type": "array"
+        },
+        "exportId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "journalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "redacted-diagnostic-export",
+          "type": "string"
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "redactionsApplied": {
+          "items": {
+            "$ref": "TransactionIdentifier.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "exportId",
+        "planId",
+        "generatedAt",
+        "journalHeadHash",
+        "entries",
+        "redactionsApplied",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RestartEffect": {
+      "$id": "RestartEffect.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "none",
+          "type": "string"
+        },
+        {
+          "const": "recommended",
+          "type": "string"
+        },
+        {
+          "const": "required",
+          "type": "string"
+        }
+      ]
+    },
+    "RestoredJournalEvent": {
+      "$id": "RestoredJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "restored",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RestorePreparedJournalEvent": {
+      "$id": "RestorePreparedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactAppliedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRestoreTargetState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "recoveryMethod": {
+          "$ref": "RecoveryMethod.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "restore-prepared",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactAppliedState",
+        "exactRestoreTargetState",
+        "recoveryMethod"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "RiskClass": {
+      "$id": "RiskClass.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "verified",
+          "type": "string"
+        },
+        {
+          "const": "advanced",
+          "type": "string"
+        },
+        {
+          "const": "experimental",
+          "type": "string"
+        },
+        {
+          "const": "extreme-locked",
+          "type": "string"
+        }
+      ]
+    },
+    "SignedOperationRevocationDocument": {
+      "$id": "SignedOperationRevocationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "kind": {
+          "const": "operation-revocation",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "reason": {
+          "$ref": "TransactionText.json"
+        },
+        "recoveryRemainsAvailable": {
+          "const": true,
+          "type": "boolean"
+        },
+        "revocationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "signature": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "signatureKeyId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "signedPayloadHash": {
+          "$ref": "TransactionHash.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "revocationId",
+        "operationVersionId",
+        "reason",
+        "issuedAt",
+        "signatureKeyId",
+        "signedPayloadHash",
+        "signature",
+        "recoveryRemainsAvailable",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "SimulationPromotionDocument": {
+      "$id": "SimulationPromotionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "PromotionEvidenceReference.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "operation-promotion",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "promotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "stage": {
+          "const": "deterministic-simulation",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "PromotionVerdict.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "promotionId",
+        "operationVersionId",
+        "verdict",
+        "evidence",
+        "recordedAt",
+        "audit",
+        "stage"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "TransactionalPlanDocument": {
+      "$id": "TransactionalPlanDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dependencyGroups": {
+          "items": {
+            "$ref": "DependencyGroup.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array"
+        },
+        "device": {
+          "$ref": "DeviceAuthorityBinding.json"
+        },
+        "effectiveRisk": {
+          "$ref": "RiskClass.json"
+        },
+        "evidenceFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "transactional-plan",
+          "type": "string"
+        },
+        "lifecycle": {
+          "$ref": "PlanLifecycleState.json"
+        },
+        "operations": {
+          "items": {
+            "$ref": "PlanOperation.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "revision": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "revisionFingerprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "riskCeiling": {
+          "$ref": "RiskClass.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "planId",
+        "revision",
+        "revisionFingerprint",
+        "evidenceFingerprint",
+        "device",
+        "lifecycle",
+        "riskCeiling",
+        "effectiveRisk",
+        "createdAt",
+        "operations",
+        "dependencyGroups"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "TransactionalRecoveryDocument": {
+      "$id": "TransactionalRecoveryDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "TransactionalPlanDocument.json"
+        },
+        {
+          "$ref": "PlanApprovalDocument.json"
+        },
+        {
+          "$ref": "PlanTransactionDocument.json"
+        },
+        {
+          "$ref": "RecoveryCheckpointDocument.json"
+        },
+        {
+          "$ref": "DurableJournalEvent.json"
+        },
+        {
+          "$ref": "TransactionReceiptDocument.json"
+        },
+        {
+          "$ref": "ProgressSnapshotDocument.json"
+        },
+        {
+          "$ref": "ProgressEventDocument.json"
+        },
+        {
+          "$ref": "OperationPromotionDocument.json"
+        },
+        {
+          "$ref": "SignedOperationRevocationDocument.json"
+        },
+        {
+          "$ref": "PrivilegedBrokerRequest.json"
+        },
+        {
+          "$ref": "PrivilegedBrokerResponse.json"
+        },
+        {
+          "$ref": "RedactedDiagnosticExportDocument.json"
+        },
+        {
+          "$ref": "AdvancedPreferenceProjectionDocument.json"
+        },
+        {
+          "$ref": "AdvancedPreferenceIntentDocument.json"
+        },
+        {
+          "$ref": "AdvancedPreferenceEventDocument.json"
+        }
+      ]
+    },
+    "TransactionHash": {
+      "$id": "TransactionHash.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 71,
+      "minLength": 71,
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "TransactionIdentifier": {
+      "$id": "TransactionIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "TransactionIntent": {
+      "$id": "TransactionIntent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "apply",
+          "type": "string"
+        },
+        {
+          "const": "restore-operation",
+          "type": "string"
+        },
+        {
+          "const": "restore-plan",
+          "type": "string"
+        },
+        {
+          "const": "restore-checkpoint",
+          "type": "string"
+        },
+        {
+          "const": "retry-after-observation",
+          "type": "string"
+        }
+      ]
+    },
+    "TransactionReceiptDocument": {
+      "$id": "TransactionReceiptDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "completedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "humanSummary": {
+          "$ref": "TransactionText.json"
+        },
+        "journalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "transaction-receipt",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "planId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "receiptId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recoveryMethod": {
+          "$ref": "RecoveryMethod.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "technicalSummary": {
+          "$ref": "TransactionText.json"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "verification": {
+          "$ref": "VerificationReceipt.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "receiptId",
+        "transactionId",
+        "planId",
+        "operationVersionId",
+        "completedAt",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState",
+        "verification",
+        "recoveryMethod",
+        "journalHeadHash",
+        "humanSummary",
+        "technicalSummary",
+        "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "TransactionSchemaVersion": {
+      "$id": "TransactionSchemaVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "1.0",
+          "type": "string"
+        }
+      ]
+    },
+    "TransactionText": {
+      "$id": "TransactionText.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "UnavailablePowerSchemeState": {
+      "$id": "UnavailablePowerSchemeState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "TransactionText.json"
+        },
+        "state": {
+          "const": "unavailable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "UnknownJournalEvent": {
+      "$id": "UnknownJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "reason": {
+          "$ref": "TransactionText.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "unknown",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState",
+        "reason"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "UnknownPowerSchemeState": {
+      "$id": "UnknownPowerSchemeState.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "TransactionText.json"
+        },
+        "state": {
+          "const": "unknown",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason",
+        "observedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "VerificationReceipt": {
+      "$id": "VerificationReceipt.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "state": {
+          "const": "verified",
+          "type": "string"
+        },
+        "verifiedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "verifiedAt",
+        "exactObservedState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "VerifiedJournalEvent": {
+      "$id": "VerifiedJournalEvent.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "eventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "eventId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "exactObservedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactPriorState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "exactRequestedState": {
+          "$ref": "ExactOperationState.json"
+        },
+        "kind": {
+          "const": "journal-event",
+          "type": "string"
+        },
+        "occurredAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousEventHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "const": "verified",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "eventId",
+        "transactionId",
+        "operationVersionId",
+        "sequence",
+        "occurredAt",
+        "previousEventHash",
+        "eventHash",
+        "audit",
+        "state",
+        "exactPriorState",
+        "exactRequestedState",
+        "exactObservedState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "VmPromotionDocument": {
+      "$id": "VmPromotionDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "audit": {
+          "$ref": "AuditReference.json"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "PromotionEvidenceReference.json"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "operation-promotion",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousPromotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousStage": {
+          "const": "deterministic-simulation",
+          "type": "string"
+        },
+        "promotionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "stage": {
+          "const": "clean-windows-vm",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "PromotionVerdict.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "promotionId",
+        "operationVersionId",
+        "verdict",
+        "evidence",
+        "recordedAt",
+        "audit",
+        "stage",
+        "previousStage",
+        "previousPromotionId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "WindowsSchemeIdentifier": {
+      "$id": "WindowsSchemeIdentifier.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 36,
+      "minLength": 36,
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.liiiraa.dev/desktop/v1/transactional-recovery.schema.json",
+  "$ref": "TransactionalRecoveryDocument.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-liiiraa-generated": {
+    "generator": "@liiiraa/contract-generation",
+    "notice": "GENERATED FILE - DO NOT EDIT",
+    "source": "packages/contracts-source/src/main.tsp"
+  }
+}

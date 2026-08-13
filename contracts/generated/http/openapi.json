@@ -196,6 +196,84 @@
           }
         ]
       },
+      "ActionProofReference": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "proofReference": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "proofReference",
+          "action",
+          "issuedAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ActivateManagedPowerSchemeRequest": {
+        "properties": {
+          "counter": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "expectedCurrentSchemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "activate-managed-power-scheme-request",
+            "type": "string"
+          },
+          "nonce": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "schemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "requestId",
+          "deviceBindingId",
+          "schemeId",
+          "expectedCurrentSchemeId",
+          "issuedAt",
+          "nonce",
+          "counter"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "AdminAccessContextProjection": {
         "properties": {
           "activeFunction": {
@@ -3039,6 +3117,220 @@
           "not": {}
         }
       },
+      "AdvancedPreferenceEventDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceAuthorityBinding"
+          },
+          "event": {
+            "$ref": "#/components/schemas/AdvancedPreferenceEventKind"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "advanced-preference-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "preferenceId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "proof": {
+            "$ref": "#/components/schemas/ActionProofReference"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "preferenceId",
+          "device",
+          "event",
+          "proof",
+          "sequence",
+          "occurredAt",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdvancedPreferenceEventKind": {
+        "anyOf": [
+          {
+            "const": "enabled",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
+            "type": "string"
+          },
+          {
+            "const": "posture-invalidated",
+            "type": "string"
+          },
+          {
+            "const": "revalidated",
+            "type": "string"
+          }
+        ]
+      },
+      "AdvancedPreferenceIntentDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceAuthorityBinding"
+          },
+          "expectedSequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/AdvancedPreferenceIntentKind"
+          },
+          "intentId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "advanced-preference-intent",
+            "type": "string"
+          },
+          "preferenceId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "proof": {
+            "$ref": "#/components/schemas/ActionProofReference"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "intentId",
+          "preferenceId",
+          "device",
+          "intent",
+          "proof",
+          "expectedSequence",
+          "requestedAt",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdvancedPreferenceIntentKind": {
+        "anyOf": [
+          {
+            "const": "enable",
+            "type": "string"
+          },
+          {
+            "const": "revoke",
+            "type": "string"
+          },
+          {
+            "const": "posture-invalidate",
+            "type": "string"
+          },
+          {
+            "const": "revalidate",
+            "type": "string"
+          }
+        ]
+      },
+      "AdvancedPreferenceProjectionDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceAuthorityBinding"
+          },
+          "kind": {
+            "const": "advanced-preference-projection",
+            "type": "string"
+          },
+          "lastEventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "preferenceId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AdvancedPreferenceState"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "preferenceId",
+          "device",
+          "state",
+          "sequence",
+          "lastEventId",
+          "updatedAt",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AdvancedPreferenceState": {
+        "anyOf": [
+          {
+            "const": "disabled",
+            "type": "string"
+          },
+          {
+            "const": "enabled",
+            "type": "string"
+          },
+          {
+            "const": "revalidation-required",
+            "type": "string"
+          }
+        ]
+      },
       "AuditEvent": {
         "properties": {
           "action": {
@@ -3100,6 +3392,25 @@
           "correlationId",
           "eventHash",
           "occurredAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "AuditReference": {
+        "properties": {
+          "auditId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "auditId",
+          "recordedAt"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -3349,6 +3660,186 @@
             "type": "string"
           }
         ]
+      },
+      "BrokerAcceptedResponse": {
+        "properties": {
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "broker-accepted-response",
+            "type": "string"
+          },
+          "outcome": {
+            "const": "accepted",
+            "type": "string"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "responseId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "responseId",
+          "requestId",
+          "outcome",
+          "completedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BrokerObservationResponse": {
+        "properties": {
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "broker-observation-response",
+            "type": "string"
+          },
+          "outcome": {
+            "const": "observed",
+            "type": "string"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "responseId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "responseId",
+          "requestId",
+          "outcome",
+          "exactObservedState",
+          "completedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BrokerOutcome": {
+        "anyOf": [
+          {
+            "const": "observed",
+            "type": "string"
+          },
+          {
+            "const": "accepted",
+            "type": "string"
+          },
+          {
+            "const": "rejected",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          }
+        ]
+      },
+      "BrokerRejectedResponse": {
+        "properties": {
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "broker-rejected-response",
+            "type": "string"
+          },
+          "outcome": {
+            "const": "rejected",
+            "type": "string"
+          },
+          "reasonCode": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "responseId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "responseId",
+          "requestId",
+          "outcome",
+          "reasonCode",
+          "completedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BrokerUnavailableResponse": {
+        "properties": {
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "broker-unavailable-response",
+            "type": "string"
+          },
+          "outcome": {
+            "const": "unavailable",
+            "type": "string"
+          },
+          "reasonCode": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "responseId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "responseId",
+          "requestId",
+          "outcome",
+          "reasonCode",
+          "completedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "CancellationState": {
         "anyOf": [
@@ -3740,6 +4231,49 @@
           "not": {}
         }
       },
+      "CompatibilityAssessment": {
+        "properties": {
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionText"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/CompatibilityVerdict"
+          }
+        },
+        "required": [
+          "verdict",
+          "reasons"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CompatibilityVerdict": {
+        "anyOf": [
+          {
+            "const": "compatible",
+            "type": "string"
+          },
+          {
+            "const": "incompatible",
+            "type": "string"
+          },
+          {
+            "const": "unknown",
+            "type": "string"
+          },
+          {
+            "const": "degraded",
+            "type": "string"
+          }
+        ]
+      },
       "CompletedMeasurementSession": {
         "properties": {
           "baseline": {
@@ -3808,6 +4342,81 @@
           "chunks",
           "evidenceHash",
           "limitations"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ConflictJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "differenceSummary": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "conflict",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState",
+          "differenceSummary"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -4201,11 +4810,117 @@
           "not": {}
         }
       },
+      "DeleteOwnedPowerSchemeRequest": {
+        "properties": {
+          "counter": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "expectedCanonicalStateHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "delete-owned-power-scheme-request",
+            "type": "string"
+          },
+          "nonce": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "schemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "requestId",
+          "deviceBindingId",
+          "schemeId",
+          "expectedCanonicalStateHash",
+          "issuedAt",
+          "nonce",
+          "counter"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DependencyGroup": {
+        "properties": {
+          "dependencyGroupId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "dependsOnGroupIds": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionIdentifier"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "operationVersionIds": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionIdentifier"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "dependencyGroupId",
+          "operationVersionIds",
+          "dependsOnGroupIds"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "DetachedSignature": {
         "maxLength": 512,
         "minLength": 64,
         "pattern": "^[A-Za-z0-9_-]+={0,2}$",
         "type": "string"
+      },
+      "DeviceAuthorityBinding": {
+        "properties": {
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "hardwareFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "securityPostureFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          }
+        },
+        "required": [
+          "deviceBindingId",
+          "hardwareFingerprint",
+          "securityPostureFingerprint"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "DeviceBindingProjection": {
         "properties": {
@@ -4607,6 +5322,241 @@
           }
         ]
       },
+      "DispatchReturnedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "brokerRequestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "brokerResponseId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/BrokerOutcome"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "dispatch-returned",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "brokerRequestId",
+          "brokerResponseId",
+          "outcome"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DriftJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "differenceSummary": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "drift",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState",
+          "differenceSummary"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DuplicateManagedPowerSchemeRequest": {
+        "properties": {
+          "counter": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "destinationSchemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "friendlyName": {
+            "const": "Liiiraa Verificado",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "duplicate-managed-power-scheme-request",
+            "type": "string"
+          },
+          "nonce": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceSchemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "requestId",
+          "deviceBindingId",
+          "sourceSchemeId",
+          "destinationSchemeId",
+          "friendlyName",
+          "issuedAt",
+          "nonce",
+          "counter"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "DurableJournalEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PreparedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/DispatchReturnedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ObservedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/VerifiedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/NotAppliedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/UnknownJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/DriftJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ConflictJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/RestorePreparedJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/RestoredJournalEvent"
+          }
+        ]
+      },
       "EvidenceComparison": {
         "oneOf": [
           {
@@ -4666,6 +5616,38 @@
             "type": "string"
           }
         ]
+      },
+      "EvidenceReference": {
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "evidenceId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/EvidenceQuality"
+          },
+          "validUntil": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidenceId",
+          "evidenceHash",
+          "capturedAt",
+          "validUntil",
+          "quality"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "EvidenceReport": {
         "properties": {
@@ -4747,6 +5729,47 @@
         "minLength": 1,
         "type": "string"
       },
+      "ExactOperationState": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ExactPowerSchemeState"
+          },
+          {
+            "$ref": "#/components/schemas/UnavailablePowerSchemeState"
+          },
+          {
+            "$ref": "#/components/schemas/UnknownPowerSchemeState"
+          }
+        ]
+      },
+      "ExactPowerSchemeState": {
+        "properties": {
+          "canonicalStateHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemeId": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          },
+          "state": {
+            "const": "observed",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "schemeId",
+          "canonicalStateHash",
+          "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "FixtureDiagnosticValue": {
         "properties": {
           "fixtureVersion": {
@@ -4768,6 +5791,69 @@
           "value",
           "scenarioId",
           "fixtureVersion"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "FriendsPromotionDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PromotionEvidenceReference"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "kind": {
+            "const": "operation-promotion",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousPromotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousStage": {
+            "const": "owner-pc",
+            "type": "string"
+          },
+          "promotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "stage": {
+            "const": "friends-pc",
+            "type": "string"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/PromotionVerdict"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "promotionId",
+          "operationVersionId",
+          "verdict",
+          "evidence",
+          "recordedAt",
+          "audit",
+          "stage",
+          "previousStage",
+          "previousPromotionId"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -5603,6 +6689,77 @@
           "not": {}
         }
       },
+      "NotAppliedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "not-applied",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "ObservedDiagnosticValue": {
         "properties": {
           "kind": {
@@ -5656,6 +6813,111 @@
           "value",
           "source",
           "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ObservedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "observed",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactObservedState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ObservePowerSchemeRequest": {
+        "properties": {
+          "counter": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "observe-power-scheme-request",
+            "type": "string"
+          },
+          "nonce": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "requestId",
+          "deviceBindingId",
+          "issuedAt",
+          "nonce",
+          "counter"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -5739,6 +7001,692 @@
         "minLength": 1,
         "pattern": "^[A-Za-z0-9_-]+={0,2}$",
         "type": "string"
+      },
+      "OperationPromotionDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SimulationPromotionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/VmPromotionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/OwnerPromotionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/FriendsPromotionDocument"
+          }
+        ]
+      },
+      "OwnerPromotionDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PromotionEvidenceReference"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "kind": {
+            "const": "operation-promotion",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousPromotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousStage": {
+            "const": "clean-windows-vm",
+            "type": "string"
+          },
+          "promotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "stage": {
+            "const": "owner-pc",
+            "type": "string"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/PromotionVerdict"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "promotionId",
+          "operationVersionId",
+          "verdict",
+          "evidence",
+          "recordedAt",
+          "audit",
+          "stage",
+          "previousStage",
+          "previousPromotionId"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PlanApprovalDocument": {
+        "properties": {
+          "approvalId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "approvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approvedRisk": {
+            "$ref": "#/components/schemas/RiskClass"
+          },
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "compatibility": {
+            "$ref": "#/components/schemas/CompatibilityVerdict"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceAuthorityBinding"
+          },
+          "evidenceFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/TransactionIntent"
+          },
+          "kind": {
+            "const": "plan-approval",
+            "type": "string"
+          },
+          "operationVersionIds": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionIdentifier"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "planRevision": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "proof": {
+            "$ref": "#/components/schemas/ActionProofReference"
+          },
+          "recoveryCoverage": {
+            "$ref": "#/components/schemas/RecoveryCoverage"
+          },
+          "revisionFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "approvalId",
+          "planId",
+          "planRevision",
+          "revisionFingerprint",
+          "evidenceFingerprint",
+          "device",
+          "approvedRisk",
+          "compatibility",
+          "recoveryCoverage",
+          "intent",
+          "proof",
+          "approvedAt",
+          "audit",
+          "operationVersionIds"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PlanLifecycleState": {
+        "anyOf": [
+          {
+            "const": "composed",
+            "type": "string"
+          },
+          {
+            "const": "awaiting-approval",
+            "type": "string"
+          },
+          {
+            "const": "approved",
+            "type": "string"
+          },
+          {
+            "const": "applying",
+            "type": "string"
+          },
+          {
+            "const": "paused",
+            "type": "string"
+          },
+          {
+            "const": "awaiting-restart",
+            "type": "string"
+          },
+          {
+            "const": "recovering",
+            "type": "string"
+          },
+          {
+            "const": "completed",
+            "type": "string"
+          },
+          {
+            "const": "restored",
+            "type": "string"
+          },
+          {
+            "const": "blocked",
+            "type": "string"
+          }
+        ]
+      },
+      "PlanOperation": {
+        "properties": {
+          "compatibility": {
+            "$ref": "#/components/schemas/CompatibilityAssessment"
+          },
+          "dependencyGroupId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceReference"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "type": "array"
+          },
+          "expectedImpact": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "operationKind": {
+            "const": "managed-power-scheme-v1",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousValue": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "recoveryMethod": {
+            "$ref": "#/components/schemas/RecoveryMethod"
+          },
+          "requestedValue": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "restartEffect": {
+            "$ref": "#/components/schemas/RestartEffect"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskClass"
+          }
+        },
+        "required": [
+          "operationVersionId",
+          "operationKind",
+          "purpose",
+          "expectedImpact",
+          "risk",
+          "evidence",
+          "compatibility",
+          "restartEffect",
+          "previousValue",
+          "requestedValue",
+          "recoveryMethod",
+          "dependencyGroupId"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PlanTransactionDocument": {
+        "properties": {
+          "approvalId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/TransactionIntent"
+          },
+          "kind": {
+            "const": "plan-transaction",
+            "type": "string"
+          },
+          "parentTransactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "planRevision": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "revisionFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "transactionId",
+          "planId",
+          "planRevision",
+          "revisionFingerprint",
+          "approvalId",
+          "intent",
+          "startedAt",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PreparedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "recoveryMethod": {
+            "$ref": "#/components/schemas/RecoveryMethod"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "prepared",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "recoveryMethod"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PrepareRestorePointRequest": {
+        "properties": {
+          "counter": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "deviceBindingId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "displaySummary": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "prepare-restore-point-request",
+            "type": "string"
+          },
+          "nonce": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "requestId",
+          "deviceBindingId",
+          "transactionId",
+          "displaySummary",
+          "issuedAt",
+          "nonce",
+          "counter"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PrivilegedBrokerRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ObservePowerSchemeRequest"
+          },
+          {
+            "$ref": "#/components/schemas/DuplicateManagedPowerSchemeRequest"
+          },
+          {
+            "$ref": "#/components/schemas/ActivateManagedPowerSchemeRequest"
+          },
+          {
+            "$ref": "#/components/schemas/DeleteOwnedPowerSchemeRequest"
+          },
+          {
+            "$ref": "#/components/schemas/PrepareRestorePointRequest"
+          }
+        ]
+      },
+      "PrivilegedBrokerResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BrokerObservationResponse"
+          },
+          {
+            "$ref": "#/components/schemas/BrokerAcceptedResponse"
+          },
+          {
+            "$ref": "#/components/schemas/BrokerRejectedResponse"
+          },
+          {
+            "$ref": "#/components/schemas/BrokerUnavailableResponse"
+          }
+        ]
+      },
+      "ProgressEventDocument": {
+        "properties": {
+          "displayText": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "progress-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousSequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProgressState"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "sequence",
+          "state",
+          "occurredAt",
+          "displayText"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ProgressSnapshotDocument": {
+        "properties": {
+          "completedOperations": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "currentOperationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "displayText": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "kind": {
+            "const": "progress-snapshot",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProgressState"
+          },
+          "totalOperations": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "transactionId",
+          "sequence",
+          "state",
+          "completedOperations",
+          "totalOperations",
+          "updatedAt",
+          "displayText"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "ProgressState": {
+        "anyOf": [
+          {
+            "const": "queued",
+            "type": "string"
+          },
+          {
+            "const": "preparing",
+            "type": "string"
+          },
+          {
+            "const": "applying",
+            "type": "string"
+          },
+          {
+            "const": "observing",
+            "type": "string"
+          },
+          {
+            "const": "verifying",
+            "type": "string"
+          },
+          {
+            "const": "awaiting-restart",
+            "type": "string"
+          },
+          {
+            "const": "paused",
+            "type": "string"
+          },
+          {
+            "const": "recovering",
+            "type": "string"
+          },
+          {
+            "const": "completed",
+            "type": "string"
+          },
+          {
+            "const": "blocked",
+            "type": "string"
+          }
+        ]
+      },
+      "PromotionEvidenceReference": {
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceHash": {
+            "$ref": "#/components/schemas/EvidenceHash"
+          },
+          "evidenceId": {
+            "$ref": "#/components/schemas/EvidenceIdentifier"
+          }
+        },
+        "required": [
+          "evidenceId",
+          "evidenceHash",
+          "capturedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PromotionVerdict": {
+        "anyOf": [
+          {
+            "const": "pending",
+            "type": "string"
+          },
+          {
+            "const": "passed",
+            "type": "string"
+          },
+          {
+            "const": "failed",
+            "type": "string"
+          },
+          {
+            "const": "blocked",
+            "type": "string"
+          },
+          {
+            "const": "revoked",
+            "type": "string"
+          }
+        ]
       },
       "ProvenanceDescription": {
         "maxLength": 512,
@@ -5842,10 +7790,200 @@
           }
         ]
       },
+      "RecoveryCheckpointDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "checkpointId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/RecoveryCoverage"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "recovery-checkpoint",
+            "type": "string"
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "restartRequired": {
+            "type": "boolean"
+          },
+          "restorePointSequence": {
+            "type": "string"
+          },
+          "restorePointStatus": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "checkpointId",
+          "transactionId",
+          "planId",
+          "createdAt",
+          "coverage",
+          "exactPriorState",
+          "restartRequired",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "RecoveryCoverage": {
+        "anyOf": [
+          {
+            "const": "ready",
+            "type": "string"
+          },
+          {
+            "const": "partial",
+            "type": "string"
+          },
+          {
+            "const": "unavailable",
+            "type": "string"
+          },
+          {
+            "const": "failed",
+            "type": "string"
+          }
+        ]
+      },
+      "RecoveryMethod": {
+        "anyOf": [
+          {
+            "const": "exact-prior-scheme",
+            "type": "string"
+          },
+          {
+            "const": "owned-scheme-removal",
+            "type": "string"
+          },
+          {
+            "const": "system-restore-complement",
+            "type": "string"
+          }
+        ]
+      },
       "RedactedAuthorityText": {
         "maxLength": 512,
         "minLength": 1,
         "type": "string"
+      },
+      "RedactedDiagnosticEntry": {
+        "properties": {
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "reasonCode": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProgressState"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "state",
+          "occurredAt",
+          "eventHash"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "RedactedDiagnosticExportDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/RedactedDiagnosticEntry"
+            },
+            "maxItems": 512,
+            "minItems": 1,
+            "type": "array"
+          },
+          "exportId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "journalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "redacted-diagnostic-export",
+            "type": "string"
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "redactionsApplied": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionIdentifier"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "exportId",
+          "planId",
+          "generatedAt",
+          "journalHeadHash",
+          "entries",
+          "redactionsApplied",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "RejectedComparison": {
         "properties": {
@@ -5982,6 +8120,184 @@
         "maxLength": 128,
         "minLength": 1,
         "type": "string"
+      },
+      "RestartEffect": {
+        "anyOf": [
+          {
+            "const": "none",
+            "type": "string"
+          },
+          {
+            "const": "recommended",
+            "type": "string"
+          },
+          {
+            "const": "required",
+            "type": "string"
+          }
+        ]
+      },
+      "RestoredJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "restored",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "RestorePreparedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactAppliedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRestoreTargetState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "recoveryMethod": {
+            "$ref": "#/components/schemas/RecoveryMethod"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "restore-prepared",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactAppliedState",
+          "exactRestoreTargetState",
+          "recoveryMethod"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "RiskClass": {
+        "anyOf": [
+          {
+            "const": "verified",
+            "type": "string"
+          },
+          {
+            "const": "advanced",
+            "type": "string"
+          },
+          {
+            "const": "experimental",
+            "type": "string"
+          },
+          {
+            "const": "extreme-locked",
+            "type": "string"
+          }
+        ]
       },
       "SafeContextKey": {
         "anyOf": [
@@ -6285,6 +8601,117 @@
           }
         ]
       },
+      "SignedOperationRevocationDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "const": "operation-revocation",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "recoveryRemainsAvailable": {
+            "const": true,
+            "type": "boolean"
+          },
+          "revocationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "signatureKeyId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "signedPayloadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "revocationId",
+          "operationVersionId",
+          "reason",
+          "issuedAt",
+          "signatureKeyId",
+          "signedPayloadHash",
+          "signature",
+          "recoveryRemainsAvailable",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SimulationPromotionDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PromotionEvidenceReference"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "kind": {
+            "const": "operation-promotion",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "promotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "stage": {
+            "const": "deterministic-simulation",
+            "type": "string"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/PromotionVerdict"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "promotionId",
+          "operationVersionId",
+          "verdict",
+          "evidence",
+          "recordedAt",
+          "audit",
+          "stage"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "SourceCapability": {
         "anyOf": [
           {
@@ -6577,6 +9004,258 @@
           }
         ]
       },
+      "TransactionalPlanDocument": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dependencyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/DependencyGroup"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceAuthorityBinding"
+          },
+          "effectiveRisk": {
+            "$ref": "#/components/schemas/RiskClass"
+          },
+          "evidenceFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "transactional-plan",
+            "type": "string"
+          },
+          "lifecycle": {
+            "$ref": "#/components/schemas/PlanLifecycleState"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/PlanOperation"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "revision": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "revisionFingerprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "riskCeiling": {
+            "$ref": "#/components/schemas/RiskClass"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "planId",
+          "revision",
+          "revisionFingerprint",
+          "evidenceFingerprint",
+          "device",
+          "lifecycle",
+          "riskCeiling",
+          "effectiveRisk",
+          "createdAt",
+          "operations",
+          "dependencyGroups"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "TransactionalRecoveryDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TransactionalPlanDocument"
+          },
+          {
+            "$ref": "#/components/schemas/PlanApprovalDocument"
+          },
+          {
+            "$ref": "#/components/schemas/PlanTransactionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/RecoveryCheckpointDocument"
+          },
+          {
+            "$ref": "#/components/schemas/DurableJournalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TransactionReceiptDocument"
+          },
+          {
+            "$ref": "#/components/schemas/ProgressSnapshotDocument"
+          },
+          {
+            "$ref": "#/components/schemas/ProgressEventDocument"
+          },
+          {
+            "$ref": "#/components/schemas/OperationPromotionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/SignedOperationRevocationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/PrivilegedBrokerRequest"
+          },
+          {
+            "$ref": "#/components/schemas/PrivilegedBrokerResponse"
+          },
+          {
+            "$ref": "#/components/schemas/RedactedDiagnosticExportDocument"
+          },
+          {
+            "$ref": "#/components/schemas/AdvancedPreferenceProjectionDocument"
+          },
+          {
+            "$ref": "#/components/schemas/AdvancedPreferenceIntentDocument"
+          },
+          {
+            "$ref": "#/components/schemas/AdvancedPreferenceEventDocument"
+          }
+        ]
+      },
+      "TransactionHash": {
+        "maxLength": 71,
+        "minLength": 71,
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "TransactionIdentifier": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "TransactionIntent": {
+        "anyOf": [
+          {
+            "const": "apply",
+            "type": "string"
+          },
+          {
+            "const": "restore-operation",
+            "type": "string"
+          },
+          {
+            "const": "restore-plan",
+            "type": "string"
+          },
+          {
+            "const": "restore-checkpoint",
+            "type": "string"
+          },
+          {
+            "const": "retry-after-observation",
+            "type": "string"
+          }
+        ]
+      },
+      "TransactionReceiptDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "humanSummary": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "journalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "transaction-receipt",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "planId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "receiptId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recoveryMethod": {
+            "$ref": "#/components/schemas/RecoveryMethod"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "technicalSummary": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "verification": {
+            "$ref": "#/components/schemas/VerificationReceipt"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "receiptId",
+          "transactionId",
+          "planId",
+          "operationVersionId",
+          "completedAt",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState",
+          "verification",
+          "recoveryMethod",
+          "journalHeadHash",
+          "humanSummary",
+          "technicalSummary",
+          "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "TransactionSchemaVersion": {
+        "anyOf": [
+          {
+            "const": "1.0",
+            "type": "string"
+          }
+        ]
+      },
+      "TransactionText": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
       "UnavailableDiagnosticValue": {
         "properties": {
           "kind": {
@@ -6619,6 +9298,129 @@
           "not": {}
         }
       },
+      "UnavailablePowerSchemeState": {
+        "properties": {
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "state": {
+            "const": "unavailable",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "reason",
+          "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "UnknownJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "unknown",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState",
+          "reason"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "UnknownPowerSchemeState": {
+        "properties": {
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/TransactionText"
+          },
+          "state": {
+            "const": "unknown",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "reason",
+          "observedAt"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "ValidationState": {
         "anyOf": [
           {
@@ -6638,6 +9440,164 @@
             "type": "string"
           }
         ]
+      },
+      "VerificationReceipt": {
+        "properties": {
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "state": {
+            "const": "verified",
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "verifiedAt",
+          "exactObservedState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "VerifiedJournalEvent": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "eventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "eventId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "exactObservedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactPriorState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "exactRequestedState": {
+            "$ref": "#/components/schemas/ExactOperationState"
+          },
+          "kind": {
+            "const": "journal-event",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousEventHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "state": {
+            "const": "verified",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "eventId",
+          "transactionId",
+          "operationVersionId",
+          "sequence",
+          "occurredAt",
+          "previousEventHash",
+          "eventHash",
+          "audit",
+          "state",
+          "exactPriorState",
+          "exactRequestedState",
+          "exactObservedState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "VmPromotionDocument": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditReference"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PromotionEvidenceReference"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "kind": {
+            "const": "operation-promotion",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousPromotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousStage": {
+            "const": "deterministic-simulation",
+            "type": "string"
+          },
+          "promotionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "stage": {
+            "const": "clean-windows-vm",
+            "type": "string"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/PromotionVerdict"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "promotionId",
+          "operationVersionId",
+          "verdict",
+          "evidence",
+          "recordedAt",
+          "audit",
+          "stage",
+          "previousStage",
+          "previousPromotionId"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "WebIdentifier": {
         "maxLength": 128,
@@ -6760,6 +9720,12 @@
       "WebUri": {
         "maxLength": 2048,
         "minLength": 1,
+        "type": "string"
+      },
+      "WindowsSchemeIdentifier": {
+        "maxLength": 36,
+        "minLength": 36,
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
         "type": "string"
       }
     }
