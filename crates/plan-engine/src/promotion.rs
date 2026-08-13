@@ -47,6 +47,32 @@ pub enum RestartEvidence {
     Completed,
 }
 
+/// Exact immutable identity of one stage-evidence artifact.
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct ExactEvidenceIdentity {
+    evidence_id: String,
+    evidence_hash: String,
+}
+
+impl ExactEvidenceIdentity {
+    pub fn new(evidence_id: impl Into<String>, evidence_hash: impl Into<String>) -> Self {
+        Self {
+            evidence_id: evidence_id.into(),
+            evidence_hash: evidence_hash.into(),
+        }
+    }
+
+    fn is_well_formed(&self) -> bool {
+        !self.evidence_id.is_empty()
+            && self.evidence_id.len() <= 128
+            && self.evidence_hash.len() == 71
+            && self
+                .evidence_hash
+                .strip_prefix("sha256:")
+                .is_some_and(|digest| digest.bytes().all(|byte| byte.is_ascii_hexdigit()))
+    }
+}
+
 /// Recovery-cycle evidence bound to one operation version, immutable build,
 /// exact stage, and the exact generated evidence references carried by the
 /// candidate promotion document.
@@ -55,7 +81,7 @@ pub struct ExactStageEvidence {
     operation_version_id: TransactionIdentifier,
     immutable_build_id: TransactionIdentifier,
     stage: PromotionStage,
-    evidence_ids: Vec<TransactionIdentifier>,
+    evidence: Vec<ExactEvidenceIdentity>,
     recovery_prepared: bool,
     applied: bool,
     verified_after_apply: bool,
@@ -72,7 +98,7 @@ impl ExactStageEvidence {
         operation_version_id: TransactionIdentifier,
         immutable_build_id: TransactionIdentifier,
         stage: PromotionStage,
-        evidence_ids: Vec<TransactionIdentifier>,
+        evidence: Vec<ExactEvidenceIdentity>,
         recovery_prepared: bool,
         applied: bool,
         verified_after_apply: bool,
@@ -86,7 +112,7 @@ impl ExactStageEvidence {
             operation_version_id,
             immutable_build_id,
             stage,
-            evidence_ids,
+            evidence,
             recovery_prepared,
             applied,
             verified_after_apply,
@@ -105,9 +131,16 @@ impl ExactStageEvidence {
             && self.restart != RestartEvidence::RequiredButMissing
             && self.restored
             && self.verified_after_restore
-            && !self.evidence_ids.is_empty()
+            && !self.evidence.is_empty()
+            && self
+                .evidence
+                .iter()
+                .all(ExactEvidenceIdentity::is_well_formed)
+            && all_unique(&self.evidence)
             && !self.tested_hardware_ids.is_empty()
+            && all_unique(&self.tested_hardware_ids)
             && !self.coverage_gaps.is_empty()
+            && all_unique(&self.coverage_gaps)
     }
 }
 
@@ -227,7 +260,21 @@ struct CandidateIdentity {
     stage: PromotionStage,
     previous_promotion_id: Option<TransactionIdentifier>,
     verdict: PromotionVerdict,
-    evidence_ids: Vec<TransactionIdentifier>,
+    evidence: Vec<ExactEvidenceIdentity>,
+}
+
+fn evidence_identity(
+    evidence: &[liiiraa_contracts_rust::PromotionEvidenceReference],
+) -> Vec<ExactEvidenceIdentity> {
+    evidence
+        .iter()
+        .map(|reference| {
+            ExactEvidenceIdentity::new(
+                reference.evidence_id.as_str(),
+                reference.evidence_hash.as_str(),
+            )
+        })
+        .collect()
 }
 
 fn candidate_identity(candidate: &OperationPromotionDocument) -> CandidateIdentity {
@@ -238,17 +285,7 @@ fn candidate_identity(candidate: &OperationPromotionDocument) -> CandidateIdenti
             stage: PromotionStage::DeterministicSimulation,
             previous_promotion_id: None,
             verdict: document.verdict,
-            evidence_ids: document
-                .evidence
-                .iter()
-                .map(|evidence| {
-                    evidence
-                        .evidence_id
-                        .as_str()
-                        .parse()
-                        .expect("generated evidence identifiers satisfy transaction bounds")
-                })
-                .collect(),
+            evidence: evidence_identity(&document.evidence),
         },
         OperationPromotionDocument::VmPromotionDocument(document) => CandidateIdentity {
             operation_version_id: document.operation_version_id.clone(),
@@ -256,17 +293,7 @@ fn candidate_identity(candidate: &OperationPromotionDocument) -> CandidateIdenti
             stage: PromotionStage::CleanWindowsVm,
             previous_promotion_id: Some(document.previous_promotion_id.clone()),
             verdict: document.verdict,
-            evidence_ids: document
-                .evidence
-                .iter()
-                .map(|evidence| {
-                    evidence
-                        .evidence_id
-                        .as_str()
-                        .parse()
-                        .expect("generated evidence identifiers satisfy transaction bounds")
-                })
-                .collect(),
+            evidence: evidence_identity(&document.evidence),
         },
         OperationPromotionDocument::OwnerPromotionDocument(document) => CandidateIdentity {
             operation_version_id: document.operation_version_id.clone(),
@@ -274,17 +301,7 @@ fn candidate_identity(candidate: &OperationPromotionDocument) -> CandidateIdenti
             stage: PromotionStage::OwnerPc,
             previous_promotion_id: Some(document.previous_promotion_id.clone()),
             verdict: document.verdict,
-            evidence_ids: document
-                .evidence
-                .iter()
-                .map(|evidence| {
-                    evidence
-                        .evidence_id
-                        .as_str()
-                        .parse()
-                        .expect("generated evidence identifiers satisfy transaction bounds")
-                })
-                .collect(),
+            evidence: evidence_identity(&document.evidence),
         },
         OperationPromotionDocument::FriendsPromotionDocument(document) => CandidateIdentity {
             operation_version_id: document.operation_version_id.clone(),
@@ -292,30 +309,26 @@ fn candidate_identity(candidate: &OperationPromotionDocument) -> CandidateIdenti
             stage: PromotionStage::FriendsPc,
             previous_promotion_id: Some(document.previous_promotion_id.clone()),
             verdict: document.verdict,
-            evidence_ids: document
-                .evidence
-                .iter()
-                .map(|evidence| {
-                    evidence
-                        .evidence_id
-                        .as_str()
-                        .parse()
-                        .expect("generated evidence identifiers satisfy transaction bounds")
-                })
-                .collect(),
+            evidence: evidence_identity(&document.evidence),
         },
     }
 }
 
-fn same_identifier_set(left: &[TransactionIdentifier], right: &[TransactionIdentifier]) -> bool {
-    let mut left = left
-        .iter()
-        .map(|identifier| identifier.as_str())
-        .collect::<Vec<_>>();
-    let mut right = right
-        .iter()
-        .map(|identifier| identifier.as_str())
-        .collect::<Vec<_>>();
+fn all_unique<T>(values: &[T]) -> bool
+where
+    T: Ord,
+{
+    let mut sorted = values.iter().collect::<Vec<_>>();
+    sorted.sort_unstable();
+    sorted.windows(2).all(|window| window[0] != window[1])
+}
+
+fn same_evidence(left: &[ExactEvidenceIdentity], right: &[ExactEvidenceIdentity]) -> bool {
+    if !all_unique(left) || !all_unique(right) {
+        return false;
+    }
+    let mut left = left.iter().collect::<Vec<_>>();
+    let mut right = right.iter().collect::<Vec<_>>();
     left.sort_unstable();
     right.sort_unstable();
     left == right
@@ -367,6 +380,11 @@ where
         if candidate_identity.stage != evidence.stage {
             return PromotionDecision::Blocked(PromotionBlockReason::StageSkipped);
         }
+        if !evidence.is_complete()
+            || !same_evidence(&candidate_identity.evidence, &evidence.evidence)
+        {
+            return PromotionDecision::Blocked(PromotionBlockReason::EvidenceIncomplete);
+        }
         if candidate_identity.verdict == PromotionVerdict::Failed {
             ledger.failed = true;
             return PromotionDecision::Blocked(PromotionBlockReason::StageFailed);
@@ -374,12 +392,6 @@ where
         if candidate_identity.verdict != PromotionVerdict::Passed {
             return PromotionDecision::Blocked(PromotionBlockReason::PreviousStageNotPassed);
         }
-        if !evidence.is_complete()
-            || !same_identifier_set(&candidate_identity.evidence_ids, &evidence.evidence_ids)
-        {
-            return PromotionDecision::Blocked(PromotionBlockReason::EvidenceIncomplete);
-        }
-
         match &ledger.latest {
             None if candidate_identity.stage != PromotionStage::DeterministicSimulation => {
                 return PromotionDecision::Blocked(PromotionBlockReason::MissingPreviousStage);
@@ -440,9 +452,8 @@ where
         ))
     }
 
-    pub fn can_apply(&self, operation_version_id: &TransactionIdentifier) -> bool {
-        !self
-            .versions
+    pub fn new_applications_blocked(&self, operation_version_id: &TransactionIdentifier) -> bool {
+        self.versions
             .get(operation_version_id.as_str())
             .is_some_and(|version| version.revoked)
     }

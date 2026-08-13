@@ -5,10 +5,10 @@ use liiiraa_contracts_rust::{
 use liiiraa_plan_engine::{
     domain::GeneratedTransport,
     promotion::{
-        DiagnosticReleaseConsent, DiagnosticReleaseIntent, ExactStageEvidence,
-        ExactVersionPromotionPolicy, LocalDiagnosticJournal, NextPromotionStage,
-        PromotionBlockReason, PromotionDecision, PromotionRequest, PromotionStage,
-        RedactedDiagnosticPolicy, RestartEvidence, RevocationSignatureVerifier,
+        DiagnosticReleaseConsent, DiagnosticReleaseIntent, ExactEvidenceIdentity,
+        ExactStageEvidence, ExactVersionPromotionPolicy, LocalDiagnosticJournal,
+        NextPromotionStage, PromotionBlockReason, PromotionDecision, PromotionRequest,
+        PromotionStage, RedactedDiagnosticPolicy, RestartEvidence, RevocationSignatureVerifier,
     },
 };
 use proptest::prelude::*;
@@ -79,10 +79,10 @@ fn cycle(
         id(operation_version),
         id(BUILD_ID),
         stage,
-        vec![id(&format!(
-            "evidence-{operation_version}-{}",
-            stage.as_str()
-        ))],
+        vec![ExactEvidenceIdentity::new(
+            format!("evidence-{operation_version}-{}", stage.as_str()),
+            format!("sha256:{}", "a".repeat(64)),
+        )],
         prepared,
         applied,
         verified_after_apply,
@@ -104,6 +104,30 @@ fn complete_cycle(operation_version: &str, stage: PromotionStage) -> ExactStageE
         RestartEvidence::NotRequired,
         true,
         true,
+    )
+}
+
+fn complete_cycle_for_build(
+    operation_version: &str,
+    stage: PromotionStage,
+    build_id: &str,
+) -> ExactStageEvidence {
+    ExactStageEvidence::new(
+        id(operation_version),
+        id(build_id),
+        stage,
+        vec![ExactEvidenceIdentity::new(
+            format!("evidence-{operation_version}-{}", stage.as_str()),
+            format!("sha256:{}", "a".repeat(64)),
+        )],
+        true,
+        true,
+        true,
+        RestartEvidence::NotRequired,
+        true,
+        true,
+        vec![id("hardware-observed-1")],
+        vec![id("coverage-gap-unobserved-hardware")],
     )
 }
 
@@ -233,6 +257,45 @@ fn d01_stage_skip_and_cross_version_evidence_reuse_fail_closed() {
 }
 
 #[test]
+fn immutable_build_drift_cannot_borrow_a_versions_prior_stage() {
+    let mut policy = policy();
+    let simulation = evaluate(
+        &mut policy,
+        promotion(
+            "power-scheme-v1",
+            PromotionStage::DeterministicSimulation,
+            "passed",
+            "build-a-simulation",
+            None,
+        ),
+        complete_cycle_for_build(
+            "power-scheme-v1",
+            PromotionStage::DeterministicSimulation,
+            "desktop-build-a",
+        ),
+    );
+    assert!(matches!(simulation, PromotionDecision::Accepted { .. }));
+    assert_blocked(
+        evaluate(
+            &mut policy,
+            promotion(
+                "power-scheme-v1",
+                PromotionStage::CleanWindowsVm,
+                "passed",
+                "build-b-vm",
+                Some("build-a-simulation"),
+            ),
+            complete_cycle_for_build(
+                "power-scheme-v1",
+                PromotionStage::CleanWindowsVm,
+                "desktop-build-b",
+            ),
+        ),
+        PromotionBlockReason::VersionMismatch,
+    );
+}
+
+#[test]
 fn d02_each_stage_requires_the_complete_recovery_cycle_and_exact_evidence_identity() {
     let stage = PromotionStage::DeterministicSimulation;
     let incomplete = [
@@ -347,6 +410,39 @@ fn d02_each_stage_requires_the_complete_recovery_cycle_and_exact_evidence_identi
         ),
         PromotionBlockReason::StageSkipped,
     );
+
+    let mut wrong_hash = policy();
+    let mismatched = ExactStageEvidence::new(
+        id("power-scheme-v1"),
+        id(BUILD_ID),
+        stage,
+        vec![ExactEvidenceIdentity::new(
+            "evidence-power-scheme-v1-deterministic-simulation",
+            format!("sha256:{}", "f".repeat(64)),
+        )],
+        true,
+        true,
+        true,
+        RestartEvidence::NotRequired,
+        true,
+        true,
+        vec![id("hardware-observed-1")],
+        vec![id("coverage-gap-unobserved-hardware")],
+    );
+    assert_blocked(
+        evaluate(
+            &mut wrong_hash,
+            promotion(
+                "power-scheme-v1",
+                stage,
+                "passed",
+                "promotion-simulation",
+                None,
+            ),
+            mismatched,
+        ),
+        PromotionBlockReason::EvidenceIncomplete,
+    );
 }
 
 #[test]
@@ -410,6 +506,55 @@ fn d06_failure_permanently_blocks_that_version_and_correction_restarts_at_simula
 }
 
 #[test]
+fn malformed_failure_evidence_cannot_poison_an_exact_operation_version() {
+    let mut policy = policy();
+    let malformed_failure = ExactStageEvidence::new(
+        id("power-scheme-v1"),
+        id(BUILD_ID),
+        PromotionStage::DeterministicSimulation,
+        vec![ExactEvidenceIdentity::new(
+            "different-evidence",
+            format!("sha256:{}", "f".repeat(64)),
+        )],
+        true,
+        true,
+        true,
+        RestartEvidence::NotRequired,
+        true,
+        true,
+        vec![id("hardware-observed-1")],
+        vec![id("coverage-gap-unobserved-hardware")],
+    );
+    assert_blocked(
+        evaluate(
+            &mut policy,
+            promotion(
+                "power-scheme-v1",
+                PromotionStage::DeterministicSimulation,
+                "failed",
+                "malformed-failure",
+                None,
+            ),
+            malformed_failure,
+        ),
+        PromotionBlockReason::EvidenceIncomplete,
+    );
+
+    let valid = evaluate(
+        &mut policy,
+        promotion(
+            "power-scheme-v1",
+            PromotionStage::DeterministicSimulation,
+            "passed",
+            "valid-after-rejected-failure",
+            None,
+        ),
+        complete_cycle("power-scheme-v1", PromotionStage::DeterministicSimulation),
+    );
+    assert!(matches!(valid, PromotionDecision::Accepted { .. }));
+}
+
+#[test]
 fn non_pass_verdicts_never_authorize_promotion() {
     for (verdict, reason) in [
         ("pending", PromotionBlockReason::PreviousStageNotPassed),
@@ -461,7 +606,7 @@ fn d08_revocation_fails_closed_and_has_no_remote_mutation_authority() {
             .verify_revocation(revocation("power-scheme-v1", "unsigned"))
             .is_err()
     );
-    assert!(policy.can_apply(&id("power-scheme-v1")));
+    assert!(!policy.new_applications_blocked(&id("power-scheme-v1")));
 
     let disposition = policy
         .verify_revocation(revocation("power-scheme-v1", "valid-signature"))
@@ -471,9 +616,9 @@ fn d08_revocation_fails_closed_and_has_no_remote_mutation_authority() {
     assert!(disposition.local_recovery_available());
     assert!(!disposition.authorizes_remote_rollback());
     assert!(!disposition.authorizes_remote_execution());
-    assert!(!policy.can_apply(&id("power-scheme-v1")));
+    assert!(policy.new_applications_blocked(&id("power-scheme-v1")));
     assert!(policy.local_recovery_available(&id("power-scheme-v1")));
-    assert!(policy.can_apply(&id("power-scheme-v2")));
+    assert!(!policy.new_applications_blocked(&id("power-scheme-v2")));
 
     assert_blocked(
         evaluate(
@@ -566,29 +711,46 @@ fn d07_diagnostics_are_local_redacted_preview_first_and_never_auto_uploaded() {
 #[test]
 fn d35_every_projection_retains_coverage_gaps_and_never_claims_universal_support() {
     let mut policy = policy();
-    let decision = evaluate(
-        &mut policy,
-        promotion(
-            "power-scheme-v1",
+    for (stage, promotion_id, previous) in [
+        (
             PromotionStage::DeterministicSimulation,
-            "passed",
-            "promotion-simulation",
+            "coverage-simulation",
             None,
         ),
-        complete_cycle("power-scheme-v1", PromotionStage::DeterministicSimulation),
-    );
-    let PromotionDecision::Accepted { promotion, .. } = decision else {
-        panic!("complete simulation should be accepted")
-    };
-    assert_eq!(
-        promotion
-            .coverage_gaps()
-            .iter()
-            .map(|identifier| identifier.as_str())
-            .collect::<Vec<_>>(),
-        ["coverage-gap-unobserved-hardware"]
-    );
-    assert!(!promotion.claims_universal_support());
+        (
+            PromotionStage::CleanWindowsVm,
+            "coverage-vm",
+            Some("coverage-simulation"),
+        ),
+        (
+            PromotionStage::OwnerPc,
+            "coverage-owner",
+            Some("coverage-vm"),
+        ),
+        (
+            PromotionStage::FriendsPc,
+            "coverage-friends",
+            Some("coverage-owner"),
+        ),
+    ] {
+        let decision = evaluate(
+            &mut policy,
+            promotion("power-scheme-v1", stage, "passed", promotion_id, previous),
+            complete_cycle("power-scheme-v1", stage),
+        );
+        let PromotionDecision::Accepted { promotion, .. } = decision else {
+            panic!("complete stage should be accepted: {decision:?}")
+        };
+        assert_eq!(
+            promotion
+                .coverage_gaps()
+                .iter()
+                .map(|identifier| identifier.as_str())
+                .collect::<Vec<_>>(),
+            ["coverage-gap-unobserved-hardware"]
+        );
+        assert!(!promotion.claims_universal_support());
+    }
 }
 
 proptest! {
@@ -638,5 +800,26 @@ proptest! {
                 PromotionDecision::Blocked(_) => {}
             }
         }
+    }
+
+    #[test]
+    fn arbitrary_sensitive_values_never_enter_redacted_preview(
+        machine_suffix in "[A-Za-z0-9]{1,24}",
+        secret_suffix in "[A-Za-z0-9]{1,24}",
+    ) {
+        let raw_machine = format!("RAW-MACHINE-{machine_suffix}");
+        let raw_secret = format!("RAW-SECRET-{secret_suffix}");
+        let journal = LocalDiagnosticJournal::new(
+            diagnostic_document(),
+            vec![raw_machine.clone()],
+            vec![raw_secret.clone()],
+        );
+        let preview = RedactedDiagnosticPolicy
+            .project_redacted(&journal)
+            .expect("raw fields remain outside the redacted projection");
+        let serialized = serde_json::to_string(preview.transport()).expect("serialize preview");
+        prop_assert!(!serialized.contains(&raw_machine));
+        prop_assert!(!serialized.contains(&raw_secret));
+        prop_assert!(!preview.has_automatic_transport());
     }
 }
