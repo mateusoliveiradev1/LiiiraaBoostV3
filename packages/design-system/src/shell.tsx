@@ -2,7 +2,17 @@ import { Activity, Bell, Minus, PanelRight, Search, ShieldCheck, Square, X } fro
 import type { ReactNode } from 'react';
 import { Button, Toolbar } from 'react-aria-components';
 
-import { LbButton, LbDialog, LbIconButton, LbSearchField, LbTextField } from './primitives.tsx';
+import {
+  LbButton,
+  LbDetailRow,
+  LbDialog,
+  LbDisclosure,
+  LbIconButton,
+  LbPanel,
+  LbRowList,
+  LbSearchField,
+  LbTextField,
+} from './primitives.tsx';
 import { QualityMark, RiskClass, ScenarioMarker, StatusSignal } from './evidence.tsx';
 import type { EvidenceLocale, OperationalState, RiskLevel } from './evidence.tsx';
 import { ProductLockup } from './product-lockup.tsx';
@@ -676,3 +686,560 @@ export const OperationalFailure = ({
     {recover}
   </section>
 );
+
+type TransactionalLocale = EvidenceLocale;
+
+const TRANSACTIONAL_COPY = Object.freeze({
+  en: Object.freeze({
+    approval: 'Approval',
+    approvalInvalid: 'Review required',
+    approvalValid: 'Approval is valid',
+    blocked: 'Blocked',
+    cancel: 'Cancel',
+    checkpoint: 'Checkpoint',
+    completed: 'Completed',
+    completedAt: 'Completed at',
+    confirmCheckpoint: 'Confirm checkpoint restoration',
+    confirmOperation: 'Confirm operation restoration',
+    confirmPlan: 'Confirm full-plan restoration',
+    current: 'Current',
+    diagnosticIdentity: 'Diagnostic / export identity',
+    evidenceBlocked: 'Evidence blocks this revision',
+    evidenceCurrent: 'Evidence is current',
+    evidenceFingerprint: 'Evidence fingerprint',
+    evidenceStale: 'Evidence is stale',
+    highestRisk: 'Highest risk',
+    journalCorrelation: 'Journal correlation',
+    observed: 'Observed',
+    operationCount: 'Operation count',
+    operationVersion: 'Operation version',
+    pending: 'Pending',
+    planRevision: 'Plan revision',
+    prior: 'Prior',
+    protectedState: 'Protected prior state',
+    receipt: 'Verified receipt',
+    receiptId: 'Receipt ID',
+    recovery: 'Recovery readiness',
+    recoveryMethod: 'Recovery method',
+    recoveryNotReady: 'Recovery is not ready',
+    recoveryReady: 'Recovery is ready',
+    recoveryTargets: 'Recovery targets',
+    requestedApplied: 'Requested / Applied',
+    requestedState: 'Requested state',
+    observedState: 'Observed state',
+    priorState: 'Prior state',
+    restoreCheckpoint: 'Restore checkpoint',
+    restoreOperation: 'Restore this operation',
+    restorePlan: 'Restore full plan',
+    revisionId: 'Revision ID',
+    startedAt: 'Started at',
+    stateConflict: 'The observed state conflicts with the protected transaction.',
+    stateDrift: 'The observed state differs from the expected prior state.',
+    stateTriplet: 'Protected state comparison',
+    technicalDetails: 'View technical details',
+    timeline: 'Execution timeline',
+    timestamp: 'Timestamp',
+    transactionId: 'Transaction ID',
+  }),
+  'pt-BR': Object.freeze({
+    approval: 'Aprovação',
+    approvalInvalid: 'Nova revisão necessária',
+    approvalValid: 'A aprovação é válida',
+    blocked: 'Bloqueado',
+    cancel: 'Cancelar',
+    checkpoint: 'Ponto de recuperação',
+    completed: 'Concluído',
+    completedAt: 'Concluído em',
+    confirmCheckpoint: 'Confirmar restauração do ponto',
+    confirmOperation: 'Confirmar restauração da operação',
+    confirmPlan: 'Confirmar restauração do plano completo',
+    current: 'Atual',
+    diagnosticIdentity: 'Identidade do diagnóstico / exportação',
+    evidenceBlocked: 'As evidências bloqueiam esta revisão',
+    evidenceCurrent: 'As evidências estão atuais',
+    evidenceFingerprint: 'Impressão digital das evidências',
+    evidenceStale: 'As evidências estão desatualizadas',
+    highestRisk: 'Maior risco',
+    journalCorrelation: 'Correlação do diário',
+    observed: 'Observado',
+    operationCount: 'Quantidade de operações',
+    operationVersion: 'Versão da operação',
+    pending: 'Pendente',
+    planRevision: 'Revisão do plano',
+    prior: 'Anterior',
+    protectedState: 'Estado anterior protegido',
+    receipt: 'Comprovante verificado',
+    receiptId: 'ID do comprovante',
+    recovery: 'Prontidão de recuperação',
+    recoveryMethod: 'Método de recuperação',
+    recoveryNotReady: 'A recuperação não está pronta',
+    recoveryReady: 'A recuperação está pronta',
+    recoveryTargets: 'Destinos de recuperação',
+    requestedApplied: 'Solicitado / Aplicado',
+    requestedState: 'Estado solicitado',
+    observedState: 'Estado observado',
+    priorState: 'Estado anterior',
+    restoreCheckpoint: 'Restaurar ponto de recuperação',
+    restoreOperation: 'Restaurar esta operação',
+    restorePlan: 'Restaurar plano completo',
+    revisionId: 'ID da revisão',
+    startedAt: 'Iniciado em',
+    stateConflict: 'O estado observado conflita com a transação protegida.',
+    stateDrift: 'O estado observado difere do estado anterior esperado.',
+    stateTriplet: 'Comparação de estados protegidos',
+    technicalDetails: 'Ver detalhes técnicos',
+    timeline: 'Linha do tempo da execução',
+    timestamp: 'Horário',
+    transactionId: 'ID da transação',
+  }),
+});
+
+const transactionalCopy = (locale: TransactionalLocale | undefined) =>
+  locale === 'pt-BR' ? TRANSACTIONAL_COPY['pt-BR'] : TRANSACTIONAL_COPY.en;
+
+export type PlanEvidenceState = 'current' | 'stale' | 'blocked';
+
+export interface PlanRevisionSummaryProps {
+  readonly action?: ReactNode;
+  readonly approvalValid: boolean;
+  readonly evidenceFingerprint: string;
+  readonly evidenceState: PlanEvidenceState;
+  readonly extremeExplanation?: string;
+  readonly highestRisk: RiskLevel;
+  readonly locale?: TransactionalLocale;
+  readonly operationCount: number;
+  readonly recoveryReady: boolean;
+  readonly revisionId: string;
+}
+
+const EVIDENCE_SIGNAL = Object.freeze({
+  blocked: 'critical',
+  current: 'success',
+  stale: 'stale',
+} satisfies Record<PlanEvidenceState, 'critical' | 'stale' | 'success'>);
+
+export const PlanRevisionSummary = ({
+  action,
+  approvalValid,
+  evidenceFingerprint,
+  evidenceState,
+  extremeExplanation,
+  highestRisk,
+  locale,
+  operationCount,
+  recoveryReady,
+  revisionId,
+}: PlanRevisionSummaryProps) => {
+  const copy = transactionalCopy(locale);
+  const evidenceDetail =
+    evidenceState === 'current'
+      ? copy.evidenceCurrent
+      : evidenceState === 'stale'
+        ? copy.evidenceStale
+        : copy.evidenceBlocked;
+
+  return (
+    <LbPanel label={copy.planRevision} tone="focal">
+      <div className="lb-transaction-heading">
+        <ProductIcon aria-hidden="true" name="list" size={20} weight="duotone" />
+        <h2>{copy.planRevision}</h2>
+      </div>
+      <LbRowList label={copy.planRevision}>
+        <LbDetailRow
+          label={copy.revisionId}
+          value={<code className="lb-transaction-exact">{revisionId}</code>}
+        />
+        <LbDetailRow
+          detail={
+            <StatusSignal
+              detail={evidenceDetail}
+              state={EVIDENCE_SIGNAL[evidenceState]}
+              {...(locale === undefined ? {} : { locale })}
+            />
+          }
+          label={copy.evidenceFingerprint}
+          value={<code className="lb-transaction-exact">{evidenceFingerprint}</code>}
+        />
+        <LbDetailRow label={copy.highestRisk} value={<RiskClass level={highestRisk} />} />
+        <LbDetailRow label={copy.operationCount} value={operationCount.toLocaleString(locale)} />
+        <LbDetailRow
+          label={copy.recovery}
+          value={
+            <StatusSignal
+              detail={recoveryReady ? copy.recoveryReady : copy.recoveryNotReady}
+              state={recoveryReady ? 'success' : 'critical'}
+              {...(locale === undefined ? {} : { locale })}
+            />
+          }
+        />
+        <LbDetailRow
+          label={copy.approval}
+          value={
+            <StatusSignal
+              detail={approvalValid ? copy.approvalValid : copy.approvalInvalid}
+              state={approvalValid ? 'success' : 'critical'}
+              {...(locale === undefined ? {} : { locale })}
+            />
+          }
+        />
+      </LbRowList>
+      {highestRisk === 'extreme' ? (
+        <StatusSignal
+          detail={
+            extremeExplanation ??
+            (locale === 'pt-BR'
+              ? 'Operações Extremas ficam visíveis somente para explicação.'
+              : 'Extreme operations remain visible for explanation only.')
+          }
+          state="critical"
+          {...(locale === undefined ? {} : { locale })}
+        />
+      ) : (
+        action
+      )}
+    </LbPanel>
+  );
+};
+
+export type ExecutionStageState = 'complete' | 'current' | 'pending';
+
+export interface ExecutionTimelineStage {
+  readonly detail?: string;
+  readonly id: string;
+  readonly label: string;
+  readonly state: ExecutionStageState;
+  readonly timestamp?: string;
+}
+
+export interface ExecutionTimelineProps {
+  readonly currentStageId: string;
+  readonly label?: string;
+  readonly locale?: TransactionalLocale;
+  readonly stages: readonly ExecutionTimelineStage[];
+}
+
+const TIMELINE_PRESENTATION = Object.freeze({
+  complete: Object.freeze({ icon: 'check' as const, pattern: 'solid' }),
+  current: Object.freeze({ icon: 'activity' as const, pattern: 'double' }),
+  pending: Object.freeze({ icon: 'timer' as const, pattern: 'dotted' }),
+});
+
+export const ExecutionTimeline = ({
+  currentStageId,
+  label,
+  locale,
+  stages,
+}: ExecutionTimelineProps) => {
+  const copy = transactionalCopy(locale);
+  const currentStages = stages.filter(
+    (stage) => stage.id === currentStageId && stage.state === 'current',
+  );
+  if (currentStages.length !== 1 || stages.filter((stage) => stage.state === 'current').length !== 1) {
+    throw new Error('ExecutionTimeline requires exactly one matching current stage.');
+  }
+
+  const stateLabels = {
+    complete: copy.completed,
+    current: copy.current,
+    pending: copy.pending,
+  } satisfies Record<ExecutionStageState, string>;
+
+  return (
+    <LbPanel label={label ?? copy.timeline}>
+      <div className="lb-transaction-heading">
+        <ProductIcon aria-hidden="true" name="activity" size={20} weight="duotone" />
+        <h2>{label ?? copy.timeline}</h2>
+      </div>
+      <ol className="lb-execution-timeline">
+        {stages.map((stage) => {
+          const presentation = TIMELINE_PRESENTATION[stage.state];
+          return (
+            <li
+              aria-current={stage.id === currentStageId ? 'step' : undefined}
+              className="lb-execution-stage"
+              data-pattern={presentation.pattern}
+              data-state={stage.state}
+              key={stage.id}
+            >
+              <ProductIcon
+                aria-hidden="true"
+                className="lb-execution-stage-icon"
+                name={presentation.icon}
+                size={20}
+                weight="duotone"
+              />
+              <div>
+                <strong>{stage.label}</strong>
+                <span className="lb-execution-stage-state">{stateLabels[stage.state]}</span>
+                {stage.detail ? <p>{stage.detail}</p> : null}
+                {stage.timestamp ? (
+                  <span className="lb-transaction-time">
+                    <span>{copy.timestamp}</span>
+                    <time dateTime={stage.timestamp}>{stage.timestamp}</time>
+                  </span>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </LbPanel>
+  );
+};
+
+export interface RecoveryTarget {
+  readonly blockedReason?: string;
+  readonly detail: string;
+  readonly id: string;
+  readonly label: string;
+  readonly onRestore: () => void;
+  readonly protectedState: string;
+}
+
+export interface RecoveryTargetListProps {
+  readonly checkpoint: RecoveryTarget;
+  readonly locale?: TransactionalLocale;
+  readonly operation: RecoveryTarget;
+  readonly plan: RecoveryTarget;
+}
+
+type RecoveryTargetKind = 'operation' | 'plan' | 'checkpoint';
+
+const RecoveryTargetAction = ({
+  kind,
+  locale,
+  target,
+}: {
+  readonly kind: RecoveryTargetKind;
+  readonly locale?: TransactionalLocale;
+  readonly target: RecoveryTarget;
+}) => {
+  const copy = transactionalCopy(locale);
+  const blockerId = `lb-recovery-${kind}-${target.id}-blocker`;
+  const actionLabel =
+    kind === 'operation'
+      ? copy.restoreOperation
+      : kind === 'plan'
+        ? copy.restorePlan
+        : copy.restoreCheckpoint;
+  const confirmationLabel =
+    kind === 'operation'
+      ? copy.confirmOperation
+      : kind === 'plan'
+        ? copy.confirmPlan
+        : copy.confirmCheckpoint;
+
+  return (
+    <li className="lb-recovery-target" data-kind={kind}>
+      <div>
+        <h3>{target.label}</h3>
+        <p>{target.detail}</p>
+        <span className="lb-transaction-exact-pair">
+          <span>{copy.protectedState}</span>
+          <code>{target.protectedState}</code>
+        </span>
+      </div>
+      {target.blockedReason ? (
+        <>
+          <Button
+            aria-describedby={blockerId}
+            className="lb-button"
+            data-lb-control
+            data-lb-variant="secondary"
+            isDisabled
+            type="button"
+          >
+            {actionLabel}
+          </Button>
+          <p className="lb-recovery-blocker" id={blockerId}>
+            <ProductIcon aria-hidden="true" name="warning" size={16} weight="duotone" />
+            <span>{target.blockedReason}</span>
+          </p>
+        </>
+      ) : (
+        <LbDialog
+          description={`${target.detail} ${copy.protectedState}: ${target.protectedState}`}
+          title={`${actionLabel}: ${target.label}`}
+          trigger={<LbButton>{actionLabel}</LbButton>}
+        >
+          <div className="lb-recovery-confirmation">
+            <span className="lb-transaction-exact-pair">
+              <span>{copy.protectedState}</span>
+              <code>{target.protectedState}</code>
+            </span>
+            <footer className="lb-dialog-actions">
+              <Button className="lb-button" data-lb-control slot="close" type="button">
+                {copy.cancel}
+              </Button>
+              <Button
+                className="lb-button"
+                data-lb-control
+                data-lb-variant="destructive"
+                onPress={target.onRestore}
+                slot="close"
+                type="button"
+              >
+                {confirmationLabel}
+              </Button>
+            </footer>
+          </div>
+        </LbDialog>
+      )}
+    </li>
+  );
+};
+
+export const RecoveryTargetList = ({
+  checkpoint,
+  locale,
+  operation,
+  plan,
+}: RecoveryTargetListProps) => {
+  if (new Set([operation.id, plan.id, checkpoint.id]).size !== 3) {
+    throw new Error('RecoveryTargetList requires three distinct target IDs.');
+  }
+  const copy = transactionalCopy(locale);
+
+  return (
+    <LbPanel label={copy.recoveryTargets}>
+      <div className="lb-transaction-heading">
+        <ProductIcon aria-hidden="true" name="recovery" size={20} weight="duotone" />
+        <h2>{copy.recoveryTargets}</h2>
+      </div>
+      <ul className="lb-recovery-target-list">
+        <RecoveryTargetAction
+          kind="operation"
+          target={operation}
+          {...(locale === undefined ? {} : { locale })}
+        />
+        <RecoveryTargetAction
+          kind="plan"
+          target={plan}
+          {...(locale === undefined ? {} : { locale })}
+        />
+        <RecoveryTargetAction
+          kind="checkpoint"
+          target={checkpoint}
+          {...(locale === undefined ? {} : { locale })}
+        />
+      </ul>
+    </LbPanel>
+  );
+};
+
+export interface StateTripletDiffProps {
+  readonly locale?: TransactionalLocale;
+  readonly observed: string;
+  readonly prior: string;
+  readonly requestedApplied: string;
+  readonly state: 'drift' | 'conflict';
+}
+
+export const StateTripletDiff = ({
+  locale,
+  observed,
+  prior,
+  requestedApplied,
+  state,
+}: StateTripletDiffProps) => {
+  const copy = transactionalCopy(locale);
+
+  return (
+    <LbPanel label={copy.stateTriplet} tone="focal">
+      <div className="lb-transaction-heading">
+        <ProductIcon aria-hidden="true" name="arrowsMerge" size={20} weight="duotone" />
+        <h2>{copy.stateTriplet}</h2>
+      </div>
+      <StatusSignal
+        detail={state === 'conflict' ? copy.stateConflict : copy.stateDrift}
+        state={state === 'conflict' ? 'critical' : 'warning'}
+        {...(locale === undefined ? {} : { locale })}
+      />
+      <dl className="lb-state-triplet" data-pattern={state === 'conflict' ? 'double' : 'dashed'}>
+        <div>
+          <dt>{copy.prior}</dt>
+          <dd>{prior}</dd>
+        </div>
+        <div>
+          <dt>{copy.requestedApplied}</dt>
+          <dd>{requestedApplied}</dd>
+        </div>
+        <div>
+          <dt>{copy.observed}</dt>
+          <dd>{observed}</dd>
+        </div>
+      </dl>
+    </LbPanel>
+  );
+};
+
+export interface VerifiedReceiptTechnicalDetails {
+  readonly completedAt: string;
+  readonly diagnosticIdentity: string;
+  readonly journalCorrelation: string;
+  readonly observedState: string;
+  readonly operationVersion: string;
+  readonly priorState: string;
+  readonly recoveryMethod: string;
+  readonly requestedState: string;
+  readonly startedAt: string;
+  readonly transactionId: string;
+}
+
+export interface VerifiedReceiptDetailsProps {
+  readonly details: VerifiedReceiptTechnicalDetails;
+  readonly locale?: TransactionalLocale;
+  readonly receiptId: string;
+  readonly summary: string;
+  readonly verification: string;
+}
+
+export const VerifiedReceiptDetails = ({
+  details,
+  locale,
+  receiptId,
+  summary,
+  verification,
+}: VerifiedReceiptDetailsProps) => {
+  const copy = transactionalCopy(locale);
+  const fields = [
+    [copy.receiptId, receiptId],
+    [copy.transactionId, details.transactionId],
+    [copy.operationVersion, details.operationVersion],
+    [copy.priorState, details.priorState],
+    [copy.requestedState, details.requestedState],
+    [copy.observedState, details.observedState],
+    [copy.recoveryMethod, details.recoveryMethod],
+    [copy.journalCorrelation, details.journalCorrelation],
+    [copy.startedAt, details.startedAt],
+    [copy.completedAt, details.completedAt],
+    [copy.diagnosticIdentity, details.diagnosticIdentity],
+  ] as const;
+
+  return (
+    <LbPanel label={copy.receipt}>
+      <div className="lb-transaction-heading">
+        <ProductIcon aria-hidden="true" name="receipt" size={20} weight="duotone" />
+        <h2>{copy.receipt}</h2>
+      </div>
+      <p className="lb-receipt-summary">{summary}</p>
+      <StatusSignal
+        detail={verification}
+        state="success"
+        {...(locale === undefined ? {} : { locale })}
+      />
+      <LbDisclosure label={copy.technicalDetails}>
+        <dl className="lb-receipt-details" data-immutable="true">
+          {fields.map(([fieldLabel, value]) => (
+            <div key={fieldLabel}>
+              <dt>{fieldLabel}</dt>
+              <dd>
+                <code className="lb-transaction-exact">{value}</code>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </LbDisclosure>
+    </LbPanel>
+  );
+};
