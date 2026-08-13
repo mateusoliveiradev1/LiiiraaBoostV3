@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-22-PLAN.md
-last_updated: "2026-08-13T07:11:13.189Z"
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-08-13T07:31:49.870Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 218
+  completed_plans: 219
   percent: 40
 ---
 
@@ -246,6 +246,7 @@ _Updated after plan completion_
 | Phase 06 P02 | 9min | 1 tasks | 7 files |
 | Phase 06 P04 | 6 min | 3 tasks | 2 files |
 | Phase 06 P22 | 19 min | 3 tasks | 7 files |
+| Phase 06 P03 | 9min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -772,6 +773,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Keep Cargo manifests and Cargo.lock unchanged until Plan 06-13 consumes the approved identity. — Separates legitimacy approval from installation and preserves pre-install evidence.
 - [Phase 06]: Authorize Phase 6 UI implementation only from exact frozen subject and independently produced checker-report bytes. — Six canonical PASS verdicts, disposed findings, exact SHA-256 bindings, and a distinct strictly later human acknowledgement prevent stale or fabricated design authority.
 - [Phase 06]: Keep the frozen UI review subject immutable after independent review. — Promotion and ordinary checks rederive the live substantive UI-SPEC in memory and byte-compare it so stale evidence cannot authorize drift.
+- [Phase 06]: Renderer intent supplies only operation selection and a non-Extreme risk ceiling; native policies own evidence, compatibility, risk, approval, and success authority.
+- [Phase 06]: Generated plan and recovery authority is immutable through private-field wrappers and read-only transport access.
+- [Phase 06]: Prepared transaction identity and exact prior state are required at privileged effect boundaries while local recovery remains independent of entitlement.
 
 ### Pending Todos
 
@@ -822,6 +826,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T07:10:46.215Z
-Stopped at: Completed 06-22-PLAN.md
+Last session: 2026-08-13T07:31:49.864Z
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
