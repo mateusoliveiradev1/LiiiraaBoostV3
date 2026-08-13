@@ -93,6 +93,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 2 - Missing Critical] Enforced external Cargo dependency purity**
+
 - **Found during:** Task 1 (Register plan-engine ownership and workspace identity)
 - **Issue:** The existing Cargo architecture adapter modeled only workspace-to-workspace edges, so adding registry dependencies such as `tauri`, `windows`, or `windows-service` to the pure domain crate would not fail the blocking threat mitigation.
 - **Fix:** Added a focused live-metadata allowlist for `liiiraa-plan-engine` and RED-then-GREEN mutation coverage for fixture, Tauri, Windows, service, and feature-shell dependencies. The allowlist also enforces exact version requirements and the dev-only property-test class.
