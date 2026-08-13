@@ -206,6 +206,9 @@ impl ObservationFirstReconciliationPolicy {
         &self,
         input: ReconcileInput<'_>,
     ) -> PlanEngineResult<ReconcileDecision> {
+        if input.operation != ReconcileOperation::Apply {
+            return Err(invalid_reconcile_input(input.operation_version_id));
+        }
         self.reconcile(input)
     }
 
@@ -213,6 +216,9 @@ impl ObservationFirstReconciliationPolicy {
         &self,
         input: ReconcileInput<'_>,
     ) -> PlanEngineResult<ReconcileDecision> {
+        if input.operation != ReconcileOperation::Restore {
+            return Err(invalid_reconcile_input(input.operation_version_id));
+        }
         self.reconcile(input)
     }
 
@@ -230,14 +236,60 @@ impl ObservationFirstReconciliationPolicy {
             ));
         }
 
+        let exact_requested_state = match choice {
+            GuidedRecoveryChoice::KeepCurrentState => evidence.exact_observed_state.clone(),
+            GuidedRecoveryChoice::RestoreExactPriorState => match evidence.operation {
+                ReconcileOperation::Apply => evidence.exact_prior_state.clone(),
+                ReconcileOperation::Restore => evidence.exact_requested_state.clone(),
+            },
+            GuidedRecoveryChoice::ReapplyAfterFreshAdmission => {
+                evidence.exact_requested_state.clone()
+            }
+        };
+
         Ok(ConflictResolutionIntent {
             transaction_id,
             parent_transaction_id: evidence.transaction_id.clone(),
             operation_version_id: evidence.operation_version_id.clone(),
             choice,
             exact_prior_state: evidence.exact_observed_state.clone(),
-            exact_requested_state: evidence.exact_observed_state.clone(),
+            exact_requested_state,
         })
+    }
+}
+
+fn invalid_reconcile_input(operation_version_id: &TransactionIdentifier) -> PlanEngineError {
+    PlanEngineError::new(
+        PlanEngineErrorCode::InvalidGeneratedTransport,
+        Some(operation_version_id.clone()),
+    )
+}
+
+fn exact_known_states_match(
+    left: &ExactOperationState,
+    right: &ExactOperationState,
+) -> Option<bool> {
+    match (left, right) {
+        (
+            ExactOperationState::ExactPowerSchemeState(left),
+            ExactOperationState::ExactPowerSchemeState(right),
+        ) => Some(
+            left.scheme_id == right.scheme_id
+                && left.canonical_state_hash == right.canonical_state_hash,
+        ),
+        _ => None,
+    }
+}
+
+fn evidence_from(input: ReconcileInput<'_>) -> ReconcileEvidence {
+    ReconcileEvidence {
+        transaction_id: input.transaction_id.clone(),
+        operation_version_id: input.operation_version_id.clone(),
+        operation: input.operation,
+        dispatch: input.dispatch,
+        exact_prior_state: input.exact_prior_state.clone(),
+        exact_requested_state: input.exact_requested_state.clone(),
+        exact_observed_state: input.exact_observed_state.clone(),
     }
 }
 
@@ -253,16 +305,35 @@ pub trait ReconciliationPolicy {
 
 impl ReconciliationPolicy for ObservationFirstReconciliationPolicy {
     fn reconcile(&self, input: ReconcileInput<'_>) -> PlanEngineResult<ReconcileDecision> {
-        let evidence = ReconcileEvidence {
-            transaction_id: input.transaction_id.clone(),
-            operation_version_id: input.operation_version_id.clone(),
-            operation: input.operation,
-            dispatch: input.dispatch,
-            exact_prior_state: input.exact_prior_state.clone(),
-            exact_requested_state: input.exact_requested_state.clone(),
-            exact_observed_state: input.exact_observed_state.clone(),
+        let observed_is_requested =
+            exact_known_states_match(input.exact_observed_state, input.exact_requested_state);
+        let observed_is_prior =
+            exact_known_states_match(input.exact_observed_state, input.exact_prior_state);
+        let evidence = evidence_from(input);
+
+        let decision = match (observed_is_requested, observed_is_prior, evidence.operation) {
+            (None, _, _) | (_, None, _) => ReconcileDecision::UnknownBlockMutations(evidence),
+            (Some(true), _, ReconcileOperation::Apply) => {
+                ReconcileDecision::AppliedNeedsReceipt(evidence)
+            }
+            (Some(true), _, ReconcileOperation::Restore) => {
+                ReconcileDecision::RestoredNeedsReceipt(evidence)
+            }
+            (Some(false), Some(true), ReconcileOperation::Apply) => {
+                ReconcileDecision::NotAppliedDoNotRetry(evidence)
+            }
+            (Some(false), Some(true), ReconcileOperation::Restore) => {
+                ReconcileDecision::NotRestoredDoNotRetry(evidence)
+            }
+            (Some(false), Some(false), ReconcileOperation::Apply) => {
+                ReconcileDecision::DriftRequiresUserChoice(evidence)
+            }
+            (Some(false), Some(false), ReconcileOperation::Restore) => {
+                ReconcileDecision::ConflictRequiresUserChoice(evidence)
+            }
         };
-        Ok(ReconcileDecision::UnknownBlockMutations(evidence))
+
+        Ok(decision)
     }
 
     fn authorize_local_recovery(
