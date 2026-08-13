@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-13T18:11:00.000Z",
+  "operationVersion": "managed-power-scheme-v1",
+  "immutableBuild": {
+    "id": "phase6-plan20-build",
+    "commit": "a334a68f037fa198f9df5fc5228a3ca7fda0d64b",
+    "artifact": {
+      "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+      "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+    }
+  },
+  "promotionStage": "deterministic-simulation",
+  "requirementsCoverage": ["PLAN-01", "PLAN-05", "PLAN-06", "PLAN-07", "PLAN-08"],
+  "decisionCoverage": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-04",
+    "D-05",
+    "D-06",
+    "D-07",
+    "D-08",
+    "D-09",
+    "D-10",
+    "D-11",
+    "D-12",
+    "D-13",
+    "D-14",
+    "D-15",
+    "D-16",
+    "D-17",
+    "D-18",
+    "D-19",
+    "D-20",
+    "D-21",
+    "D-22",
+    "D-23",
+    "D-24",
+    "D-25",
+    "D-26",
+    "D-27",
+    "D-28",
+    "D-29",
+    "D-30",
+    "D-31",
+    "D-32",
+    "D-33",
+    "D-34",
+    "D-35"
+  ],
+  "stages": [
+    {
+      "stage": "deterministic-simulation",
+      "predecessorStage": null,
+      "runEvidence": {
+        "id": "phase6-deterministic-plan20",
+        "stage": "deterministic-simulation",
+        "evidenceKind": "deterministic",
+        "status": "PASS",
+        "operationVersion": "managed-power-scheme-v1",
+        "buildId": "phase6-plan20-build",
+        "participantId": "deterministic-test-runner",
+        "recordedAt": "2026-08-13T18:10:24.000Z",
+        "expiresAt": "2099-12-31T23:59:59.000Z",
+        "artifacts": [
+          {
+            "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+            "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+          },
+          {
+            "path": "apps/desktop/tests/browser/transactional-plans.spec.ts",
+            "sha256": "59153640041760bf7440bb24a9df2360624a7fc691855e13e64af31a5a12238f"
+          }
+        ],
+        "cycle": {
+          "prepare": "PASS",
+          "apply": "PASS",
+          "verifyApply": "PASS",
+          "restartRequired": true,
+          "restart": "PASS",
+          "restore": "PASS",
+          "verifyRestore": "PASS"
+        },
+        "journalSha256": "f31b3153a531814b2f1b56401f83de84b7ea59d1f4d029ec219d23f5e8bf14cf",
+        "receiptSha256": "023997901082791191de1dd154502315eae1a7d80b0793927ecb1e5a411b7934",
+        "security": {
+          "ipcAdversarial": "PASS",
+          "replayRejected": true,
+          "identitySpoofRejected": true,
+          "sessionSwapRejected": true
+        },
+        "faults": {
+          "diskFull": "PASS",
+          "crash": "PASS",
+          "reboot": "PASS",
+          "drift": "PASS"
+        },
+        "accessibility": {
+          "status": "PASS",
+          "seriousOrCriticalViolations": 0
+        },
+        "diagnostics": {
+          "redacted": true,
+          "previewed": true,
+          "consentBound": true,
+          "autoUpload": false,
+          "rawFieldsFound": []
+        },
+        "revocation": {
+          "signed": true,
+          "blocksNewApply": true,
+          "localRecoveryAvailable": true,
+          "remoteRollback": false,
+          "remoteExecution": false
+        },
+        "coverageGaps": [
+          "clean-windows-vm-not-run",
+          "owner-pc-not-run",
+          "friends-pc-not-run",
+          "physical-hardware-matrix-incomplete"
+        ],
+        "universalSupportClaim": false,
+        "manualOverride": false
+      },
+      "humanReview": { "status": "not-required" }
+    },
+    {
+      "stage": "clean-windows-vm",
+      "predecessorStage": "deterministic-simulation",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    },
+    {
+      "stage": "owner-pc",
+      "predecessorStage": "clean-windows-vm",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    },
+    {
+      "stage": "friends-pc",
+      "predecessorStage": "owner-pc",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    }
+  ]
+}

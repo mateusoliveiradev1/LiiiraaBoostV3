@@ -52,6 +52,7 @@
     "web:verify": "pnpm web:verify:quick && pnpm web:build && pnpm --filter @liiiraa/web-evidence exec playwright test && pnpm web:verify:phase -- --mode final",
     "phase4:verify": "node --experimental-strip-types tooling/phase4-evidence/src/evaluate.ts",
     "phase5:verify": "node tooling/phase5-evidence/run.mjs",
+    "phase6:verify": "node --experimental-strip-types tooling/phase6-evidence/src/evaluate.ts",
     "verify:quick": "pnpm --filter @liiiraa/desktop verify:quick && pnpm web:verify:quick",
     "verify": "pnpm --filter @liiiraa/desktop verify && pnpm web:verify"
   },

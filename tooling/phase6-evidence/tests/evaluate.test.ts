@@ -115,7 +115,7 @@ const runEvidence = (stage: Stage, evidenceKind: 'deterministic' | 'physical') =
     previewed: true,
     consentBound: true,
     autoUpload: false,
-    rawFieldsFound: [],
+    rawFieldsFound: [] as string[],
   },
   revocation: {
     signed: true,
