@@ -1901,14 +1901,22 @@ const AuthorityExecution = ({
           </LbButton>
         </RestartPlanner>
       ) : null}
-      <LbButton
-        aria-describedby={onCancelSafely === undefined ? 'cancel-safe-blocker' : undefined}
-        isDisabled={onCancelSafely === undefined}
-        onPress={() => onCancelSafely?.(transactionId)}
-        variant="secondary"
-      >
-        {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
-      </LbButton>
+      {onCancelSafely === undefined ? (
+        <button
+          aria-describedby="cancel-safe-blocker"
+          className="lb-button"
+          data-lb-control
+          data-lb-variant="secondary"
+          disabled
+          type="button"
+        >
+          {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
+        </button>
+      ) : (
+        <LbButton onPress={() => onCancelSafely(transactionId)} variant="secondary">
+          {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
+        </LbButton>
+      )}
       {onCancelSafely === undefined ? (
         <p id="cancel-safe-blocker">
           {localized(
@@ -2237,26 +2245,40 @@ const AuthoritativeImproveSurface = ({
                   />
                 </label>
               ) : null}
-              <LbButton
-                aria-describedby={confirmationBlocked ? 'plan-confirmation-blocker' : undefined}
-                isDisabled={confirmationBlocked}
-                onPress={() => {
-                  void authority.approve({
-                    request: {
-                      planId: plan.planId,
-                      planRevision: plan.revision,
-                      intent: 'apply',
-                      proofReference: approvalProofReference ?? 'verified-local-review',
-                    },
-                  });
-                }}
-                variant="primary"
-              >
-                {localized(
-                  { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
-                  locale,
-                )}
-              </LbButton>
+              {confirmationBlocked ? (
+                <button
+                  aria-describedby="plan-confirmation-blocker"
+                  className="lb-button"
+                  data-lb-control
+                  data-lb-variant="primary"
+                  disabled
+                  type="button"
+                >
+                  {localized(
+                    { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                    locale,
+                  )}
+                </button>
+              ) : (
+                <LbButton
+                  onPress={() => {
+                    void authority.approve({
+                      request: {
+                        planId: plan.planId,
+                        planRevision: plan.revision,
+                        intent: 'apply',
+                        proofReference: approvalProofReference ?? 'verified-local-review',
+                      },
+                    });
+                  }}
+                  variant="primary"
+                >
+                  {localized(
+                    { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                    locale,
+                  )}
+                </LbButton>
+              )}
               {confirmationBlocked ? (
                 <p id="plan-confirmation-blocker">
                   {localized(
@@ -2280,25 +2302,39 @@ const AuthoritativeImproveSurface = ({
                   locale,
                 )}
               </h2>
-              <LbButton
-                aria-describedby={applyBlocked ? 'plan-apply-blocker' : undefined}
-                isDisabled={applyBlocked}
-                onPress={() => {
-                  void authority.apply({
-                    request: {
-                      planId: plan.planId,
-                      planRevision: plan.revision,
-                      approvalId: approval.approvalId,
-                    },
-                  });
-                }}
-                variant="primary"
-              >
-                {localized(
-                  { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
-                  locale,
-                )}
-              </LbButton>
+              {applyBlocked ? (
+                <button
+                  aria-describedby="plan-apply-blocker"
+                  className="lb-button"
+                  data-lb-control
+                  data-lb-variant="primary"
+                  disabled
+                  type="button"
+                >
+                  {localized(
+                    { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                    locale,
+                  )}
+                </button>
+              ) : (
+                <LbButton
+                  onPress={() => {
+                    void authority.apply({
+                      request: {
+                        planId: plan.planId,
+                        planRevision: plan.revision,
+                        approvalId: approval.approvalId,
+                      },
+                    });
+                  }}
+                  variant="primary"
+                >
+                  {localized(
+                    { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                    locale,
+                  )}
+                </LbButton>
+              )}
               {applyBlocked ? (
                 <p id="plan-apply-blocker">
                   {localized(

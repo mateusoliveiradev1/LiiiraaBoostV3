@@ -1,14 +1,26 @@
 import {
   ChangeLedger,
+  ExecutionTimeline,
   LbButton,
+  LbPanel,
   ProductIcon,
   RecoveryCheckpoint,
+  RecoveryTargetList,
   RouteHeader,
   ScenarioMarker,
+  StateTripletDiff,
+  StatusSignal,
   SystemStateLedger,
+  VerifiedReceiptDetails,
   VerificationReceipt,
 } from '@liiiraa/design-system';
-import { useState } from 'react';
+import type {
+  PlanOperationJson,
+  TransactionReceiptDocumentJson,
+  TransactionalRecoveryDocumentJson,
+} from '@liiiraa/contracts-ts';
+import type { PlanAuthority, PlanAuthoritySnapshot } from '@liiiraa/desktop-client';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { createPhaseBoundaryExplanation } from '../model/interaction-policy.js';
 import type { ShellLocale } from './calibration.js';
@@ -126,12 +138,734 @@ const nextRecoverView = (view: RecoverView): RecoverView => {
 };
 
 export interface RecoverSurfaceProps {
+  readonly authority?: PlanAuthority;
   readonly locale: ShellLocale;
+  readonly onKeepCurrentState?: (operationVersionId: string) => void;
   readonly scenarioId: string;
+  readonly validatedDocuments?: readonly TransactionalRecoveryDocumentJson[];
   readonly view?: RecoverView;
 }
 
-export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps) => {
+type JournalEventDocument = Extract<TransactionalRecoveryDocumentJson, { kind: 'journal-event' }>;
+type RecoveryCheckpointDocument = Extract<
+  TransactionalRecoveryDocumentJson,
+  { kind: 'recovery-checkpoint' }
+>;
+
+const recoveryLocalized = (
+  copy: Readonly<{ en: string; 'pt-BR': string }>,
+  locale: ShellLocale,
+): string => copy[locale];
+
+const recoveryExactState = (state: PlanOperationJson['previousValue']): string => {
+  if (state.state === 'observed') {
+    return `${state.schemeId} · ${state.canonicalStateHash}`;
+  }
+  return `${state.state}: ${state.reason}`;
+};
+
+const useRecoveryAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot =>
+  useSyncExternalStore(authority.subscribe, authority.snapshot, authority.snapshot);
+
+const latestJournalEvent = (
+  documents: readonly TransactionalRecoveryDocumentJson[],
+  transactionId: string | null,
+): JournalEventDocument | undefined =>
+  documents
+    .filter(
+      (document): document is JournalEventDocument =>
+        document.kind === 'journal-event' && document.transactionId === transactionId,
+    )
+    .toSorted((left, right) => right.sequence - left.sequence)[0];
+
+const recoveryTimeline = (snapshot: PlanAuthoritySnapshot, locale: ShellLocale) => {
+  const state = snapshot.progress?.state ?? 'queued';
+  const indexes = {
+    applying: 1,
+    'awaiting-restart': 2,
+    blocked: 2,
+    completed: 4,
+    observing: 2,
+    paused: 2,
+    preparing: 0,
+    queued: 0,
+    recovering: 3,
+    verifying: 3,
+  } as const;
+  const currentIndex = indexes[state];
+  const labels =
+    locale === 'pt-BR'
+      ? [
+          'Preparando recuperação',
+          'Restaurando estado protegido',
+          'Observando o Windows',
+          'Verificando restauração',
+          'Comprovante imutável',
+        ]
+      : [
+          'Preparing recovery',
+          'Restoring protected state',
+          'Observing Windows',
+          'Verifying restoration',
+          'Immutable receipt',
+        ];
+  return {
+    currentStageId: `recovery-stage-${String(currentIndex)}`,
+    stages: labels.map((label, index) => ({
+      id: `recovery-stage-${String(index)}`,
+      label,
+      state:
+        index < currentIndex
+          ? ('complete' as const)
+          : index === currentIndex
+            ? ('current' as const)
+            : ('pending' as const),
+      ...(index === currentIndex && snapshot.progress !== null
+        ? { detail: snapshot.progress.displayText }
+        : {}),
+    })),
+  };
+};
+
+const RecoveryReceipt = ({
+  locale,
+  receipt,
+  snapshot,
+}: {
+  readonly locale: ShellLocale;
+  readonly receipt: TransactionReceiptDocumentJson;
+  readonly snapshot: PlanAuthoritySnapshot;
+}) => (
+  <VerifiedReceiptDetails
+    details={{
+      completedAt: receipt.completedAt,
+      diagnosticIdentity: snapshot.diagnostic?.exportId ?? 'not-exported',
+      journalCorrelation: receipt.journalHeadHash,
+      observedState: recoveryExactState(receipt.exactObservedState),
+      operationVersion: receipt.operationVersionId,
+      priorState: recoveryExactState(receipt.exactPriorState),
+      recoveryMethod: receipt.recoveryMethod,
+      requestedState: recoveryExactState(receipt.exactRequestedState),
+      startedAt: snapshot.transaction?.startedAt ?? receipt.completedAt,
+      transactionId: receipt.transactionId,
+    }}
+    locale={locale}
+    receiptId={receipt.receiptId}
+    summary={receipt.humanSummary}
+    verification={recoveryLocalized(
+      {
+        en: 'Observed restoration state verified',
+        'pt-BR': 'Estado restaurado observado e verificado',
+      },
+      locale,
+    )}
+  />
+);
+
+const DiagnosticReview = ({
+  authority,
+  locale,
+  snapshot,
+}: {
+  readonly authority: PlanAuthority;
+  readonly locale: ShellLocale;
+  readonly snapshot: PlanAuthoritySnapshot;
+}) => {
+  const planId = snapshot.plan?.planId;
+  const diagnostic = snapshot.diagnostic;
+
+  return (
+    <LbPanel
+      label={recoveryLocalized(
+        { en: 'Local diagnostic review', 'pt-BR': 'Revisão local do diagnóstico' },
+        locale,
+      )}
+    >
+      <h2>
+        {recoveryLocalized(
+          { en: 'Local redaction preview', 'pt-BR': 'Prévia local de redação' },
+          locale,
+        )}
+      </h2>
+      {diagnostic === null ? (
+        planId === undefined ? (
+          <button
+            aria-describedby="diagnostic-preview-blocker"
+            className="lb-button"
+            data-lb-control
+            data-lb-variant="secondary"
+            disabled
+            type="button"
+          >
+            {recoveryLocalized(
+              {
+                en: 'Review diagnostic for export',
+                'pt-BR': 'Revisar diagnóstico para exportação',
+              },
+              locale,
+            )}
+          </button>
+        ) : (
+          <LbButton
+            onPress={() => {
+              void authority.previewDiagnostic({ request: { planId } });
+            }}
+            variant="secondary"
+          >
+            {recoveryLocalized(
+              {
+                en: 'Review diagnostic for export',
+                'pt-BR': 'Revisar diagnóstico para exportação',
+              },
+              locale,
+            )}
+          </LbButton>
+        )
+      ) : (
+        <>
+          <dl data-immutable="true">
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  { en: 'Export identity', 'pt-BR': 'Identidade da exportação' },
+                  locale,
+                )}
+              </dt>
+              <dd>
+                <code>{diagnostic.exportId}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  { en: 'Redactions applied', 'pt-BR': 'Redações aplicadas' },
+                  locale,
+                )}
+              </dt>
+              <dd>{diagnostic.redactionsApplied.join(' · ')}</dd>
+            </div>
+            <div>
+              <dt>
+                {recoveryLocalized({ en: 'Local entries', 'pt-BR': 'Eventos locais' }, locale)}
+              </dt>
+              <dd>{String(diagnostic.entries.length)}</dd>
+            </div>
+          </dl>
+          <p>
+            {recoveryLocalized(
+              {
+                en: 'The redacted file remains local until you explicitly choose a destination.',
+                'pt-BR':
+                  'O arquivo redigido permanece local até você escolher explicitamente um destino.',
+              },
+              locale,
+            )}
+          </p>
+          <LbButton
+            onPress={() => {
+              void authority.exportDiagnostic({
+                request: { planId: diagnostic.planId, exportId: diagnostic.exportId },
+              });
+            }}
+            variant="primary"
+          >
+            {recoveryLocalized(
+              { en: 'Create redacted file', 'pt-BR': 'Criar arquivo redigido' },
+              locale,
+            )}
+          </LbButton>
+        </>
+      )}
+      {planId === undefined ? (
+        <p id="diagnostic-preview-blocker">
+          {recoveryLocalized(
+            {
+              en: 'Diagnostic review requires an authoritative plan identity.',
+              'pt-BR': 'A revisão do diagnóstico exige uma identidade autorizada do plano.',
+            },
+            locale,
+          )}
+        </p>
+      ) : null}
+    </LbPanel>
+  );
+};
+
+const AuthoritativeRecoverSurface = ({
+  authority,
+  locale,
+  onKeepCurrentState,
+  validatedDocuments = [],
+  view = 'overview',
+}: RecoverSurfaceProps & Readonly<{ authority: PlanAuthority }>) => {
+  const snapshot = useRecoveryAuthoritySnapshot(authority);
+  const { plan, progress, transactionId } = snapshot;
+  const currentEvent = latestJournalEvent(validatedDocuments, transactionId);
+  const checkpoint = validatedDocuments.find(
+    (document): document is RecoveryCheckpointDocument =>
+      document.kind === 'recovery-checkpoint' && document.planId === plan?.planId,
+  );
+  const receipts = validatedDocuments.filter(
+    (document): document is TransactionReceiptDocumentJson =>
+      document.kind === 'transaction-receipt' && document.planId === plan?.planId,
+  );
+  const revocation = validatedDocuments.find(
+    (document) => document.kind === 'operation-revocation',
+  );
+  const conflict = currentEvent?.state === 'conflict' ? currentEvent : undefined;
+  const unresolved =
+    snapshot.stale ||
+    snapshot.status === 'unknown' ||
+    snapshot.status === 'error' ||
+    progress?.state === 'blocked' ||
+    progress?.state === 'paused' ||
+    progress?.state === 'recovering';
+  const operationVersionId =
+    currentEvent?.operationVersionId ??
+    (progress === null
+      ? undefined
+      : progress.kind === 'progress-snapshot'
+        ? progress.currentOperationVersionId
+        : progress.operationVersionId) ??
+    plan?.operations[0]?.operationVersionId;
+  const operation = plan?.operations.find(
+    (candidate) => candidate.operationVersionId === operationVersionId,
+  );
+  const affectedGroup = plan?.dependencyGroups.find(
+    (group) => group.dependencyGroupId === operation?.dependencyGroupId,
+  );
+  const independentOperations =
+    plan?.operations.filter(
+      (candidate) => candidate.dependencyGroupId !== affectedGroup?.dependencyGroupId,
+    ) ?? [];
+  const timeline = recoveryTimeline(snapshot, locale);
+
+  useEffect(() => {
+    if (transactionId === null) return undefined;
+    let active = true;
+    let detach = (): void => undefined;
+    void authority.reconnect(transactionId);
+    void authority.subscribeExecution({ transactionId }).then((result) => {
+      if (active && result.ok) detach = result.value;
+      else if (result.ok) result.value();
+    });
+    return () => {
+      active = false;
+      detach();
+    };
+  }, [authority, transactionId]);
+
+  const restoreBlocker =
+    plan === null
+      ? recoveryLocalized(
+          {
+            en: 'No authoritative plan identity is available.',
+            'pt-BR': 'Nenhuma identidade autorizada de plano está disponível.',
+          },
+          locale,
+        )
+      : undefined;
+  const operationBlocker =
+    restoreBlocker ??
+    (operation === undefined
+      ? recoveryLocalized(
+          {
+            en: 'No exact operation recovery target is available.',
+            'pt-BR': 'Nenhum destino exato de recuperação da operação está disponível.',
+          },
+          locale,
+        )
+      : undefined);
+  const checkpointBlocker =
+    restoreBlocker ??
+    (checkpoint === undefined
+      ? recoveryLocalized(
+          {
+            en: 'No authoritative checkpoint identity is available.',
+            'pt-BR': 'Nenhuma identidade autorizada de ponto de recuperação está disponível.',
+          },
+          locale,
+        )
+      : undefined);
+
+  return (
+    <main
+      data-authority-origin={snapshot.origin}
+      data-recover-view={view}
+      data-recovery-available="offline signed-out no-premium"
+    >
+      <RouteHeader
+        purpose={recoveryLocalized(
+          {
+            en: 'Restore only from validated local authority, with exact prior state and a new auditable transaction.',
+            'pt-BR':
+              'Restaure somente pela autoridade local validada, com estado anterior exato e uma nova transação auditável.',
+          },
+          locale,
+        )}
+        title={recoveryLocalized(
+          { en: 'Recovery Center', 'pt-BR': 'Central de Recuperação' },
+          locale,
+        )}
+      />
+
+      <section aria-labelledby="recovery-safety-heading" className="lb-transaction-layout">
+        <div>
+          <h2 id="recovery-safety-heading" tabIndex={-1}>
+            {recoveryLocalized(
+              { en: 'Current safety verdict', 'pt-BR': 'Veredito atual de segurança' },
+              locale,
+            )}
+          </h2>
+          <div
+            aria-live={unresolved && conflict === undefined ? 'assertive' : 'polite'}
+            role="status"
+          >
+            <StatusSignal
+              detail={
+                unresolved
+                  ? recoveryLocalized(
+                      {
+                        en: 'New mutations are blocked. Recovery stays available while Windows truth is observed.',
+                        'pt-BR':
+                          'Novas mutações estão bloqueadas. A recuperação permanece disponível enquanto o estado real do Windows é observado.',
+                      },
+                      locale,
+                    )
+                  : recoveryLocalized(
+                      {
+                        en: 'No unresolved recovery blocks a reviewed new transaction.',
+                        'pt-BR':
+                          'Nenhuma recuperação pendente bloqueia uma nova transação revisada.',
+                      },
+                      locale,
+                    )
+              }
+              locale={locale}
+              state={unresolved ? 'critical' : 'success'}
+            />
+          </div>
+          <h3>
+            {recoveryLocalized({ en: 'Next safe action', 'pt-BR': 'Próxima ação segura' }, locale)}
+          </h3>
+          <p>
+            {unresolved
+              ? recoveryLocalized(
+                  {
+                    en: 'Review the observed state and choose one exact recovery target.',
+                    'pt-BR': 'Revise o estado observado e escolha um destino exato de recuperação.',
+                  },
+                  locale,
+                )
+              : recoveryLocalized(
+                  {
+                    en: 'Review immutable history or prepare a local diagnostic export.',
+                    'pt-BR':
+                      'Revise o histórico imutável ou prepare uma exportação local do diagnóstico.',
+                  },
+                  locale,
+                )}
+          </p>
+        </div>
+        <aside>
+          <LbPanel
+            label={recoveryLocalized(
+              { en: 'Recovery availability', 'pt-BR': 'Disponibilidade da recuperação' },
+              locale,
+            )}
+          >
+            <p>
+              {recoveryLocalized(
+                {
+                  en: 'Available offline, signed out, and without Premium.',
+                  'pt-BR': 'Disponível offline, sem login e sem Premium.',
+                },
+                locale,
+              )}
+            </p>
+            <p>{`${recoveryLocalized({ en: 'Complementary restore', 'pt-BR': 'Restauração complementar' }, locale)}: ${checkpoint?.restorePointStatus ?? recoveryLocalized({ en: 'not reported', 'pt-BR': 'não informada' }, locale)}`}</p>
+            {revocation !== undefined ? (
+              <StatusSignal
+                detail={recoveryLocalized(
+                  {
+                    en: 'Signed revocation blocks new apply; local restoration remains enabled.',
+                    'pt-BR':
+                      'A revogação assinada bloqueia novas aplicações; a restauração local continua habilitada.',
+                  },
+                  locale,
+                )}
+                locale={locale}
+                state="warning"
+              />
+            ) : null}
+          </LbPanel>
+        </aside>
+      </section>
+
+      {progress !== null ? (
+        <ExecutionTimeline
+          currentStageId={timeline.currentStageId}
+          label={recoveryLocalized(
+            { en: 'Execution timeline', 'pt-BR': 'Linha do tempo da execução' },
+            locale,
+          )}
+          locale={locale}
+          stages={timeline.stages}
+        />
+      ) : null}
+
+      {currentEvent !== undefined && unresolved ? (
+        <LbPanel
+          label={recoveryLocalized(
+            { en: 'Affected dependency group', 'pt-BR': 'Grupo de dependência afetado' },
+            locale,
+          )}
+          tone="focal"
+        >
+          <dl>
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  { en: 'Failed operation', 'pt-BR': 'Operação com falha' },
+                  locale,
+                )}
+              </dt>
+              <dd>
+                <code>{currentEvent.operationVersionId}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  {
+                    en: 'Affected dependency closure',
+                    'pt-BR': 'Fechamento de dependências afetado',
+                  },
+                  locale,
+                )}
+              </dt>
+              <dd>
+                <code>{affectedGroup?.dependencyGroupId ?? 'not-established'}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  {
+                    en: 'Independent operations preserved',
+                    'pt-BR': 'Operações independentes preservadas',
+                  },
+                  locale,
+                )}
+              </dt>
+              <dd>
+                {independentOperations.map(({ operationVersionId: id }) => id).join(' · ') ||
+                  recoveryLocalized(
+                    { en: 'none established', 'pt-BR': 'nenhuma estabelecida' },
+                    locale,
+                  )}
+              </dd>
+            </div>
+            <div>
+              <dt>
+                {recoveryLocalized(
+                  { en: 'Rollback result', 'pt-BR': 'Resultado da reversão' },
+                  locale,
+                )}
+              </dt>
+              <dd>{currentEvent.state === 'restored' ? 'verified-restored' : 'not-verified'}</dd>
+            </div>
+          </dl>
+        </LbPanel>
+      ) : null}
+
+      {conflict !== undefined ? (
+        <section aria-labelledby="conflict-resolution-heading">
+          <h2 id="conflict-resolution-heading" tabIndex={-1}>
+            {recoveryLocalized(
+              { en: 'Conflict requires your decision', 'pt-BR': 'O conflito exige sua decisão' },
+              locale,
+            )}
+          </h2>
+          <StateTripletDiff
+            locale={locale}
+            observed={recoveryExactState(conflict.exactObservedState)}
+            prior={recoveryExactState(conflict.exactPriorState)}
+            requestedApplied={recoveryExactState(conflict.exactRequestedState)}
+            state="conflict"
+          />
+          {onKeepCurrentState === undefined ? (
+            <button
+              aria-describedby="keep-current-blocker"
+              className="lb-button"
+              data-lb-control
+              data-lb-variant="secondary"
+              disabled
+              type="button"
+            >
+              {recoveryLocalized(
+                { en: 'Keep current state', 'pt-BR': 'Manter o estado atual' },
+                locale,
+              )}
+            </button>
+          ) : (
+            <LbButton
+              onPress={() => onKeepCurrentState(conflict.operationVersionId)}
+              variant="secondary"
+            >
+              {recoveryLocalized(
+                { en: 'Keep current state', 'pt-BR': 'Manter o estado atual' },
+                locale,
+              )}
+            </LbButton>
+          )}
+          {onKeepCurrentState === undefined ? (
+            <p id="keep-current-blocker">
+              {recoveryLocalized(
+                {
+                  en: 'The current authority does not expose the audited keep-current intent.',
+                  'pt-BR':
+                    'A autoridade atual não expõe a intenção auditada de manter o estado atual.',
+                },
+                locale,
+              )}
+            </p>
+          ) : null}
+          <LbButton
+            onPress={() => {
+              if (plan !== null) {
+                void authority.restoreOperation({
+                  request: {
+                    planId: plan.planId,
+                    operationVersionId: conflict.operationVersionId,
+                  },
+                });
+              }
+            }}
+            variant="secondary"
+          >
+            {recoveryLocalized(
+              { en: 'Restore the prior state', 'pt-BR': 'Restaurar o estado anterior' },
+              locale,
+            )}
+          </LbButton>
+        </section>
+      ) : null}
+
+      <RecoveryTargetList
+        checkpoint={{
+          id: checkpoint?.checkpointId ?? 'checkpoint-unavailable',
+          label:
+            checkpoint?.checkpointId ??
+            recoveryLocalized(
+              { en: 'Checkpoint unavailable', 'pt-BR': 'Ponto de recuperação indisponível' },
+              locale,
+            ),
+          detail: recoveryLocalized(
+            {
+              en: 'Start a new checkpoint restoration transaction.',
+              'pt-BR': 'Iniciar uma nova transação de restauração do ponto de recuperação.',
+            },
+            locale,
+          ),
+          protectedState:
+            checkpoint === undefined
+              ? 'not-established'
+              : recoveryExactState(checkpoint.exactPriorState),
+          ...(checkpointBlocker === undefined ? {} : { blockedReason: checkpointBlocker }),
+          onRestore: () => {
+            if (checkpoint !== undefined) {
+              void authority.restoreCheckpoint({
+                request: { checkpointId: checkpoint.checkpointId },
+              });
+            }
+          },
+        }}
+        locale={locale}
+        operation={{
+          id: operation?.operationVersionId ?? 'operation-unavailable',
+          label:
+            operation?.purpose ??
+            recoveryLocalized(
+              { en: 'Operation unavailable', 'pt-BR': 'Operação indisponível' },
+              locale,
+            ),
+          detail: recoveryLocalized(
+            {
+              en: 'Restore only this exact operation as a new transaction.',
+              'pt-BR': 'Restaurar somente esta operação exata como uma nova transação.',
+            },
+            locale,
+          ),
+          protectedState:
+            operation === undefined
+              ? 'not-established'
+              : recoveryExactState(operation.previousValue),
+          ...(operationBlocker === undefined ? {} : { blockedReason: operationBlocker }),
+          onRestore: () => {
+            if (plan !== null && operation !== undefined) {
+              void authority.restoreOperation({
+                request: { planId: plan.planId, operationVersionId: operation.operationVersionId },
+              });
+            }
+          },
+        }}
+        plan={{
+          id: plan?.planId ?? 'plan-unavailable',
+          label:
+            plan?.planId ??
+            recoveryLocalized({ en: 'Plan unavailable', 'pt-BR': 'Plano indisponível' }, locale),
+          detail: recoveryLocalized(
+            {
+              en: 'Restore the complete plan and its listed dependency groups as a new transaction.',
+              'pt-BR':
+                'Restaurar o plano completo e seus grupos de dependência listados como uma nova transação.',
+            },
+            locale,
+          ),
+          protectedState: plan?.revisionFingerprint ?? 'not-established',
+          ...(restoreBlocker === undefined ? {} : { blockedReason: restoreBlocker }),
+          onRestore: () => {
+            if (plan !== null) void authority.restorePlan({ request: { planId: plan.planId } });
+          },
+        }}
+      />
+
+      <section aria-labelledby="recovery-history-heading">
+        <h2 id="recovery-history-heading">
+          {recoveryLocalized({ en: 'Immutable history', 'pt-BR': 'Histórico imutável' }, locale)}
+        </h2>
+        {receipts.length === 0 ? (
+          <StatusSignal
+            detail={recoveryLocalized(
+              {
+                en: 'Verified applies and restores will appear here with their receipts.',
+                'pt-BR':
+                  'Aplicações e restaurações verificadas aparecerão aqui com seus comprovantes.',
+              },
+              locale,
+            )}
+            locale={locale}
+            state="empty"
+          />
+        ) : (
+          receipts.map((receipt) => (
+            <RecoveryReceipt
+              key={receipt.receiptId}
+              locale={locale}
+              receipt={receipt}
+              snapshot={snapshot}
+            />
+          ))
+        )}
+      </section>
+
+      <DiagnosticReview authority={authority} locale={locale} snapshot={snapshot} />
+    </main>
+  );
+};
+
+const LegacyRecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps) => {
   const [internalView, setInternalView] = useState<RecoverView>('overview');
   const activeView = view ?? internalView;
   const copy = RECOVER_COPY[activeView][locale];
@@ -295,5 +1029,34 @@ export const RecoverSurface = ({ locale, scenarioId, view }: RecoverSurfaceProps
         </LbButton>
       ) : null}
     </main>
+  );
+};
+
+export const RecoverSurface = ({
+  authority,
+  locale,
+  onKeepCurrentState,
+  scenarioId,
+  validatedDocuments,
+  view,
+}: RecoverSurfaceProps) => {
+  if (authority !== undefined) {
+    return (
+      <AuthoritativeRecoverSurface
+        authority={authority}
+        locale={locale}
+        {...(onKeepCurrentState === undefined ? {} : { onKeepCurrentState })}
+        scenarioId={scenarioId}
+        {...(validatedDocuments === undefined ? {} : { validatedDocuments })}
+        {...(view === undefined ? {} : { view })}
+      />
+    );
+  }
+  return (
+    <LegacyRecoverSurface
+      locale={locale}
+      scenarioId={scenarioId}
+      {...(view === undefined ? {} : { view })}
+    />
   );
 };

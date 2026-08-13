@@ -463,7 +463,7 @@ describe('authoritative recovery workspace', () => {
     );
 
     expect(markup).toContain('Prior');
-    expect(markup).toContain('Requested / applied');
+    expect(markup).toContain('Requested / Applied');
     expect(markup).toContain('Observed');
     expect(markup).toContain('11111111-1111-4111-8111-111111111111');
     expect(markup).toContain('22222222-2222-4222-8222-222222222222');
@@ -516,7 +516,8 @@ describe('immutable receipt and diagnostic recovery evidence', () => {
 
     expect(markup).toContain('data-immutable="true"');
     expect(markup).toContain('receipt-restored-0001');
-    expect(markup).toContain('Revisar diagnóstico para exportação');
+    expect(markup).toContain('Prévia local de redação');
+    expect(markup).toContain('Criar arquivo redigido');
     expect(markup).toContain('diagnostic-redacted-0001');
     expect(markup).toContain('credentials');
     expect(markup).toContain('raw-hardware-identifiers');
