@@ -8,12 +8,14 @@ use liiiraa_contracts_rust::{
     PrivilegedBrokerRequest, TransactionalRecoveryDocument,
     validate_transactional_recovery_document,
 };
+use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
 use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
 
 use super::dedup_store::{DedupStore, FaultPoint, Reservation, ReserveRequest, StoreError};
 use super::dispatcher::DispatchContext;
+use super::windows_pipe::AuthenticatedClientToken;
 
 pub const PIPE_REJECT_REMOTE_CLIENTS: u32 = 0x0000_0008;
 pub const MAX_REPLAY_RETENTION_SECONDS: i64 = 180 * 24 * 60 * 60;
@@ -73,7 +75,8 @@ pub struct SessionTicket {
     pub session_key: Vec<u8>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BrokerEnvelope {
     pub transaction_id: String,
     pub step_id: String,
@@ -123,7 +126,6 @@ pub trait OperationDispatcher {
     ) -> Result<Value, BrokerError>;
 }
 
-#[derive(Clone)]
 struct SessionState {
     server_nonce: String,
     session_key: Vec<u8>,
@@ -132,6 +134,7 @@ struct SessionState {
     interactive_logon_sid: String,
     process_id: u32,
     process_image_hash: String,
+    client_token: Option<AuthenticatedClientToken>,
 }
 
 pub struct Broker {
@@ -166,10 +169,32 @@ impl Broker {
         })
     }
 
+    #[cfg(debug_assertions)]
     pub fn authenticate_client(
         &mut self,
         identity: &ClientIdentity,
         client_nonce: &str,
+    ) -> Result<SessionTicket, BrokerError> {
+        self.authenticate_client_inner(identity, client_nonce, None)
+    }
+
+    pub(crate) fn authenticate_client_with_token(
+        &mut self,
+        identity: &ClientIdentity,
+        client_nonce: &str,
+        token: AuthenticatedClientToken,
+    ) -> Result<SessionTicket, BrokerError> {
+        if !token.is_bound_to(identity.session_id, &identity.logon_sid) {
+            return Err(error(BrokerErrorCode::AuthenticationFailed));
+        }
+        self.authenticate_client_inner(identity, client_nonce, Some(token))
+    }
+
+    fn authenticate_client_inner(
+        &mut self,
+        identity: &ClientIdentity,
+        client_nonce: &str,
+        client_token: Option<AuthenticatedClientToken>,
     ) -> Result<SessionTicket, BrokerError> {
         if self.stopping
             || !identity.local_machine
@@ -222,6 +247,7 @@ impl Broker {
                 interactive_logon_sid: identity.logon_sid.clone(),
                 process_id: identity.process_id,
                 process_image_hash: identity.process_image_hash.clone(),
+                client_token,
             },
         );
         Ok(SessionTicket {
@@ -346,15 +372,28 @@ impl Broker {
         self.store
             .mark_unknown_after_dispatch(&envelope.transaction_id, &envelope.step_id)
             .map_err(map_store_error)?;
-        let context = DispatchContext::metadata_only(
-            &envelope.transaction_id,
-            &envelope.step_id,
-            &envelope.operation_version_id,
-            session.interactive_session_id,
-            &session.interactive_logon_sid,
-            session.process_id,
-            &session.process_image_hash,
-        );
+        let context = if let Some(token) = session.client_token.as_ref() {
+            DispatchContext::with_effect_lease(
+                &envelope.transaction_id,
+                &envelope.step_id,
+                &envelope.operation_version_id,
+                session.interactive_session_id,
+                &session.interactive_logon_sid,
+                session.process_id,
+                &session.process_image_hash,
+                token.effect_lease(),
+            )
+        } else {
+            DispatchContext::metadata_only(
+                &envelope.transaction_id,
+                &envelope.step_id,
+                &envelope.operation_version_id,
+                session.interactive_session_id,
+                &session.interactive_logon_sid,
+                session.process_id,
+                &session.process_image_hash,
+            )
+        };
         let document = dispatcher.dispatch(request, &context)?;
         if fault == FaultPoint::AfterDispatch {
             return Err(error(BrokerErrorCode::DatabaseUnavailable));
@@ -379,6 +418,11 @@ impl Broker {
 
     pub fn begin_preshutdown(&mut self) {
         self.stopping = true;
+        self.sessions.clear();
+    }
+
+    pub(crate) fn disconnect_session(&mut self, ticket: &SessionTicket) {
+        self.sessions.remove(&ticket.session_id);
     }
 
     pub fn prune_terminal_before(&mut self, cutoff: i64) -> Result<usize, BrokerError> {

@@ -5,6 +5,7 @@ use std::{
     fs,
     path::PathBuf,
     sync::atomic::{AtomicU64, Ordering},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use liiiraa_contracts_rust::PrivilegedBrokerRequest;
@@ -58,8 +59,14 @@ impl OperationDispatcher for SpyDispatcher {
 
 fn database_path(label: &str) -> PathBuf {
     let id = NEXT_DATABASE.fetch_add(1, Ordering::Relaxed);
-    let root =
-        std::env::temp_dir().join(format!("liiiraa-ipc-{label}-{}-{id}", std::process::id()));
+    let epoch = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock after epoch")
+        .as_nanos();
+    let root = std::env::temp_dir().join(format!(
+        "liiiraa-ipc-{label}-{}-{epoch}-{id}",
+        std::process::id()
+    ));
     fs::create_dir_all(&root).expect("create isolated test directory");
     root.join("broker.sqlite3")
 }

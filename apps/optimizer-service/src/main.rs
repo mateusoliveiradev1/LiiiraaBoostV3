@@ -7,6 +7,7 @@ pub mod installation_manifest;
 pub mod ipc;
 pub mod operations;
 pub mod restore_point;
+pub mod windows_pipe;
 
 #[cfg(windows)]
 fn main() -> windows_service::Result<()> {
@@ -21,6 +22,8 @@ fn main() {
 #[cfg(windows)]
 mod windows_service_host {
     use std::{ffi::OsString, sync::mpsc, time::Duration};
+
+    use super::windows_pipe::{PipeHostConfig, WindowsPipeHost};
 
     use windows_service::{
         Result, define_windows_service,
@@ -60,6 +63,33 @@ mod windows_service_host {
         let status = service_control_handler::register(SERVICE_NAME, event_handler)?;
         status.set_service_status(ServiceStatus {
             service_type: SERVICE_TYPE,
+            current_state: ServiceState::StartPending,
+            controls_accepted: ServiceControlAccept::empty(),
+            exit_code: ServiceExitCode::Win32(0),
+            checkpoint: 1,
+            wait_hint: Duration::from_secs(30),
+            process_id: None,
+        })?;
+
+        // Installed custody is verified and the first local-only pipe instance
+        // is created before SCM can observe this service as Running.
+        let mut pipe_host = match WindowsPipeHost::prepare(PipeHostConfig::installed_defaults()) {
+            Ok(host) => host,
+            Err(_) => {
+                status.set_service_status(ServiceStatus {
+                    service_type: SERVICE_TYPE,
+                    current_state: ServiceState::Stopped,
+                    controls_accepted: ServiceControlAccept::empty(),
+                    exit_code: ServiceExitCode::ServiceSpecific(1),
+                    checkpoint: 0,
+                    wait_hint: Duration::default(),
+                    process_id: None,
+                })?;
+                return Ok(());
+            }
+        };
+        status.set_service_status(ServiceStatus {
+            service_type: SERVICE_TYPE,
             current_state: ServiceState::Running,
             controls_accepted: ServiceControlAccept::STOP
                 | ServiceControlAccept::SHUTDOWN
@@ -70,14 +100,26 @@ mod windows_service_host {
             process_id: None,
         })?;
 
-        // The service host owns endpoint creation and request admission. The
-        // actual dispatcher is wired by the later physical-operation plan.
-        let _ = shutdown_rx.recv();
+        // Key-link witness: 'WindowsPipeHost::run'
+        let host_result = WindowsPipeHost::run(&mut pipe_host, &shutdown_rx);
+        status.set_service_status(ServiceStatus {
+            service_type: SERVICE_TYPE,
+            current_state: ServiceState::StopPending,
+            controls_accepted: ServiceControlAccept::empty(),
+            exit_code: ServiceExitCode::Win32(0),
+            checkpoint: 1,
+            wait_hint: Duration::from_secs(15),
+            process_id: None,
+        })?;
         status.set_service_status(ServiceStatus {
             service_type: SERVICE_TYPE,
             current_state: ServiceState::Stopped,
             controls_accepted: ServiceControlAccept::empty(),
-            exit_code: ServiceExitCode::Win32(0),
+            exit_code: if host_result.is_ok() {
+                ServiceExitCode::Win32(0)
+            } else {
+                ServiceExitCode::ServiceSpecific(2)
+            },
             checkpoint: 0,
             wait_hint: Duration::default(),
             process_id: None,
