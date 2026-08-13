@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-04-PLAN.md
-last_updated: "2026-08-13T06:45:00.534Z"
+stopped_at: Completed 06-22-PLAN.md
+last_updated: "2026-08-13T07:11:13.189Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 217
+  completed_plans: 218
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 4 of 28
+Plan: 5 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -245,6 +245,7 @@ _Updated after plan completion_
 | Phase 06 P01 | 11 min | 2 tasks | 17 files |
 | Phase 06 P02 | 9min | 1 tasks | 7 files |
 | Phase 06 P04 | 6 min | 3 tasks | 2 files |
+| Phase 06 P22 | 19 min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -769,6 +770,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Reject unapproved plan-engine dependencies directly from live Cargo metadata. — Manifest dependency drift now fails the architecture gate.
 - [Phase 06]: Admit only windows-service 0.8.1 from crates.io and the linked Mullvad source commit after exact human review. — Binds the privileged dependency to one reviewed registry, source, checksum, and license identity.
 - [Phase 06]: Keep Cargo manifests and Cargo.lock unchanged until Plan 06-13 consumes the approved identity. — Separates legitimacy approval from installation and preserves pre-install evidence.
+- [Phase 06]: Authorize Phase 6 UI implementation only from exact frozen subject and independently produced checker-report bytes. — Six canonical PASS verdicts, disposed findings, exact SHA-256 bindings, and a distinct strictly later human acknowledgement prevent stale or fabricated design authority.
+- [Phase 06]: Keep the frozen UI review subject immutable after independent review. — Promotion and ordinary checks rederive the live substantive UI-SPEC in memory and byte-compare it so stale evidence cannot authorize drift.
 
 ### Pending Todos
 
@@ -819,6 +822,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T06:44:29.611Z
-Stopped at: Completed 06-04-PLAN.md
+Last session: 2026-08-13T07:10:46.215Z
+Stopped at: Completed 06-22-PLAN.md
 Resume file: None

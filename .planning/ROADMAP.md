@@ -739,7 +739,7 @@ Plans:
 - [x] 06-01-PLAN.md — Canonical generated transactional contracts and parity corpus
 - [x] 06-02-PLAN.md — Pure plan-engine workspace and module ownership
 - [x] 06-04-PLAN.md — Blocking windows-service legitimacy review
-- [ ] 06-22-PLAN.md — Blocking independent six-dimension UI-contract approval
+- [x] 06-22-PLAN.md — Blocking independent six-dimension UI-contract approval
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -888,7 +888,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 3/28 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 4/28 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |
