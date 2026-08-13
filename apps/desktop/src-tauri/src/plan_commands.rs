@@ -11,13 +11,13 @@ pub const PLAN_COMMANDS: [&str; 11] = [
     "revise_plan",
     "approve_plan",
     "apply_plan",
-    "restore_operation",
+    "restore_plan_operation",
     "restore_plan",
-    "restore_checkpoint",
-    "read_execution",
-    "create_restart_checkpoint",
-    "preview_recovery_diagnostics",
-    "export_recovery_diagnostics",
+    "restore_recovery_checkpoint",
+    "read_plan_execution",
+    "subscribe_plan_execution",
+    "preview_plan_diagnostic",
+    "export_plan_diagnostic",
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -30,7 +30,7 @@ pub enum PlanCommand {
     RestorePlan,
     RestoreCheckpoint,
     ReadExecution,
-    CreateRestartCheckpoint,
+    SubscribeExecution,
     PreviewRecoveryDiagnostics,
     ExportRecoveryDiagnostics,
 }
@@ -44,13 +44,13 @@ impl TryFrom<&str> for PlanCommand {
             "revise_plan" => Ok(Self::Revise),
             "approve_plan" => Ok(Self::Approve),
             "apply_plan" => Ok(Self::Apply),
-            "restore_operation" => Ok(Self::RestoreOperation),
+            "restore_plan_operation" => Ok(Self::RestoreOperation),
             "restore_plan" => Ok(Self::RestorePlan),
-            "restore_checkpoint" => Ok(Self::RestoreCheckpoint),
-            "read_execution" => Ok(Self::ReadExecution),
-            "create_restart_checkpoint" => Ok(Self::CreateRestartCheckpoint),
-            "preview_recovery_diagnostics" => Ok(Self::PreviewRecoveryDiagnostics),
-            "export_recovery_diagnostics" => Ok(Self::ExportRecoveryDiagnostics),
+            "restore_recovery_checkpoint" => Ok(Self::RestoreCheckpoint),
+            "read_plan_execution" => Ok(Self::ReadExecution),
+            "subscribe_plan_execution" => Ok(Self::SubscribeExecution),
+            "preview_plan_diagnostic" => Ok(Self::PreviewRecoveryDiagnostics),
+            "export_plan_diagnostic" => Ok(Self::ExportRecoveryDiagnostics),
             _ => Err(PlanExecutorError::InvalidRequest),
         }
     }
@@ -110,11 +110,7 @@ pub fn validate_plan_document(
             PlanCommand::Compose | PlanCommand::Revise,
             TransactionalRecoveryDocument::TransactionalPlanDocument(_),
         )
-        | (PlanCommand::Approve, TransactionalRecoveryDocument::PlanApprovalDocument(_))
-        | (
-            PlanCommand::CreateRestartCheckpoint,
-            TransactionalRecoveryDocument::RecoveryCheckpointDocument(_),
-        ) => true,
+        | (PlanCommand::Approve, TransactionalRecoveryDocument::PlanApprovalDocument(_)) => true,
         (
             PlanCommand::Apply,
             TransactionalRecoveryDocument::PlanTransactionDocument(transaction),
@@ -161,18 +157,14 @@ pub fn command_acceptance(
         (
             PlanCommand::RestoreOperation,
             TransactionalRecoveryDocument::PlanTransactionDocument(_),
-        ) => ("restore_operation", "plan-transaction"),
+        ) => ("restore_plan_operation", "plan-transaction"),
         (PlanCommand::RestorePlan, TransactionalRecoveryDocument::PlanTransactionDocument(_)) => {
             ("restore_plan", "plan-transaction")
         }
         (
             PlanCommand::RestoreCheckpoint,
             TransactionalRecoveryDocument::PlanTransactionDocument(_),
-        ) => ("restore_checkpoint", "plan-transaction"),
-        (
-            PlanCommand::CreateRestartCheckpoint,
-            TransactionalRecoveryDocument::RecoveryCheckpointDocument(_),
-        ) => ("create_restart_checkpoint", "recovery-checkpoint"),
+        ) => ("restore_recovery_checkpoint", "plan-transaction"),
         _ => return None,
     };
     Some(AcceptedPlanIntent {

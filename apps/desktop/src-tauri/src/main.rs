@@ -67,8 +67,8 @@ use plan_commands::{
     command_acceptance, validate_export_file_name, validate_plan_document,
 };
 use plan_executor::{
-    DiagnosticConsent, DiagnosticExportReceipt, DiagnosticPreview, ExecutionSnapshot,
-    ExecutionState, PlanExecutor, PlanExecutorError,
+    DiagnosticConsent, DiagnosticExportReceipt, DiagnosticPreview, ExecutionSnapshot, PlanExecutor,
+    PlanExecutorError,
 };
 use recovery_store::{RecoveryStore, integrity_anchor::WindowsIntegrityAnchor};
 
@@ -934,7 +934,7 @@ fn apply_plan(
 }
 
 #[tauri::command]
-fn restore_operation(
+fn restore_plan_operation(
     executor: State<'_, Mutex<NativePlanExecutor>>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
@@ -952,7 +952,7 @@ fn restore_plan(
 }
 
 #[tauri::command]
-fn restore_checkpoint(
+fn restore_recovery_checkpoint(
     executor: State<'_, Mutex<NativePlanExecutor>>,
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
@@ -961,7 +961,7 @@ fn restore_checkpoint(
 }
 
 #[tauri::command]
-fn read_execution(
+fn read_plan_execution(
     executor: State<'_, Mutex<NativePlanExecutor>>,
 ) -> Result<ExecutionSnapshot, PlanExecutorError> {
     executor
@@ -971,21 +971,22 @@ fn read_execution(
 }
 
 #[tauri::command]
-fn create_restart_checkpoint(
+fn subscribe_plan_execution(
     executor: State<'_, Mutex<NativePlanExecutor>>,
+    progress: Channel<ExecutionSnapshot>,
 ) -> Result<ExecutionSnapshot, PlanExecutorError> {
     let snapshot = executor
         .lock()
         .map_err(|_| PlanExecutorError::JournalUnavailable)?
         .read_execution();
-    if snapshot.state != ExecutionState::RestartVerificationRequired {
-        return Err(PlanExecutorError::RecoveryRequired);
-    }
+    progress
+        .send(snapshot.clone())
+        .map_err(|_| PlanExecutorError::InvalidResponse)?;
     Ok(snapshot)
 }
 
 #[tauri::command]
-fn preview_recovery_diagnostics(
+fn preview_plan_diagnostic(
     executor: State<'_, Mutex<NativePlanExecutor>>,
 ) -> Result<DiagnosticPreview, PlanExecutorError> {
     executor
@@ -995,7 +996,7 @@ fn preview_recovery_diagnostics(
 }
 
 #[tauri::command]
-fn export_recovery_diagnostics(
+fn export_plan_diagnostic(
     app: AppHandle,
     executor: State<'_, Mutex<NativePlanExecutor>>,
     request: DiagnosticExportRequest,
@@ -1129,30 +1130,30 @@ fn run() -> Result<(), String> {
             cancel_measurement_capture,
             compare_measurement_sessions,
             compose_plan,
-            create_restart_checkpoint,
             desktop_sign_in,
             desktop_sign_out,
             dispatch_shell_command,
             export_evidence_report,
-            export_recovery_diagnostics,
+            export_plan_diagnostic,
             finish_measurement_capture,
             get_shell_bootstrap,
             open_account_subscription,
             open_admin,
             prepare_device_binding,
-            preview_recovery_diagnostics,
-            read_execution,
+            preview_plan_diagnostic,
+            read_plan_execution,
             read_live_telemetry,
             read_evidence_health,
             read_hardware_inventory,
             refresh_hardware_inventory,
             render_evidence_report,
-            restore_checkpoint,
-            restore_operation,
+            restore_recovery_checkpoint,
+            restore_plan_operation,
             restore_plan,
             revise_plan,
             sample_measurement_capture,
             start_measurement_capture,
+            subscribe_plan_execution,
             sync_account
         ])
         .on_window_event(|window, event| {
