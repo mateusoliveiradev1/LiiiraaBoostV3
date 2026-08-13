@@ -11,6 +11,7 @@ import type {
 import type { PlanAuthority, PlanAuthoritySnapshot } from '@liiiraa/desktop-client';
 
 import { ImproveSurface } from './improve.js';
+import { RecoverSurface } from './recover.js';
 
 const NOW = '2026-08-13T16:00:00Z';
 const HASH_A = `sha256:${'a'.repeat(64)}`;
@@ -283,5 +284,243 @@ describe('authoritative execution', () => {
     expect(markup).toContain('Verified receipt pending');
     expect(markup).not.toContain('Plan applied and verified');
     expect(markup).not.toContain('data-progress-percentage');
+  });
+});
+
+const recoveryTransaction = {
+  kind: 'plan-transaction',
+  schemaVersion: '1.0',
+  transactionId: 'transaction-recovery-0001',
+  planId: 'plan-authoritative-0001',
+  planRevision: 7,
+  revisionFingerprint: HASH_A,
+  approvalId: 'approval-0001',
+  intent: 'restore-operation',
+  startedAt: NOW,
+  audit: { auditId: 'audit-recovery', recordedAt: NOW },
+} as const;
+
+const recoveryProgress: ProgressSnapshotDocumentJson = {
+  kind: 'progress-snapshot',
+  schemaVersion: '1.0',
+  transactionId: recoveryTransaction.transactionId,
+  sequence: 12,
+  state: 'blocked',
+  completedOperations: 1,
+  totalOperations: 2,
+  currentOperationVersionId: 'power-advanced-v2',
+  updatedAt: NOW,
+  displayText: 'Observed state requires a recovery decision.',
+};
+
+const checkpointDocument: TransactionalRecoveryDocumentJson = {
+  kind: 'recovery-checkpoint',
+  schemaVersion: '1.0',
+  checkpointId: 'checkpoint-0001',
+  transactionId: recoveryTransaction.transactionId,
+  planId: 'plan-authoritative-0001',
+  createdAt: NOW,
+  coverage: 'ready',
+  exactPriorState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  restartRequired: true,
+  audit: { auditId: 'audit-checkpoint', recordedAt: NOW },
+};
+
+const conflictDocument: TransactionalRecoveryDocumentJson = {
+  kind: 'journal-event',
+  schemaVersion: '1.0',
+  eventId: 'event-conflict-0001',
+  transactionId: recoveryTransaction.transactionId,
+  operationVersionId: 'power-advanced-v2',
+  sequence: 12,
+  occurredAt: NOW,
+  previousEventHash: HASH_A,
+  eventHash: HASH_B,
+  audit: { auditId: 'audit-conflict', recordedAt: NOW },
+  state: 'conflict',
+  exactPriorState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  exactRequestedState: observedState('22222222-2222-4222-8222-222222222222', HASH_B),
+  exactObservedState: observedState('33333333-3333-4333-8333-333333333333', HASH_C),
+  differenceSummary: 'Windows now contains a third state.',
+};
+
+const unknownDocument: TransactionalRecoveryDocumentJson = {
+  kind: 'journal-event',
+  schemaVersion: '1.0',
+  eventId: 'event-unknown-0001',
+  transactionId: recoveryTransaction.transactionId,
+  operationVersionId: 'power-advanced-v2',
+  sequence: 11,
+  occurredAt: NOW,
+  previousEventHash: HASH_A,
+  eventHash: HASH_D,
+  audit: { auditId: 'audit-unknown', recordedAt: NOW },
+  state: 'unknown',
+  exactPriorState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  exactRequestedState: observedState('22222222-2222-4222-8222-222222222222', HASH_B),
+  exactObservedState: {
+    state: 'unknown',
+    reason: 'Observation was interrupted.',
+    observedAt: NOW,
+  },
+  reason: 'Native observation did not establish a final state.',
+};
+
+const receiptDocument: TransactionalRecoveryDocumentJson = {
+  kind: 'transaction-receipt',
+  schemaVersion: '1.0',
+  receiptId: 'receipt-restored-0001',
+  transactionId: recoveryTransaction.transactionId,
+  planId: 'plan-authoritative-0001',
+  operationVersionId: 'power-advanced-v2',
+  completedAt: NOW,
+  exactPriorState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  exactRequestedState: observedState('22222222-2222-4222-8222-222222222222', HASH_B),
+  exactObservedState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  verification: {
+    state: 'verified',
+    verifiedAt: NOW,
+    exactObservedState: observedState('11111111-1111-4111-8111-111111111111', HASH_A),
+  },
+  recoveryMethod: 'exact-prior-scheme',
+  journalHeadHash: HASH_D,
+  humanSummary: 'The exact prior power scheme was observed after restoration.',
+  technicalSummary: 'Verified restoration receipt.',
+  audit: { auditId: 'audit-receipt', recordedAt: NOW },
+};
+
+const createRecoverySnapshot = (
+  overrides: Partial<PlanAuthoritySnapshot> = {},
+): PlanAuthoritySnapshot => ({
+  ...createSnapshot(),
+  status: 'unknown',
+  plan: { ...createPlan(), lifecycle: 'blocked' },
+  approval: createApproval(),
+  transaction: recoveryTransaction,
+  transactionId: recoveryTransaction.transactionId,
+  progress: recoveryProgress,
+  sequence: recoveryProgress.sequence,
+  stale: true,
+  error: { code: 'UNKNOWN_AFTER_DISPATCH', command: 'restore_plan_operation' },
+  ...overrides,
+});
+
+describe('authoritative recovery workspace', () => {
+  it('places unresolved safety first and keeps operation, plan, and checkpoint recovery distinct', () => {
+    const markup = renderToStaticMarkup(
+      <RecoverSurface
+        authority={createAuthority(createRecoverySnapshot())}
+        locale="en"
+        scenarioId="S17"
+        validatedDocuments={[checkpointDocument, unknownDocument]}
+        view="guided-recovery"
+      />,
+    );
+
+    expect(markup).toContain('data-recovery-available="offline signed-out no-premium"');
+    expect(markup.indexOf('Current safety verdict')).toBeLessThan(
+      markup.indexOf('Execution timeline'),
+    );
+    expect(markup).toContain('Restore this operation');
+    expect(markup).toContain('Restore full plan');
+    expect(markup).toContain('Restore checkpoint');
+    expect(markup).toContain('checkpoint-0001');
+    expect(markup).not.toMatch(/>Restore</u);
+  });
+
+  it('announces unknown restoration once and exposes affected closure, preserved work, rollback, and next action', () => {
+    const markup = renderToStaticMarkup(
+      <RecoverSurface
+        authority={createAuthority(createRecoverySnapshot())}
+        locale="en"
+        scenarioId="S17"
+        validatedDocuments={[unknownDocument]}
+        view="guided-recovery"
+      />,
+    );
+
+    expect(markup.match(/aria-live="assertive"/gu)).toHaveLength(1);
+    expect(markup).toContain('New mutations are blocked');
+    expect(markup).toContain('Failed operation');
+    expect(markup).toContain('power-advanced-v2');
+    expect(markup).toContain('Affected dependency closure');
+    expect(markup).toContain('group-tuning');
+    expect(markup).toContain('Independent operations preserved');
+    expect(markup).toContain('power-base-v1');
+    expect(markup).toContain('Rollback result');
+    expect(markup).toContain('Next safe action');
+  });
+
+  it('shows exact three-state conflict without preselection or timeout resolution', () => {
+    const markup = renderToStaticMarkup(
+      <RecoverSurface
+        authority={createAuthority(createRecoverySnapshot())}
+        locale="en"
+        scenarioId="S17"
+        validatedDocuments={[conflictDocument]}
+        view="guided-recovery"
+      />,
+    );
+
+    expect(markup).toContain('Prior');
+    expect(markup).toContain('Requested / applied');
+    expect(markup).toContain('Observed');
+    expect(markup).toContain('11111111-1111-4111-8111-111111111111');
+    expect(markup).toContain('22222222-2222-4222-8222-222222222222');
+    expect(markup).toContain('33333333-3333-4333-8333-333333333333');
+    expect(markup).toContain('Keep current state');
+    expect(markup).toContain('Restore the prior state');
+    expect(markup).not.toContain('checked=""');
+    expect(markup).not.toMatch(/timeout|countdown/iu);
+  });
+});
+
+describe('immutable receipt and diagnostic recovery evidence', () => {
+  it('renders immutable receipt details and begins export with a local redaction preview', () => {
+    const snapshot = createRecoverySnapshot({
+      status: 'ready',
+      stale: false,
+      error: null,
+      progress: { ...recoveryProgress, state: 'completed' },
+      diagnostic: {
+        kind: 'redacted-diagnostic-export',
+        schemaVersion: '1.0',
+        exportId: 'diagnostic-redacted-0001',
+        planId: 'plan-authoritative-0001',
+        generatedAt: NOW,
+        journalHeadHash: HASH_D,
+        entries: [
+          {
+            eventId: 'event-redacted-0001',
+            transactionId: recoveryTransaction.transactionId,
+            operationVersionId: 'power-advanced-v2',
+            state: 'blocked',
+            occurredAt: NOW,
+            reasonCode: 'OBSERVATION_REQUIRED',
+            eventHash: HASH_A,
+          },
+        ],
+        redactionsApplied: ['credentials', 'raw-hardware-identifiers'],
+        audit: { auditId: 'audit-diagnostic', recordedAt: NOW },
+      },
+    });
+    const markup = renderToStaticMarkup(
+      <RecoverSurface
+        authority={createAuthority(snapshot)}
+        locale="pt-BR"
+        scenarioId="S17"
+        validatedDocuments={[receiptDocument]}
+        view="verified-receipt"
+      />,
+    );
+
+    expect(markup).toContain('data-immutable="true"');
+    expect(markup).toContain('receipt-restored-0001');
+    expect(markup).toContain('Revisar diagnóstico para exportação');
+    expect(markup).toContain('diagnostic-redacted-0001');
+    expect(markup).toContain('credentials');
+    expect(markup).toContain('raw-hardware-identifiers');
+    expect(markup).not.toMatch(/upload|enviado automaticamente/iu);
+    expect(markup).not.toMatch(/edit receipt|delete receipt|rewrite status/iu);
   });
 });
