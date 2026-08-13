@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-12-PLAN.md
-last_updated: "2026-08-13T08:24:29.263Z"
+stopped_at: Completed 06-13-PLAN.md
+last_updated: "2026-08-13T08:43:14.681Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 222
+  completed_plans: 223
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 8 of 28
+Plan: 9 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -250,6 +250,7 @@ _Updated after plan completion_
 | Phase 06 P09 | 15min | 3 tasks | 4 files |
 | Phase 06 P11 | 14 min | 3 tasks | 3 files |
 | Phase 06 P12 | 15 min | 3 tasks | 5 files |
+| Phase 06 P13 | 15 min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -787,6 +788,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Bind transactional apply proof to device, plan fingerprint, and canonical operation-version set. — A proof must authorize exactly one reviewed plan on one device and reject target drift.
 - [Phase 06]: Use distinct one-use proof actions for Advanced preference enable and revoke. — Closed actions prevent an approval captured for one risk transition from authorizing the inverse transition.
 - [Phase 06]: Keep receipt custody and proof validity native/cloud-side. — The renderer receives no credential, receipt, reusable proof, or proof-validity projection.
+- [Phase 06]: Bind privileged dependency admission to the exact reviewed windows-service 0.8.1 registry checksum and Mullvad source identity. — Prevents a similarly named, differently sourced, or checksum-mismatched privileged crate from entering the service boundary.
+- [Phase 06]: Authenticate the verified local native host before issuing a session secret, then bind canonical messages to durable nonce, counter, transaction, step, and operation identity. — Same-user spoofing, captured messages, stale counters, and reused nonces fail before dispatch.
+- [Phase 06]: Mark admitted broker identities unknown before dispatch so crash recovery observes state and never blindly redispatches. — A crash after reserve or dispatch returns observation-required while the mutation spy remains singular.
 
 ### Pending Todos
 
@@ -837,6 +841,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T08:24:29.257Z
-Stopped at: Completed 06-12-PLAN.md
+Last session: 2026-08-13T08:43:14.674Z
+Stopped at: Completed 06-13-PLAN.md
 Resume file: None
