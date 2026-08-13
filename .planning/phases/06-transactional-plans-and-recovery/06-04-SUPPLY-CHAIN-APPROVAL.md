@@ -4,9 +4,9 @@
 
 ## Gate status
 
-Awaiting the non-auto-approvable human legitimacy decision.
+Recorded verdict: `APPROVED` by `Liiiraa` at `2026-08-13T06:42:11.148Z`.
 
-- Status: `PENDING`
+- Status: `APPROVED`
 - Exact crate: `windows-service 0.8.1`
 - Registry record: [crates.io windows-service 0.8.1](https://crates.io/api/v1/crates/windows-service/0.8.1)
 - Registry checksum (SHA-256): `857224b3b211c6f3616921f081ee54721ee3ad2ace2fac6a6337e032f7b4dcf2`
@@ -44,7 +44,7 @@ Open the registry, repository, tag, and immutable commit links above. Compare th
 <!-- phase6-windows-service-approval-record:start
 {
   "schemaVersion": 1,
-  "status": "PENDING",
+  "status": "APPROVED",
   "candidate": {
     "name": "windows-service",
     "version": "0.8.1",
@@ -156,11 +156,21 @@ Open the registry, repository, tag, and immutable commit links above. Compare th
     ]
   },
   "review": {
-    "reviewerIdentity": null,
-    "reviewedAtUtc": null,
-    "reviewerResponse": null,
-    "verdict": null,
-    "approvedIdentity": null
+    "reviewerIdentity": "Liiiraa",
+    "reviewedAtUtc": "2026-08-13T06:42:11.148Z",
+    "reviewerResponse": "APPROVED windows-service 0.8.1 — Reviewer: Liiiraa",
+    "verdict": "APPROVED",
+    "approvedIdentity": {
+      "name": "windows-service",
+      "version": "0.8.1",
+      "registryRecordUrl": "https://crates.io/api/v1/crates/windows-service/0.8.1",
+      "sourceRepositoryUrl": "https://github.com/mullvad/windows-service-rs",
+      "sourceTag": "v0.8.1",
+      "sourceCommit": "aab40570b50c05b8e6f3c375171727e666ee42a0",
+      "sourceCommitUrl": "https://github.com/mullvad/windows-service-rs/commit/aab40570b50c05b8e6f3c375171727e666ee42a0",
+      "checksumSha256": "857224b3b211c6f3616921f081ee54721ee3ad2ace2fac6a6337e032f7b4dcf2",
+      "spdxLicense": "MIT OR Apache-2.0"
+    }
   }
 }
 phase6-windows-service-approval-record:end -->
