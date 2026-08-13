@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-13T18:11:00.000Z",
+  "generatedAt": "2026-08-13T18:36:22.1614169Z",
   "operationVersion": "managed-power-scheme-v1",
   "immutableBuild": {
     "id": "phase6-plan20-build",
@@ -10,7 +10,7 @@
       "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
     }
   },
-  "promotionStage": "deterministic-simulation",
+  "promotionStage": "clean-windows-vm",
   "requirementsCoverage": ["PLAN-01", "PLAN-05", "PLAN-06", "PLAN-07", "PLAN-08"],
   "decisionCoverage": [
     "D-01",
@@ -128,8 +128,76 @@
     {
       "stage": "clean-windows-vm",
       "predecessorStage": "deterministic-simulation",
-      "runEvidence": null,
-      "humanReview": { "status": "pending" }
+      "runEvidence": {
+        "id": "phase6-clean-windows-vm-managed-power-scheme-v1-blocked-20260813t183622z",
+        "stage": "clean-windows-vm",
+        "evidenceKind": "physical",
+        "status": "FAIL",
+        "operationVersion": "managed-power-scheme-v1",
+        "buildId": "phase6-plan20-build",
+        "participantId": "hyperv:liiiraaboost-w11-25h2-clean",
+        "recordedAt": "2026-08-13T18:36:22.1614169Z",
+        "expiresAt": "2026-08-14T18:36:22.1614169Z",
+        "artifacts": [
+          {
+            "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+            "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+          },
+          {
+            "path": ".planning/phases/06-transactional-plans-and-recovery/06-UAT.md",
+            "sha256": "15fc10e4c31ef9ca1b6afde9f5b9e397bb3b27c065f8f07cbc255d5f73407003"
+          }
+        ],
+        "cycle": {
+          "prepare": "BLOCKED",
+          "apply": "BLOCKED",
+          "verifyApply": "BLOCKED",
+          "restartRequired": true,
+          "restart": "BLOCKED",
+          "restore": "BLOCKED",
+          "verifyRestore": "BLOCKED"
+        },
+        "journalSha256": "",
+        "receiptSha256": "",
+        "security": {
+          "ipcAdversarial": "BLOCKED",
+          "replayRejected": false,
+          "identitySpoofRejected": false,
+          "sessionSwapRejected": false
+        },
+        "faults": {
+          "diskFull": "BLOCKED",
+          "crash": "BLOCKED",
+          "reboot": "BLOCKED",
+          "drift": "BLOCKED"
+        },
+        "accessibility": {
+          "status": "BLOCKED",
+          "seriousOrCriticalViolations": 0
+        },
+        "diagnostics": {
+          "redacted": true,
+          "previewed": true,
+          "consentBound": false,
+          "autoUpload": false,
+          "rawFieldsFound": []
+        },
+        "revocation": {
+          "signed": false,
+          "blocksNewApply": true,
+          "localRecoveryAvailable": false,
+          "remoteRollback": false,
+          "remoteExecution": false
+        },
+        "coverageGaps": [
+          "clean-windows-vm-blocked-elevation-required",
+          "clean-windows-vm-cycle-not-run",
+          "physical-hardware-matrix-incomplete"
+        ],
+        "universalSupportClaim": false,
+        "manualOverride": false
+      },
+      "humanReview": { "status": "not-required" }
     },
     {
       "stage": "owner-pc",
