@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-21-PLAN.md
-last_updated: "2026-08-13T18:32:37.820Z"
+stopped_at: Completed 06-29-PLAN.md
+last_updated: "2026-08-13T22:36:41.481Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
-  total_plans: 245
-  completed_plans: 239
+  total_plans: 256
+  completed_plans: 240
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 25 of 28
+Plan: 2 of 39
 Status: Ready to execute
-Last activity: 2026-08-13 - Completed quick task 260813-lkv: Auditar arquivos de ambiente, preservar segredos e commitar somente configurações seguras
+Last activity: 2026-08-13
 
-Progress: [██████████] 98%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -267,6 +267,7 @@ _Updated after plan completion_
 | Phase 06 P25 | 10 min | 2 tasks | 2 files |
 | Phase 06 P20 | 8 min | 2 tasks | 3 files |
 | Phase 06 P21 | 13min | 3 tasks | 11 files |
+| Phase 06 P29 | 15 min | 1 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -855,6 +856,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Emit only bounded redacted packaged evidence with exact build, operation version, run kind, GUIDs, and hashed client identity. — Retains attributable evidence without leaking credentials or hardware/user identifiers.
 - [Phase 06]: Deterministic and browser witnesses admit simulation only — Every physical stage requires persisted PASS run evidence plus a strictly later exact matching APPROVED review.
 - [Phase 06]: Planned evidence stays deterministic-only with physical cells pending — Final mode fails with exact per-stage blockers and preserves visible hardware coverage gaps.
+- [Phase 06]: Keep the generated PrivilegedBrokerRequest intact through durable reservation and dispatch instead of collapsing it to a payload-free operation enum. — Preserves exact validated request fields and keeps the generated closed union as the sole dispatch vocabulary.
+- [Phase 06]: Treat session, SID, PID, and image hash as audit metadata only; physical effects additionally require an opaque InteractiveUserEffectLease bound to the verified session and SID. — Prevents forgeable identity strings or booleans from authorizing user-scoped Windows effects.
+- [Phase 06]: Return generated accepted, rejected, or unavailable diagnostics from physical dispatch while reserving verified success and receipts for independent post-effect observation. — Maintains observation-only success authority across broker return, timeout, response loss, and recovery.
 
 ### Pending Todos
 
@@ -906,6 +910,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T18:32:37.811Z
-Stopped at: Completed 06-21-PLAN.md
+Last session: 2026-08-13T22:36:16.864Z
+Stopped at: Completed 06-29-PLAN.md
 Resume file: None
