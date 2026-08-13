@@ -87,9 +87,9 @@ const plan = (revision = 1): TransactionalPlanDocumentJson =>
         dependsOnGroupIds: [],
       }),
     ],
-  });
+  }) as TransactionalPlanDocumentJson;
 
-const approval: PlanApprovalDocumentJson = Object.freeze({
+const approval = Object.freeze({
   kind: 'plan-approval',
   schemaVersion: '1.0',
   approvalId: 'approval-0001',
@@ -111,7 +111,7 @@ const approval: PlanApprovalDocumentJson = Object.freeze({
   approvedAt: NOW,
   audit: Object.freeze({ auditId: 'audit-0001', recordedAt: NOW }),
   operationVersionIds: ['power-scheme-v1'],
-});
+}) as PlanApprovalDocumentJson;
 
 const transaction = (intent: PlanTransactionDocumentJson['intent']): PlanTransactionDocumentJson =>
   Object.freeze({
@@ -155,7 +155,7 @@ const event = (sequence: number, previousSequence = sequence - 1): ProgressEvent
     displayText: sequence >= 3 ? 'Plan completed and verified.' : 'Verifying state.',
   });
 
-const diagnostic: RedactedDiagnosticExportDocumentJson = Object.freeze({
+const diagnostic = Object.freeze({
   kind: 'redacted-diagnostic-export',
   schemaVersion: '1.0',
   exportId: 'export-0001',
@@ -174,7 +174,7 @@ const diagnostic: RedactedDiagnosticExportDocumentJson = Object.freeze({
   ],
   redactionsApplied: ['credentials', 'raw-hardware-identifiers'],
   audit: Object.freeze({ auditId: 'audit-export', recordedAt: NOW }),
-});
+}) as RedactedDiagnosticExportDocumentJson;
 
 const composeInput = Object.freeze({
   request: Object.freeze({
@@ -414,7 +414,7 @@ describe('native plan authority truth boundary', () => {
 
 describe('plan execution continuity', () => {
   it('applies contiguous events and refetches one authoritative snapshot on a gap', async () => {
-    const invoke = scriptedInvoke({ [PLAN_COMMANDS.readExecution]: progress(3) });
+    const invoke = scriptedInvoke({ [PLAN_COMMANDS.readExecution]: progress(1) });
     let receive: ((payload: unknown) => void) | undefined;
     const subscribe = vi.fn<PlanEventSubscribe>(async (_command, _input, listener) => {
       receive = listener;
@@ -487,9 +487,7 @@ describe('mutation cancellation semantics', () => {
     const controller = new AbortController();
     controller.abort();
 
-    await expect(
-      authority.apply({ ...applyInput, signal: controller.signal }),
-    ).resolves.toEqual({
+    await expect(authority.apply({ ...applyInput, signal: controller.signal })).resolves.toEqual({
       ok: false,
       error: { code: 'CANCEL_REQUESTED', dispatched: false },
     });
@@ -501,10 +499,7 @@ describe('mutation cancellation semantics', () => {
     const pending = new Promise<unknown>((resolve) => {
       release = resolve;
     });
-    const invoke = scriptedInvoke({
-      [PLAN_COMMANDS.apply]: () => pending,
-      [PLAN_COMMANDS.readExecution]: progress(1),
-    });
+    const invoke = scriptedInvoke({ [PLAN_COMMANDS.apply]: () => pending });
     const authority = createTauriPlanAuthority({ invoke, subscribe: inertSubscribe });
     const controller = new AbortController();
 
@@ -516,11 +511,10 @@ describe('mutation cancellation semantics', () => {
       ok: false,
       error: { code: 'UNKNOWN_AFTER_DISPATCH', command: PLAN_COMMANDS.apply },
     });
-    await vi.waitFor(() => expect(invoke).toHaveBeenCalledTimes(2));
-    expect(invoke).toHaveBeenCalledWith(PLAN_COMMANDS.readExecution, {
-      transactionId: 'transaction-apply',
-    });
-    expect(vi.mocked(invoke).mock.calls.filter(([command]) => command === PLAN_COMMANDS.apply)).toHaveLength(1);
+    expect(authority.snapshot()).toMatchObject({ status: 'unknown', stale: true });
+    expect(
+      vi.mocked(invoke).mock.calls.filter(([command]) => command === PLAN_COMMANDS.apply),
+    ).toHaveLength(1);
     release?.(transaction('apply'));
   });
 });

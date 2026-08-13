@@ -10,6 +10,11 @@ export {
   createTauriEvidenceAuthority,
 } from './evidence.js';
 export {
+  PLAN_COMMANDS,
+  createDeterministicPlanAuthority,
+  createTauriPlanAuthority,
+} from './plans.js';
+export {
   ACTIVITY_STATES,
   CALIBRATION_PROGRESS_STATES,
   DESKTOP_ROUTES,
@@ -64,6 +69,31 @@ export type {
   StartCaptureRequest,
   TauriEvidenceAuthorityOptions,
 } from './evidence.js';
+export type {
+  ApplyPlanInput,
+  ApprovePlanInput,
+  ComposePlanInput,
+  DeterministicPlanAuthorityOptions,
+  ExportDiagnosticInput,
+  PlanAuthority,
+  PlanAuthorityOrigin,
+  PlanAuthoritySnapshot,
+  PlanAuthorityStatus,
+  PlanClientError,
+  PlanEventListener,
+  PlanEventSubscribe,
+  PlanInvoke,
+  PlanInvokeCommand,
+  PlanListener,
+  PreviewDiagnosticInput,
+  ReadExecutionInput,
+  RestoreCheckpointInput,
+  RestoreOperationInput,
+  RestorePlanInput,
+  RevisePlanInput,
+  SubscribeExecutionInput,
+  TauriPlanAuthorityOptions,
+} from './plans.js';
 export type {
   DesktopCapability,
   DesktopInspectionError,
