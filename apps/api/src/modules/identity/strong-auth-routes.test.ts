@@ -152,7 +152,7 @@ const preferenceScope = (action: 'enable-advanced-preference' | 'revoke-advanced
 const createHarness = async () => {
   const repository = new MemoryStrongAuthRepository();
   let now = new Date(STARTED_AT);
-  let actor = baseActor;
+  let actor: IdentityActor | null = baseActor;
   let id = 10;
   const authority = createStagingStrongAuth({
     clock: { now: () => new Date(now) },
@@ -182,7 +182,7 @@ const createHarness = async () => {
     moveClock: (milliseconds: number) => {
       now = new Date(now.getTime() + milliseconds);
     },
-    setActor: (next: IdentityActor) => {
+    setActor: (next: IdentityActor | null) => {
       actor = next;
     },
   };
@@ -274,6 +274,15 @@ describe('transactional-plan strong-auth routes', () => {
         })
       ).statusCode,
     ).toBe(422);
+    harness.setActor({ ...baseActor, accountId: '00000000-0000-4000-8000-000000000098' });
+    expect(
+      (
+        await post(harness.app, '/v1/identity/strong-auth/plan-proof/consume', {
+          ...applyScope,
+          receipt,
+        })
+      ).statusCode,
+    ).toBe(422);
     harness.setActor(baseActor);
     harness.moveClock(5 * 60_000 + 1);
     expect(
@@ -305,6 +314,68 @@ describe('transactional-plan strong-auth routes', () => {
       }),
     ]);
     expect(results.map(({ statusCode }) => statusCode).sort()).toEqual([200, 422]);
+    await harness.app.close();
+  });
+
+  it('accepts one millisecond before expiry and rejects the exact expiry boundary', async () => {
+    const beforeExpiry = await createHarness();
+    const issuedBeforeExpiry = await post(beforeExpiry.app, '/v1/identity/strong-auth/step-up', {
+      ...applyScope,
+      code: beforeExpiry.code(),
+    });
+    beforeExpiry.moveClock(5 * 60_000 - 1);
+    expect(
+      (
+        await post(beforeExpiry.app, '/v1/identity/strong-auth/plan-proof/consume', {
+          ...applyScope,
+          receipt: issuedBeforeExpiry.json<{ receipt: string }>().receipt,
+        })
+      ).statusCode,
+    ).toBe(200);
+    await beforeExpiry.app.close();
+
+    const atExpiry = await createHarness();
+    const issuedAtExpiry = await post(atExpiry.app, '/v1/identity/strong-auth/step-up', {
+      ...applyScope,
+      code: atExpiry.code(),
+    });
+    atExpiry.moveClock(5 * 60_000);
+    expect(
+      (
+        await post(atExpiry.app, '/v1/identity/strong-auth/plan-proof/consume', {
+          ...applyScope,
+          receipt: issuedAtExpiry.json<{ receipt: string }>().receipt,
+        })
+      ).statusCode,
+    ).toBe(422);
+    await atExpiry.app.close();
+  });
+
+  it('fails closed after sign-out without consuming the proof', async () => {
+    const harness = await createHarness();
+    const issued = await post(harness.app, '/v1/identity/strong-auth/step-up', {
+      ...applyScope,
+      code: harness.code(),
+    });
+    const receipt = issued.json<{ receipt: string }>().receipt;
+    harness.setActor(null);
+    expect(
+      (
+        await post(harness.app, '/v1/identity/strong-auth/plan-proof/consume', {
+          ...applyScope,
+          receipt,
+        })
+      ).statusCode,
+    ).toBe(403);
+    harness.setActor(baseActor);
+    expect(
+      (
+        await post(harness.app, '/v1/identity/strong-auth/plan-proof/consume', {
+          ...applyScope,
+          receipt,
+        })
+      ).statusCode,
+    ).toBe(200);
     await harness.app.close();
   });
 

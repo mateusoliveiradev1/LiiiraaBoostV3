@@ -268,6 +268,28 @@ fn offline_signed_out_stale_and_posture_changed_proofs_fail_closed() {
 }
 
 #[test]
+fn proof_clock_boundary_is_strictly_before_expiry() {
+    let mut boundary = apply_proof();
+    boundary["verifiedAtUnixMs"] = json!(NOW_MS - 299_999);
+    boundary["expiresAtUnixMs"] = json!(NOW_MS + 1);
+    let before_expiry = RecordingApi {
+        response: RefCell::new(Ok(response(boundary.clone()))),
+        calls: RefCell::new(Vec::new()),
+    };
+    consume_plan_approval(&store(), &before_expiry, apply_request(), NOW_MS)
+        .expect("one millisecond of fresh proof lifetime remains admissible");
+
+    let at_expiry = RecordingApi {
+        response: RefCell::new(Ok(response(boundary))),
+        calls: RefCell::new(Vec::new()),
+    };
+    assert_eq!(
+        consume_plan_approval(&store(), &at_expiry, apply_request(), NOW_MS + 1),
+        Err(PlanAuthError::InvalidResponse),
+    );
+}
+
+#[test]
 fn local_recovery_needs_neither_network_nor_authentication() {
     let admission = admit_local_recovery();
     assert_eq!(format!("{admission:?}"), "LocalRecoveryAdmission");
@@ -276,6 +298,7 @@ fn local_recovery_needs_neither_network_nor_authentication() {
 #[test]
 fn renderer_boolean_and_plaintext_sqlite_are_absent_from_native_proof_boundary() {
     let source = include_str!("../src/plan_auth.rs");
+    let main_source = include_str!("../src/main.rs");
     for prohibited in [
         "strongAuth: true",
         "strong_auth: bool",
@@ -288,4 +311,6 @@ fn renderer_boolean_and_plaintext_sqlite_are_absent_from_native_proof_boundary()
         );
     }
     assert!(!format!("{:?}", receipt()).contains(RECEIPT));
+    assert!(!main_source.contains("consume_plan_approval_from_native("));
+    assert!(!main_source.contains("consume_advanced_preference_approval_from_native("));
 }

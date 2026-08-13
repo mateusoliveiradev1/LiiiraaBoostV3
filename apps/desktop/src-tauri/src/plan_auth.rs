@@ -188,6 +188,15 @@ struct ConsumedProofWire {
     consumed_at_unix_ms: u64,
 }
 
+struct ExpectedProof<'a> {
+    kind: &'static str,
+    action: &'static str,
+    resource: &'static str,
+    authorization_context_id: &'a str,
+    device_id: &'a str,
+    target_fingerprint: &'a str,
+}
+
 fn bounded_value(value: &str) -> bool {
     (1..=128).contains(&value.len())
         && value
@@ -286,6 +295,15 @@ fn decode_proof(
     Ok(proof)
 }
 
+fn matches_expected_proof(proof: &ConsumedProofWire, expected: &ExpectedProof<'_>) -> bool {
+    proof.kind == expected.kind
+        && proof.action == expected.action
+        && proof.resource == expected.resource
+        && proof.authorization_context_id == expected.authorization_context_id
+        && proof.device_id == expected.device_id
+        && proof.target_fingerprint == expected.target_fingerprint
+}
+
 pub fn consume_plan_approval(
     store: &impl CredentialStore,
     api: &impl PlanApprovalApi,
@@ -327,13 +345,17 @@ pub fn consume_plan_approval(
     }))
     .map_err(|_| PlanAuthError::InvalidRequest)?;
     let proof = decode_proof(consume(store, api, body)?, now_unix_ms)?;
-    if proof.kind != "consumed-plan-approval"
-        || proof.action != "apply-transactional-plan"
-        || proof.resource != "desktop-plan"
-        || proof.authorization_context_id != request.authorization_context_id
-        || proof.device_id != request.device_id
-        || proof.target_fingerprint != expected_target
-    {
+    if !matches_expected_proof(
+        &proof,
+        &ExpectedProof {
+            kind: "consumed-plan-approval",
+            action: "apply-transactional-plan",
+            resource: "desktop-plan",
+            authorization_context_id: &request.authorization_context_id,
+            device_id: &request.device_id,
+            target_fingerprint: &expected_target,
+        },
+    ) {
         return Err(PlanAuthError::InvalidResponse);
     }
     Ok(ConsumedPlanApprovalProof {
@@ -380,13 +402,17 @@ pub fn consume_advanced_preference_approval(
     }))
     .map_err(|_| PlanAuthError::InvalidRequest)?;
     let proof = decode_proof(consume(store, api, body)?, now_unix_ms)?;
-    if proof.kind != "consumed-advanced-preference"
-        || proof.action != action
-        || proof.resource != "desktop-risk-preference"
-        || proof.authorization_context_id != request.authorization_context_id
-        || proof.device_id != request.device_id
-        || proof.target_fingerprint != expected_target
-    {
+    if !matches_expected_proof(
+        &proof,
+        &ExpectedProof {
+            kind: "consumed-advanced-preference",
+            action,
+            resource: "desktop-risk-preference",
+            authorization_context_id: &request.authorization_context_id,
+            device_id: &request.device_id,
+            target_fingerprint: &expected_target,
+        },
+    ) {
         return Err(PlanAuthError::InvalidResponse);
     }
     Ok(ConsumedAdvancedPreferenceProof {
