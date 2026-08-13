@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-24-PLAN.md
-last_updated: "2026-08-13T18:01:16.365Z"
+stopped_at: Completed 06-20-PLAN.md
+last_updated: "2026-08-13T18:11:20.756Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 237
+  completed_plans: 238
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 23 of 28
+Plan: 24 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -265,6 +265,7 @@ _Updated after plan completion_
 | Phase 06 P18 | 18 min | 2 tasks | 12 files |
 | Phase 06 P24 | 18 min | 2 tasks | 13 files |
 | Phase 06 P25 | 10 min | 2 tasks | 2 files |
+| Phase 06 P20 | 8 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -848,6 +849,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Request fresh enable and revoke proof through one action-discriminated system-browser callback, then invoke only the corresponding named PlanAuthority method.
 - [Phase 06]: Keep transition UI pending until a newer native projection confirms enabled or revoked; command dispatch and proof completion never toggle renderer state.
 - [Phase 06]: Block Advanced apply on absent, revoked, invalidated, stale, or unavailable preference authority while keeping local recovery enabled in every state.
+- [Phase 06]: Label every browser witness as deterministic test composition and explicitly not physical Windows evidence. — Prevents browser fixtures from masquerading as packaged or physical Windows proof.
+- [Phase 06]: Require exact ordered promotion predecessors and a matching checkpoint before any physical mutation callback. — Makes sequential promotion and human authority a fail-closed precondition.
+- [Phase 06]: Emit only bounded redacted packaged evidence with exact build, operation version, run kind, GUIDs, and hashed client identity. — Retains attributable evidence without leaking credentials or hardware/user identifiers.
 
 ### Pending Todos
 
@@ -898,6 +902,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T18:00:58.694Z
-Stopped at: Completed 06-24-PLAN.md
+Last session: 2026-08-13T18:11:12.424Z
+Stopped at: Completed 06-20-PLAN.md
 Resume file: None
