@@ -8,9 +8,13 @@ import type {
   TransactionalPlanDocumentJson,
   TransactionalRecoveryDocumentJson,
 } from '@liiiraa/contracts-ts';
-import type { PlanAuthority, PlanAuthoritySnapshot } from '@liiiraa/desktop-client';
+import type {
+  AdvancedPreferenceProjection,
+  PlanAuthority,
+  PlanAuthoritySnapshot,
+} from '@liiiraa/desktop-client';
 
-import { ImproveSurface } from './improve.js';
+import { ImproveSurface, performAdvancedPreferenceTransition } from './improve.js';
 import { RecoverSurface } from './recover.js';
 
 const NOW = '2026-08-13T16:00:00Z';
@@ -154,9 +158,139 @@ const createAuthority = (snapshot: PlanAuthoritySnapshot): PlanAuthority =>
     subscribeExecution: vi.fn(),
     previewDiagnostic: vi.fn(),
     exportDiagnostic: vi.fn(),
+    readAdvancedPreference: vi.fn(),
+    enableAdvancedPreference: vi.fn(),
+    revokeAdvancedPreference: vi.fn(),
+    reopen: vi.fn(),
     reconnect: vi.fn(),
     dispose: vi.fn(),
   }) as unknown as PlanAuthority;
+
+const createAdvancedPreference = (
+  state: AdvancedPreferenceProjection['state'],
+  overrides: Partial<AdvancedPreferenceProjection> = {},
+): AdvancedPreferenceProjection => ({
+  kind: 'advanced-preference',
+  schemaVersion: '1.0',
+  state,
+  reason: `${state} because native posture authority said so`,
+  bindingFreshness: state === 'enabled' ? 'current' : state === 'unavailable' ? 'unavailable' : 'stale',
+  sequence: 4,
+  updatedAt: NOW,
+  provenance: 'native',
+  ...overrides,
+});
+
+describe('Advanced preference lifecycle', () => {
+  it.each([
+    ['disabled', 'Enable Advanced on this PC'],
+    ['enabled', 'Revoke Advanced on this PC'],
+    ['revoked', 'Enable Advanced on this PC'],
+    ['invalidated', 'Revalidate Advanced on this PC'],
+    ['unavailable', 'Advanced authority is unavailable'],
+  ] as const)('renders authoritative %s scope, reason, next action, and unconditional recovery', (state, nextAction) => {
+    const markup = renderToStaticMarkup(
+      <ImproveSurface
+        authority={createAuthority(
+          createSnapshot({ advancedPreference: createAdvancedPreference(state) }),
+        )}
+        locale="en"
+        scenarioId="S01"
+        view="plan-review"
+      />,
+    );
+
+    expect(markup).toContain(`data-advanced-preference-state="${state}"`);
+    expect(markup).toContain('Advanced preference for this PC');
+    expect(markup).toContain('Device-local and persistent across app restarts');
+    expect(markup).toContain(`${state} because native posture authority said so`);
+    expect(markup).toContain(NOW);
+    expect(markup).toContain(nextAction);
+    expect(markup).toContain('The maximum risk ceiling cannot enable Advanced');
+    expect(markup).toContain('Open Recovery Center');
+    expect(markup).not.toContain('cloud sync');
+  });
+
+  it('explains posture invalidation, announces once, focuses its heading, and blocks Advanced apply', () => {
+    const markup = renderToStaticMarkup(
+      <ImproveSurface
+        authority={createAuthority(
+          createSnapshot({
+            advancedPreference: createAdvancedPreference('invalidated', {
+              reason: 'Hardware or security posture changed after the last validation.',
+            }),
+            approval: createApproval(),
+          }),
+        )}
+        locale="en"
+        scenarioId="S01"
+        view="confirmation"
+      />,
+    );
+
+    expect(markup.match(/aria-live="assertive"/gu)).toHaveLength(1);
+    expect(markup).toContain('Hardware or security posture changed after the last validation.');
+    expect(markup).toContain('tabindex="-1"');
+    expect(markup).toContain('Revalidate Advanced on this PC');
+    expect(markup).toContain('aria-describedby="advanced-preference-apply-blocker"');
+    expect(markup).toContain('disabled=""');
+    expect(markup).toContain('Recovery remains available');
+  });
+
+  it('uses fresh distinct strong-auth actions and waits for native enable or revoke truth', async () => {
+    for (const action of ['enable-advanced-preference', 'revoke-advanced-preference'] as const) {
+      const projection = createAdvancedPreference(action.startsWith('enable') ? 'disabled' : 'enabled');
+      const authority = createAuthority(createSnapshot({ advancedPreference: projection }));
+      const authorize = vi.fn().mockResolvedValue({
+        intentId: `intent-${action}`,
+        authorizationContextId: `context-${action}`,
+        proofReference: `proof-${action}`,
+        requestedAt: NOW,
+      });
+
+      await performAdvancedPreferenceTransition({ action, authority, authorize });
+
+      expect(authorize).toHaveBeenCalledOnce();
+      expect(authorize).toHaveBeenCalledWith(action);
+      const expectedInput = {
+        request: {
+          intentId: `intent-${action}`,
+          authorizationContextId: `context-${action}`,
+          proofReference: `proof-${action}`,
+          expectedSequence: projection.sequence,
+          requestedAt: NOW,
+        },
+      };
+      if (action === 'enable-advanced-preference') {
+        expect(authority.enableAdvancedPreference).toHaveBeenCalledWith(expectedInput);
+        expect(authority.revokeAdvancedPreference).not.toHaveBeenCalled();
+      } else {
+        expect(authority.revokeAdvancedPreference).toHaveBeenCalledWith(expectedInput);
+        expect(authority.enableAdvancedPreference).not.toHaveBeenCalled();
+      }
+      expect(authority.snapshot().advancedPreference).toBe(projection);
+    }
+  });
+
+  it('renders bilingual local scope, revalidation, and recovery copy without generic errors', () => {
+    const markup = renderToStaticMarkup(
+      <ImproveSurface
+        authority={createAuthority(
+          createSnapshot({ advancedPreference: createAdvancedPreference('invalidated') }),
+        )}
+        locale="pt-BR"
+        scenarioId="S01"
+        view="plan-review"
+      />,
+    );
+
+    expect(markup).toContain('PreferÃªncia AvanÃ§ada deste PC');
+    expect(markup).toContain('Local do dispositivo e persistente entre reinicializaÃ§Ãµes do aplicativo');
+    expect(markup).toContain('Revalidar AvanÃ§ado neste PC');
+    expect(markup).toContain('A recuperaÃ§Ã£o continua disponÃ­vel');
+    expect(markup).not.toMatch(/something went wrong|erro genÃ©rico/iu);
+  });
+});
 
 describe('authoritative plan review', () => {
   it('renders immutable revision, evidence, mixed-risk dependency order, and every operation field', () => {
