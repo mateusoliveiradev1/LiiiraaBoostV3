@@ -789,7 +789,7 @@ Plans:
 **Wave 10** *(blocked on Wave 9 completion; parallel prerequisites)*
 
 - [x] 06-29-PLAN.md — Closed authenticated physical operation dispatcher
-- [ ] 06-39-PLAN.md — Generated signed-artifact, stage-config, and continuation contracts
+- [x] 06-39-PLAN.md — Generated signed-artifact, stage-config, and continuation contracts
 
 **Wave 11** *(blocked on 06-39)*
 
@@ -926,7 +926,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 26/39 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 27/39 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

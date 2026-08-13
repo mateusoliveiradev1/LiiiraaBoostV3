@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-29-PLAN.md
-last_updated: "2026-08-13T22:36:41.481Z"
+stopped_at: Completed 06-39-PLAN.md
+last_updated: "2026-08-13T22:55:35.178Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 240
+  completed_plans: 241
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 2 of 39
+Plan: 3 of 39
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -268,6 +268,7 @@ _Updated after plan completion_
 | Phase 06 P20 | 8 min | 2 tasks | 3 files |
 | Phase 06 P21 | 13min | 3 tasks | 11 files |
 | Phase 06 P29 | 15 min | 1 tasks | 7 files |
+| Phase 06 P39 | 15 min | 1 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -859,6 +860,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Keep the generated PrivilegedBrokerRequest intact through durable reservation and dispatch instead of collapsing it to a payload-free operation enum. — Preserves exact validated request fields and keeps the generated closed union as the sole dispatch vocabulary.
 - [Phase 06]: Treat session, SID, PID, and image hash as audit metadata only; physical effects additionally require an opaque InteractiveUserEffectLease bound to the verified session and SID. — Prevents forgeable identity strings or booleans from authorizing user-scoped Windows effects.
 - [Phase 06]: Return generated accepted, rejected, or unavailable diagnostics from physical dispatch while reserving verified success and receipts for independent post-effect observation. — Maintains observation-only success authority across broker return, timeout, response loss, and recovery.
+- [Phase 06]: Represent installed and portable custody as distinct fixed-key file sets so role completeness is structural. — Missing, duplicate, swapped, or driver-as-installed roles must be schema-invalid rather than deferred to callers.
+- [Phase 06]: Keep artifact and roster CMS signatures external; document signer identity is evidence and never caller-provided trust authority. — Detached signatures authenticate canonical bytes without making a document field, environment value, or CLI argument a trust root.
+- [Phase 06]: Encode physical continuation as six exact predecessor and sequence variants with observation required and mutation forbidden after reboot. — The generated shape must reject lifecycle skips and prevent resume from becoming blind mutation authority.
+- [Phase 06]: Emit roster binding uniqueness from TypeSpec and enforce the generated rule equivalently in AJV and Rust. — Object-level uniqueItems cannot reject distinct entries that reuse only a participant ID or only a machine slot.
 
 ### Pending Todos
 
@@ -910,6 +915,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T22:36:16.864Z
-Stopped at: Completed 06-29-PLAN.md
+Last session: 2026-08-13T22:55:35.165Z
+Stopped at: Completed 06-39-PLAN.md
 Resume file: None
