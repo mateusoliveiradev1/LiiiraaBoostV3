@@ -3,6 +3,7 @@ import "./envelope.tsp";
 import "./provenance.tsp";
 import "./desktop-inspection.tsp";
 import "./hardware-evidence.tsp";
+import "./transactional-plans.tsp";
 import "./shell.tsp";
 import "./web.tsp";
 import "./control-plane.tsp";

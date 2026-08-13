@@ -848,6 +848,195 @@ impl ::std::convert::TryFrom<::std::string::String> for AccountState {
         value.parse()
     }
 }
+#[doc = "`ActionProofReference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ActionProofReference.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"action\","]
+#[doc = "    \"expiresAt\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"proofReference\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"action\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"expiresAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"proofReference\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ActionProofReference {
+    pub action: TransactionText,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: ::std::string::String,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    #[serde(rename = "proofReference")]
+    pub proof_reference: TransactionIdentifier,
+}
+#[doc = "`ActivateManagedPowerSchemeRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ActivateManagedPowerSchemeRequest.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"counter\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"expectedCurrentSchemeId\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"nonce\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"schemeId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"counter\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"expectedCurrentSchemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"activate-managed-power-scheme-request\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"nonce\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"schemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ActivateManagedPowerSchemeRequest {
+    pub counter: ::std::string::String,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "expectedCurrentSchemeId")]
+    pub expected_current_scheme_id: WindowsSchemeIdentifier,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: ActivateManagedPowerSchemeRequestKind,
+    pub nonce: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "schemeId")]
+    pub scheme_id: WindowsSchemeIdentifier,
+}
+#[doc = "`ActivateManagedPowerSchemeRequestKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"activate-managed-power-scheme-request\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ActivateManagedPowerSchemeRequestKind {
+    #[serde(rename = "activate-managed-power-scheme-request")]
+    ActivateManagedPowerSchemeRequest,
+}
+impl ::std::fmt::Display for ActivateManagedPowerSchemeRequestKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ActivateManagedPowerSchemeRequest => {
+                f.write_str("activate-managed-power-scheme-request")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for ActivateManagedPowerSchemeRequestKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "activate-managed-power-scheme-request" => Ok(Self::ActivateManagedPowerSchemeRequest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ActivateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ActivateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ActivateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AdminAccessContextProjection`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -9987,6 +10176,687 @@ impl ::std::convert::TryFrom<::std::string::String> for AdminTeamMemberProjectio
         value.parse()
     }
 }
+#[doc = "`AdvancedPreferenceEventDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceEventDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"device\","]
+#[doc = "    \"event\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"preferenceId\","]
+#[doc = "    \"proof\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"device\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
+#[doc = "    },"]
+#[doc = "    \"event\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceEventKind\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"advanced-preference-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"preferenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"proof\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ActionProofReference\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdvancedPreferenceEventDocument {
+    pub audit: AuditReference,
+    pub device: DeviceAuthorityBinding,
+    pub event: AdvancedPreferenceEventKind,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    pub kind: AdvancedPreferenceEventDocumentKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "preferenceId")]
+    pub preference_id: TransactionIdentifier,
+    pub proof: ActionProofReference,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+}
+#[doc = "`AdvancedPreferenceEventDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"advanced-preference-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceEventDocumentKind {
+    #[serde(rename = "advanced-preference-event")]
+    AdvancedPreferenceEvent,
+}
+impl ::std::fmt::Display for AdvancedPreferenceEventDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdvancedPreferenceEvent => f.write_str("advanced-preference-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceEventDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "advanced-preference-event" => Ok(Self::AdvancedPreferenceEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdvancedPreferenceEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceEventKind.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"enabled\","]
+#[doc = "    \"revoked\","]
+#[doc = "    \"posture-invalidated\","]
+#[doc = "    \"revalidated\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceEventKind {
+    #[serde(rename = "enabled")]
+    Enabled,
+    #[serde(rename = "revoked")]
+    Revoked,
+    #[serde(rename = "posture-invalidated")]
+    PostureInvalidated,
+    #[serde(rename = "revalidated")]
+    Revalidated,
+}
+impl ::std::fmt::Display for AdvancedPreferenceEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Enabled => f.write_str("enabled"),
+            Self::Revoked => f.write_str("revoked"),
+            Self::PostureInvalidated => f.write_str("posture-invalidated"),
+            Self::Revalidated => f.write_str("revalidated"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "enabled" => Ok(Self::Enabled),
+            "revoked" => Ok(Self::Revoked),
+            "posture-invalidated" => Ok(Self::PostureInvalidated),
+            "revalidated" => Ok(Self::Revalidated),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdvancedPreferenceIntentDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceIntentDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"device\","]
+#[doc = "    \"expectedSequence\","]
+#[doc = "    \"intent\","]
+#[doc = "    \"intentId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"preferenceId\","]
+#[doc = "    \"proof\","]
+#[doc = "    \"requestedAt\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"device\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
+#[doc = "    },"]
+#[doc = "    \"expectedSequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"intent\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceIntentKind\""]
+#[doc = "    },"]
+#[doc = "    \"intentId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"advanced-preference-intent\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"preferenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"proof\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ActionProofReference\""]
+#[doc = "    },"]
+#[doc = "    \"requestedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdvancedPreferenceIntentDocument {
+    pub audit: AuditReference,
+    pub device: DeviceAuthorityBinding,
+    #[serde(rename = "expectedSequence")]
+    pub expected_sequence: ::std::string::String,
+    pub intent: AdvancedPreferenceIntentKind,
+    #[serde(rename = "intentId")]
+    pub intent_id: TransactionIdentifier,
+    pub kind: AdvancedPreferenceIntentDocumentKind,
+    #[serde(rename = "preferenceId")]
+    pub preference_id: TransactionIdentifier,
+    pub proof: ActionProofReference,
+    #[serde(rename = "requestedAt")]
+    pub requested_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`AdvancedPreferenceIntentDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"advanced-preference-intent\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceIntentDocumentKind {
+    #[serde(rename = "advanced-preference-intent")]
+    AdvancedPreferenceIntent,
+}
+impl ::std::fmt::Display for AdvancedPreferenceIntentDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdvancedPreferenceIntent => f.write_str("advanced-preference-intent"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceIntentDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "advanced-preference-intent" => Ok(Self::AdvancedPreferenceIntent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceIntentDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceIntentDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceIntentDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdvancedPreferenceIntentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceIntentKind.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"enable\","]
+#[doc = "    \"revoke\","]
+#[doc = "    \"posture-invalidate\","]
+#[doc = "    \"revalidate\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceIntentKind {
+    #[serde(rename = "enable")]
+    Enable,
+    #[serde(rename = "revoke")]
+    Revoke,
+    #[serde(rename = "posture-invalidate")]
+    PostureInvalidate,
+    #[serde(rename = "revalidate")]
+    Revalidate,
+}
+impl ::std::fmt::Display for AdvancedPreferenceIntentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Enable => f.write_str("enable"),
+            Self::Revoke => f.write_str("revoke"),
+            Self::PostureInvalidate => f.write_str("posture-invalidate"),
+            Self::Revalidate => f.write_str("revalidate"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceIntentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "enable" => Ok(Self::Enable),
+            "revoke" => Ok(Self::Revoke),
+            "posture-invalidate" => Ok(Self::PostureInvalidate),
+            "revalidate" => Ok(Self::Revalidate),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceIntentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceIntentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceIntentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdvancedPreferenceProjectionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceProjectionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"device\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"lastEventId\","]
+#[doc = "    \"preferenceId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"updatedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"device\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"advanced-preference-projection\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"lastEventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"preferenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceState\""]
+#[doc = "    },"]
+#[doc = "    \"updatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AdvancedPreferenceProjectionDocument {
+    pub audit: AuditReference,
+    pub device: DeviceAuthorityBinding,
+    pub kind: AdvancedPreferenceProjectionDocumentKind,
+    #[serde(rename = "lastEventId")]
+    pub last_event_id: TransactionIdentifier,
+    #[serde(rename = "preferenceId")]
+    pub preference_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: AdvancedPreferenceState,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: ::std::string::String,
+}
+#[doc = "`AdvancedPreferenceProjectionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"advanced-preference-projection\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceProjectionDocumentKind {
+    #[serde(rename = "advanced-preference-projection")]
+    AdvancedPreferenceProjection,
+}
+impl ::std::fmt::Display for AdvancedPreferenceProjectionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AdvancedPreferenceProjection => f.write_str("advanced-preference-projection"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceProjectionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "advanced-preference-projection" => Ok(Self::AdvancedPreferenceProjection),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceProjectionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceProjectionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceProjectionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`AdvancedPreferenceState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AdvancedPreferenceState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"disabled\","]
+#[doc = "    \"enabled\","]
+#[doc = "    \"revalidation-required\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum AdvancedPreferenceState {
+    #[serde(rename = "disabled")]
+    Disabled,
+    #[serde(rename = "enabled")]
+    Enabled,
+    #[serde(rename = "revalidation-required")]
+    RevalidationRequired,
+}
+impl ::std::fmt::Display for AdvancedPreferenceState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Disabled => f.write_str("disabled"),
+            Self::Enabled => f.write_str("enabled"),
+            Self::RevalidationRequired => f.write_str("revalidation-required"),
+        }
+    }
+}
+impl ::std::str::FromStr for AdvancedPreferenceState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "disabled" => Ok(Self::Disabled),
+            "enabled" => Ok(Self::Enabled),
+            "revalidation-required" => Ok(Self::RevalidationRequired),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for AdvancedPreferenceState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for AdvancedPreferenceState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AuditEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -10233,6 +11103,39 @@ impl ::std::convert::TryFrom<::std::string::String> for AuditEventSchemaVersion 
     ) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
     }
+}
+#[doc = "`AuditReference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"AuditReference.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"auditId\","]
+#[doc = "    \"recordedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"auditId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct AuditReference {
+    #[serde(rename = "auditId")]
+    pub audit_id: TransactionIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
 }
 #[doc = "`AuditResult`"]
 #[doc = r""]
@@ -11260,6 +12163,888 @@ impl ::std::convert::TryFrom<&::std::string::String> for AuthorityReceiptSchemaV
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for AuthorityReceiptSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerAcceptedResponse`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"BrokerAcceptedResponse.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"responseId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"broker-accepted-response\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"accepted\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"responseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct BrokerAcceptedResponse {
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    pub kind: BrokerAcceptedResponseKind,
+    pub outcome: BrokerAcceptedResponseOutcome,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "responseId")]
+    pub response_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`BrokerAcceptedResponseKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"broker-accepted-response\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerAcceptedResponseKind {
+    #[serde(rename = "broker-accepted-response")]
+    BrokerAcceptedResponse,
+}
+impl ::std::fmt::Display for BrokerAcceptedResponseKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::BrokerAcceptedResponse => f.write_str("broker-accepted-response"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerAcceptedResponseKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "broker-accepted-response" => Ok(Self::BrokerAcceptedResponse),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerAcceptedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerAcceptedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerAcceptedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerAcceptedResponseOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"accepted\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerAcceptedResponseOutcome {
+    #[serde(rename = "accepted")]
+    Accepted,
+}
+impl ::std::fmt::Display for BrokerAcceptedResponseOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Accepted => f.write_str("accepted"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerAcceptedResponseOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "accepted" => Ok(Self::Accepted),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerAcceptedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerAcceptedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerAcceptedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerObservationResponse`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"BrokerObservationResponse.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"responseId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"broker-observation-response\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"observed\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"responseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct BrokerObservationResponse {
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    pub kind: BrokerObservationResponseKind,
+    pub outcome: BrokerObservationResponseOutcome,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "responseId")]
+    pub response_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`BrokerObservationResponseKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"broker-observation-response\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerObservationResponseKind {
+    #[serde(rename = "broker-observation-response")]
+    BrokerObservationResponse,
+}
+impl ::std::fmt::Display for BrokerObservationResponseKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::BrokerObservationResponse => f.write_str("broker-observation-response"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerObservationResponseKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "broker-observation-response" => Ok(Self::BrokerObservationResponse),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerObservationResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerObservationResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerObservationResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerObservationResponseOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observed\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerObservationResponseOutcome {
+    #[serde(rename = "observed")]
+    Observed,
+}
+impl ::std::fmt::Display for BrokerObservationResponseOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Observed => f.write_str("observed"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerObservationResponseOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observed" => Ok(Self::Observed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerObservationResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerObservationResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerObservationResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"BrokerOutcome.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observed\","]
+#[doc = "    \"accepted\","]
+#[doc = "    \"rejected\","]
+#[doc = "    \"unavailable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerOutcome {
+    #[serde(rename = "observed")]
+    Observed,
+    #[serde(rename = "accepted")]
+    Accepted,
+    #[serde(rename = "rejected")]
+    Rejected,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for BrokerOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Observed => f.write_str("observed"),
+            Self::Accepted => f.write_str("accepted"),
+            Self::Rejected => f.write_str("rejected"),
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observed" => Ok(Self::Observed),
+            "accepted" => Ok(Self::Accepted),
+            "rejected" => Ok(Self::Rejected),
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerRejectedResponse`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"BrokerRejectedResponse.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"reasonCode\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"responseId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"broker-rejected-response\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"rejected\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"reasonCode\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"responseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct BrokerRejectedResponse {
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    pub kind: BrokerRejectedResponseKind,
+    pub outcome: BrokerRejectedResponseOutcome,
+    #[serde(rename = "reasonCode")]
+    pub reason_code: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "responseId")]
+    pub response_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`BrokerRejectedResponseKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"broker-rejected-response\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerRejectedResponseKind {
+    #[serde(rename = "broker-rejected-response")]
+    BrokerRejectedResponse,
+}
+impl ::std::fmt::Display for BrokerRejectedResponseKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::BrokerRejectedResponse => f.write_str("broker-rejected-response"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerRejectedResponseKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "broker-rejected-response" => Ok(Self::BrokerRejectedResponse),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerRejectedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerRejectedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerRejectedResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerRejectedResponseOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"rejected\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerRejectedResponseOutcome {
+    #[serde(rename = "rejected")]
+    Rejected,
+}
+impl ::std::fmt::Display for BrokerRejectedResponseOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Rejected => f.write_str("rejected"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerRejectedResponseOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "rejected" => Ok(Self::Rejected),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerRejectedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerRejectedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerRejectedResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerUnavailableResponse`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"BrokerUnavailableResponse.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"reasonCode\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"responseId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"broker-unavailable-response\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unavailable\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"reasonCode\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"responseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct BrokerUnavailableResponse {
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    pub kind: BrokerUnavailableResponseKind,
+    pub outcome: BrokerUnavailableResponseOutcome,
+    #[serde(rename = "reasonCode")]
+    pub reason_code: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "responseId")]
+    pub response_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`BrokerUnavailableResponseKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"broker-unavailable-response\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerUnavailableResponseKind {
+    #[serde(rename = "broker-unavailable-response")]
+    BrokerUnavailableResponse,
+}
+impl ::std::fmt::Display for BrokerUnavailableResponseKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::BrokerUnavailableResponse => f.write_str("broker-unavailable-response"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerUnavailableResponseKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "broker-unavailable-response" => Ok(Self::BrokerUnavailableResponse),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerUnavailableResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerUnavailableResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerUnavailableResponseKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`BrokerUnavailableResponseOutcome`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unavailable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum BrokerUnavailableResponseOutcome {
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for BrokerUnavailableResponseOutcome {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for BrokerUnavailableResponseOutcome {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for BrokerUnavailableResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for BrokerUnavailableResponseOutcome {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for BrokerUnavailableResponseOutcome {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -12383,6 +14168,126 @@ pub struct ComparisonProjection {
     pub quality: EvidenceQuality,
     pub unit: MetricUnit,
 }
+#[doc = "`CompatibilityAssessment`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CompatibilityAssessment.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"reasons\","]
+#[doc = "    \"verdict\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"reasons\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"verdict\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CompatibilityVerdict\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CompatibilityAssessment {
+    pub reasons: ::std::vec::Vec<TransactionText>,
+    pub verdict: CompatibilityVerdict,
+}
+#[doc = "`CompatibilityVerdict`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CompatibilityVerdict.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"compatible\","]
+#[doc = "    \"incompatible\","]
+#[doc = "    \"unknown\","]
+#[doc = "    \"degraded\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CompatibilityVerdict {
+    #[serde(rename = "compatible")]
+    Compatible,
+    #[serde(rename = "incompatible")]
+    Incompatible,
+    #[serde(rename = "unknown")]
+    Unknown,
+    #[serde(rename = "degraded")]
+    Degraded,
+}
+impl ::std::fmt::Display for CompatibilityVerdict {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Compatible => f.write_str("compatible"),
+            Self::Incompatible => f.write_str("incompatible"),
+            Self::Unknown => f.write_str("unknown"),
+            Self::Degraded => f.write_str("degraded"),
+        }
+    }
+}
+impl ::std::str::FromStr for CompatibilityVerdict {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "compatible" => Ok(Self::Compatible),
+            "incompatible" => Ok(Self::Incompatible),
+            "unknown" => Ok(Self::Unknown),
+            "degraded" => Ok(Self::Degraded),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CompatibilityVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CompatibilityVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CompatibilityVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`CompletedMeasurementSession`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -12615,6 +14520,254 @@ impl ::std::convert::TryFrom<&::std::string::String> for CompletedMeasurementSes
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for CompletedMeasurementSessionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConflictJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ConflictJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"differenceSummary\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"differenceSummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"conflict\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ConflictJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "differenceSummary")]
+    pub difference_summary: TransactionText,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: ConflictJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: ConflictJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`ConflictJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConflictJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for ConflictJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConflictJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConflictJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConflictJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConflictJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ConflictJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"conflict\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ConflictJournalEventState {
+    #[serde(rename = "conflict")]
+    Conflict,
+}
+impl ::std::fmt::Display for ConflictJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Conflict => f.write_str("conflict"),
+        }
+    }
+}
+impl ::std::str::FromStr for ConflictJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "conflict" => Ok(Self::Conflict),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ConflictJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ConflictJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ConflictJournalEventState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -14132,6 +16285,198 @@ impl ::std::convert::TryFrom<::std::string::String> for DegradedMeasurementSessi
         value.parse()
     }
 }
+#[doc = "`DeleteOwnedPowerSchemeRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeleteOwnedPowerSchemeRequest.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"counter\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"expectedCanonicalStateHash\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"nonce\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"schemeId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"counter\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"expectedCanonicalStateHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"delete-owned-power-scheme-request\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"nonce\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"schemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeleteOwnedPowerSchemeRequest {
+    pub counter: ::std::string::String,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "expectedCanonicalStateHash")]
+    pub expected_canonical_state_hash: TransactionHash,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: DeleteOwnedPowerSchemeRequestKind,
+    pub nonce: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "schemeId")]
+    pub scheme_id: WindowsSchemeIdentifier,
+}
+#[doc = "`DeleteOwnedPowerSchemeRequestKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"delete-owned-power-scheme-request\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DeleteOwnedPowerSchemeRequestKind {
+    #[serde(rename = "delete-owned-power-scheme-request")]
+    DeleteOwnedPowerSchemeRequest,
+}
+impl ::std::fmt::Display for DeleteOwnedPowerSchemeRequestKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeleteOwnedPowerSchemeRequest => f.write_str("delete-owned-power-scheme-request"),
+        }
+    }
+}
+impl ::std::str::FromStr for DeleteOwnedPowerSchemeRequestKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "delete-owned-power-scheme-request" => Ok(Self::DeleteOwnedPowerSchemeRequest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DeleteOwnedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DeleteOwnedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DeleteOwnedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DependencyGroup`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DependencyGroup.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"dependencyGroupId\","]
+#[doc = "    \"dependsOnGroupIds\","]
+#[doc = "    \"operationVersionIds\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"dependencyGroupId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"dependsOnGroupIds\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 0"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionIds\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DependencyGroup {
+    #[serde(rename = "dependencyGroupId")]
+    pub dependency_group_id: TransactionIdentifier,
+    #[serde(rename = "dependsOnGroupIds")]
+    pub depends_on_group_ids: ::std::vec::Vec<TransactionIdentifier>,
+    #[serde(rename = "operationVersionIds")]
+    pub operation_version_ids: ::std::vec::Vec<TransactionIdentifier>,
+}
 #[doc = "`DetachedSignature`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -14205,6 +16550,45 @@ impl<'de> ::serde::Deserialize<'de> for DetachedSignature {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
     }
+}
+#[doc = "`DeviceAuthorityBinding`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DeviceAuthorityBinding.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"hardwareFingerprint\","]
+#[doc = "    \"securityPostureFingerprint\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"hardwareFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"securityPostureFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DeviceAuthorityBinding {
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "hardwareFingerprint")]
+    pub hardware_fingerprint: TransactionHash,
+    #[serde(rename = "securityPostureFingerprint")]
+    pub security_posture_fingerprint: TransactionHash,
 }
 #[doc = "`DeviceBindingProjection`"]
 #[doc = r""]
@@ -15865,6 +18249,829 @@ impl ::std::convert::From<UnavailableDiagnosticValue> for DiagnosticValue {
         Self::UnavailableDiagnosticValue(value)
     }
 }
+#[doc = "`DispatchReturnedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DispatchReturnedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"brokerRequestId\","]
+#[doc = "    \"brokerResponseId\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"outcome\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"brokerRequestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"brokerResponseId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"outcome\": {"]
+#[doc = "      \"$ref\": \"#/definitions/BrokerOutcome\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"dispatch-returned\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DispatchReturnedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "brokerRequestId")]
+    pub broker_request_id: TransactionIdentifier,
+    #[serde(rename = "brokerResponseId")]
+    pub broker_response_id: TransactionIdentifier,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    pub kind: DispatchReturnedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    pub outcome: BrokerOutcome,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: DispatchReturnedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`DispatchReturnedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DispatchReturnedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for DispatchReturnedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for DispatchReturnedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DispatchReturnedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DispatchReturnedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DispatchReturnedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DispatchReturnedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"dispatch-returned\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DispatchReturnedJournalEventState {
+    #[serde(rename = "dispatch-returned")]
+    DispatchReturned,
+}
+impl ::std::fmt::Display for DispatchReturnedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DispatchReturned => f.write_str("dispatch-returned"),
+        }
+    }
+}
+impl ::std::str::FromStr for DispatchReturnedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "dispatch-returned" => Ok(Self::DispatchReturned),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DispatchReturnedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DispatchReturnedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DispatchReturnedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DriftJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DriftJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"differenceSummary\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"differenceSummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"drift\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DriftJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "differenceSummary")]
+    pub difference_summary: TransactionText,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: DriftJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: DriftJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`DriftJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DriftJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for DriftJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for DriftJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DriftJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DriftJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DriftJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DriftJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"drift\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DriftJournalEventState {
+    #[serde(rename = "drift")]
+    Drift,
+}
+impl ::std::fmt::Display for DriftJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Drift => f.write_str("drift"),
+        }
+    }
+}
+impl ::std::str::FromStr for DriftJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "drift" => Ok(Self::Drift),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DriftJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DriftJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DriftJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DuplicateManagedPowerSchemeRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DuplicateManagedPowerSchemeRequest.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"counter\","]
+#[doc = "    \"destinationSchemeId\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"friendlyName\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"nonce\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceSchemeId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"counter\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"destinationSchemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"friendlyName\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Liiiraa Verificado\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"duplicate-managed-power-scheme-request\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"nonce\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceSchemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct DuplicateManagedPowerSchemeRequest {
+    pub counter: ::std::string::String,
+    #[serde(rename = "destinationSchemeId")]
+    pub destination_scheme_id: WindowsSchemeIdentifier,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "friendlyName")]
+    pub friendly_name: DuplicateManagedPowerSchemeRequestFriendlyName,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: DuplicateManagedPowerSchemeRequestKind,
+    pub nonce: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceSchemeId")]
+    pub source_scheme_id: WindowsSchemeIdentifier,
+}
+#[doc = "`DuplicateManagedPowerSchemeRequestFriendlyName`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Liiiraa Verificado\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DuplicateManagedPowerSchemeRequestFriendlyName {
+    #[serde(rename = "Liiiraa Verificado")]
+    LiiiraaVerificado,
+}
+impl ::std::fmt::Display for DuplicateManagedPowerSchemeRequestFriendlyName {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaVerificado => f.write_str("Liiiraa Verificado"),
+        }
+    }
+}
+impl ::std::str::FromStr for DuplicateManagedPowerSchemeRequestFriendlyName {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Liiiraa Verificado" => Ok(Self::LiiiraaVerificado),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DuplicateManagedPowerSchemeRequestFriendlyName {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for DuplicateManagedPowerSchemeRequestFriendlyName
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for DuplicateManagedPowerSchemeRequestFriendlyName
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DuplicateManagedPowerSchemeRequestKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"duplicate-managed-power-scheme-request\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DuplicateManagedPowerSchemeRequestKind {
+    #[serde(rename = "duplicate-managed-power-scheme-request")]
+    DuplicateManagedPowerSchemeRequest,
+}
+impl ::std::fmt::Display for DuplicateManagedPowerSchemeRequestKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DuplicateManagedPowerSchemeRequest => {
+                f.write_str("duplicate-managed-power-scheme-request")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for DuplicateManagedPowerSchemeRequestKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "duplicate-managed-power-scheme-request" => {
+                Ok(Self::DuplicateManagedPowerSchemeRequest)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DuplicateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DuplicateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DuplicateManagedPowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`DurableJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"DurableJournalEvent.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PreparedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DispatchReturnedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ObservedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/VerifiedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/NotAppliedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/UnknownJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DriftJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ConflictJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RestorePreparedJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RestoredJournalEvent\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum DurableJournalEvent {
+    PreparedJournalEvent(PreparedJournalEvent),
+    DispatchReturnedJournalEvent(DispatchReturnedJournalEvent),
+    ObservedJournalEvent(ObservedJournalEvent),
+    VerifiedJournalEvent(VerifiedJournalEvent),
+    NotAppliedJournalEvent(NotAppliedJournalEvent),
+    UnknownJournalEvent(UnknownJournalEvent),
+    DriftJournalEvent(DriftJournalEvent),
+    ConflictJournalEvent(ConflictJournalEvent),
+    RestorePreparedJournalEvent(RestorePreparedJournalEvent),
+    RestoredJournalEvent(RestoredJournalEvent),
+}
+impl ::std::convert::From<PreparedJournalEvent> for DurableJournalEvent {
+    fn from(value: PreparedJournalEvent) -> Self {
+        Self::PreparedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<DispatchReturnedJournalEvent> for DurableJournalEvent {
+    fn from(value: DispatchReturnedJournalEvent) -> Self {
+        Self::DispatchReturnedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<ObservedJournalEvent> for DurableJournalEvent {
+    fn from(value: ObservedJournalEvent) -> Self {
+        Self::ObservedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<VerifiedJournalEvent> for DurableJournalEvent {
+    fn from(value: VerifiedJournalEvent) -> Self {
+        Self::VerifiedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<NotAppliedJournalEvent> for DurableJournalEvent {
+    fn from(value: NotAppliedJournalEvent) -> Self {
+        Self::NotAppliedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<UnknownJournalEvent> for DurableJournalEvent {
+    fn from(value: UnknownJournalEvent) -> Self {
+        Self::UnknownJournalEvent(value)
+    }
+}
+impl ::std::convert::From<DriftJournalEvent> for DurableJournalEvent {
+    fn from(value: DriftJournalEvent) -> Self {
+        Self::DriftJournalEvent(value)
+    }
+}
+impl ::std::convert::From<ConflictJournalEvent> for DurableJournalEvent {
+    fn from(value: ConflictJournalEvent) -> Self {
+        Self::ConflictJournalEvent(value)
+    }
+}
+impl ::std::convert::From<RestorePreparedJournalEvent> for DurableJournalEvent {
+    fn from(value: RestorePreparedJournalEvent) -> Self {
+        Self::RestorePreparedJournalEvent(value)
+    }
+}
+impl ::std::convert::From<RestoredJournalEvent> for DurableJournalEvent {
+    fn from(value: RestoredJournalEvent) -> Self {
+        Self::RestoredJournalEvent(value)
+    }
+}
 #[doc = "`EvidenceComparison`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -16163,6 +19370,56 @@ impl ::std::convert::TryFrom<::std::string::String> for EvidenceQuality {
     ) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
     }
+}
+#[doc = "`EvidenceReference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"EvidenceReference.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"capturedAt\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"evidenceId\","]
+#[doc = "    \"quality\","]
+#[doc = "    \"validUntil\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"capturedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"quality\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceQuality\""]
+#[doc = "    },"]
+#[doc = "    \"validUntil\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceReference {
+    #[serde(rename = "capturedAt")]
+    pub captured_at: ::std::string::String,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    #[serde(rename = "evidenceId")]
+    pub evidence_id: EvidenceIdentifier,
+    pub quality: EvidenceQuality,
+    #[serde(rename = "validUntil")]
+    pub valid_until: ::std::string::String,
 }
 #[doc = "`EvidenceReport`"]
 #[doc = r""]
@@ -16464,6 +19721,164 @@ impl<'de> ::serde::Deserialize<'de> for EvidenceText {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`ExactOperationState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ExactOperationState.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactPowerSchemeState\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/UnavailablePowerSchemeState\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/UnknownPowerSchemeState\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum ExactOperationState {
+    ExactPowerSchemeState(ExactPowerSchemeState),
+    UnavailablePowerSchemeState(UnavailablePowerSchemeState),
+    UnknownPowerSchemeState(UnknownPowerSchemeState),
+}
+impl ::std::convert::From<ExactPowerSchemeState> for ExactOperationState {
+    fn from(value: ExactPowerSchemeState) -> Self {
+        Self::ExactPowerSchemeState(value)
+    }
+}
+impl ::std::convert::From<UnavailablePowerSchemeState> for ExactOperationState {
+    fn from(value: UnavailablePowerSchemeState) -> Self {
+        Self::UnavailablePowerSchemeState(value)
+    }
+}
+impl ::std::convert::From<UnknownPowerSchemeState> for ExactOperationState {
+    fn from(value: UnknownPowerSchemeState) -> Self {
+        Self::UnknownPowerSchemeState(value)
+    }
+}
+#[doc = "`ExactPowerSchemeState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ExactPowerSchemeState.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"canonicalStateHash\","]
+#[doc = "    \"observedAt\","]
+#[doc = "    \"schemeId\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"canonicalStateHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"observedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemeId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"observed\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ExactPowerSchemeState {
+    #[serde(rename = "canonicalStateHash")]
+    pub canonical_state_hash: TransactionHash,
+    #[serde(rename = "observedAt")]
+    pub observed_at: ::std::string::String,
+    #[serde(rename = "schemeId")]
+    pub scheme_id: WindowsSchemeIdentifier,
+    pub state: ExactPowerSchemeStateState,
+}
+#[doc = "`ExactPowerSchemeStateState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observed\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ExactPowerSchemeStateState {
+    #[serde(rename = "observed")]
+    Observed,
+}
+impl ::std::fmt::Display for ExactPowerSchemeStateState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Observed => f.write_str("observed"),
+        }
+    }
+}
+impl ::std::str::FromStr for ExactPowerSchemeStateState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observed" => Ok(Self::Observed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ExactPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ExactPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ExactPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`FixtureDiagnosticValue`"]
@@ -19602,6 +23017,379 @@ impl ::std::convert::TryFrom<::std::string::String> for NoChangeReceiptNextPhase
         value.parse()
     }
 }
+#[doc = "`NotAppliedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"NotAppliedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"not-applied\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct NotAppliedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: NotAppliedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: NotAppliedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`NotAppliedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum NotAppliedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for NotAppliedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for NotAppliedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for NotAppliedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for NotAppliedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for NotAppliedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`NotAppliedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"not-applied\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum NotAppliedJournalEventState {
+    #[serde(rename = "not-applied")]
+    NotApplied,
+}
+impl ::std::fmt::Display for NotAppliedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NotApplied => f.write_str("not-applied"),
+        }
+    }
+}
+impl ::std::str::FromStr for NotAppliedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "not-applied" => Ok(Self::NotApplied),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for NotAppliedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for NotAppliedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for NotAppliedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ObservePowerSchemeRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ObservePowerSchemeRequest.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"counter\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"nonce\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"counter\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"observe-power-scheme-request\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"nonce\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ObservePowerSchemeRequest {
+    pub counter: ::std::string::String,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: ObservePowerSchemeRequestKind,
+    pub nonce: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`ObservePowerSchemeRequestKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observe-power-scheme-request\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ObservePowerSchemeRequestKind {
+    #[serde(rename = "observe-power-scheme-request")]
+    ObservePowerSchemeRequest,
+}
+impl ::std::fmt::Display for ObservePowerSchemeRequestKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ObservePowerSchemeRequest => f.write_str("observe-power-scheme-request"),
+        }
+    }
+}
+impl ::std::str::FromStr for ObservePowerSchemeRequestKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observe-power-scheme-request" => Ok(Self::ObservePowerSchemeRequest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ObservePowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ObservePowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ObservePowerSchemeRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ObservedDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -19828,6 +23616,236 @@ impl ::std::convert::TryFrom<&::std::string::String> for ObservedHardwareFactSta
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ObservedHardwareFactState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ObservedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ObservedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"observed\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ObservedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    pub kind: ObservedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: ObservedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`ObservedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ObservedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for ObservedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for ObservedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ObservedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ObservedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ObservedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ObservedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"observed\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ObservedJournalEventState {
+    #[serde(rename = "observed")]
+    Observed,
+}
+impl ::std::fmt::Display for ObservedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Observed => f.write_str("observed"),
+        }
+    }
+}
+impl ::std::str::FromStr for ObservedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "observed" => Ok(Self::Observed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ObservedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ObservedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ObservedJournalEventState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -20322,6 +24340,1904 @@ impl<'de> ::serde::Deserialize<'de> for OpaquePayloadBytes {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`OperationPromotionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OperationPromotionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"promotionId\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"verdict\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/PromotionEvidenceReference\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"operation-promotion\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"promotionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PromotionStage\""]
+#[doc = "    },"]
+#[doc = "    \"verdict\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PromotionVerdict\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OperationPromotionDocument {
+    pub audit: AuditReference,
+    pub evidence: ::std::vec::Vec<PromotionEvidenceReference>,
+    pub kind: OperationPromotionDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "promotionId")]
+    pub promotion_id: TransactionIdentifier,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub stage: PromotionStage,
+    pub verdict: PromotionVerdict,
+}
+#[doc = "`OperationPromotionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"operation-promotion\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OperationPromotionDocumentKind {
+    #[serde(rename = "operation-promotion")]
+    OperationPromotion,
+}
+impl ::std::fmt::Display for OperationPromotionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OperationPromotion => f.write_str("operation-promotion"),
+        }
+    }
+}
+impl ::std::str::FromStr for OperationPromotionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "operation-promotion" => Ok(Self::OperationPromotion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OperationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OperationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OperationPromotionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PlanApprovalDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PlanApprovalDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"approvalId\","]
+#[doc = "    \"approvedAt\","]
+#[doc = "    \"approvedRisk\","]
+#[doc = "    \"audit\","]
+#[doc = "    \"compatibility\","]
+#[doc = "    \"device\","]
+#[doc = "    \"evidenceFingerprint\","]
+#[doc = "    \"intent\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionIds\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"planRevision\","]
+#[doc = "    \"proof\","]
+#[doc = "    \"recoveryCoverage\","]
+#[doc = "    \"revisionFingerprint\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"approvalId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"approvedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"approvedRisk\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RiskClass\""]
+#[doc = "    },"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"compatibility\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CompatibilityVerdict\""]
+#[doc = "    },"]
+#[doc = "    \"device\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"intent\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIntent\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"plan-approval\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionIds\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"planRevision\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"proof\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ActionProofReference\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryCoverage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryCoverage\""]
+#[doc = "    },"]
+#[doc = "    \"revisionFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PlanApprovalDocument {
+    #[serde(rename = "approvalId")]
+    pub approval_id: TransactionIdentifier,
+    #[serde(rename = "approvedAt")]
+    pub approved_at: ::std::string::String,
+    #[serde(rename = "approvedRisk")]
+    pub approved_risk: RiskClass,
+    pub audit: AuditReference,
+    pub compatibility: CompatibilityVerdict,
+    pub device: DeviceAuthorityBinding,
+    #[serde(rename = "evidenceFingerprint")]
+    pub evidence_fingerprint: TransactionHash,
+    pub intent: TransactionIntent,
+    pub kind: PlanApprovalDocumentKind,
+    #[serde(rename = "operationVersionIds")]
+    pub operation_version_ids: ::std::vec::Vec<TransactionIdentifier>,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    #[serde(rename = "planRevision")]
+    pub plan_revision: ::std::num::NonZeroU64,
+    pub proof: ActionProofReference,
+    #[serde(rename = "recoveryCoverage")]
+    pub recovery_coverage: RecoveryCoverage,
+    #[serde(rename = "revisionFingerprint")]
+    pub revision_fingerprint: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`PlanApprovalDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"plan-approval\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PlanApprovalDocumentKind {
+    #[serde(rename = "plan-approval")]
+    PlanApproval,
+}
+impl ::std::fmt::Display for PlanApprovalDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PlanApproval => f.write_str("plan-approval"),
+        }
+    }
+}
+impl ::std::str::FromStr for PlanApprovalDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "plan-approval" => Ok(Self::PlanApproval),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PlanApprovalDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PlanApprovalDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PlanApprovalDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PlanLifecycleState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PlanLifecycleState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"composed\","]
+#[doc = "    \"awaiting-approval\","]
+#[doc = "    \"approved\","]
+#[doc = "    \"applying\","]
+#[doc = "    \"paused\","]
+#[doc = "    \"awaiting-restart\","]
+#[doc = "    \"recovering\","]
+#[doc = "    \"completed\","]
+#[doc = "    \"restored\","]
+#[doc = "    \"blocked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PlanLifecycleState {
+    #[serde(rename = "composed")]
+    Composed,
+    #[serde(rename = "awaiting-approval")]
+    AwaitingApproval,
+    #[serde(rename = "approved")]
+    Approved,
+    #[serde(rename = "applying")]
+    Applying,
+    #[serde(rename = "paused")]
+    Paused,
+    #[serde(rename = "awaiting-restart")]
+    AwaitingRestart,
+    #[serde(rename = "recovering")]
+    Recovering,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "restored")]
+    Restored,
+    #[serde(rename = "blocked")]
+    Blocked,
+}
+impl ::std::fmt::Display for PlanLifecycleState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Composed => f.write_str("composed"),
+            Self::AwaitingApproval => f.write_str("awaiting-approval"),
+            Self::Approved => f.write_str("approved"),
+            Self::Applying => f.write_str("applying"),
+            Self::Paused => f.write_str("paused"),
+            Self::AwaitingRestart => f.write_str("awaiting-restart"),
+            Self::Recovering => f.write_str("recovering"),
+            Self::Completed => f.write_str("completed"),
+            Self::Restored => f.write_str("restored"),
+            Self::Blocked => f.write_str("blocked"),
+        }
+    }
+}
+impl ::std::str::FromStr for PlanLifecycleState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "composed" => Ok(Self::Composed),
+            "awaiting-approval" => Ok(Self::AwaitingApproval),
+            "approved" => Ok(Self::Approved),
+            "applying" => Ok(Self::Applying),
+            "paused" => Ok(Self::Paused),
+            "awaiting-restart" => Ok(Self::AwaitingRestart),
+            "recovering" => Ok(Self::Recovering),
+            "completed" => Ok(Self::Completed),
+            "restored" => Ok(Self::Restored),
+            "blocked" => Ok(Self::Blocked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PlanLifecycleState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PlanLifecycleState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PlanLifecycleState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PlanOperation`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PlanOperation.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"compatibility\","]
+#[doc = "    \"dependencyGroupId\","]
+#[doc = "    \"evidence\","]
+#[doc = "    \"expectedImpact\","]
+#[doc = "    \"operationKind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousValue\","]
+#[doc = "    \"purpose\","]
+#[doc = "    \"recoveryMethod\","]
+#[doc = "    \"requestedValue\","]
+#[doc = "    \"restartEffect\","]
+#[doc = "    \"risk\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"compatibility\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CompatibilityAssessment\""]
+#[doc = "    },"]
+#[doc = "    \"dependencyGroupId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"evidence\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/EvidenceReference\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 16,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"expectedImpact\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"operationKind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"managed-power-scheme-v1\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousValue\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"purpose\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryMethod\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryMethod\""]
+#[doc = "    },"]
+#[doc = "    \"requestedValue\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"restartEffect\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RestartEffect\""]
+#[doc = "    },"]
+#[doc = "    \"risk\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RiskClass\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PlanOperation {
+    pub compatibility: CompatibilityAssessment,
+    #[serde(rename = "dependencyGroupId")]
+    pub dependency_group_id: TransactionIdentifier,
+    pub evidence: ::std::vec::Vec<EvidenceReference>,
+    #[serde(rename = "expectedImpact")]
+    pub expected_impact: TransactionText,
+    #[serde(rename = "operationKind")]
+    pub operation_kind: PlanOperationOperationKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousValue")]
+    pub previous_value: ExactOperationState,
+    pub purpose: TransactionText,
+    #[serde(rename = "recoveryMethod")]
+    pub recovery_method: RecoveryMethod,
+    #[serde(rename = "requestedValue")]
+    pub requested_value: ExactOperationState,
+    #[serde(rename = "restartEffect")]
+    pub restart_effect: RestartEffect,
+    pub risk: RiskClass,
+}
+#[doc = "`PlanOperationOperationKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"managed-power-scheme-v1\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PlanOperationOperationKind {
+    #[serde(rename = "managed-power-scheme-v1")]
+    ManagedPowerSchemeV1,
+}
+impl ::std::fmt::Display for PlanOperationOperationKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ManagedPowerSchemeV1 => f.write_str("managed-power-scheme-v1"),
+        }
+    }
+}
+impl ::std::str::FromStr for PlanOperationOperationKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "managed-power-scheme-v1" => Ok(Self::ManagedPowerSchemeV1),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PlanOperationOperationKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PlanOperationOperationKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PlanOperationOperationKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PlanTransactionDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PlanTransactionDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"approvalId\","]
+#[doc = "    \"audit\","]
+#[doc = "    \"intent\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"planRevision\","]
+#[doc = "    \"revisionFingerprint\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"startedAt\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"approvalId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"intent\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIntent\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"plan-transaction\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"parentTransactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"planRevision\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"revisionFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"startedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PlanTransactionDocument {
+    #[serde(rename = "approvalId")]
+    pub approval_id: TransactionIdentifier,
+    pub audit: AuditReference,
+    pub intent: TransactionIntent,
+    pub kind: PlanTransactionDocumentKind,
+    #[serde(
+        rename = "parentTransactionId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub parent_transaction_id: ::std::option::Option<TransactionIdentifier>,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    #[serde(rename = "planRevision")]
+    pub plan_revision: ::std::num::NonZeroU64,
+    #[serde(rename = "revisionFingerprint")]
+    pub revision_fingerprint: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "startedAt")]
+    pub started_at: ::std::string::String,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`PlanTransactionDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"plan-transaction\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PlanTransactionDocumentKind {
+    #[serde(rename = "plan-transaction")]
+    PlanTransaction,
+}
+impl ::std::fmt::Display for PlanTransactionDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PlanTransaction => f.write_str("plan-transaction"),
+        }
+    }
+}
+impl ::std::str::FromStr for PlanTransactionDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "plan-transaction" => Ok(Self::PlanTransaction),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PlanTransactionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PlanTransactionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PlanTransactionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PrepareRestorePointRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PrepareRestorePointRequest.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"counter\","]
+#[doc = "    \"deviceBindingId\","]
+#[doc = "    \"displaySummary\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"nonce\","]
+#[doc = "    \"requestId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"counter\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"deviceBindingId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"displaySummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"prepare-restore-point-request\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"nonce\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"requestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PrepareRestorePointRequest {
+    pub counter: ::std::string::String,
+    #[serde(rename = "deviceBindingId")]
+    pub device_binding_id: TransactionIdentifier,
+    #[serde(rename = "displaySummary")]
+    pub display_summary: TransactionText,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: PrepareRestorePointRequestKind,
+    pub nonce: TransactionIdentifier,
+    #[serde(rename = "requestId")]
+    pub request_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`PrepareRestorePointRequestKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"prepare-restore-point-request\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PrepareRestorePointRequestKind {
+    #[serde(rename = "prepare-restore-point-request")]
+    PrepareRestorePointRequest,
+}
+impl ::std::fmt::Display for PrepareRestorePointRequestKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PrepareRestorePointRequest => f.write_str("prepare-restore-point-request"),
+        }
+    }
+}
+impl ::std::str::FromStr for PrepareRestorePointRequestKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "prepare-restore-point-request" => Ok(Self::PrepareRestorePointRequest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PrepareRestorePointRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PrepareRestorePointRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PrepareRestorePointRequestKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PreparedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PreparedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"recoveryMethod\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryMethod\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryMethod\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"prepared\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PreparedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: PreparedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "recoveryMethod")]
+    pub recovery_method: RecoveryMethod,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: PreparedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`PreparedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PreparedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for PreparedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for PreparedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PreparedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"prepared\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PreparedJournalEventState {
+    #[serde(rename = "prepared")]
+    Prepared,
+}
+impl ::std::fmt::Display for PreparedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Prepared => f.write_str("prepared"),
+        }
+    }
+}
+impl ::std::str::FromStr for PreparedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "prepared" => Ok(Self::Prepared),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PrivilegedBrokerRequest`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PrivilegedBrokerRequest.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ObservePowerSchemeRequest\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DuplicateManagedPowerSchemeRequest\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ActivateManagedPowerSchemeRequest\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DeleteOwnedPowerSchemeRequest\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PrepareRestorePointRequest\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum PrivilegedBrokerRequest {
+    ObservePowerSchemeRequest(ObservePowerSchemeRequest),
+    DuplicateManagedPowerSchemeRequest(DuplicateManagedPowerSchemeRequest),
+    ActivateManagedPowerSchemeRequest(ActivateManagedPowerSchemeRequest),
+    DeleteOwnedPowerSchemeRequest(DeleteOwnedPowerSchemeRequest),
+    PrepareRestorePointRequest(PrepareRestorePointRequest),
+}
+impl ::std::convert::From<ObservePowerSchemeRequest> for PrivilegedBrokerRequest {
+    fn from(value: ObservePowerSchemeRequest) -> Self {
+        Self::ObservePowerSchemeRequest(value)
+    }
+}
+impl ::std::convert::From<DuplicateManagedPowerSchemeRequest> for PrivilegedBrokerRequest {
+    fn from(value: DuplicateManagedPowerSchemeRequest) -> Self {
+        Self::DuplicateManagedPowerSchemeRequest(value)
+    }
+}
+impl ::std::convert::From<ActivateManagedPowerSchemeRequest> for PrivilegedBrokerRequest {
+    fn from(value: ActivateManagedPowerSchemeRequest) -> Self {
+        Self::ActivateManagedPowerSchemeRequest(value)
+    }
+}
+impl ::std::convert::From<DeleteOwnedPowerSchemeRequest> for PrivilegedBrokerRequest {
+    fn from(value: DeleteOwnedPowerSchemeRequest) -> Self {
+        Self::DeleteOwnedPowerSchemeRequest(value)
+    }
+}
+impl ::std::convert::From<PrepareRestorePointRequest> for PrivilegedBrokerRequest {
+    fn from(value: PrepareRestorePointRequest) -> Self {
+        Self::PrepareRestorePointRequest(value)
+    }
+}
+#[doc = "`PrivilegedBrokerResponse`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PrivilegedBrokerResponse.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/BrokerObservationResponse\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/BrokerAcceptedResponse\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/BrokerRejectedResponse\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/BrokerUnavailableResponse\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum PrivilegedBrokerResponse {
+    ObservationResponse(BrokerObservationResponse),
+    AcceptedResponse(BrokerAcceptedResponse),
+    RejectedResponse(BrokerRejectedResponse),
+    UnavailableResponse(BrokerUnavailableResponse),
+}
+impl ::std::convert::From<BrokerObservationResponse> for PrivilegedBrokerResponse {
+    fn from(value: BrokerObservationResponse) -> Self {
+        Self::ObservationResponse(value)
+    }
+}
+impl ::std::convert::From<BrokerAcceptedResponse> for PrivilegedBrokerResponse {
+    fn from(value: BrokerAcceptedResponse) -> Self {
+        Self::AcceptedResponse(value)
+    }
+}
+impl ::std::convert::From<BrokerRejectedResponse> for PrivilegedBrokerResponse {
+    fn from(value: BrokerRejectedResponse) -> Self {
+        Self::RejectedResponse(value)
+    }
+}
+impl ::std::convert::From<BrokerUnavailableResponse> for PrivilegedBrokerResponse {
+    fn from(value: BrokerUnavailableResponse) -> Self {
+        Self::UnavailableResponse(value)
+    }
+}
+#[doc = "`ProgressEventDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProgressEventDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"displayText\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"displayText\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"progress-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProgressState\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ProgressEventDocument {
+    #[serde(rename = "displayText")]
+    pub display_text: TransactionText,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    pub kind: ProgressEventDocumentKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(
+        rename = "operationVersionId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub operation_version_id: ::std::option::Option<TransactionIdentifier>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: ProgressState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`ProgressEventDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"progress-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProgressEventDocumentKind {
+    #[serde(rename = "progress-event")]
+    ProgressEvent,
+}
+impl ::std::fmt::Display for ProgressEventDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ProgressEvent => f.write_str("progress-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProgressEventDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "progress-event" => Ok(Self::ProgressEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProgressEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProgressEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProgressEventDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ProgressSnapshotDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProgressSnapshotDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"completedOperations\","]
+#[doc = "    \"displayText\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"totalOperations\","]
+#[doc = "    \"transactionId\","]
+#[doc = "    \"updatedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"completedOperations\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"currentOperationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"displayText\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"progress-snapshot\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProgressState\""]
+#[doc = "    },"]
+#[doc = "    \"totalOperations\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"updatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ProgressSnapshotDocument {
+    #[serde(rename = "completedOperations")]
+    pub completed_operations: u32,
+    #[serde(
+        rename = "currentOperationVersionId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub current_operation_version_id: ::std::option::Option<TransactionIdentifier>,
+    #[serde(rename = "displayText")]
+    pub display_text: TransactionText,
+    pub kind: ProgressSnapshotDocumentKind,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: ProgressState,
+    #[serde(rename = "totalOperations")]
+    pub total_operations: u32,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: ::std::string::String,
+}
+#[doc = "`ProgressSnapshotDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"progress-snapshot\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProgressSnapshotDocumentKind {
+    #[serde(rename = "progress-snapshot")]
+    ProgressSnapshot,
+}
+impl ::std::fmt::Display for ProgressSnapshotDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ProgressSnapshot => f.write_str("progress-snapshot"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProgressSnapshotDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "progress-snapshot" => Ok(Self::ProgressSnapshot),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProgressSnapshotDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProgressSnapshotDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProgressSnapshotDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ProgressState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ProgressState.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"queued\","]
+#[doc = "    \"preparing\","]
+#[doc = "    \"applying\","]
+#[doc = "    \"observing\","]
+#[doc = "    \"verifying\","]
+#[doc = "    \"awaiting-restart\","]
+#[doc = "    \"paused\","]
+#[doc = "    \"recovering\","]
+#[doc = "    \"completed\","]
+#[doc = "    \"blocked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ProgressState {
+    #[serde(rename = "queued")]
+    Queued,
+    #[serde(rename = "preparing")]
+    Preparing,
+    #[serde(rename = "applying")]
+    Applying,
+    #[serde(rename = "observing")]
+    Observing,
+    #[serde(rename = "verifying")]
+    Verifying,
+    #[serde(rename = "awaiting-restart")]
+    AwaitingRestart,
+    #[serde(rename = "paused")]
+    Paused,
+    #[serde(rename = "recovering")]
+    Recovering,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "blocked")]
+    Blocked,
+}
+impl ::std::fmt::Display for ProgressState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Queued => f.write_str("queued"),
+            Self::Preparing => f.write_str("preparing"),
+            Self::Applying => f.write_str("applying"),
+            Self::Observing => f.write_str("observing"),
+            Self::Verifying => f.write_str("verifying"),
+            Self::AwaitingRestart => f.write_str("awaiting-restart"),
+            Self::Paused => f.write_str("paused"),
+            Self::Recovering => f.write_str("recovering"),
+            Self::Completed => f.write_str("completed"),
+            Self::Blocked => f.write_str("blocked"),
+        }
+    }
+}
+impl ::std::str::FromStr for ProgressState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "queued" => Ok(Self::Queued),
+            "preparing" => Ok(Self::Preparing),
+            "applying" => Ok(Self::Applying),
+            "observing" => Ok(Self::Observing),
+            "verifying" => Ok(Self::Verifying),
+            "awaiting-restart" => Ok(Self::AwaitingRestart),
+            "paused" => Ok(Self::Paused),
+            "recovering" => Ok(Self::Recovering),
+            "completed" => Ok(Self::Completed),
+            "blocked" => Ok(Self::Blocked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ProgressState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ProgressState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ProgressState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PromotionEvidenceReference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PromotionEvidenceReference.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"capturedAt\","]
+#[doc = "    \"evidenceHash\","]
+#[doc = "    \"evidenceId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"capturedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceHash\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/EvidenceIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PromotionEvidenceReference {
+    #[serde(rename = "capturedAt")]
+    pub captured_at: ::std::string::String,
+    #[serde(rename = "evidenceHash")]
+    pub evidence_hash: EvidenceHash,
+    #[serde(rename = "evidenceId")]
+    pub evidence_id: EvidenceIdentifier,
+}
+#[doc = "`PromotionStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PromotionStage.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"deterministic-simulation\","]
+#[doc = "    \"clean-windows-vm\","]
+#[doc = "    \"owner-pc\","]
+#[doc = "    \"friends-pc\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PromotionStage {
+    #[serde(rename = "deterministic-simulation")]
+    DeterministicSimulation,
+    #[serde(rename = "clean-windows-vm")]
+    CleanWindowsVm,
+    #[serde(rename = "owner-pc")]
+    OwnerPc,
+    #[serde(rename = "friends-pc")]
+    FriendsPc,
+}
+impl ::std::fmt::Display for PromotionStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::DeterministicSimulation => f.write_str("deterministic-simulation"),
+            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
+            Self::OwnerPc => f.write_str("owner-pc"),
+            Self::FriendsPc => f.write_str("friends-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for PromotionStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "deterministic-simulation" => Ok(Self::DeterministicSimulation),
+            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
+            "owner-pc" => Ok(Self::OwnerPc),
+            "friends-pc" => Ok(Self::FriendsPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PromotionStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PromotionStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PromotionStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PromotionVerdict`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PromotionVerdict.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"pending\","]
+#[doc = "    \"passed\","]
+#[doc = "    \"failed\","]
+#[doc = "    \"blocked\","]
+#[doc = "    \"revoked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PromotionVerdict {
+    #[serde(rename = "pending")]
+    Pending,
+    #[serde(rename = "passed")]
+    Passed,
+    #[serde(rename = "failed")]
+    Failed,
+    #[serde(rename = "blocked")]
+    Blocked,
+    #[serde(rename = "revoked")]
+    Revoked,
+}
+impl ::std::fmt::Display for PromotionVerdict {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Pending => f.write_str("pending"),
+            Self::Passed => f.write_str("passed"),
+            Self::Failed => f.write_str("failed"),
+            Self::Blocked => f.write_str("blocked"),
+            Self::Revoked => f.write_str("revoked"),
+        }
+    }
+}
+impl ::std::str::FromStr for PromotionVerdict {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "pending" => Ok(Self::Pending),
+            "passed" => Ok(Self::Passed),
+            "failed" => Ok(Self::Failed),
+            "blocked" => Ok(Self::Blocked),
+            "revoked" => Ok(Self::Revoked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PromotionVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PromotionVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PromotionVerdict {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`ProvenanceDescription`"]
@@ -20861,6 +26777,335 @@ impl ::std::convert::TryFrom<::std::string::String> for ProviderIdentity {
         value.parse()
     }
 }
+#[doc = "`RecoveryCheckpointDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RecoveryCheckpointDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"checkpointId\","]
+#[doc = "    \"coverage\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"restartRequired\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"checkpointId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"coverage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryCoverage\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"recovery-checkpoint\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"restartRequired\": {"]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"restorePointSequence\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"restorePointStatus\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RecoveryCheckpointDocument {
+    pub audit: AuditReference,
+    #[serde(rename = "checkpointId")]
+    pub checkpoint_id: TransactionIdentifier,
+    pub coverage: RecoveryCoverage,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    pub kind: RecoveryCheckpointDocumentKind,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    #[serde(rename = "restartRequired")]
+    pub restart_required: bool,
+    #[serde(
+        rename = "restorePointSequence",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub restore_point_sequence: ::std::option::Option<::std::string::String>,
+    #[serde(
+        rename = "restorePointStatus",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub restore_point_status: ::std::option::Option<TransactionText>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RecoveryCheckpointDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"recovery-checkpoint\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RecoveryCheckpointDocumentKind {
+    #[serde(rename = "recovery-checkpoint")]
+    RecoveryCheckpoint,
+}
+impl ::std::fmt::Display for RecoveryCheckpointDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RecoveryCheckpoint => f.write_str("recovery-checkpoint"),
+        }
+    }
+}
+impl ::std::str::FromStr for RecoveryCheckpointDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "recovery-checkpoint" => Ok(Self::RecoveryCheckpoint),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RecoveryCheckpointDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RecoveryCheckpointDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RecoveryCheckpointDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RecoveryCoverage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RecoveryCoverage.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"ready\","]
+#[doc = "    \"partial\","]
+#[doc = "    \"unavailable\","]
+#[doc = "    \"failed\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RecoveryCoverage {
+    #[serde(rename = "ready")]
+    Ready,
+    #[serde(rename = "partial")]
+    Partial,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+    #[serde(rename = "failed")]
+    Failed,
+}
+impl ::std::fmt::Display for RecoveryCoverage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Ready => f.write_str("ready"),
+            Self::Partial => f.write_str("partial"),
+            Self::Unavailable => f.write_str("unavailable"),
+            Self::Failed => f.write_str("failed"),
+        }
+    }
+}
+impl ::std::str::FromStr for RecoveryCoverage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "ready" => Ok(Self::Ready),
+            "partial" => Ok(Self::Partial),
+            "unavailable" => Ok(Self::Unavailable),
+            "failed" => Ok(Self::Failed),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RecoveryCoverage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RecoveryCoverage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RecoveryCoverage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RecoveryMethod`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RecoveryMethod.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"exact-prior-scheme\","]
+#[doc = "    \"owned-scheme-removal\","]
+#[doc = "    \"system-restore-complement\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RecoveryMethod {
+    #[serde(rename = "exact-prior-scheme")]
+    ExactPriorScheme,
+    #[serde(rename = "owned-scheme-removal")]
+    OwnedSchemeRemoval,
+    #[serde(rename = "system-restore-complement")]
+    SystemRestoreComplement,
+}
+impl ::std::fmt::Display for RecoveryMethod {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ExactPriorScheme => f.write_str("exact-prior-scheme"),
+            Self::OwnedSchemeRemoval => f.write_str("owned-scheme-removal"),
+            Self::SystemRestoreComplement => f.write_str("system-restore-complement"),
+        }
+    }
+}
+impl ::std::str::FromStr for RecoveryMethod {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "exact-prior-scheme" => Ok(Self::ExactPriorScheme),
+            "owned-scheme-removal" => Ok(Self::OwnedSchemeRemoval),
+            "system-restore-complement" => Ok(Self::SystemRestoreComplement),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RecoveryMethod {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RecoveryMethod {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RecoveryMethod {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`RedactedAuthorityText`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -20933,6 +27178,223 @@ impl<'de> ::serde::Deserialize<'de> for RedactedAuthorityText {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`RedactedDiagnosticEntry`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RedactedDiagnosticEntry.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"reasonCode\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProgressState\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RedactedDiagnosticEntry {
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(
+        rename = "reasonCode",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub reason_code: ::std::option::Option<TransactionIdentifier>,
+    pub state: ProgressState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RedactedDiagnosticExportDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RedactedDiagnosticExportDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"entries\","]
+#[doc = "    \"exportId\","]
+#[doc = "    \"generatedAt\","]
+#[doc = "    \"journalHeadHash\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"redactionsApplied\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"entries\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/RedactedDiagnosticEntry\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 512,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"exportId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"generatedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"journalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"redacted-diagnostic-export\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"redactionsApplied\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RedactedDiagnosticExportDocument {
+    pub audit: AuditReference,
+    pub entries: ::std::vec::Vec<RedactedDiagnosticEntry>,
+    #[serde(rename = "exportId")]
+    pub export_id: TransactionIdentifier,
+    #[serde(rename = "generatedAt")]
+    pub generated_at: ::std::string::String,
+    #[serde(rename = "journalHeadHash")]
+    pub journal_head_hash: TransactionHash,
+    pub kind: RedactedDiagnosticExportDocumentKind,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    #[serde(rename = "redactionsApplied")]
+    pub redactions_applied: ::std::vec::Vec<TransactionIdentifier>,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`RedactedDiagnosticExportDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"redacted-diagnostic-export\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RedactedDiagnosticExportDocumentKind {
+    #[serde(rename = "redacted-diagnostic-export")]
+    RedactedDiagnosticExport,
+}
+impl ::std::fmt::Display for RedactedDiagnosticExportDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RedactedDiagnosticExport => f.write_str("redacted-diagnostic-export"),
+        }
+    }
+}
+impl ::std::str::FromStr for RedactedDiagnosticExportDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "redacted-diagnostic-export" => Ok(Self::RedactedDiagnosticExport),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RedactedDiagnosticExportDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RedactedDiagnosticExportDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RedactedDiagnosticExportDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`RejectedComparison`"]
@@ -21493,6 +27955,653 @@ impl<'de> ::serde::Deserialize<'de> for RequestId {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`RestartEffect`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RestartEffect.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"none\","]
+#[doc = "    \"recommended\","]
+#[doc = "    \"required\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestartEffect {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "recommended")]
+    Recommended,
+    #[serde(rename = "required")]
+    Required,
+}
+impl ::std::fmt::Display for RestartEffect {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::None => f.write_str("none"),
+            Self::Recommended => f.write_str("recommended"),
+            Self::Required => f.write_str("required"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestartEffect {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "none" => Ok(Self::None),
+            "recommended" => Ok(Self::Recommended),
+            "required" => Ok(Self::Required),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestartEffect {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestartEffect {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestartEffect {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestorePreparedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RestorePreparedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactAppliedState\","]
+#[doc = "    \"exactRestoreTargetState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"recoveryMethod\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactAppliedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRestoreTargetState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryMethod\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryMethod\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restore-prepared\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RestorePreparedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactAppliedState")]
+    pub exact_applied_state: ExactOperationState,
+    #[serde(rename = "exactRestoreTargetState")]
+    pub exact_restore_target_state: ExactOperationState,
+    pub kind: RestorePreparedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "recoveryMethod")]
+    pub recovery_method: RecoveryMethod,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: RestorePreparedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RestorePreparedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestorePreparedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for RestorePreparedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestorePreparedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestorePreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestorePreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestorePreparedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestorePreparedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restore-prepared\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestorePreparedJournalEventState {
+    #[serde(rename = "restore-prepared")]
+    RestorePrepared,
+}
+impl ::std::fmt::Display for RestorePreparedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RestorePrepared => f.write_str("restore-prepared"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestorePreparedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restore-prepared" => Ok(Self::RestorePrepared),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestorePreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestorePreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestorePreparedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestoredJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RestoredJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restored\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RestoredJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: RestoredJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: RestoredJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RestoredJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestoredJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for RestoredJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestoredJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestoredJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestoredJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestoredJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestoredJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restored\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestoredJournalEventState {
+    #[serde(rename = "restored")]
+    Restored,
+}
+impl ::std::fmt::Display for RestoredJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Restored => f.write_str("restored"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestoredJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restored" => Ok(Self::Restored),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestoredJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestoredJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestoredJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RiskClass`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RiskClass.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"verified\","]
+#[doc = "    \"advanced\","]
+#[doc = "    \"experimental\","]
+#[doc = "    \"extreme-locked\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RiskClass {
+    #[serde(rename = "verified")]
+    Verified,
+    #[serde(rename = "advanced")]
+    Advanced,
+    #[serde(rename = "experimental")]
+    Experimental,
+    #[serde(rename = "extreme-locked")]
+    ExtremeLocked,
+}
+impl ::std::fmt::Display for RiskClass {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Verified => f.write_str("verified"),
+            Self::Advanced => f.write_str("advanced"),
+            Self::Experimental => f.write_str("experimental"),
+            Self::ExtremeLocked => f.write_str("extreme-locked"),
+        }
+    }
+}
+impl ::std::str::FromStr for RiskClass {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "verified" => Ok(Self::Verified),
+            "advanced" => Ok(Self::Advanced),
+            "experimental" => Ok(Self::Experimental),
+            "extreme-locked" => Ok(Self::ExtremeLocked),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RiskClass {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RiskClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RiskClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`SafeContextKey`"]
@@ -30012,6 +37121,162 @@ impl ::std::convert::TryFrom<::std::string::String> for SignatureState {
         value.parse()
     }
 }
+#[doc = "`SignedOperationRevocationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"SignedOperationRevocationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"issuedAt\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"recoveryRemainsAvailable\","]
+#[doc = "    \"revocationId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"signature\","]
+#[doc = "    \"signatureKeyId\","]
+#[doc = "    \"signedPayloadHash\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"issuedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"operation-revocation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryRemainsAvailable\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"revocationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"signature\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"signatureKeyId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"signedPayloadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SignedOperationRevocationDocument {
+    pub audit: AuditReference,
+    #[serde(rename = "issuedAt")]
+    pub issued_at: ::std::string::String,
+    pub kind: SignedOperationRevocationDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    pub reason: TransactionText,
+    #[serde(rename = "recoveryRemainsAvailable")]
+    pub recovery_remains_available: bool,
+    #[serde(rename = "revocationId")]
+    pub revocation_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub signature: TransactionIdentifier,
+    #[serde(rename = "signatureKeyId")]
+    pub signature_key_id: TransactionIdentifier,
+    #[serde(rename = "signedPayloadHash")]
+    pub signed_payload_hash: TransactionHash,
+}
+#[doc = "`SignedOperationRevocationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"operation-revocation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SignedOperationRevocationDocumentKind {
+    #[serde(rename = "operation-revocation")]
+    OperationRevocation,
+}
+impl ::std::fmt::Display for SignedOperationRevocationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OperationRevocation => f.write_str("operation-revocation"),
+        }
+    }
+}
+impl ::std::str::FromStr for SignedOperationRevocationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "operation-revocation" => Ok(Self::OperationRevocation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SignedOperationRevocationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SignedOperationRevocationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SignedOperationRevocationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`SourceCapability`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -31135,6 +38400,907 @@ impl ::std::convert::TryFrom<::std::string::String> for SupportCommandSchemaVers
         value.parse()
     }
 }
+#[doc = "`TransactionHash`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionHash.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 71,"]
+#[doc = "  \"minLength\": 71,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TransactionHash(::std::string::String);
+impl ::std::ops::Deref for TransactionHash {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TransactionHash> for ::std::string::String {
+    fn from(value: TransactionHash) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TransactionHash {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 71usize {
+            return Err("longer than 71 characters".into());
+        }
+        if value.chars().count() < 71usize {
+            return Err("shorter than 71 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionHash {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionHash {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionHash {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TransactionHash {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`TransactionIdentifier`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionIdentifier.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TransactionIdentifier(::std::string::String);
+impl ::std::ops::Deref for TransactionIdentifier {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TransactionIdentifier> for ::std::string::String {
+    fn from(value: TransactionIdentifier) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TransactionIdentifier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TransactionIdentifier {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`TransactionIntent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionIntent.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"apply\","]
+#[doc = "    \"restore-operation\","]
+#[doc = "    \"restore-plan\","]
+#[doc = "    \"restore-checkpoint\","]
+#[doc = "    \"retry-after-observation\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TransactionIntent {
+    #[serde(rename = "apply")]
+    Apply,
+    #[serde(rename = "restore-operation")]
+    RestoreOperation,
+    #[serde(rename = "restore-plan")]
+    RestorePlan,
+    #[serde(rename = "restore-checkpoint")]
+    RestoreCheckpoint,
+    #[serde(rename = "retry-after-observation")]
+    RetryAfterObservation,
+}
+impl ::std::fmt::Display for TransactionIntent {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Apply => f.write_str("apply"),
+            Self::RestoreOperation => f.write_str("restore-operation"),
+            Self::RestorePlan => f.write_str("restore-plan"),
+            Self::RestoreCheckpoint => f.write_str("restore-checkpoint"),
+            Self::RetryAfterObservation => f.write_str("retry-after-observation"),
+        }
+    }
+}
+impl ::std::str::FromStr for TransactionIntent {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "apply" => Ok(Self::Apply),
+            "restore-operation" => Ok(Self::RestoreOperation),
+            "restore-plan" => Ok(Self::RestorePlan),
+            "restore-checkpoint" => Ok(Self::RestoreCheckpoint),
+            "retry-after-observation" => Ok(Self::RetryAfterObservation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionIntent {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionIntent {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionIntent {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TransactionReceiptDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionReceiptDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"completedAt\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"humanSummary\","]
+#[doc = "    \"journalHeadHash\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"receiptId\","]
+#[doc = "    \"recoveryMethod\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"technicalSummary\","]
+#[doc = "    \"transactionId\","]
+#[doc = "    \"verification\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"completedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"humanSummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"journalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"transaction-receipt\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"receiptId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"recoveryMethod\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryMethod\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"technicalSummary\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"verification\": {"]
+#[doc = "      \"$ref\": \"#/definitions/VerificationReceipt\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct TransactionReceiptDocument {
+    pub audit: AuditReference,
+    #[serde(rename = "completedAt")]
+    pub completed_at: ::std::string::String,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    #[serde(rename = "humanSummary")]
+    pub human_summary: TransactionText,
+    #[serde(rename = "journalHeadHash")]
+    pub journal_head_hash: TransactionHash,
+    pub kind: TransactionReceiptDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    #[serde(rename = "receiptId")]
+    pub receipt_id: TransactionIdentifier,
+    #[serde(rename = "recoveryMethod")]
+    pub recovery_method: RecoveryMethod,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "technicalSummary")]
+    pub technical_summary: TransactionText,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+    pub verification: VerificationReceipt,
+}
+#[doc = "`TransactionReceiptDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"transaction-receipt\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TransactionReceiptDocumentKind {
+    #[serde(rename = "transaction-receipt")]
+    TransactionReceipt,
+}
+impl ::std::fmt::Display for TransactionReceiptDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TransactionReceipt => f.write_str("transaction-receipt"),
+        }
+    }
+}
+impl ::std::str::FromStr for TransactionReceiptDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "transaction-receipt" => Ok(Self::TransactionReceipt),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionReceiptDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionReceiptDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionReceiptDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TransactionSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionSchemaVersion.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TransactionSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for TransactionSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for TransactionSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TransactionText`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionText.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TransactionText(::std::string::String);
+impl ::std::ops::Deref for TransactionText {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TransactionText> for ::std::string::String {
+    fn from(value: TransactionText) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TransactionText {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionText {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionText {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TransactionText {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`TransactionalPlanDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionalPlanDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"dependencyGroups\","]
+#[doc = "    \"device\","]
+#[doc = "    \"effectiveRisk\","]
+#[doc = "    \"evidenceFingerprint\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"lifecycle\","]
+#[doc = "    \"operations\","]
+#[doc = "    \"planId\","]
+#[doc = "    \"revision\","]
+#[doc = "    \"revisionFingerprint\","]
+#[doc = "    \"riskCeiling\","]
+#[doc = "    \"schemaVersion\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"dependencyGroups\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/DependencyGroup\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"device\": {"]
+#[doc = "      \"$ref\": \"#/definitions/DeviceAuthorityBinding\""]
+#[doc = "    },"]
+#[doc = "    \"effectiveRisk\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RiskClass\""]
+#[doc = "    },"]
+#[doc = "    \"evidenceFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"transactional-plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"lifecycle\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PlanLifecycleState\""]
+#[doc = "    },"]
+#[doc = "    \"operations\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/PlanOperation\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 64,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"planId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"revision\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"revisionFingerprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"riskCeiling\": {"]
+#[doc = "      \"$ref\": \"#/definitions/RiskClass\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct TransactionalPlanDocument {
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    #[serde(rename = "dependencyGroups")]
+    pub dependency_groups: ::std::vec::Vec<DependencyGroup>,
+    pub device: DeviceAuthorityBinding,
+    #[serde(rename = "effectiveRisk")]
+    pub effective_risk: RiskClass,
+    #[serde(rename = "evidenceFingerprint")]
+    pub evidence_fingerprint: TransactionHash,
+    pub kind: TransactionalPlanDocumentKind,
+    pub lifecycle: PlanLifecycleState,
+    pub operations: ::std::vec::Vec<PlanOperation>,
+    #[serde(rename = "planId")]
+    pub plan_id: TransactionIdentifier,
+    pub revision: ::std::num::NonZeroU64,
+    #[serde(rename = "revisionFingerprint")]
+    pub revision_fingerprint: TransactionHash,
+    #[serde(rename = "riskCeiling")]
+    pub risk_ceiling: RiskClass,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+}
+#[doc = "`TransactionalPlanDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"transactional-plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TransactionalPlanDocumentKind {
+    #[serde(rename = "transactional-plan")]
+    TransactionalPlan,
+}
+impl ::std::fmt::Display for TransactionalPlanDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TransactionalPlan => f.write_str("transactional-plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for TransactionalPlanDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "transactional-plan" => Ok(Self::TransactionalPlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionalPlanDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionalPlanDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionalPlanDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TransactionalRecoveryDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TransactionalRecoveryDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionalPlanDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PlanApprovalDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PlanTransactionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RecoveryCheckpointDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/DurableJournalEvent\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionReceiptDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ProgressSnapshotDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ProgressEventDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/OperationPromotionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/SignedOperationRevocationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PrivilegedBrokerRequest\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PrivilegedBrokerResponse\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RedactedDiagnosticExportDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceProjectionDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceIntentDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceEventDocument\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum TransactionalRecoveryDocument {
+    TransactionalPlanDocument(TransactionalPlanDocument),
+    PlanApprovalDocument(PlanApprovalDocument),
+    PlanTransactionDocument(PlanTransactionDocument),
+    RecoveryCheckpointDocument(RecoveryCheckpointDocument),
+    DurableJournalEvent(DurableJournalEvent),
+    TransactionReceiptDocument(TransactionReceiptDocument),
+    ProgressSnapshotDocument(ProgressSnapshotDocument),
+    ProgressEventDocument(ProgressEventDocument),
+    OperationPromotionDocument(OperationPromotionDocument),
+    SignedOperationRevocationDocument(SignedOperationRevocationDocument),
+    PrivilegedBrokerRequest(PrivilegedBrokerRequest),
+    PrivilegedBrokerResponse(PrivilegedBrokerResponse),
+    RedactedDiagnosticExportDocument(RedactedDiagnosticExportDocument),
+    AdvancedPreferenceProjectionDocument(AdvancedPreferenceProjectionDocument),
+    AdvancedPreferenceIntentDocument(AdvancedPreferenceIntentDocument),
+    AdvancedPreferenceEventDocument(AdvancedPreferenceEventDocument),
+}
+impl ::std::convert::From<TransactionalPlanDocument> for TransactionalRecoveryDocument {
+    fn from(value: TransactionalPlanDocument) -> Self {
+        Self::TransactionalPlanDocument(value)
+    }
+}
+impl ::std::convert::From<PlanApprovalDocument> for TransactionalRecoveryDocument {
+    fn from(value: PlanApprovalDocument) -> Self {
+        Self::PlanApprovalDocument(value)
+    }
+}
+impl ::std::convert::From<PlanTransactionDocument> for TransactionalRecoveryDocument {
+    fn from(value: PlanTransactionDocument) -> Self {
+        Self::PlanTransactionDocument(value)
+    }
+}
+impl ::std::convert::From<RecoveryCheckpointDocument> for TransactionalRecoveryDocument {
+    fn from(value: RecoveryCheckpointDocument) -> Self {
+        Self::RecoveryCheckpointDocument(value)
+    }
+}
+impl ::std::convert::From<DurableJournalEvent> for TransactionalRecoveryDocument {
+    fn from(value: DurableJournalEvent) -> Self {
+        Self::DurableJournalEvent(value)
+    }
+}
+impl ::std::convert::From<TransactionReceiptDocument> for TransactionalRecoveryDocument {
+    fn from(value: TransactionReceiptDocument) -> Self {
+        Self::TransactionReceiptDocument(value)
+    }
+}
+impl ::std::convert::From<ProgressSnapshotDocument> for TransactionalRecoveryDocument {
+    fn from(value: ProgressSnapshotDocument) -> Self {
+        Self::ProgressSnapshotDocument(value)
+    }
+}
+impl ::std::convert::From<ProgressEventDocument> for TransactionalRecoveryDocument {
+    fn from(value: ProgressEventDocument) -> Self {
+        Self::ProgressEventDocument(value)
+    }
+}
+impl ::std::convert::From<OperationPromotionDocument> for TransactionalRecoveryDocument {
+    fn from(value: OperationPromotionDocument) -> Self {
+        Self::OperationPromotionDocument(value)
+    }
+}
+impl ::std::convert::From<SignedOperationRevocationDocument> for TransactionalRecoveryDocument {
+    fn from(value: SignedOperationRevocationDocument) -> Self {
+        Self::SignedOperationRevocationDocument(value)
+    }
+}
+impl ::std::convert::From<PrivilegedBrokerRequest> for TransactionalRecoveryDocument {
+    fn from(value: PrivilegedBrokerRequest) -> Self {
+        Self::PrivilegedBrokerRequest(value)
+    }
+}
+impl ::std::convert::From<PrivilegedBrokerResponse> for TransactionalRecoveryDocument {
+    fn from(value: PrivilegedBrokerResponse) -> Self {
+        Self::PrivilegedBrokerResponse(value)
+    }
+}
+impl ::std::convert::From<RedactedDiagnosticExportDocument> for TransactionalRecoveryDocument {
+    fn from(value: RedactedDiagnosticExportDocument) -> Self {
+        Self::RedactedDiagnosticExportDocument(value)
+    }
+}
+impl ::std::convert::From<AdvancedPreferenceProjectionDocument> for TransactionalRecoveryDocument {
+    fn from(value: AdvancedPreferenceProjectionDocument) -> Self {
+        Self::AdvancedPreferenceProjectionDocument(value)
+    }
+}
+impl ::std::convert::From<AdvancedPreferenceIntentDocument> for TransactionalRecoveryDocument {
+    fn from(value: AdvancedPreferenceIntentDocument) -> Self {
+        Self::AdvancedPreferenceIntentDocument(value)
+    }
+}
+impl ::std::convert::From<AdvancedPreferenceEventDocument> for TransactionalRecoveryDocument {
+    fn from(value: AdvancedPreferenceEventDocument) -> Self {
+        Self::AdvancedPreferenceEventDocument(value)
+    }
+}
 #[doc = "`UnavailableDiagnosticValue`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -31343,6 +39509,467 @@ impl ::std::convert::TryFrom<::std::string::String> for UnavailableHardwareFactS
         value.parse()
     }
 }
+#[doc = "`UnavailablePowerSchemeState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"UnavailablePowerSchemeState.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"observedAt\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"observedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unavailable\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct UnavailablePowerSchemeState {
+    #[serde(rename = "observedAt")]
+    pub observed_at: ::std::string::String,
+    pub reason: TransactionText,
+    pub state: UnavailablePowerSchemeStateState,
+}
+#[doc = "`UnavailablePowerSchemeStateState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unavailable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum UnavailablePowerSchemeStateState {
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+impl ::std::fmt::Display for UnavailablePowerSchemeStateState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unavailable => f.write_str("unavailable"),
+        }
+    }
+}
+impl ::std::str::FromStr for UnavailablePowerSchemeStateState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unavailable" => Ok(Self::Unavailable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for UnavailablePowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for UnavailablePowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for UnavailablePowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`UnknownJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"UnknownJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unknown\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct UnknownJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: UnknownJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    pub reason: TransactionText,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: UnknownJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`UnknownJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum UnknownJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for UnknownJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for UnknownJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for UnknownJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for UnknownJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for UnknownJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`UnknownJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unknown\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum UnknownJournalEventState {
+    #[serde(rename = "unknown")]
+    Unknown,
+}
+impl ::std::fmt::Display for UnknownJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unknown => f.write_str("unknown"),
+        }
+    }
+}
+impl ::std::str::FromStr for UnknownJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unknown" => Ok(Self::Unknown),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for UnknownJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for UnknownJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for UnknownJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`UnknownPowerSchemeState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"UnknownPowerSchemeState.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"observedAt\","]
+#[doc = "    \"reason\","]
+#[doc = "    \"state\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"observedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"reason\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionText\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"unknown\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct UnknownPowerSchemeState {
+    #[serde(rename = "observedAt")]
+    pub observed_at: ::std::string::String,
+    pub reason: TransactionText,
+    pub state: UnknownPowerSchemeStateState,
+}
+#[doc = "`UnknownPowerSchemeStateState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"unknown\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum UnknownPowerSchemeStateState {
+    #[serde(rename = "unknown")]
+    Unknown,
+}
+impl ::std::fmt::Display for UnknownPowerSchemeStateState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Unknown => f.write_str("unknown"),
+        }
+    }
+}
+impl ::std::str::FromStr for UnknownPowerSchemeStateState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "unknown" => Ok(Self::Unknown),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for UnknownPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for UnknownPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for UnknownPowerSchemeStateState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ValidationState`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -31420,6 +40047,356 @@ impl ::std::convert::TryFrom<&::std::string::String> for ValidationState {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ValidationState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VerificationReceipt`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"VerificationReceipt.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"state\","]
+#[doc = "    \"verifiedAt\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"verified\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verifiedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct VerificationReceipt {
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    pub state: VerificationReceiptState,
+    #[serde(rename = "verifiedAt")]
+    pub verified_at: ::std::string::String,
+}
+#[doc = "`VerificationReceiptState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"verified\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VerificationReceiptState {
+    #[serde(rename = "verified")]
+    Verified,
+}
+impl ::std::fmt::Display for VerificationReceiptState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Verified => f.write_str("verified"),
+        }
+    }
+}
+impl ::std::str::FromStr for VerificationReceiptState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "verified" => Ok(Self::Verified),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VerificationReceiptState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VerificationReceiptState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VerificationReceiptState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VerifiedJournalEvent`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"VerifiedJournalEvent.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"audit\","]
+#[doc = "    \"eventHash\","]
+#[doc = "    \"eventId\","]
+#[doc = "    \"exactObservedState\","]
+#[doc = "    \"exactPriorState\","]
+#[doc = "    \"exactRequestedState\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"occurredAt\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousEventHash\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/AuditReference\""]
+#[doc = "    },"]
+#[doc = "    \"eventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"eventId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"exactObservedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactPriorState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"exactRequestedState\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ExactOperationState\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"journal-event\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"occurredAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousEventHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"verified\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct VerifiedJournalEvent {
+    pub audit: AuditReference,
+    #[serde(rename = "eventHash")]
+    pub event_hash: TransactionHash,
+    #[serde(rename = "eventId")]
+    pub event_id: TransactionIdentifier,
+    #[serde(rename = "exactObservedState")]
+    pub exact_observed_state: ExactOperationState,
+    #[serde(rename = "exactPriorState")]
+    pub exact_prior_state: ExactOperationState,
+    #[serde(rename = "exactRequestedState")]
+    pub exact_requested_state: ExactOperationState,
+    pub kind: VerifiedJournalEventKind,
+    #[serde(rename = "occurredAt")]
+    pub occurred_at: ::std::string::String,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousEventHash")]
+    pub previous_event_hash: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: ::std::string::String,
+    pub state: VerifiedJournalEventState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`VerifiedJournalEventKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"journal-event\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VerifiedJournalEventKind {
+    #[serde(rename = "journal-event")]
+    JournalEvent,
+}
+impl ::std::fmt::Display for VerifiedJournalEventKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::JournalEvent => f.write_str("journal-event"),
+        }
+    }
+}
+impl ::std::str::FromStr for VerifiedJournalEventKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "journal-event" => Ok(Self::JournalEvent),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VerifiedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VerifiedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VerifiedJournalEventKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`VerifiedJournalEventState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"verified\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum VerifiedJournalEventState {
+    #[serde(rename = "verified")]
+    Verified,
+}
+impl ::std::fmt::Display for VerifiedJournalEventState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Verified => f.write_str("verified"),
+        }
+    }
+}
+impl ::std::str::FromStr for VerifiedJournalEventState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "verified" => Ok(Self::Verified),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for VerifiedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for VerifiedJournalEventState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for VerifiedJournalEventState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -32030,6 +41007,80 @@ impl ::std::convert::TryFrom<::std::string::String> for WebUri {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for WebUri {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`WindowsSchemeIdentifier`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"WindowsSchemeIdentifier.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 36,"]
+#[doc = "  \"minLength\": 36,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WindowsSchemeIdentifier(::std::string::String);
+impl ::std::ops::Deref for WindowsSchemeIdentifier {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WindowsSchemeIdentifier> for ::std::string::String {
+    fn from(value: WindowsSchemeIdentifier) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WindowsSchemeIdentifier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 36usize {
+            return Err("longer than 36 characters".into());
+        }
+        if value.chars().count() < 36usize {
+            return Err("shorter than 36 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WindowsSchemeIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WindowsSchemeIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WindowsSchemeIdentifier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WindowsSchemeIdentifier {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
