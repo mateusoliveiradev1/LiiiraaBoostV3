@@ -1,8 +1,8 @@
 ---
 phase: 6
 slug: transactional-plans-and-recovery
-status: pending-review
-reviewed_at: 2026-08-12T23:58:47.6539196-03:00
+status: approved
+reviewed_at: 2026-08-13T06:55:38.309Z
 shadcn_initialized: false
 preset: none
 created: 2026-08-12
@@ -274,13 +274,13 @@ Copy states what happened, what remains uncertain, and the next safe action. Pri
 
 ## Checker Sign-Off
 
-The contract remains `pending-review`; no unchecked dimension is treated as approved, and execution must not claim UI authority until the UI checker records all six PASS results.
+The independent six-dimension checker report and separate human acknowledgement bind this exact contract.
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved by Liiiraa at 2026-08-13T06:55:38.309Z; subject=.planning/phases/06-transactional-plans-and-recovery/06-22-UI-CONTRACT-REVIEW-INPUT.md; subjectSha256=aafe1e0e1d7666d4603908999d9e4560e53e73846005718c94be773bfdfc01db; report=.planning/phases/06-transactional-plans-and-recovery/06-22-UI-CONTRACT-CHECKER-REPORT.md; reportSha256=6e9ae1507e3a4c344afe96deb3f0505133428f144e1b5b87946170b772ec8dc3

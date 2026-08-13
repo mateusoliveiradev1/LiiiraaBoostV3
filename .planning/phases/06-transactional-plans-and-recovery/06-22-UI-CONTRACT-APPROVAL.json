@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "ui-contract-approval-v1",
+  "subject": {
+    "canonicalization": "ui-spec-review-payload-v1",
+    "path": ".planning/phases/06-transactional-plans-and-recovery/06-22-UI-CONTRACT-REVIEW-INPUT.md",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "aafe1e0e1d7666d4603908999d9e4560e53e73846005718c94be773bfdfc01db"
+    }
+  },
+  "checkerEvidence": {
+    "checkerIdentity": {
+      "name": "Codex Independent UI Contract Checker",
+      "provider": "Codex",
+      "runId": "codex-ui-check-06-22-95074756-e591-494c-bb74-94e49771e86d"
+    },
+    "completedAtUtc": "2026-08-13T06:54:54.967Z",
+    "report": {
+      "path": ".planning/phases/06-transactional-plans-and-recovery/06-22-UI-CONTRACT-CHECKER-REPORT.md",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "6e9ae1507e3a4c344afe96deb3f0505133428f144e1b5b87946170b772ec8dc3"
+      }
+    },
+    "dimensions": [
+      {
+        "id": "copywriting",
+        "verdict": "PASS"
+      },
+      {
+        "id": "visuals",
+        "verdict": "PASS"
+      },
+      {
+        "id": "color",
+        "verdict": "PASS"
+      },
+      {
+        "id": "typography",
+        "verdict": "PASS"
+      },
+      {
+        "id": "spacing",
+        "verdict": "PASS"
+      },
+      {
+        "id": "registry-safety",
+        "verdict": "PASS"
+      }
+    ],
+    "findingsDisposition": {
+      "status": "none-raised",
+      "detail": "Independent review raised no blocking or non-blocking findings across the six canonical dimensions."
+    }
+  },
+  "humanAcknowledgement": {
+    "acknowledgedBy": "Liiiraa",
+    "acknowledgedAtUtc": "2026-08-13T06:55:38.309Z",
+    "reportSha256": "6e9ae1507e3a4c344afe96deb3f0505133428f144e1b5b87946170b772ec8dc3",
+    "subjectSha256": "aafe1e0e1d7666d4603908999d9e4560e53e73846005718c94be773bfdfc01db",
+    "statement": "I reviewed the independently produced checker report bound by this SHA-256 and approve this exact UI-SPEC."
+  }
+}
