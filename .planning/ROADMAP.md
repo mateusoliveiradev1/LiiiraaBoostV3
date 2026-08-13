@@ -731,7 +731,31 @@ Plans:
 3. High-risk work cannot proceed until proportional explanation, authentication, recovery preparation, and confirmation are complete, and every side effect is journaled and verified.
 4. User can restore one operation, a complete plan, or a recovery checkpoint after failure or reboot; partial failure pauses safely, rolls back only the necessary dependency set, explains the cause, and preserves an auditable diagnostic.
 
-**Plans**: TBD
+**Plans**: 22 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Canonical generated transactional contracts and parity corpus
+- [ ] 06-02-PLAN.md — Pure plan-engine workspace and module ownership
+- [ ] 06-03-PLAN.md — Shared plan/recovery domain interfaces
+- [ ] 06-04-PLAN.md — Blocking windows-service legitimacy review
+- [ ] 06-05-PLAN.md — Immutable personalized plan revisions
+- [ ] 06-06-PLAN.md — Proportional risk and approval admission
+- [ ] 06-07-PLAN.md — Dependency-scoped rollback planning
+- [ ] 06-08-PLAN.md — Observation-first reconciliation
+- [ ] 06-09-PLAN.md — FULL-durable append-only recovery store
+- [ ] 06-10-PLAN.md — Exact-version promotion, revocation, and diagnostics
+- [ ] 06-11-PLAN.md — Runtime-validated renderer PlanAuthority
+- [ ] 06-12-PLAN.md — Native action-scoped strong-auth bridge
+- [ ] 06-13-PLAN.md — Authenticated replay-resistant privileged broker
+- [ ] 06-14-PLAN.md — Transaction and recovery executor state machine
+- [ ] 06-15-PLAN.md — Liiiraa Verificado power-scheme operation
+- [ ] 06-16-PLAN.md — Complementary Windows Restore preparation
+- [ ] 06-17-PLAN.md — Accessible transactional design-system components
+- [ ] 06-18-PLAN.md — Tauri executor, lifecycle, and capability integration
+- [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
+- [ ] 06-20-PLAN.md — Browser and packaged end-to-end journeys
+- [ ] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
+- [ ] 06-22-PLAN.md — Sequential VM, owner, and friends physical promotion
 
 **UI hint**: yes
 
