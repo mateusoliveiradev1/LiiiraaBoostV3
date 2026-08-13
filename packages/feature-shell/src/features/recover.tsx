@@ -20,7 +20,7 @@ import type {
   TransactionalRecoveryDocumentJson,
 } from '@liiiraa/contracts-ts';
 import type { PlanAuthority, PlanAuthoritySnapshot } from '@liiiraa/desktop-client';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 import { createPhaseBoundaryExplanation } from '../model/interaction-policy.js';
 import type { ShellLocale } from './calibration.js';
@@ -164,8 +164,14 @@ const recoveryExactState = (state: PlanOperationJson['previousValue']): string =
   return `${state.state}: ${state.reason}`;
 };
 
-const useRecoveryAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot =>
-  useSyncExternalStore(authority.subscribe, authority.snapshot, authority.snapshot);
+const useRecoveryAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot => {
+  const subscribe = useCallback(
+    (listener: Parameters<PlanAuthority['subscribe']>[0]) => authority.subscribe(listener),
+    [authority],
+  );
+  const getSnapshot = useCallback(() => authority.snapshot(), [authority]);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+};
 
 const latestJournalEvent = (
   documents: readonly TransactionalRecoveryDocumentJson[],
@@ -710,7 +716,9 @@ const AuthoritativeRecoverSurface = ({
             </button>
           ) : (
             <LbButton
-              onPress={() => onKeepCurrentState(conflict.operationVersionId)}
+              onPress={() => {
+                onKeepCurrentState(conflict.operationVersionId);
+              }}
               variant="secondary"
             >
               {recoveryLocalized(

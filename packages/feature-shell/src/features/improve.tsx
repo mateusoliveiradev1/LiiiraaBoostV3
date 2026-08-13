@@ -39,7 +39,7 @@ import type {
   PlanAuthoritySnapshot,
   RecommendationState,
 } from '@liiiraa/desktop-client';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { ShellLocale } from './calibration.js';
 
@@ -1553,8 +1553,14 @@ const approvalMatchesPlan = (snapshot: PlanAuthoritySnapshot): boolean => {
   );
 };
 
-const usePlanAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot =>
-  useSyncExternalStore(authority.subscribe, authority.snapshot, authority.snapshot);
+const usePlanAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot => {
+  const subscribe = useCallback(
+    (listener: Parameters<PlanAuthority['subscribe']>[0]) => authority.subscribe(listener),
+    [authority],
+  );
+  const getSnapshot = useCallback(() => authority.snapshot(), [authority]);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+};
 
 const AuthorityStatus = ({
   locale,
@@ -1913,7 +1919,12 @@ const AuthorityExecution = ({
           {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
         </button>
       ) : (
-        <LbButton onPress={() => onCancelSafely(transactionId)} variant="secondary">
+        <LbButton
+          onPress={() => {
+            onCancelSafely(transactionId);
+          }}
+          variant="secondary"
+        >
           {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
         </LbButton>
       )}
@@ -2238,7 +2249,9 @@ const AuthoritativeImproveSurface = ({
                   <span>{expectedPhrase}</span>
                   <input
                     autoComplete="off"
-                    onChange={(event) => setExperimentalPhrase(event.currentTarget.value)}
+                    onChange={(event) => {
+                      setExperimentalPhrase(event.currentTarget.value);
+                    }}
                     spellCheck={false}
                     type="text"
                     value={experimentalPhrase}
