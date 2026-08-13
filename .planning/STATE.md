@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-08-13T06:30:17.053Z"
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-08-13T06:45:00.534Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 216
+  completed_plans: 217
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 3 of 28
+Plan: 4 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -244,6 +244,7 @@ _Updated after plan completion_
 | Phase 05 P07 | 24 min | 2 tasks | 6 files |
 | Phase 06 P01 | 11 min | 2 tasks | 17 files |
 | Phase 06 P02 | 9min | 1 tasks | 7 files |
+| Phase 06 P04 | 6 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -766,6 +767,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Register plan-engine as an active optimizer-owned domain module before behavior is added. — Domain ownership exists before downstream behavior.
 - [Phase 06]: Allow plan-engine only generated contracts, exact-pinned pure serialization and hashing dependencies, and dev-only property testing. — Keeps renderer, fixture, privileged, service, and network authority out of the pure domain.
 - [Phase 06]: Reject unapproved plan-engine dependencies directly from live Cargo metadata. — Manifest dependency drift now fails the architecture gate.
+- [Phase 06]: Admit only windows-service 0.8.1 from crates.io and the linked Mullvad source commit after exact human review. — Binds the privileged dependency to one reviewed registry, source, checksum, and license identity.
+- [Phase 06]: Keep Cargo manifests and Cargo.lock unchanged until Plan 06-13 consumes the approved identity. — Separates legitimacy approval from installation and preserves pre-install evidence.
 
 ### Pending Todos
 
@@ -816,6 +819,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T06:30:17.045Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-08-13T06:44:29.611Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None
