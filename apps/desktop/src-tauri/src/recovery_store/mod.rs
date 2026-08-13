@@ -67,6 +67,22 @@ pub struct StoredEvent {
     pub event_mac: String,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RecoveryDiagnosticEvent {
+    pub sequence: u32,
+    pub event_kind: String,
+    pub content_hash: String,
+    pub key_epoch: u32,
+    pub event_mac: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RecoveryDiagnosticExport {
+    pub database_id: String,
+    pub mutation_state: MutationState,
+    pub retained_events: Vec<RecoveryDiagnosticEvent>,
+}
+
 #[derive(Clone, Debug)]
 struct PreparedDocument {
     record_id: String,
@@ -222,6 +238,25 @@ impl RecoveryStore {
 
     pub fn history(&self) -> Result<Vec<StoredEvent>, RecoveryStoreError> {
         load_history(&self.connection)
+    }
+
+    pub fn diagnostic_export(&self) -> Result<RecoveryDiagnosticExport, RecoveryStoreError> {
+        let retained_events = self
+            .history()?
+            .into_iter()
+            .map(|event| RecoveryDiagnosticEvent {
+                sequence: event.sequence,
+                event_kind: event.event_kind,
+                content_hash: event.content_hash,
+                key_epoch: event.key_epoch,
+                event_mac: event.event_mac,
+            })
+            .collect();
+        Ok(RecoveryDiagnosticExport {
+            database_id: self.database_id.clone(),
+            mutation_state: self.mutation_state,
+            retained_events,
+        })
     }
 
     pub fn rebuild_executor_projection(&mut self) -> Result<(), RecoveryStoreError> {
@@ -390,11 +425,12 @@ impl RecoveryStore {
                     params![approval_id],
                 )
             }
-            Some("recovery-checkpoint") | Some("transaction-receipt") => ensure_exists(
+            Some("recovery-checkpoint") => ensure_exists(
                 &self.connection,
                 "SELECT 1 FROM transactions WHERE record_id = ?1",
                 params![required_string(document, "transactionId")?],
             ),
+            Some("transaction-receipt") => self.validate_receipt_head(document),
             Some("journal-event") => {
                 let transaction_id = prepared
                     .transaction_id
@@ -423,6 +459,35 @@ impl RecoveryStore {
             }
             _ => Err(RecoveryStoreError::ContractRejected),
         }
+    }
+
+    fn validate_receipt_head(&self, document: &Value) -> Result<(), RecoveryStoreError> {
+        let transaction_id = required_string(document, "transactionId")?;
+        ensure_exists(
+            &self.connection,
+            "SELECT 1 FROM transactions WHERE record_id = ?1",
+            params![transaction_id],
+        )?;
+        let canonical = self
+            .connection
+            .query_row(
+                "SELECT canonical_json FROM journal_events
+                 WHERE transaction_id = ?1 AND event_kind IN (
+                    'journal-event:verified', 'journal-event:restored'
+                 )
+                 ORDER BY document_sequence DESC LIMIT 1",
+                [transaction_id],
+                |row| row.get::<_, Vec<u8>>(0),
+            )
+            .optional()
+            .map_err(map_sqlite_error)?
+            .ok_or(RecoveryStoreError::InvalidTransition)?;
+        let event: Value =
+            serde_json::from_slice(&canonical).map_err(|_| RecoveryStoreError::HashMismatch)?;
+        if required_string(&event, "eventHash")? != required_string(document, "journalHeadHash")? {
+            return Err(RecoveryStoreError::InvalidTransition);
+        }
+        Ok(())
     }
 }
 
@@ -589,14 +654,28 @@ fn prepare_document(document: &Value) -> Result<PreparedDocument, RecoveryStoreE
         _ => return Err(RecoveryStoreError::ContractRejected),
     };
     let canonical_json = canonical_json(document)?;
+    let record_id = if kind == "transactional-plan" {
+        plan_revision_record_id(
+            required_string(document, "planId")?,
+            required_u32(document, "revision")?,
+        )
+    } else {
+        required_string(document, record_field)?.to_owned()
+    };
     Ok(PreparedDocument {
-        record_id: required_string(document, record_field)?.to_owned(),
+        record_id,
         event_kind,
         document_sequence,
         transaction_id,
         content_hash: hash_bytes(&canonical_json),
         canonical_json,
     })
+}
+
+fn plan_revision_record_id(plan_id: &str, revision: u32) -> String {
+    let identity = format!("{plan_id}\u{0}{revision}");
+    let digest = Sha256::digest(identity.as_bytes());
+    format!("plan-revision:{}", hex_bytes(&digest))
 }
 
 fn insert_journal_event(
@@ -1066,5 +1145,23 @@ fn map_migration_error(error: rusqlite_migration::Error) -> RecoveryStoreError {
     match error {
         rusqlite_migration::Error::RusqliteError { err, .. } => map_sqlite_error(err),
         _ => RecoveryStoreError::Migration,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::hmac_sha256;
+
+    #[test]
+    fn hmac_sha256_matches_rfc_4231_case_one() {
+        let key = [0x0b_u8; 20];
+        assert_eq!(
+            hmac_sha256(&key, b"Hi There"),
+            [
+                0xb0, 0x34, 0x4c, 0x61, 0xd8, 0xdb, 0x38, 0x53, 0x5c, 0xa8, 0xaf, 0xce, 0xaf, 0x0b,
+                0xf1, 0x2b, 0x88, 0x1d, 0xc2, 0x00, 0xc9, 0x83, 0x3d, 0xa7, 0x26, 0xe9, 0x37, 0x6c,
+                0x2e, 0x32, 0xcf, 0xf7,
+            ]
+        );
     }
 }

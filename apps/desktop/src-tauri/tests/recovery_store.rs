@@ -293,6 +293,84 @@ fn authoritative_history_rejects_update_and_delete() {
 }
 
 #[test]
+fn every_authoritative_document_is_appended_and_receipts_require_a_verified_head() {
+    let database = TestDatabase::new("authoritative-documents");
+    let anchor = FakeAnchor::default();
+    let mut store = open_store(&database, &anchor);
+    append_prerequisites(&mut store);
+    store
+        .append_document(&fixture("protected recovery checkpoint"))
+        .expect("append checkpoint");
+    assert_eq!(
+        store.append_document(&fixture("complete verified receipt")),
+        Err(RecoveryStoreError::InvalidTransition)
+    );
+    for fixture_id in [
+        "journal prepared",
+        "journal dispatch returned",
+        "journal observed",
+        "journal verified",
+    ] {
+        store.append_document(&fixture(fixture_id)).unwrap();
+    }
+    store
+        .append_document(&fixture("complete verified receipt"))
+        .expect("append verified receipt");
+    store
+        .append_document(&fixture("ordered simulation promotion"))
+        .expect("append promotion");
+    drop(store);
+
+    let connection = Connection::open(&database.path).unwrap();
+    for (table, expected) in [
+        ("plan_revisions", 1_i64),
+        ("plan_operations", 1),
+        ("approval_events", 1),
+        ("transactions", 1),
+        ("recovery_checkpoints", 1),
+        ("receipts", 1),
+        ("operation_promotions", 1),
+    ] {
+        let count: i64 = connection
+            .query_row(&format!("SELECT count(*) FROM {table}"), [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        assert_eq!(count, expected, "unexpected row count for {table}");
+    }
+    assert!(connection.execute("DELETE FROM receipts", []).is_err());
+}
+
+#[test]
+fn multiple_plan_revisions_append_without_rewriting_prior_versions() {
+    let database = TestDatabase::new("plan-revisions");
+    let anchor = FakeAnchor::default();
+    let mut store = open_store(&database, &anchor);
+    let revision_one = fixture("transactional plan with complete PLAN-03 metadata");
+    store.append_document(&revision_one).unwrap();
+    let mut revision_two = revision_one;
+    revision_two["revision"] = Value::from(2);
+    revision_two["revisionFingerprint"] = Value::from(format!("sha256:{}", "f".repeat(64)));
+    store.append_document(&revision_two).unwrap();
+    drop(store);
+
+    let connection = Connection::open(&database.path).unwrap();
+    let revisions = connection
+        .prepare("SELECT revision FROM plan_revisions ORDER BY revision")
+        .unwrap()
+        .query_map([], |row| row.get::<_, u32>(0))
+        .unwrap()
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap();
+    assert_eq!(revisions, vec![1, 2]);
+    assert!(
+        connection
+            .execute("UPDATE plan_revisions SET revision = 3", [])
+            .is_err()
+    );
+}
+
+#[test]
 fn whole_history_rewrite_with_recomputed_sha_is_detected_by_external_anchor() {
     let database = TestDatabase::new("whole-rewrite");
     let anchor = FakeAnchor::default();
@@ -345,6 +423,15 @@ fn missing_anchor_or_key_preserves_read_only_recovery_and_blocks_mutation() {
         MutationState::ReadOnlyIntegrityAnchorUnavailable
     );
     assert_eq!(reopened.history().unwrap().len(), 3);
+    let diagnostic = reopened.diagnostic_export().unwrap();
+    assert_eq!(diagnostic.mutation_state, reopened.mutation_state());
+    assert_eq!(diagnostic.retained_events.len(), 3);
+    assert!(
+        diagnostic
+            .retained_events
+            .iter()
+            .all(|event| event.event_mac.starts_with("hmac-sha256:"))
+    );
     assert_eq!(
         reopened.append_document(&fixture("journal prepared")),
         Err(RecoveryStoreError::IntegrityAnchorUnavailable)
@@ -356,6 +443,32 @@ fn missing_anchor_or_key_preserves_read_only_recovery_and_blocks_mutation() {
         reopened.mutation_state(),
         MutationState::ReadOnlyIntegrityAnchorUnavailable
     );
+}
+
+#[test]
+fn database_identity_mismatch_is_diagnostic_and_read_only() {
+    let database = TestDatabase::new("database-identity");
+    let anchor = FakeAnchor::default();
+    {
+        let mut store = open_store(&database, &anchor);
+        append_prerequisites(&mut store);
+    }
+    let mut wrong = anchor.head();
+    wrong.database_id = "recovery-different-database".to_owned();
+    anchor.replace_head(wrong);
+
+    let mut reopened = open_store(&database, &anchor);
+    assert_eq!(
+        reopened.mutation_state(),
+        MutationState::ReadOnlyAnchorMismatch
+    );
+    assert_eq!(
+        reopened.append_document(&fixture("journal prepared")),
+        Err(RecoveryStoreError::AnchorMismatch)
+    );
+    let first = reopened.diagnostic_export().unwrap();
+    let second = reopened.diagnostic_export().unwrap();
+    assert_eq!(first, second);
 }
 
 #[test]
@@ -575,4 +688,22 @@ fn every_prior_schema_version_upgrades_without_rewriting_history() {
         .unwrap();
     let store = open_store(&database, &anchor);
     assert!(store.connection_policy().unwrap().synchronous_full);
+}
+
+#[test]
+fn unversioned_database_upgrades_to_latest_without_external_dependencies() {
+    let database = TestDatabase::new("upgrade-v0");
+    let mut connection = Connection::open(&database.path).unwrap();
+    recovery_store::migrations::migrations()
+        .to_version(&mut connection, 0)
+        .expect("retain unversioned schema");
+    drop(connection);
+
+    let anchor = FakeAnchor::default();
+    drop(open_store(&database, &anchor));
+    let connection = Connection::open(&database.path).unwrap();
+    let version: u32 = connection
+        .query_row("PRAGMA user_version", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(version, 2);
 }
