@@ -40,3 +40,55 @@ The fail-closed evaluator was run after persistence. Both the plan command and t
 ### Escalation
 
 This operation version is blocked from clean-VM admission and all later stages. Per the plan, a correction must run from a new operation version beginning again at deterministic simulation, from an elevated session that can validate the exact VM and `Clean-Windows-Ready` checkpoint before any physical mutation.
+
+---
+
+## Corrected operation `managed-power-scheme-v2` — BLOCKED AT SIMULATION ADMISSION
+
+- **Supersedes without rewriting:** the immutable `managed-power-scheme-v1` attempt in commit `99148fdf28d5aec81833665299f944bbb2aef7c1`
+- **Restart policy:** re-executed from deterministic simulation as explicitly selected by the owner
+- **Attempt recorded at:** `2026-08-13T18:47:29.8358907Z`
+- **Result:** `BLOCKED-MISSING-EXACT-PHYSICAL-RUNNER`
+- **Physical mutation status:** none
+- **Human review:** `not-required` — no physical run package exists to review
+
+### Deterministic restart evidence
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Packaged harness suite | PASS | `rtk pnpm --filter @liiiraa/desktop exec vitest --run tests/packaged/transactional-plans.test.ts` passed 12/12 on 2026-08-13. |
+| New operation-version construction | PASS, partial only | The live harness accepted `managed-power-scheme-v2`, emitted `phase6-deterministic-simulation-managed-power-scheme-v2`, rejected replay/same-user spoof/wrong-session/remote client before a second dispatch, and produced redacted evidence hash `sha256:27795a62d128bf7eccfabfc8bb55dd0e1e0a86e8b3df2a331f9f6caeaa78a3b0`. |
+| Full version-bound simulation admission | BLOCKED | No canonical runner exists that emits the required `managed-power-scheme-v2` journal, receipt, prepare/apply/restart/restore, revocation, and accessibility artifacts. The checked-in test still hard-codes `managed-power-scheme-v1`; relabeling those bytes as v2 would fabricate exact-version evidence. |
+
+### Elevated clean-VM preflight
+
+The Hyper-V audit was executed through an elevated `Start-Process powershell.exe -Verb RunAs` helper. The non-elevated Codex process did not invoke Hyper-V mutation commands directly.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Exact VM | PASS | `LiiiraaBoost-W11-25H2-Clean`, Generation 2, Running, 4 vCPU, dynamic 4–12 GiB memory |
+| Security baseline | PASS | Secure Boot On and virtual TPM enabled |
+| Exact clean checkpoint | PASS | One checkpoint named `Clean-Windows-Ready` |
+| Hyper-V services/integration | PASS | `vmms` and `vmcompute` running; Guest Service, Heartbeat, KVP, Shutdown, Time Sync, and VSS report OK |
+| Elevated audit record | PASS | `C:\Users\Liiiraa\VM-Lab\Evidence\20260813-154633-audit.json`, SHA-256 `5756e237171f8c71873b632ef6320d1bd69387c251cba0e13502e38d05b2a1f8` |
+| Elevated console record | PASS | `C:\Users\Liiiraa\VM-Lab\Evidence\20260813-154630-audit-console.log`, SHA-256 `f3726c4aa4fac844ae5019e9ce0c552d286c13fe6248a580e1310846c78d81df` |
+
+### Blocking implementation evidence
+
+- The immutable build authority still identifies commit `a334a68f037fa198f9df5fc5228a3ca7fda0d64b` and source artifact `apps/desktop/tests/packaged/transactional-plans.ts` with SHA-256 `751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba`.
+- That commit contains no tracked `.exe` or `.msi` package. The local NSIS installer predates the immutable commit and therefore cannot be relabeled as the exact build.
+- The harness exposes `executePhysicalMutation` only as a callback gate; it contains no VM installer, guest executor, broker client, evidence writer, or physical operation implementation.
+- The exact immutable service entrypoint states: `actual dispatcher is wired by the later physical-operation plan`. It starts and stops the Windows service but does not dispatch the admitted power-scheme operation.
+- Implementing and packaging that dispatcher, guest runner, service installation, crash/reboot resumption, fault injection, and evidence collection is a structural privileged-boundary change. It is not safe to improvise inside this evidence-only plan.
+
+### Matrix not executed
+
+No install, installed checkpoint, real prepare/apply/observe/verify/restart/boot-reconcile/restore, GUID lifecycle, physical broker dispatch, physical fault injection, System Restore mutation, or Narrator/keyboard walkthrough was executed. No physical PASS, GUID, dispatch count, journal, receipt, accessibility result, or reviewer verdict is claimed.
+
+### Escalation and exact resume point
+
+Plan 06-26 remains blocked before clean-VM Task 1 mutation. A new implementation plan must first produce and verify an immutable installable build plus a real physical runner wired to the allowlisted optimizer-service dispatcher. After that correction, mint `managed-power-scheme-v3` (or a later never-used version), restart at deterministic simulation, re-audit the clean checkpoint through the elevated helper, and then resume Task 1. Task 2 must not be presented and `06-26-SUMMARY.md` must not be created for this attempt.
+
+### Fail-closed evaluator result
+
+Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage clean-vm --require-run-evidence` and the evaluator's canonical stage form `rtk pnpm phase6:verify -- --mode final --require-run-evidence clean-windows-vm` exited nonzero. The result was `ok: false`, `runReadyForReview: false`, `highestAdmittedStage: null`, with all four stages pending. Diagnostics explicitly include `RUN_EVIDENCE_NOT_PASSED`, every incomplete lifecycle step, missing journal/receipt hashes, blocked accessibility/revocation/consent, and `PHYSICAL_RUN_EVIDENCE_MISSING`. This is the required fail-closed outcome; it is not a PASS package.
