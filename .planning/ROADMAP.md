@@ -731,7 +731,7 @@ Plans:
 3. High-risk work cannot proceed until proportional explanation, authentication, recovery preparation, and confirmation are complete, and every side effect is journaled and verified.
 4. User can restore one operation, a complete plan, or a recovery checkpoint after failure or reboot; partial failure pauses safely, rolls back only the necessary dependency set, explains the cause, and preserves an auditable diagnostic.
 
-**Plans**: 22 plans
+**Plans**: 28 plans
 
 Plans:
 - [ ] 06-01-PLAN.md — Canonical generated transactional contracts and parity corpus
@@ -755,7 +755,13 @@ Plans:
 - [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
 - [ ] 06-20-PLAN.md — Browser and packaged end-to-end journeys
 - [ ] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
-- [ ] 06-22-PLAN.md — Completion-blocking sequential VM, owner, and friends physical promotion
+- [ ] 06-22-PLAN.md — Blocking independent six-dimension UI-contract approval
+- [ ] 06-23-PLAN.md — Append-audited device-local Advanced preference authority
+- [ ] 06-24-PLAN.md — Closed native/client Advanced preference wiring
+- [ ] 06-25-PLAN.md — Accessible Advanced enable, revoke, persistence, and revalidation UI
+- [ ] 06-26-PLAN.md — Persisted-before-review clean Windows VM promotion
+- [ ] 06-27-PLAN.md — Persisted-before-review owner PC promotion
+- [ ] 06-28-PLAN.md — Persisted-before-review friends PCs and final four-stage verification
 
 **UI hint**: yes
 
