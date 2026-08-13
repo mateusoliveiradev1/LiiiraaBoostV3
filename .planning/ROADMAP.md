@@ -734,33 +734,68 @@ Plans:
 **Plans**: 28 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 06-01-PLAN.md — Canonical generated transactional contracts and parity corpus
 - [ ] 06-02-PLAN.md — Pure plan-engine workspace and module ownership
-- [ ] 06-03-PLAN.md — Shared plan/recovery domain interfaces
 - [ ] 06-04-PLAN.md — Blocking windows-service legitimacy review
+- [ ] 06-22-PLAN.md — Blocking independent six-dimension UI-contract approval
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 06-03-PLAN.md — Shared plan/recovery domain interfaces
+- [ ] 06-09-PLAN.md — FULL-durable recovery store with Windows-protected keyed audit anchor
+- [ ] 06-11-PLAN.md — Runtime-validated renderer PlanAuthority
+- [ ] 06-12-PLAN.md — Native action-scoped strong-auth bridge
+- [ ] 06-13-PLAN.md — Authenticated replay-resistant privileged broker
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 06-05-PLAN.md — Immutable personalized plan revisions
 - [ ] 06-06-PLAN.md — Proportional risk and approval admission
 - [ ] 06-07-PLAN.md — Dependency-scoped rollback planning
 - [ ] 06-08-PLAN.md — Observation-first reconciliation
-- [ ] 06-09-PLAN.md — FULL-durable recovery store with Windows-protected keyed audit anchor
 - [ ] 06-10-PLAN.md — Exact-version promotion, revocation, and diagnostics
-- [ ] 06-11-PLAN.md — Runtime-validated renderer PlanAuthority
-- [ ] 06-12-PLAN.md — Native action-scoped strong-auth bridge
-- [ ] 06-13-PLAN.md — Authenticated replay-resistant privileged broker
-- [ ] 06-14-PLAN.md — Transaction and recovery executor state machine
-- [ ] 06-15-PLAN.md — Liiiraa Verificado power-scheme operation
 - [ ] 06-16-PLAN.md — Complementary Windows Restore preparation
 - [ ] 06-17-PLAN.md — Accessible transactional design-system components
-- [ ] 06-18-PLAN.md — Tauri executor, lifecycle, and capability integration
-- [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
-- [ ] 06-20-PLAN.md — Browser and packaged end-to-end journeys
-- [ ] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
-- [ ] 06-22-PLAN.md — Blocking independent six-dimension UI-contract approval
 - [ ] 06-23-PLAN.md — Append-audited device-local Advanced preference authority
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 06-14-PLAN.md — Transaction and recovery executor state machine
+- [ ] 06-15-PLAN.md — Liiiraa Verificado power-scheme operation
+- [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 06-18-PLAN.md — Tauri executor, lifecycle, and capability integration
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 06-24-PLAN.md — Closed native/client Advanced preference wiring
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 06-25-PLAN.md — Accessible Advanced enable, revoke, persistence, and revalidation UI
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 06-20-PLAN.md — Browser and packaged end-to-end journeys
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
 - [ ] 06-26-PLAN.md — Persisted-before-review clean Windows VM promotion
+
+**Wave 11** *(blocked on Wave 10 completion)*
+
 - [ ] 06-27-PLAN.md — Persisted-before-review owner PC promotion
+
+**Wave 12** *(blocked on Wave 11 completion)*
+
 - [ ] 06-28-PLAN.md — Persisted-before-review friends PCs and final four-stage verification
 
 **UI hint**: yes
