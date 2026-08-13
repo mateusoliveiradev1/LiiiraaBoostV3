@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-15-PLAN.md
-last_updated: "2026-08-13T16:44:13.320Z"
+stopped_at: Completed 06-19-PLAN.md
+last_updated: "2026-08-13T17:00:42.623Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 233
+  completed_plans: 234
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 19 of 28
+Plan: 20 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [██████████] 95%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -261,6 +261,7 @@ _Updated after plan completion_
 | Phase 06 P23 | 14 min | 3 tasks | 6 files |
 | Phase 06 P14 | 16 min | 3 tasks | 2 files |
 | Phase 06 P15 | 8 min | 3 tasks | 5 files |
+| Phase 06 P19 | 12m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -831,6 +832,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Treat a nonzero journaled GUID as the only managed destination identity; the friendly name is exact presentation metadata and never ownership authority.
 - [Phase 06]: Define canonical power-scheme state as exact GUID, friendly name, description, and a sorted SHA-256 fingerprint of every enumerated AC/DC setting value.
 - [Phase 06]: Restore and cleanup only after exact prior/target observation; third state, changed metadata/settings, or uncertain ownership returns conflict without delete authority.
+- [Phase 06]: Authoritative Improve and Recovery branches consume immutable PlanAuthority snapshots and emit intents; legacy preview branches remain only when no authority is supplied.
+- [Phase 06]: Receipts, checkpoints, journals, and revocations render only from typed validated documents; absent authority evidence produces disabled or pending states instead of synthetic success.
+- [Phase 06]: Extreme plans remain structurally non-executable, while proportional gates and exact confirmation language apply to lower risk levels.
 
 ### Pending Todos
 
@@ -881,6 +885,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T16:44:13.313Z
-Stopped at: Completed 06-15-PLAN.md
+Last session: 2026-08-13T17:00:42.615Z
+Stopped at: Completed 06-19-PLAN.md
 Resume file: None
