@@ -13,6 +13,7 @@ use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
 
 use super::dedup_store::{DedupStore, FaultPoint, Reservation, ReserveRequest, StoreError};
+use super::dispatcher::DispatchContext;
 
 pub const PIPE_REJECT_REMOTE_CLIENTS: u32 = 0x0000_0008;
 pub const MAX_REPLAY_RETENTION_SECONDS: i64 = 180 * 24 * 60 * 60;
@@ -114,17 +115,12 @@ pub struct BrokerError {
     pub code: BrokerErrorCode,
 }
 
-#[derive(Clone, Debug)]
-pub enum AllowedOperation {
-    ObservePowerScheme,
-    DuplicateManagedPowerScheme,
-    ActivateManagedPowerScheme,
-    DeleteOwnedPowerScheme,
-    PrepareRestorePoint,
-}
-
 pub trait OperationDispatcher {
-    fn dispatch(&mut self, operation: AllowedOperation) -> Result<Value, BrokerError>;
+    fn dispatch(
+        &mut self,
+        request: PrivilegedBrokerRequest,
+        context: &DispatchContext,
+    ) -> Result<Value, BrokerError>;
 }
 
 #[derive(Clone)]
@@ -132,6 +128,10 @@ struct SessionState {
     server_nonce: String,
     session_key: Vec<u8>,
     principal_id: String,
+    interactive_session_id: u32,
+    interactive_logon_sid: String,
+    process_id: u32,
+    process_image_hash: String,
 }
 
 pub struct Broker {
@@ -218,6 +218,10 @@ impl Broker {
                     "{}:{}:{}",
                     identity.logon_sid, identity.session_id, identity.process_image_hash
                 ),
+                interactive_session_id: identity.session_id,
+                interactive_logon_sid: identity.logon_sid.clone(),
+                process_id: identity.process_id,
+                process_image_hash: identity.process_image_hash.clone(),
             },
         );
         Ok(SessionTicket {
@@ -304,7 +308,7 @@ impl Broker {
             return Err(error(BrokerErrorCode::InvalidMac));
         }
 
-        let (operation, counter, request_nonce) = validate_broker_request(
+        let (request, counter, request_nonce) = validate_broker_request(
             &envelope.request,
             &envelope.transaction_id,
             &envelope.step_id,
@@ -342,7 +346,16 @@ impl Broker {
         self.store
             .mark_unknown_after_dispatch(&envelope.transaction_id, &envelope.step_id)
             .map_err(map_store_error)?;
-        let document = dispatcher.dispatch(operation)?;
+        let context = DispatchContext::metadata_only(
+            &envelope.transaction_id,
+            &envelope.step_id,
+            &envelope.operation_version_id,
+            session.interactive_session_id,
+            &session.interactive_logon_sid,
+            session.process_id,
+            &session.process_image_hash,
+        );
+        let document = dispatcher.dispatch(request, &context)?;
         if fault == FaultPoint::AfterDispatch {
             return Err(error(BrokerErrorCode::DatabaseUnavailable));
         }
@@ -397,7 +410,7 @@ fn validate_broker_request(
     request: &Value,
     transaction_id: &str,
     step_id: &str,
-) -> Result<(AllowedOperation, u32, String), BrokerError> {
+) -> Result<(PrivilegedBrokerRequest, u32, String), BrokerError> {
     let validated = validate_transactional_recovery_document(request)
         .map_err(|_| error(BrokerErrorCode::InvalidMessage))?;
     let TransactionalRecoveryDocument::PrivilegedBrokerRequest(request) = validated else {
@@ -425,24 +438,7 @@ fn validate_broker_request(
         .filter(|value| !value.trim().is_empty())
         .ok_or_else(|| error(BrokerErrorCode::InvalidMessage))?
         .to_owned();
-    let operation = match request {
-        PrivilegedBrokerRequest::ObservePowerSchemeRequest(_) => {
-            AllowedOperation::ObservePowerScheme
-        }
-        PrivilegedBrokerRequest::DuplicateManagedPowerSchemeRequest(_) => {
-            AllowedOperation::DuplicateManagedPowerScheme
-        }
-        PrivilegedBrokerRequest::ActivateManagedPowerSchemeRequest(_) => {
-            AllowedOperation::ActivateManagedPowerScheme
-        }
-        PrivilegedBrokerRequest::DeleteOwnedPowerSchemeRequest(_) => {
-            AllowedOperation::DeleteOwnedPowerScheme
-        }
-        PrivilegedBrokerRequest::PrepareRestorePointRequest(_) => {
-            AllowedOperation::PrepareRestorePoint
-        }
-    };
-    Ok((operation, counter, nonce))
+    Ok((request, counter, nonce))
 }
 
 fn request_value(request: &PrivilegedBrokerRequest) -> Value {

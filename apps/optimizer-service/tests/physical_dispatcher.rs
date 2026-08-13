@@ -10,21 +10,22 @@ use liiiraa_contracts_rust::{
 use serde_json::{Value, json};
 use service::{
     dispatcher::{
-        DispatchContext, InteractiveUserEffectLease, PhysicalOperationDispatcher,
-        POWER_SCHEME_OPERATION_VERSION, RESTORE_POINT_OPERATION_VERSION,
+        DispatchContext, InteractiveUserEffectLease, POWER_SCHEME_OPERATION_VERSION,
+        PhysicalOperationDispatcher, RESTORE_POINT_OPERATION_VERSION,
     },
     ipc::{BrokerErrorCode, OperationDispatcher},
     operations::power_scheme::{
         MANAGED_SCHEME_DESCRIPTION, MANAGED_SCHEME_FRIENDLY_NAME, PowerSchemeError, PowerSchemeId,
         PowerSchemePort, PowerSchemeSnapshot, VerifiedClientContext,
     },
-    restore_point::{
-        ApiCallEvidence, PointObservation, RestorePointApi, RestorePointObserver,
-    },
+    restore_point::{ApiCallEvidence, PointObservation, RestorePointApi, RestorePointObserver},
 };
 
 const SID: &str = "S-1-5-5-7-42";
 const DEVICE: &str = "device-verified";
+const PRIOR_GUID: &str = "00000000-0000-4000-8000-000000000001";
+const TARGET_GUID: &str = "00000000-0000-4000-8000-000000000002";
+const PRIOR_HASH: &str = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum PowerCall {
@@ -119,11 +120,11 @@ impl PowerSchemePort for FakePower {
 }
 
 #[derive(Default)]
-struct FakeRestorePoint {
+struct FakeRestorePointApi {
     descriptions: Vec<String>,
 }
 
-impl RestorePointApi for FakeRestorePoint {
+impl RestorePointApi for FakeRestorePointApi {
     fn readiness(&mut self) -> Result<(), service::restore_point::UnavailableReason> {
         Ok(())
     }
@@ -147,7 +148,10 @@ impl RestorePointApi for FakeRestorePoint {
     }
 }
 
-impl RestorePointObserver for FakeRestorePoint {
+#[derive(Default)]
+struct FakeRestorePointObserver;
+
+impl RestorePointObserver for FakeRestorePointObserver {
     fn observe(&mut self, sequence_number: i64) -> PointObservation {
         PointObservation::Usable { sequence_number }
     }
@@ -155,6 +159,10 @@ impl RestorePointObserver for FakeRestorePoint {
 
 fn id(value: u128) -> PowerSchemeId {
     PowerSchemeId::from_journaled_u128(value).expect("nonzero fixture GUID")
+}
+
+fn guid_id(value: &str) -> u128 {
+    u128::from_str_radix(&value.replace('-', ""), 16).expect("valid fixture GUID")
 }
 
 fn snapshot(value: u128, name: &str, description: &str, hash: &str) -> PowerSchemeSnapshot {
@@ -167,7 +175,9 @@ fn snapshot(value: u128, name: &str, description: &str, hash: &str) -> PowerSche
 }
 
 fn generated(value: Value) -> PrivilegedBrokerRequest {
-    match validate_transactional_recovery_document(&value).expect("generated-valid request") {
+    let validated = validate_transactional_recovery_document(&value)
+        .unwrap_or_else(|error| panic!("generated-valid request {value}: {error:?}"));
+    match validated {
         TransactionalRecoveryDocument::PrivilegedBrokerRequest(request) => request,
         _ => panic!("fixture must be a broker request"),
     }
@@ -211,18 +221,25 @@ fn assert_generated_diagnostic(document: &Value, step: &str) {
 
 #[test]
 fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_effect() {
-    let prior = snapshot(1, "Balanced", "Windows balanced", "sha256:prior");
+    let prior = snapshot(
+        guid_id(PRIOR_GUID),
+        "Balanced",
+        "Windows balanced",
+        PRIOR_HASH,
+    );
     let target = snapshot(
-        2,
+        guid_id(TARGET_GUID),
         MANAGED_SCHEME_FRIENDLY_NAME,
         MANAGED_SCHEME_DESCRIPTION,
-        "sha256:prior",
+        PRIOR_HASH,
     );
     let mut power = FakePower::new(prior.clone());
-    let mut restore = FakeRestorePoint::default();
+    let mut restore = FakeRestorePointApi::default();
+    let mut restore_observer = FakeRestorePointObserver;
 
     {
-        let mut dispatcher = PhysicalOperationDispatcher::new(&mut power, &mut restore);
+        let mut dispatcher =
+            PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer);
         let document = dispatcher
             .dispatch(
                 generated(request("observe-power-scheme-request", "step-observe")),
@@ -239,11 +256,12 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
     assert!(power.mutations.is_empty(), "observation cannot mutate");
 
     let mut duplicate = request("duplicate-managed-power-scheme-request", "step-duplicate");
-    duplicate["sourceSchemeId"] = json!("00000000-0000-0000-0000-000000000001");
-    duplicate["destinationSchemeId"] = json!("00000000-0000-0000-0000-000000000002");
+    duplicate["sourceSchemeId"] = json!(PRIOR_GUID);
+    duplicate["destinationSchemeId"] = json!(TARGET_GUID);
     duplicate["friendlyName"] = json!(MANAGED_SCHEME_FRIENDLY_NAME);
     {
-        let mut dispatcher = PhysicalOperationDispatcher::new(&mut power, &mut restore);
+        let mut dispatcher =
+            PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer);
         let document = dispatcher
             .dispatch(
                 generated(duplicate),
@@ -255,17 +273,17 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
     assert_eq!(
         power.mutations,
         [PowerCall::Duplicate {
-            source: 1,
-            destination: 2
+            source: guid_id(PRIOR_GUID),
+            destination: guid_id(TARGET_GUID)
         }]
     );
 
     let mut activate = request("activate-managed-power-scheme-request", "step-activate");
-    activate["schemeId"] = json!("00000000-0000-0000-0000-000000000002");
-    activate["expectedCurrentSchemeId"] =
-        json!("00000000-0000-0000-0000-000000000001");
+    activate["schemeId"] = json!(TARGET_GUID);
+    activate["expectedCurrentSchemeId"] = json!(PRIOR_GUID);
     {
-        let mut dispatcher = PhysicalOperationDispatcher::new(&mut power, &mut restore);
+        let mut dispatcher =
+            PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer);
         dispatcher
             .dispatch(
                 generated(activate),
@@ -274,14 +292,18 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
             .expect("activate dispatches");
     }
     assert_eq!(power.active, target);
-    assert_eq!(power.mutations.last(), Some(&PowerCall::Activate(2)));
+    assert_eq!(
+        power.mutations.last(),
+        Some(&PowerCall::Activate(guid_id(TARGET_GUID)))
+    );
 
     let mut delete = request("delete-owned-power-scheme-request", "step-delete");
-    delete["schemeId"] = json!("00000000-0000-0000-0000-000000000002");
-    delete["expectedCanonicalStateHash"] = json!("sha256:prior");
+    delete["schemeId"] = json!(TARGET_GUID);
+    delete["expectedCanonicalStateHash"] = json!(PRIOR_HASH);
     power.active = prior;
     {
-        let mut dispatcher = PhysicalOperationDispatcher::new(&mut power, &mut restore);
+        let mut dispatcher =
+            PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer);
         dispatcher
             .dispatch(
                 generated(delete),
@@ -289,13 +311,17 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
             )
             .expect("delete dispatches");
     }
-    assert_eq!(power.mutations.last(), Some(&PowerCall::Delete(2)));
+    assert_eq!(
+        power.mutations.last(),
+        Some(&PowerCall::Delete(guid_id(TARGET_GUID)))
+    );
 
     let mut prepare = request("prepare-restore-point-request", "step-restore-point");
     prepare["transactionId"] = json!("transaction-physical");
     prepare["displaySummary"] = json!("Prepare Liiiraa recovery checkpoint");
     {
-        let mut dispatcher = PhysicalOperationDispatcher::new(&mut power, &mut restore);
+        let mut dispatcher =
+            PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer);
         dispatcher
             .dispatch(
                 generated(prepare),
@@ -311,9 +337,15 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
 
 #[test]
 fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
-    let prior = snapshot(1, "Balanced", "Windows balanced", "sha256:prior");
+    let prior = snapshot(
+        guid_id(PRIOR_GUID),
+        "Balanced",
+        "Windows balanced",
+        PRIOR_HASH,
+    );
     let mut power = FakePower::new(prior);
-    let mut restore = FakeRestorePoint::default();
+    let mut restore = FakeRestorePointApi::default();
+    let mut restore_observer = FakeRestorePointObserver;
     let request = generated(request("observe-power-scheme-request", "step-observe"));
     let metadata_only = DispatchContext::metadata_only(
         "transaction-physical",
@@ -324,7 +356,7 @@ fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
         4242,
         "sha256:trusted-native-host",
     );
-    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore)
+    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer)
         .dispatch(request.clone(), &metadata_only)
         .expect_err("metadata cannot authorize an effect");
     assert_eq!(error.code, BrokerErrorCode::AuthenticationFailed);
@@ -340,7 +372,7 @@ fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
         "sha256:trusted-native-host",
         wrong_lease,
     );
-    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore)
+    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer)
         .dispatch(request, &mismatched)
         .expect_err("lease identity must match verified metadata");
     assert_eq!(error.code, BrokerErrorCode::AuthenticationFailed);
@@ -350,24 +382,30 @@ fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
 
 #[test]
 fn drift_wrong_version_and_forbidden_shapes_are_zero_call_fail_closed_cases() {
-    let drifted = snapshot(3, "External", "Changed outside Liiiraa", "sha256:drift");
+    let drifted = snapshot(
+        guid_id("00000000-0000-4000-8000-000000000003"),
+        "External",
+        "Changed outside Liiiraa",
+        "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    );
     let mut power = FakePower::new(drifted);
-    let mut restore = FakeRestorePoint::default();
+    let mut restore = FakeRestorePointApi::default();
+    let mut restore_observer = FakeRestorePointObserver;
     let mut activate = request("activate-managed-power-scheme-request", "step-activate");
-    activate["schemeId"] = json!("00000000-0000-0000-0000-000000000002");
-    activate["expectedCurrentSchemeId"] =
-        json!("00000000-0000-0000-0000-000000000001");
-    let document = PhysicalOperationDispatcher::new(&mut power, &mut restore)
-        .dispatch(
-            generated(activate.clone()),
-            &context("step-activate", POWER_SCHEME_OPERATION_VERSION),
-        )
-        .expect("drift is a closed diagnostic result");
+    activate["schemeId"] = json!(TARGET_GUID);
+    activate["expectedCurrentSchemeId"] = json!(PRIOR_GUID);
+    let document =
+        PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer)
+            .dispatch(
+                generated(activate.clone()),
+                &context("step-activate", POWER_SCHEME_OPERATION_VERSION),
+            )
+            .expect("drift is a closed diagnostic result");
     assert_eq!(document["outcome"], "rejected");
     assert_eq!(document["reasonCode"], "power-scheme-drift");
     assert!(power.mutations.is_empty());
 
-    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore)
+    let error = PhysicalOperationDispatcher::new(&mut power, &mut restore, &mut restore_observer)
         .dispatch(
             generated(activate),
             &context("step-activate", "power-scheme-extreme-v999"),

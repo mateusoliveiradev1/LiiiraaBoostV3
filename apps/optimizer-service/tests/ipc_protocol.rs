@@ -7,12 +7,14 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 
+use liiiraa_contracts_rust::PrivilegedBrokerRequest;
 use serde_json::{Value, json};
+use service::dispatcher::DispatchContext;
 use service::{
     dedup_store::FaultPoint,
     ipc::{
-        AllowedOperation, Broker, BrokerConfig, BrokerError, BrokerErrorCode, ClientIdentity,
-        OperationDispatcher, PIPE_REJECT_REMOTE_CLIENTS, PipeSecurityPolicy, ReplyDisposition,
+        Broker, BrokerConfig, BrokerError, BrokerErrorCode, ClientIdentity, OperationDispatcher,
+        PIPE_REJECT_REMOTE_CLIENTS, PipeSecurityPolicy, ReplyDisposition,
     },
 };
 
@@ -30,14 +32,18 @@ impl SpyDispatcher {
 }
 
 impl OperationDispatcher for SpyDispatcher {
-    fn dispatch(&mut self, operation: AllowedOperation) -> Result<Value, BrokerError> {
+    fn dispatch(
+        &mut self,
+        operation: PrivilegedBrokerRequest,
+        _context: &DispatchContext,
+    ) -> Result<Value, BrokerError> {
         self.calls += 1;
         let request_id = match operation {
-            AllowedOperation::ObservePowerScheme => "step-observe",
-            AllowedOperation::DuplicateManagedPowerScheme => "step-duplicate",
-            AllowedOperation::ActivateManagedPowerScheme => "step-activate",
-            AllowedOperation::DeleteOwnedPowerScheme => "step-delete",
-            AllowedOperation::PrepareRestorePoint => "step-restore-point",
+            PrivilegedBrokerRequest::ObservePowerSchemeRequest(_) => "step-observe",
+            PrivilegedBrokerRequest::DuplicateManagedPowerSchemeRequest(_) => "step-duplicate",
+            PrivilegedBrokerRequest::ActivateManagedPowerSchemeRequest(_) => "step-activate",
+            PrivilegedBrokerRequest::DeleteOwnedPowerSchemeRequest(_) => "step-delete",
+            PrivilegedBrokerRequest::PrepareRestorePointRequest(_) => "step-restore-point",
         };
         Ok(json!({
             "kind": "broker-accepted-response",

@@ -1,6 +1,7 @@
 //! Windows service entrypoint for the minimal privileged optimizer broker.
 
 pub mod dedup_store;
+pub mod dispatcher;
 pub mod ipc;
 pub mod operations;
 pub mod restore_point;

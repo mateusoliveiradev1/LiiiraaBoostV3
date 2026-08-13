@@ -18,4 +18,13 @@ impl PowerOperation {
         Self::ActivateManaged,
         Self::DeleteOwned,
     ];
+
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Observe => "observe-power-scheme",
+            Self::DuplicateManaged => "duplicate-managed-power-scheme",
+            Self::ActivateManaged => "activate-managed-power-scheme",
+            Self::DeleteOwned => "delete-owned-power-scheme",
+        }
+    }
 }
