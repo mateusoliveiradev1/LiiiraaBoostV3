@@ -165,8 +165,10 @@ const isExactRelativePath = (value: string): boolean =>
   !/[*?[\]{}]/u.test(value) &&
   value.split('/').every((segment) => segment.length > 0 && segment !== '.' && segment !== '..');
 
-const hasOnlyKeys = (value: Record<string, unknown>, keys: readonly string[]): boolean =>
-  Object.keys(value).every((key) => keys.includes(key));
+const hasExactKeys = (value: Record<string, unknown>, keys: readonly string[]): boolean => {
+  const actual = Object.keys(value);
+  return actual.length === keys.length && actual.every((key) => keys.includes(key));
+};
 
 const sha256 = (value: string | Uint8Array): string =>
   createHash('sha256').update(value).digest('hex');
@@ -204,7 +206,7 @@ const push = (
 const asArtifact = (value: unknown): Phase6ArtifactReference | null => {
   if (
     !isObject(value) ||
-    !hasOnlyKeys(value, ['path', 'sha256']) ||
+    !hasExactKeys(value, ['path', 'sha256']) ||
     typeof value['path'] !== 'string' ||
     typeof value['sha256'] !== 'string'
   ) {
@@ -216,7 +218,7 @@ const asArtifact = (value: unknown): Phase6ArtifactReference | null => {
 const asRun = (value: unknown): Phase6RunEvidence | null => {
   if (
     !isObject(value) ||
-    !hasOnlyKeys(value, [
+    !hasExactKeys(value, [
       'id',
       'stage',
       'evidenceKind',
@@ -249,15 +251,76 @@ const asRun = (value: unknown): Phase6RunEvidence | null => {
     typeof value['recordedAt'] !== 'string' ||
     typeof value['expiresAt'] !== 'string' ||
     !Array.isArray(value['artifacts']) ||
+    value['artifacts'].some((artifact) => asArtifact(artifact) === null) ||
     !isObject(value['cycle']) ||
+    !hasExactKeys(value['cycle'], [
+      'prepare',
+      'apply',
+      'verifyApply',
+      'restartRequired',
+      'restart',
+      'restore',
+      'verifyRestore',
+    ]) ||
+    typeof value['cycle']['prepare'] !== 'string' ||
+    typeof value['cycle']['apply'] !== 'string' ||
+    typeof value['cycle']['verifyApply'] !== 'string' ||
+    typeof value['cycle']['restartRequired'] !== 'boolean' ||
+    typeof value['cycle']['restart'] !== 'string' ||
+    typeof value['cycle']['restore'] !== 'string' ||
+    typeof value['cycle']['verifyRestore'] !== 'string' ||
     typeof value['journalSha256'] !== 'string' ||
     typeof value['receiptSha256'] !== 'string' ||
     !isObject(value['security']) ||
+    !hasExactKeys(value['security'], [
+      'ipcAdversarial',
+      'replayRejected',
+      'identitySpoofRejected',
+      'sessionSwapRejected',
+    ]) ||
+    typeof value['security']['ipcAdversarial'] !== 'string' ||
+    typeof value['security']['replayRejected'] !== 'boolean' ||
+    typeof value['security']['identitySpoofRejected'] !== 'boolean' ||
+    typeof value['security']['sessionSwapRejected'] !== 'boolean' ||
     !isObject(value['faults']) ||
+    !hasExactKeys(value['faults'], ['diskFull', 'crash', 'reboot', 'drift']) ||
+    typeof value['faults']['diskFull'] !== 'string' ||
+    typeof value['faults']['crash'] !== 'string' ||
+    typeof value['faults']['reboot'] !== 'string' ||
+    typeof value['faults']['drift'] !== 'string' ||
     !isObject(value['accessibility']) ||
+    !hasExactKeys(value['accessibility'], ['status', 'seriousOrCriticalViolations']) ||
+    typeof value['accessibility']['status'] !== 'string' ||
+    typeof value['accessibility']['seriousOrCriticalViolations'] !== 'number' ||
     !isObject(value['diagnostics']) ||
+    !hasExactKeys(value['diagnostics'], [
+      'redacted',
+      'previewed',
+      'consentBound',
+      'autoUpload',
+      'rawFieldsFound',
+    ]) ||
+    typeof value['diagnostics']['redacted'] !== 'boolean' ||
+    typeof value['diagnostics']['previewed'] !== 'boolean' ||
+    typeof value['diagnostics']['consentBound'] !== 'boolean' ||
+    typeof value['diagnostics']['autoUpload'] !== 'boolean' ||
+    !Array.isArray(value['diagnostics']['rawFieldsFound']) ||
+    value['diagnostics']['rawFieldsFound'].some((field) => typeof field !== 'string') ||
     !isObject(value['revocation']) ||
+    !hasExactKeys(value['revocation'], [
+      'signed',
+      'blocksNewApply',
+      'localRecoveryAvailable',
+      'remoteRollback',
+      'remoteExecution',
+    ]) ||
+    typeof value['revocation']['signed'] !== 'boolean' ||
+    typeof value['revocation']['blocksNewApply'] !== 'boolean' ||
+    typeof value['revocation']['localRecoveryAvailable'] !== 'boolean' ||
+    typeof value['revocation']['remoteRollback'] !== 'boolean' ||
+    typeof value['revocation']['remoteExecution'] !== 'boolean' ||
     !Array.isArray(value['coverageGaps']) ||
+    value['coverageGaps'].some((gap) => typeof gap !== 'string') ||
     typeof value['universalSupportClaim'] !== 'boolean' ||
     typeof value['manualOverride'] !== 'boolean'
   ) {
@@ -269,11 +332,11 @@ const asRun = (value: unknown): Phase6RunEvidence | null => {
 const asReview = (value: unknown): Phase6HumanReview | null => {
   if (!isObject(value) || typeof value['status'] !== 'string') return null;
   if (value['status'] === 'pending' || value['status'] === 'not-required') {
-    return hasOnlyKeys(value, ['status']) ? (value as Phase6HumanReview) : null;
+    return hasExactKeys(value, ['status']) ? (value as Phase6HumanReview) : null;
   }
   if (
     !['approved', 'rejected'].includes(value['status']) ||
-    !hasOnlyKeys(value, [
+    !hasExactKeys(value, [
       'status',
       'id',
       'reviewerId',
@@ -299,7 +362,8 @@ const asReview = (value: unknown): Phase6HumanReview | null => {
     !isStage(value['stage']) ||
     typeof value['runEvidenceId'] !== 'string' ||
     typeof value['runEvidenceSha256'] !== 'string' ||
-    !Array.isArray(value['artifactHashes'])
+    !Array.isArray(value['artifactHashes']) ||
+    value['artifactHashes'].some((hash) => typeof hash !== 'string')
   ) {
     return null;
   }
@@ -309,7 +373,7 @@ const asReview = (value: unknown): Phase6HumanReview | null => {
 const asManifest = (value: unknown): Phase6EvidenceManifest | null => {
   if (
     !isObject(value) ||
-    !hasOnlyKeys(value, [
+    !hasExactKeys(value, [
       'schemaVersion',
       'generatedAt',
       'operationVersion',
@@ -323,7 +387,7 @@ const asManifest = (value: unknown): Phase6EvidenceManifest | null => {
     typeof value['generatedAt'] !== 'string' ||
     typeof value['operationVersion'] !== 'string' ||
     !isObject(value['immutableBuild']) ||
-    !hasOnlyKeys(value['immutableBuild'], ['id', 'commit', 'artifact']) ||
+    !hasExactKeys(value['immutableBuild'], ['id', 'commit', 'artifact']) ||
     typeof value['immutableBuild']['id'] !== 'string' ||
     typeof value['immutableBuild']['commit'] !== 'string' ||
     asArtifact(value['immutableBuild']['artifact']) === null ||
@@ -337,7 +401,7 @@ const asManifest = (value: unknown): Phase6EvidenceManifest | null => {
   for (const cell of value['stages']) {
     if (
       !isObject(cell) ||
-      !hasOnlyKeys(cell, ['stage', 'predecessorStage', 'runEvidence', 'humanReview']) ||
+      !hasExactKeys(cell, ['stage', 'predecessorStage', 'runEvidence', 'humanReview']) ||
       !isStage(cell['stage']) ||
       (cell['predecessorStage'] !== null && !isStage(cell['predecessorStage'])) ||
       (cell['runEvidence'] !== null && asRun(cell['runEvidence']) === null) ||

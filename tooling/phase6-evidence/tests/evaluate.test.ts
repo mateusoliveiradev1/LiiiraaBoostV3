@@ -494,4 +494,137 @@ describe('Phase 6 exact-version sequential evidence authority', () => {
       'PROMOTION_STAGE_SEQUENCE_INVALID',
     );
   });
+
+  const requiredRunFields = [
+    'id',
+    'stage',
+    'evidenceKind',
+    'status',
+    'operationVersion',
+    'buildId',
+    'participantId',
+    'recordedAt',
+    'expiresAt',
+    'artifacts',
+    'cycle',
+    'journalSha256',
+    'receiptSha256',
+    'security',
+    'faults',
+    'accessibility',
+    'diagnostics',
+    'revocation',
+    'coverageGaps',
+    'universalSupportClaim',
+    'manualOverride',
+  ] as const;
+
+  it.each(requiredRunFields)('rejects omitted run evidence field %s', (field) => {
+    const manifest = validManifest();
+    delete (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)[field];
+    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
+      'EVIDENCE_MANIFEST_INVALID',
+    );
+  });
+
+  const nestedRunFields = [
+    ['cycle', 'prepare'],
+    ['cycle', 'apply'],
+    ['cycle', 'verifyApply'],
+    ['cycle', 'restartRequired'],
+    ['cycle', 'restart'],
+    ['cycle', 'restore'],
+    ['cycle', 'verifyRestore'],
+    ['security', 'ipcAdversarial'],
+    ['security', 'replayRejected'],
+    ['security', 'identitySpoofRejected'],
+    ['security', 'sessionSwapRejected'],
+    ['faults', 'diskFull'],
+    ['faults', 'crash'],
+    ['faults', 'reboot'],
+    ['faults', 'drift'],
+    ['accessibility', 'status'],
+    ['accessibility', 'seriousOrCriticalViolations'],
+    ['diagnostics', 'redacted'],
+    ['diagnostics', 'previewed'],
+    ['diagnostics', 'consentBound'],
+    ['diagnostics', 'autoUpload'],
+    ['diagnostics', 'rawFieldsFound'],
+    ['revocation', 'signed'],
+    ['revocation', 'blocksNewApply'],
+    ['revocation', 'localRecoveryAvailable'],
+    ['revocation', 'remoteRollback'],
+    ['revocation', 'remoteExecution'],
+  ] as const;
+
+  it.each(nestedRunFields)('rejects omitted nested evidence field %s.%s', (group, field) => {
+    const manifest = validManifest();
+    const run = manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>;
+    delete (run[group] as Record<string, unknown>)[field];
+    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
+      'EVIDENCE_MANIFEST_INVALID',
+    );
+  });
+
+  const requiredReviewFields = [
+    'status',
+    'id',
+    'reviewerId',
+    'participantId',
+    'recordedAt',
+    'response',
+    'verdict',
+    'operationVersion',
+    'buildId',
+    'stage',
+    'runEvidenceId',
+    'runEvidenceSha256',
+    'artifactHashes',
+  ] as const;
+
+  it.each(requiredReviewFields)('rejects omitted decided-review field %s', (field) => {
+    const manifest = validManifest();
+    withPhysicalStage(manifest, 'clean-windows-vm');
+    delete (manifest.stages[1]!.humanReview as unknown as Record<string, unknown>)[field];
+    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
+      'EVIDENCE_MANIFEST_INVALID',
+    );
+  });
+
+  it('rejects a review artifact-hash swap even when its run hash still matches', () => {
+    const manifest = validManifest();
+    const run = withPhysicalStage(manifest, 'clean-windows-vm');
+    manifest.stages[1]!.humanReview = {
+      ...approvedReview(run),
+      artifactHashes: [sha256('swapped'), run.artifacts[1]!.sha256],
+    } as never;
+    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
+      'REVIEW_ARTIFACT_HASH_MISMATCH',
+    );
+  });
+
+  it('rejects a failed earlier physical run and blocks every supplied later stage', () => {
+    const manifest = fullyReviewedManifest();
+    manifest.stages[1]!.runEvidence!.status = 'FAIL';
+    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toEqual(
+      expect.arrayContaining(['RUN_EVIDENCE_NOT_PASSED', 'PROMOTION_STAGE_SKIPPED']),
+    );
+  });
+
+  it('rejects already-decided review bytes in run-evidence collection mode', () => {
+    const manifest = validManifest();
+    withPhysicalStage(manifest, 'clean-windows-vm');
+    expect(
+      codes(evaluatePhase6Evidence(manifest, context({ requireRunEvidence: 'clean-windows-vm' }))),
+    ).toContain('RUN_REVIEW_ALREADY_DECIDED');
+  });
+
+  it('rejects additional unreviewed fields at every closed trust boundary', () => {
+    const manifest = validManifest();
+    (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)['rawMachineId'] =
+      'forbidden';
+    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
+      'EVIDENCE_MANIFEST_INVALID',
+    );
+  });
 });
