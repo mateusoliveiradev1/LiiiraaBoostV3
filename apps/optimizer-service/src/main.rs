@@ -2,6 +2,7 @@
 
 pub mod dedup_store;
 pub mod ipc;
+pub mod restore_point;
 
 #[cfg(windows)]
 fn main() -> windows_service::Result<()> {
