@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-08-PLAN.md
-last_updated: "2026-08-13T15:14:53.707Z"
+stopped_at: Completed 06-10-PLAN.md
+last_updated: "2026-08-13T15:29:46.906Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 227
+  completed_plans: 228
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 13 of 28
+Plan: 14 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -255,6 +255,7 @@ _Updated after plan completion_
 | Phase 06 P06 | 11 min | 3 tasks | 2 files |
 | Phase 06 P07 | 6 min | 3 tasks | 2 files |
 | Phase 06 P08 | 7 min | 3 tasks | 2 files |
+| Phase 06 P10 | 10 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -807,6 +808,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Compare known Windows state by exact scheme identity and canonical state hash while retaining observation timestamps as immutable evidence metadata. — Separates durable state identity from observation-time metadata while preserving exact evidence.
 - [Phase 06]: Treat broker return, failure, timeout, response loss, and abandoned mutex as diagnostic only; observed Windows truth exclusively selects the verdict. — A broker return cannot prove the final external Windows state.
 - [Phase 06]: Resolve drift and conflict only through a new child transaction intent whose prior is the observed current state; never rewrite the original transaction evidence. — Preserves immutable audit history and requires explicit safe user resolution.
+- [Phase 06]: Bind promotion authority to exact immutable evidence and never authorize drift. — Operation version, immutable build, ordered stage predecessor, and evidence ID/hash tuples must all match before authority advances.
+- [Phase 06]: Keep signed revocation fail closed while preserving local recovery. — Failed or validly revoked versions permanently block new applies, but no revocation can authorize remote rollback, remote execution, or remove local recovery.
+- [Phase 06]: Keep friends diagnostics local, redacted, previewed, and explicitly consent-bound. — Only a consent matching the exact redacted preview fingerprint and selected export/send intent can authorize a user action; no automatic transport exists.
 
 ### Pending Todos
 
@@ -857,6 +861,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:14:53.698Z
-Stopped at: Completed 06-08-PLAN.md
+Last session: 2026-08-13T15:29:09.002Z
+Stopped at: Completed 06-10-PLAN.md
 Resume file: None
