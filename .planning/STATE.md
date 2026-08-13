@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-08-13T05:54:53.633Z"
-last_activity: 2026-08-13 -- Phase 06 planning complete
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-08-13T06:19:01.334Z"
+last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 214
+  completed_plans: 215
   percent: 40
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-26)
 
 **Core value:** Produce measurable performance gains adapted to the exact hardware without sacrificing system stability, while keeping every change explainable, auditable, and reversible.
-**Current focus:** Phase 06 — Transactional Plans and Recovery
+**Current focus:** Phase 06 — transactional-plans-and-recovery
 
 ## Current Position
 
-Phase: 06 (transactional-plans-and-recovery) — READY
-Plan: Not started
+Phase: 06 (transactional-plans-and-recovery) — EXECUTING
+Plan: 2 of 28
 Status: Ready to execute
-Last activity: 2026-08-13 -- Phase 06 planning complete
+Last activity: 2026-08-13
 
-Progress: [██████████] Phase 05 11/11 plans complete
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -242,6 +242,7 @@ _Updated after plan completion_
 | Phase 05 P05 | 16 min | 2 tasks | 5 files |
 | Phase 05 P06 | 14 min | 2 tasks | 4 files |
 | Phase 05 P07 | 24 min | 2 tasks | 6 files |
+| Phase 06 P01 | 11 min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -758,7 +759,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 05]: Comparisons expose no delta until every required dimension is comparable and all blockers are absent.
 - [Phase 05]: Offline HTML and JSON reports share one immutable hash-verifiable projection.
 - [Phase 05]: Claim revocation removes eligibility while preserving comparison history.
-
+- [Phase 06]: Model transaction and recovery truth as closed discriminated documents. — Unknown, drift, conflict, and restored outcomes cannot masquerade as verified success.
+- [Phase 06]: Publish TransactionalRecoveryDocument as a first-class generated schema with Ajv and Rust validators. — Every untrusted Phase 6 document crosses runtime JSON Schema validation before generated transport deserialization.
+- [Phase 06]: Use bounded uint32 event sequences and replay counters. — TypeScript and Rust retain identical numeric JSON without sacrificing practical per-document range.
 ### Pending Todos
 
 None yet.
@@ -808,6 +811,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T02:59:35.604Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-transactional-plans-and-recovery/06-UI-SPEC.md
+Last session: 2026-08-13T06:19:01.325Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None

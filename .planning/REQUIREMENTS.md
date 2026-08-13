@@ -64,14 +64,14 @@
 
 ### Plans, Execution, and Recovery
 
-- [ ] **PLAN-01**: User can generate a personalized optimization plan from current goals, hardware capabilities, and system evidence
-- [ ] **PLAN-02**: User can add, remove, and inspect individual operations before approving a plan
-- [ ] **PLAN-03**: Every operation shows purpose, expected impact, risk, evidence, compatibility, restart effect, previous value, and recovery method
-- [ ] **PLAN-04**: User chooses a global Verificado, Avançado, Experimental, or Extremo policy while retaining per-operation control
-- [ ] **PLAN-05**: High-risk operations require proportional confirmation, authentication, completed recovery preparation, and post-change verification
-- [ ] **PLAN-06**: The engine journals exact prior state before every side effect and verifies apply and rollback outcomes
-- [ ] **PLAN-07**: User can restore an individual operation, a complete plan, or a recovery checkpoint after failure or reboot
-- [ ] **PLAN-08**: Partial failure pauses safely, reverts only the necessary dependency set, explains the cause, and preserves an auditable diagnostic
+- [x] **PLAN-01**: User can generate a personalized optimization plan from current goals, hardware capabilities, and system evidence
+- [x] **PLAN-02**: User can add, remove, and inspect individual operations before approving a plan
+- [x] **PLAN-03**: Every operation shows purpose, expected impact, risk, evidence, compatibility, restart effect, previous value, and recovery method
+- [x] **PLAN-04**: User chooses a global Verificado, Avançado, Experimental, or Extremo policy while retaining per-operation control
+- [x] **PLAN-05**: High-risk operations require proportional confirmation, authentication, completed recovery preparation, and post-change verification
+- [x] **PLAN-06**: The engine journals exact prior state before every side effect and verifies apply and rollback outcomes
+- [x] **PLAN-07**: User can restore an individual operation, a complete plan, or a recovery checkpoint after failure or reboot
+- [x] **PLAN-08**: Partial failure pauses safely, reverts only the necessary dependency set, explains the cause, and preserves an auditable diagnostic
 
 ### Games and Profiles
 
@@ -202,14 +202,14 @@ A v1 requirement is complete only when:
 | DIAG-05     | Phase 5  | Complete |
 | DIAG-06     | Phase 5  | Complete |
 | DIAG-07     | Phase 5  | Complete |
-| PLAN-01     | Phase 6  | Pending  |
-| PLAN-02     | Phase 6  | Pending  |
-| PLAN-03     | Phase 6  | Pending  |
-| PLAN-04     | Phase 6  | Pending  |
-| PLAN-05     | Phase 6  | Pending  |
-| PLAN-06     | Phase 6  | Pending  |
-| PLAN-07     | Phase 6  | Pending  |
-| PLAN-08     | Phase 6  | Pending  |
+| PLAN-01     | Phase 6  | Complete |
+| PLAN-02     | Phase 6  | Complete |
+| PLAN-03     | Phase 6  | Complete |
+| PLAN-04     | Phase 6  | Complete |
+| PLAN-05     | Phase 6  | Complete |
+| PLAN-06     | Phase 6  | Complete |
+| PLAN-07     | Phase 6  | Complete |
+| PLAN-08     | Phase 6  | Complete |
 | GAME-01     | Phase 8  | Pending  |
 | GAME-02     | Phase 8  | Pending  |
 | GAME-03     | Phase 8  | Pending  |
