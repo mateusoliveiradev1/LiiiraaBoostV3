@@ -390,10 +390,13 @@ fn one_event_anchor_lag_recovers_but_rollback_ahead_and_multi_lag_do_not() {
     );
     drop(store);
 
-    let recovered = open_store(&database, &anchor);
+    let mut recovered = open_store(&database, &anchor);
     assert_eq!(recovered.mutation_state(), MutationState::Writable);
+    recovered
+        .append_document(&fixture("journal dispatch returned"))
+        .expect("advance beyond the recoverable single-event lag");
     let latest = anchor.head();
-    assert_eq!(latest.sequence, Some(3));
+    assert_eq!(latest.sequence, Some(4));
     drop(recovered);
 
     anchor.replace_head(before.clone());
