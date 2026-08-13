@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-08-13T07:31:49.870Z"
+stopped_at: Completed 06-09-PLAN.md
+last_updated: "2026-08-13T07:52:08.743Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 219
+  completed_plans: 220
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 5 of 28
+Plan: 6 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -247,6 +247,7 @@ _Updated after plan completion_
 | Phase 06 P04 | 6 min | 3 tasks | 2 files |
 | Phase 06 P22 | 19 min | 3 tasks | 7 files |
 | Phase 06 P03 | 9min | 2 tasks | 8 files |
+| Phase 06 P09 | 15min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -776,6 +777,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Renderer intent supplies only operation selection and a non-Extreme risk ceiling; native policies own evidence, compatibility, risk, approval, and success authority.
 - [Phase 06]: Generated plan and recovery authority is immutable through private-field wrappers and read-only transport access.
 - [Phase 06]: Prepared transaction identity and exact prior state are required at privileged effect boundaries while local recovery remains independent of entitlement.
+- [Phase 06]: Authenticate every authoritative recovery document through one global HMAC journal while retaining STRICT purpose-specific tables for query and foreign-key authority.
+- [Phase 06]: Recover only an exact single newest non-rotation anchor lag; rotation interruption, multi-event lag, rollback, ahead state, or database identity mismatch remains read-only.
+- [Phase 06]: Bind immutable receipts to the latest verified or restored contract event before append.
 
 ### Pending Todos
 
@@ -826,6 +830,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T07:31:49.864Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-08-13T07:52:08.736Z
+Stopped at: Completed 06-09-PLAN.md
 Resume file: None
