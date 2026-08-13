@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 06-24-PLAN.md
-last_updated: "2026-08-13T17:44:22.351Z"
+last_updated: "2026-08-13T18:01:16.365Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 236
+  completed_plans: 237
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 22 of 28
+Plan: 23 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [██████████] 96%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -264,6 +264,7 @@ _Updated after plan completion_
 | Phase 06 P19 | 12m | 2 tasks | 3 files |
 | Phase 06 P18 | 18 min | 2 tasks | 12 files |
 | Phase 06 P24 | 18 min | 2 tasks | 13 files |
+| Phase 06 P25 | 10 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -844,6 +845,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Recompute device posture on startup, read, and immediately before apply; invalidated or unavailable preference authority blocks new Advanced apply work.
 - [Phase 06]: Publish one closed native-attributed projection to the renderer and mutate cached authority only after a validated native response.
 - [Phase 06]: Never gate local recovery on Advanced preference, authentication, subscription, or connectivity.
+- [Phase 06]: Request fresh enable and revoke proof through one action-discriminated system-browser callback, then invoke only the corresponding named PlanAuthority method.
+- [Phase 06]: Keep transition UI pending until a newer native projection confirms enabled or revoked; command dispatch and proof completion never toggle renderer state.
+- [Phase 06]: Block Advanced apply on absent, revoked, invalidated, stale, or unavailable preference authority while keeping local recovery enabled in every state.
 
 ### Pending Todos
 
@@ -894,6 +898,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T17:44:22.343Z
+Last session: 2026-08-13T18:00:58.694Z
 Stopped at: Completed 06-24-PLAN.md
 Resume file: None
