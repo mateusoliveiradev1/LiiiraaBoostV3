@@ -1,91 +1,65 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-type Stage = 'deterministic-simulation' | 'clean-windows-vm' | 'owner-pc' | 'friends-pc';
-type Mode = 'planned' | 'final';
+import {
+  PHASE6_PROMOTION_STAGES,
+  PHASE6_REQUIREMENTS,
+  evaluatePhase6Evidence,
+  parsePhase6CliOptions,
+  phase6EvidenceSha256,
+} from '../src/evaluate.js';
 
-interface Diagnostic {
-  code: string;
-  path: string;
-  message: string;
-}
+type Stage = (typeof PHASE6_PROMOTION_STAGES)[number];
+type PhysicalStage = Exclude<Stage, 'deterministic-simulation'>;
 
-interface Result {
-  ok: boolean;
-  releaseReady: boolean;
-  highestAdmittedStage: Stage | null;
-  runReadyForReview: boolean;
-  pendingStages: Stage[];
-  coverageGaps: string[];
-  diagnostics: Diagnostic[];
-}
-
-interface Context {
-  mode: Mode;
-  evaluatedAt: string;
-  artifactContents: Readonly<Record<string, string | Uint8Array>>;
-  requireRunEvidence?: Stage;
-}
-
-type Evaluator = (manifest: unknown, context: Context) => Result;
-
-const missingEvaluator: Evaluator = () => ({
-  ok: false,
-  releaseReady: false,
-  highestAdmittedStage: null,
-  runReadyForReview: false,
-  pendingStages: [],
-  coverageGaps: [],
-  diagnostics: [
-    {
-      code: 'EVALUATOR_NOT_IMPLEMENTED',
-      path: '$',
-      message: 'Phase 6 evidence evaluator is not implemented.',
-    },
-  ],
-});
-
-const moduleUrl = new URL('../src/evaluate.ts', import.meta.url).href;
-const loaded = (await import(/* @vite-ignore */ moduleUrl).catch(() => ({
-  evaluatePhase6Evidence: missingEvaluator,
-}))) as { evaluatePhase6Evidence: Evaluator };
-const { evaluatePhase6Evidence } = loaded;
-
-const sha256 = (value: string | Uint8Array): string =>
-  createHash('sha256').update(value).digest('hex');
-
-const canonical = (value: unknown): string => {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
-  if (value !== null && typeof value === 'object') {
-    return `{${Object.entries(value as Record<string, unknown>)
-      .toSorted(([left], [right]) => left.localeCompare(right))
-      .map(([key, nested]) => `${JSON.stringify(key)}:${canonical(nested)}`)
-      .join(',')}}`;
-  }
-  return JSON.stringify(value);
-};
-
-const STAGES = ['deterministic-simulation', 'clean-windows-vm', 'owner-pc', 'friends-pc'] as const;
-const REQUIREMENTS = ['PLAN-01', 'PLAN-05', 'PLAN-06', 'PLAN-07', 'PLAN-08'] as const;
+const REQUIREMENTS = [
+  'PLAN-01',
+  'PLAN-02',
+  'PLAN-03',
+  'PLAN-04',
+  'PLAN-05',
+  'PLAN-06',
+  'PLAN-07',
+  'PLAN-08',
+] as const;
 const DECISIONS = Array.from(
   { length: 35 },
   (_, index) => `D-${String(index + 1).padStart(2, '0')}`,
 );
 const buildBytes = 'phase-6 immutable packaged build';
-const evidenceBytes = 'phase-6 bounded deterministic evidence';
+const evidenceBytes = 'phase-6 bounded evidence';
 const buildPath = 'artifacts/liiiraa-boost-phase6.exe';
 const evidencePath = 'evidence/phase6-cycle.json';
+const artifactManifestSha256 = createHash('sha256').update('artifact manifest').digest('hex');
+const configSha256 = createHash('sha256').update('stage config').digest('hex');
+const rosterSha256 = createHash('sha256').update('signed friends roster').digest('hex');
 
-const runEvidence = (stage: Stage, evidenceKind: 'deterministic' | 'physical') => ({
-  id: `run-${stage}`,
+const sha256 = (value: string | Uint8Array): string =>
+  createHash('sha256').update(value).digest('hex');
+
+const runEvidence = (
+  stage: Stage,
+  participantId: string,
+  machineSlot: string | null = null,
+  predecessorRunEvidenceSha256: string | null = null,
+) => ({
+  id: `run-${stage}-${participantId}`,
+  source: stage === 'deterministic-simulation' ? 'phase6-deterministic-rust-1' : 'phase6-physical-runner-rust-1',
   stage,
-  evidenceKind,
+  evidenceKind: stage === 'deterministic-simulation' ? 'deterministic' : 'physical',
   status: 'PASS',
-  operationVersion: 'power-scheme@1.0.0',
-  buildId: 'phase6-build-001',
-  participantId: evidenceKind === 'physical' ? `participant-${stage}` : 'deterministic-runner',
+  operationVersion: 'power-scheme@3.0.0',
+  buildId: 'phase6-build-003',
+  participantId,
+  machineSlot,
+  artifactManifestSha256,
+  configSha256,
+  friendsRosterSha256: stage === 'friends-pc' ? rosterSha256 : null,
+  predecessorRunEvidenceSha256,
   recordedAt: '2030-01-15T18:00:00.000Z',
+  exportedAt: stage === 'friends-pc' ? '2030-01-15T18:30:00.000Z' : null,
   expiresAt: '2031-01-15T18:00:00.000Z',
   artifacts: [
     { path: buildPath, sha256: sha256(buildBytes) },
@@ -100,8 +74,16 @@ const runEvidence = (stage: Stage, evidenceKind: 'deterministic' | 'physical') =
     restore: 'PASS',
     verifyRestore: 'PASS',
   },
-  journalSha256: sha256(`journal-${stage}`),
-  receiptSha256: sha256(`receipt-${stage}`),
+  continuation: [
+    'installed-ready',
+    'checkpoint-created',
+    'reboot-requested',
+    'resumed-observation',
+    'restore-requested',
+    'restored-complete',
+  ],
+  journalSha256: sha256(`journal-${stage}-${participantId}`),
+  receiptSha256: sha256(`receipt-${stage}-${participantId}`),
   security: {
     ipcAdversarial: 'PASS',
     replayRejected: true,
@@ -116,6 +98,7 @@ const runEvidence = (stage: Stage, evidenceKind: 'deterministic' | 'physical') =
     consentBound: true,
     autoUpload: false,
     rawFieldsFound: [] as string[],
+    byteLength: 1024,
   },
   revocation: {
     signed: true,
@@ -124,517 +107,277 @@ const runEvidence = (stage: Stage, evidenceKind: 'deterministic' | 'physical') =
     remoteRollback: false,
     remoteExecution: false,
   },
-  coverageGaps: ['windows-10-hardware-matrix', 'additional-friends-hardware'],
+  coverageGaps: ['additional-hardware'],
   universalSupportClaim: false,
   manualOverride: false,
 });
 
-type RunEvidence = ReturnType<typeof runEvidence>;
+type Run = ReturnType<typeof runEvidence>;
 
-const approvedReview = (run: RunEvidence) => ({
-  status: 'approved',
-  id: `review-${run.stage}`,
-  reviewerId: `reviewer-${run.stage}`,
+const consentFor = (run: Run) => ({
+  id: `consent-${run.participantId}`,
   participantId: run.participantId,
+  machineSlot: run.machineSlot,
+  recordedAt: '2030-01-15T18:15:00.000Z',
+  artifactManifestSha256,
+  configSha256,
+  friendsRosterSha256: rosterSha256,
+  runEvidenceId: run.id,
+  runEvidenceSha256: phase6EvidenceSha256(run),
+  previewSha256: sha256(`preview-${run.participantId}`),
+  redactedBytesSha256: sha256(`redacted-${run.participantId}`),
+  intent: 'export-and-send',
+});
+
+const reviewFor = (run: Run, consent: ReturnType<typeof consentFor> | null = null) => ({
+  id: `review-${run.participantId}`,
+  reviewerId: `reviewer-${run.participantId}`,
+  participantId: run.participantId,
+  machineSlot: run.machineSlot,
   recordedAt: '2030-01-15T19:00:00.000Z',
   response: 'APPROVED',
   verdict: 'APPROVED',
   operationVersion: run.operationVersion,
   buildId: run.buildId,
   stage: run.stage,
+  artifactManifestSha256,
+  configSha256,
+  friendsRosterSha256: run.friendsRosterSha256,
   runEvidenceId: run.id,
-  runEvidenceSha256: sha256(canonical(run)),
+  runEvidenceSha256: phase6EvidenceSha256(run),
+  consentId: consent?.id ?? null,
+  consentSha256: consent === null ? null : phase6EvidenceSha256(consent),
   artifactHashes: run.artifacts.map(({ sha256: hash }) => hash),
 });
 
-const validManifest = () => {
-  const deterministic = runEvidence('deterministic-simulation', 'deterministic');
+const roster = () => ({
+  id: 'friends-roster-alpha-001',
+  recordedAt: '2030-01-15T17:00:00.000Z',
+  operationVersion: 'power-scheme@3.0.0',
+  buildId: 'phase6-build-003',
+  artifactManifestSha256,
+  configSha256,
+  rosterSha256,
+  cmsSha256: sha256('friends roster cms'),
+  participants: [
+    { participantId: 'friend-alpha', machineSlot: 'friends-slot-01' },
+    { participantId: 'friend-bravo', machineSlot: 'friends-slot-02' },
+  ],
+});
+
+const manifest = () => {
+  const deterministic = runEvidence('deterministic-simulation', 'deterministic-runner');
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: '2030-01-15T20:00:00.000Z',
-    operationVersion: 'power-scheme@1.0.0',
+    operationVersion: 'power-scheme@3.0.0',
     immutableBuild: {
-      id: 'phase6-build-001',
+      id: 'phase6-build-003',
       commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
       artifact: { path: buildPath, sha256: sha256(buildBytes) },
+      artifactManifestSha256,
     },
-    promotionStage: 'deterministic-simulation',
+    promotionStage: 'deterministic-simulation' as Stage,
     requirementsCoverage: [...REQUIREMENTS],
     decisionCoverage: [...DECISIONS],
-    stages: [
-      {
-        stage: 'deterministic-simulation',
-        predecessorStage: null,
-        runEvidence: deterministic,
-        humanReview: { status: 'not-required' },
-      },
-      {
-        stage: 'clean-windows-vm',
-        predecessorStage: 'deterministic-simulation',
-        runEvidence: null,
-        humanReview: { status: 'pending' },
-      },
-      {
-        stage: 'owner-pc',
-        predecessorStage: 'clean-windows-vm',
-        runEvidence: null,
-        humanReview: { status: 'pending' },
-      },
-      {
-        stage: 'friends-pc',
-        predecessorStage: 'owner-pc',
-        runEvidence: null,
-        humanReview: { status: 'pending' },
-      },
+    legacyBlockedAttempts: [
+      { path: 'evidence/legacy/managed-power-scheme-v2.json', sha256: sha256('legacy') },
     ],
+    stages: PHASE6_PROMOTION_STAGES.map((stage, index) => ({
+      stage,
+      predecessorStage: index === 0 ? null : PHASE6_PROMOTION_STAGES[index - 1]!,
+      friendsRoster: null as ReturnType<typeof roster> | null,
+      runs: stage === 'deterministic-simulation' ? [deterministic] : ([] as Run[]),
+      consents: [] as ReturnType<typeof consentFor>[],
+      reviews: [] as ReturnType<typeof reviewFor>[],
+    })),
   };
 };
 
-type Manifest = ReturnType<typeof validManifest>;
-type StageCell = Manifest['stages'][number];
+type Manifest = ReturnType<typeof manifest>;
 
-const context = (overrides: Partial<Context> = {}): Context => ({
-  mode: 'planned',
+const context = (overrides: Record<string, unknown> = {}) => ({
+  mode: 'planned' as const,
   evaluatedAt: '2030-01-16T00:00:00.000Z',
   artifactContents: { [buildPath]: buildBytes, [evidencePath]: evidenceBytes },
   ...overrides,
 });
 
-const codes = (result: Result): string[] => result.diagnostics.map(({ code }) => code);
+const codes = (result: ReturnType<typeof evaluatePhase6Evidence>): string[] =>
+  result.diagnostics.map(({ code }) => code);
 
-const withPhysicalStage = (
-  manifest: Manifest,
-  stage: Exclude<Stage, 'deterministic-simulation'>,
-  review: 'pending' | 'approved' = 'approved',
-): RunEvidence => {
-  const cell = manifest.stages[STAGES.indexOf(stage)] as StageCell;
-  const run = runEvidence(stage, 'physical');
-  cell.runEvidence = run as StageCell['runEvidence'];
-  cell.humanReview = (review === 'approved' ? approvedReview(run) : { status: 'pending' }) as never;
-  manifest.promotionStage = stage;
-  return run;
+const appendPhysical = (value: Manifest, stage: PhysicalStage, review = true): Run[] => {
+  const index = PHASE6_PROMOTION_STAGES.indexOf(stage);
+  const cell = value.stages[index]!;
+  const predecessor = value.stages[index - 1]!.runs.at(-1)!;
+  const bindings = stage === 'friends-pc' ? roster().participants : [{ participantId: `participant-${stage}`, machineSlot: null }];
+  if (stage === 'friends-pc') cell.friendsRoster = roster();
+  cell.runs = bindings.map(({ participantId, machineSlot }) =>
+    runEvidence(stage, participantId, machineSlot, phase6EvidenceSha256(predecessor)),
+  );
+  if (stage === 'friends-pc') cell.consents = cell.runs.map(consentFor);
+  if (review) {
+    cell.reviews = cell.runs.map((run, runIndex) =>
+      reviewFor(run, stage === 'friends-pc' ? cell.consents[runIndex]! : null),
+    );
+  }
+  value.promotionStage = stage;
+  return cell.runs;
 };
 
-const fullyReviewedManifest = (): Manifest => {
-  const manifest = validManifest();
-  withPhysicalStage(manifest, 'clean-windows-vm');
-  withPhysicalStage(manifest, 'owner-pc');
-  withPhysicalStage(manifest, 'friends-pc');
-  return manifest;
+const reviewedThrough = (stage: PhysicalStage): Manifest => {
+  const value = manifest();
+  appendPhysical(value, 'clean-windows-vm');
+  if (stage === 'owner-pc' || stage === 'friends-pc') appendPhysical(value, 'owner-pc');
+  if (stage === 'friends-pc') appendPhysical(value, 'friends-pc');
+  return value;
 };
 
-describe('Phase 6 exact-version sequential evidence authority', () => {
-  it('admits only deterministic simulation in planned mode and names every physical blocker', () => {
-    const result = evaluatePhase6Evidence(validManifest(), context());
-
-    expect(result.ok).toBe(true);
-    expect(result.highestAdmittedStage).toBe('deterministic-simulation');
-    expect(result.pendingStages).toEqual(['clean-windows-vm', 'owner-pc', 'friends-pc']);
-    expect(result.releaseReady).toBe(false);
-    expect(result.diagnostics).toEqual([]);
+describe('closed Phase 6 CLI grammar', () => {
+  it.each([
+    [['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm'], { mode: 'planned', requireRunEvidence: 'clean-windows-vm' }],
+    [['--mode', 'planned', '--require-admitted-stage', 'owner-pc'], { mode: 'planned', requireAdmittedStage: 'owner-pc' }],
+    [['--mode', 'final'], { mode: 'final' }],
+  ] as const)('accepts only canonical invocation %j', (args, expected) => {
+    expect(parsePhase6CliOptions(args)).toEqual(expected);
   });
 
-  it('reports each missing physical run explicitly in final mode', () => {
-    const result = evaluatePhase6Evidence(validManifest(), context({ mode: 'final' }));
+  it.each([
+    [],
+    ['--mode'],
+    ['--mode', 'planned'],
+    ['--mode', 'other'],
+    ['--mode', 'final', '--require-run-evidence', 'friends-pc'],
+    ['--mode', 'planned', '--require-run-evidence'],
+    ['--mode', 'planned', '--require-admitted-stage'],
+    ['--mode', 'planned', '--require-run-evidence', 'clean-vm'],
+    ['--mode', 'planned', '--require-run-evidence', 'friends-pcs'],
+    ['--mode', 'planned', '--stage', 'clean-windows-vm'],
+    ['--mode', 'planned', '--unknown'],
+    ['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm', '--require-admitted-stage', 'clean-windows-vm'],
+  ])('rejects noncanonical invocation %j before evaluation', (args) => {
+    expect(() => parsePhase6CliOptions(args)).toThrow(/Phase 6 CLI/u);
+  });
+});
 
-    expect(result.ok).toBe(false);
-    expect(codes(result).filter((code) => code === 'PHYSICAL_RUN_EVIDENCE_MISSING')).toHaveLength(
-      3,
-    );
-    expect(result.pendingStages).toEqual(['clean-windows-vm', 'owner-pc', 'friends-pc']);
+describe('exact PLAN-01 through PLAN-08 coverage', () => {
+  it('keeps evaluator and schema on the exact ordered closed set', () => {
+    const schema = JSON.parse(
+      readFileSync(new URL('../evidence-manifest.schema.json', import.meta.url), 'utf8'),
+    ) as Record<string, any>;
+    const coverage = schema.properties.requirementsCoverage;
+
+    expect(PHASE6_REQUIREMENTS).toEqual(REQUIREMENTS);
+    expect(coverage.items.enum).toEqual(REQUIREMENTS);
+    expect(coverage).toMatchObject({ minItems: 8, maxItems: 8, uniqueItems: true });
   });
 
-  it('accepts persisted physical run evidence for later review without admitting the stage', () => {
-    const manifest = validManifest();
-    withPhysicalStage(manifest, 'clean-windows-vm', 'pending');
+  it.each(['PLAN-02', 'PLAN-03', 'PLAN-04'] as const)(
+    'reports REQUIREMENT_COVERAGE_MISSING when %s is omitted',
+    (omitted) => {
+      const value = manifest();
+      value.requirementsCoverage = value.requirementsCoverage.filter((id) => id !== omitted);
+      expect(codes(evaluatePhase6Evidence(value, context({ requireAdmittedStage: 'deterministic-simulation' })))).toContain(
+        'REQUIREMENT_COVERAGE_MISSING',
+      );
+    },
+  );
 
-    const result = evaluatePhase6Evidence(
-      manifest,
-      context({ requireRunEvidence: 'clean-windows-vm' }),
+  it.each([
+    ['reordered', (ids: string[]) => [ids[1]!, ids[0]!, ...ids.slice(2)]],
+    ['duplicate', (ids: string[]) => [...ids.slice(0, 7), ids[6]!]],
+    ['unknown', (ids: string[]) => [...ids.slice(0, 7), 'PLAN-99']],
+    ['fewer', (ids: string[]) => ids.slice(0, 7)],
+    ['more', (ids: string[]) => [...ids, 'PLAN-99']],
+  ])('rejects %s requirement coverage', (_name, mutate) => {
+    const value = manifest();
+    value.requirementsCoverage = mutate(value.requirementsCoverage);
+    expect(codes(evaluatePhase6Evidence(value, context({ requireAdmittedStage: 'deterministic-simulation' })))).toContain(
+      'REQUIREMENT_COVERAGE_INVALID',
     );
+  });
+});
 
+describe('targeted and final stage evaluation', () => {
+  it('accepts one pending clean run while later stages are absent', () => {
+    const value = manifest();
+    appendPhysical(value, 'clean-windows-vm', false);
+    const result = evaluatePhase6Evidence(value, context({ requireRunEvidence: 'clean-windows-vm' }));
     expect(result.ok).toBe(true);
     expect(result.runReadyForReview).toBe(true);
     expect(result.highestAdmittedStage).toBe('deterministic-simulation');
-    expect(result.pendingStages).toContain('clean-windows-vm');
   });
 
-  it('admits exact physical stages only after later matching APPROVED reviews', () => {
-    const result = evaluatePhase6Evidence(fullyReviewedManifest(), context({ mode: 'final' }));
-
+  it('accepts an admitted owner stage while friends remains absent', () => {
+    const value = reviewedThrough('owner-pc');
+    const result = evaluatePhase6Evidence(value, context({ requireAdmittedStage: 'owner-pc' }));
     expect(result.ok).toBe(true);
-    expect(result.highestAdmittedStage).toBe('friends-pc');
-    expect(result.pendingStages).toEqual([]);
-    expect(result.coverageGaps).toEqual([
-      'additional-friends-hardware',
-      'windows-10-hardware-matrix',
-    ]);
-    expect(result.releaseReady).toBe(false);
+    expect(result.highestAdmittedStage).toBe('owner-pc');
   });
 
-  it('does not let approval transform deterministic composition into physical evidence', () => {
-    const manifest = validManifest();
-    const cell = manifest.stages[1]!;
-    const simulated = runEvidence('clean-windows-vm', 'deterministic');
-    cell.runEvidence = simulated as never;
-    cell.humanReview = approvedReview(simulated) as never;
-    manifest.promotionStage = 'clean-windows-vm';
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'SIMULATED_AS_PHYSICAL',
-    );
+  it('requires the complete four-stage chain in final mode', () => {
+    expect(evaluatePhase6Evidence(reviewedThrough('friends-pc'), context({ mode: 'final' })).ok).toBe(true);
+    expect(evaluatePhase6Evidence(reviewedThrough('owner-pc'), context({ mode: 'final' })).ok).toBe(false);
   });
 
-  it('rejects an approved review without persisted run evidence', () => {
-    const manifest = validManifest();
-    const run = runEvidence('clean-windows-vm', 'physical');
-    manifest.stages[1]!.humanReview = approvedReview(run) as never;
-    manifest.promotionStage = 'clean-windows-vm';
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'REVIEW_WITHOUT_RUN',
-    );
-  });
-
-  it('rejects a persisted physical run without an approved final review', () => {
-    const manifest = validManifest();
-    withPhysicalStage(manifest, 'clean-windows-vm', 'pending');
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'HUMAN_REVIEW_PENDING',
-    );
-  });
-
-  it('rejects an explicit human rejection', () => {
-    const manifest = validManifest();
-    const run = withPhysicalStage(manifest, 'clean-windows-vm');
-    manifest.stages[1]!.humanReview = {
-      ...approvedReview(run),
-      status: 'rejected',
-      response: 'REJECTED',
-      verdict: 'REJECTED',
-    } as never;
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'HUMAN_REVIEW_REJECTED',
-    );
-  });
-
-  it('rejects a review bound to another immutable run hash', () => {
-    const manifest = validManifest();
-    const run = withPhysicalStage(manifest, 'clean-windows-vm');
-    manifest.stages[1]!.humanReview = {
-      ...approvedReview(run),
-      runEvidenceSha256: sha256('another run'),
-    } as never;
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'REVIEW_RUN_HASH_MISMATCH',
-    );
-  });
-
-  it('rejects skipped physical predecessors', () => {
-    const manifest = validManifest();
-    withPhysicalStage(manifest, 'owner-pc');
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
+  it('rejects skipped predecessors even for targeted gates', () => {
+    const value = manifest();
+    appendPhysical(value, 'owner-pc', false);
+    expect(codes(evaluatePhase6Evidence(value, context({ requireRunEvidence: 'owner-pc' })))).toContain(
       'PROMOTION_STAGE_SKIPPED',
     );
   });
+});
 
-  it.each([
-    ['operationVersion', 'power-scheme@2.0.0', 'OPERATION_VERSION_MISMATCH'],
-    ['buildId', 'another-build', 'BUILD_ID_MISMATCH'],
-    ['stage', 'owner-pc', 'RUN_STAGE_MISMATCH'],
-  ] as const)('rejects mixed %s authority', (field, value, code) => {
-    const manifest = validManifest();
-    const run = withPhysicalStage(manifest, 'clean-windows-vm');
-    (run as unknown as Record<string, unknown>)[field] = value;
-    manifest.stages[1]!.humanReview = approvedReview(run) as never;
-
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(code);
+describe('frozen friends roster and one-to-one append-only evidence', () => {
+  it('admits exactly one run, consent, and later review for each frozen roster member', () => {
+    const result = evaluatePhase6Evidence(reviewedThrough('friends-pc'), context({ mode: 'final' }));
+    expect(result.ok).toBe(true);
+    expect(result.highestAdmittedStage).toBe('friends-pc');
   });
 
   it.each([
-    ['prepare', 'CYCLE_PREPARE_NOT_PASSED'],
-    ['apply', 'CYCLE_APPLY_NOT_PASSED'],
-    ['verifyApply', 'CYCLE_VERIFY_APPLY_NOT_PASSED'],
-    ['restart', 'CYCLE_RESTART_NOT_PASSED'],
-    ['restore', 'CYCLE_RESTORE_NOT_PASSED'],
-    ['verifyRestore', 'CYCLE_VERIFY_RESTORE_NOT_PASSED'],
-  ] as const)('rejects incomplete %s recovery-cycle evidence', (field, expected) => {
-    const manifest = validManifest();
-    const run = manifest.stages[0]!.runEvidence!;
-    (run.cycle as unknown as Record<string, unknown>)[field] = 'FAIL';
-
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(expected);
+    ['missing run', (value: Manifest) => value.stages[3]!.runs.pop()],
+    ['extra run', (value: Manifest) => value.stages[3]!.runs.push({ ...value.stages[3]!.runs[0]!, id: 'run-extra', participantId: 'friend-extra', machineSlot: 'friends-slot-03' })],
+    ['duplicate run', (value: Manifest) => value.stages[3]!.runs.push(value.stages[3]!.runs[0]!)],
+    ['missing consent', (value: Manifest) => value.stages[3]!.consents.pop()],
+    ['extra consent', (value: Manifest) => value.stages[3]!.consents.push({ ...value.stages[3]!.consents[0]!, id: 'consent-extra' })],
+    ['missing review', (value: Manifest) => value.stages[3]!.reviews.pop()],
+    ['extra review', (value: Manifest) => value.stages[3]!.reviews.push({ ...value.stages[3]!.reviews[0]!, id: 'review-extra' })],
+    ['swapped slot', (value: Manifest) => { value.stages[3]!.runs[0]!.machineSlot = 'friends-slot-02'; }],
+    ['unknown participant', (value: Manifest) => { value.stages[3]!.runs[0]!.participantId = 'friend-unknown'; }],
+    ['rejected review', (value: Manifest) => { value.stages[3]!.reviews[0]!.verdict = 'REJECTED'; value.stages[3]!.reviews[0]!.response = 'REJECTED'; }],
+    ['review before run', (value: Manifest) => { value.stages[3]!.reviews[0]!.recordedAt = value.stages[3]!.runs[0]!.recordedAt; }],
+    ['consent after export', (value: Manifest) => { value.stages[3]!.consents[0]!.recordedAt = value.stages[3]!.runs[0]!.exportedAt!; }],
+    ['roster hash mismatch', (value: Manifest) => { value.stages[3]!.runs[0]!.friendsRosterSha256 = sha256('other roster'); }],
+    ['run hash mismatch', (value: Manifest) => { value.stages[3]!.reviews[0]!.runEvidenceSha256 = sha256('other run'); }],
+  ])('blocks final admission for %s', (_name, mutate) => {
+    const value = reviewedThrough('friends-pc');
+    mutate(value);
+    expect(evaluatePhase6Evidence(value, context({ mode: 'final' })).ok).toBe(false);
   });
 
   it.each([
-    ['journalSha256', '', 'JOURNAL_HASH_INVALID'],
-    ['receiptSha256', '', 'RECEIPT_HASH_INVALID'],
-  ] as const)('rejects invalid %s proof', (field, value, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)[field] = value;
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
+    ['duplicate participant', (value: Manifest) => { value.stages[3]!.friendsRoster!.participants[1]!.participantId = 'friend-alpha'; }],
+    ['duplicate slot', (value: Manifest) => { value.stages[3]!.friendsRoster!.participants[1]!.machineSlot = 'friends-slot-01'; }],
+  ])('rejects %s in the immutable roster', (_name, mutate) => {
+    const value = reviewedThrough('friends-pc');
+    mutate(value);
+    expect(codes(evaluatePhase6Evidence(value, context({ mode: 'final' })))).toContain('FRIENDS_ROSTER_INVALID');
+  });
+});
+
+describe('legacy evidence remains blocked history', () => {
+  it('never upgrades schema v1 bytes into current PASS evidence', () => {
+    const legacy = { ...manifest(), schemaVersion: 1 };
+    const result = evaluatePhase6Evidence(legacy, context({ mode: 'final' }));
+    expect(result.ok).toBe(false);
+    expect(codes(result)).toContain('LEGACY_EVIDENCE_BLOCKED');
   });
 
-  it.each([
-    ['ipcAdversarial', 'FAIL', 'IPC_ADVERSARIAL_NOT_PASSED'],
-    ['replayRejected', false, 'IPC_REPLAY_NOT_REJECTED'],
-    ['identitySpoofRejected', false, 'IPC_IDENTITY_SPOOF_NOT_REJECTED'],
-    ['sessionSwapRejected', false, 'IPC_SESSION_SWAP_NOT_REJECTED'],
-  ] as const)('rejects security proof mutation %s', (field, value, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence!.security as unknown as Record<string, unknown>)[field] =
-      value;
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it.each([
-    ['diskFull', 'FAULT_DISK_FULL_NOT_PASSED'],
-    ['crash', 'FAULT_CRASH_NOT_PASSED'],
-    ['reboot', 'FAULT_REBOOT_NOT_PASSED'],
-    ['drift', 'FAULT_DRIFT_NOT_PASSED'],
-  ] as const)('rejects missing %s fault evidence', (field, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence!.faults as unknown as Record<string, unknown>)[field] = 'FAIL';
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it('rejects failed accessibility evidence', () => {
-    const manifest = validManifest();
-    manifest.stages[0]!.runEvidence!.accessibility.status = 'FAIL';
-    manifest.stages[0]!.runEvidence!.accessibility.seriousOrCriticalViolations = 1;
-
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toEqual(
-      expect.arrayContaining(['ACCESSIBILITY_NOT_PASSED', 'ACCESSIBILITY_VIOLATIONS_FOUND']),
-    );
-  });
-
-  it.each([
-    ['redacted', false, 'DIAGNOSTICS_NOT_REDACTED'],
-    ['previewed', false, 'DIAGNOSTICS_NOT_PREVIEWED'],
-    ['consentBound', false, 'DIAGNOSTICS_CONSENT_MISSING'],
-    ['autoUpload', true, 'DIAGNOSTICS_AUTO_UPLOAD_FORBIDDEN'],
-  ] as const)('rejects privacy mutation %s', (field, value, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence!.diagnostics as unknown as Record<string, unknown>)[field] =
-      value;
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it('rejects forbidden raw diagnostic fields', () => {
-    const manifest = validManifest();
-    manifest.stages[0]!.runEvidence!.diagnostics.rawFieldsFound = ['MachineGuid'];
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
-      'DIAGNOSTICS_RAW_DATA_LEAK',
-    );
-  });
-
-  it.each([
-    ['signed', false, 'REVOCATION_NOT_SIGNED'],
-    ['blocksNewApply', false, 'REVOCATION_APPLY_NOT_BLOCKED'],
-    ['localRecoveryAvailable', false, 'REVOCATION_RECOVERY_BLOCKED'],
-    ['remoteRollback', true, 'REVOCATION_REMOTE_ROLLBACK_FORBIDDEN'],
-    ['remoteExecution', true, 'REVOCATION_REMOTE_EXECUTION_FORBIDDEN'],
-  ] as const)('rejects revocation mutation %s', (field, value, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence!.revocation as unknown as Record<string, unknown>)[field] =
-      value;
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it.each([
-    ['manualOverride', true, 'MANUAL_OVERRIDE_FORBIDDEN'],
-    ['universalSupportClaim', true, 'UNIVERSAL_SUPPORT_CLAIM_FORBIDDEN'],
-  ] as const)('rejects forbidden %s', (field, value, code) => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)[field] = value;
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it('rejects stale run evidence', () => {
-    const manifest = validManifest();
-    manifest.stages[0]!.runEvidence!.expiresAt = '2030-01-15T23:59:59.000Z';
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain('RUN_EVIDENCE_STALE');
-  });
-
-  it('requires review to be persisted strictly after its run evidence', () => {
-    const manifest = validManifest();
-    const run = withPhysicalStage(manifest, 'clean-windows-vm');
-    manifest.stages[1]!.humanReview = {
-      ...approvedReview(run),
-      recordedAt: run.recordedAt,
-    } as never;
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'REVIEW_NOT_AFTER_RUN',
-    );
-  });
-
-  it('rejects changed or missing immutable artifacts', () => {
-    const changed = evaluatePhase6Evidence(
-      validManifest(),
-      context({ artifactContents: { [buildPath]: 'tampered', [evidencePath]: evidenceBytes } }),
-    );
-    const missing = evaluatePhase6Evidence(
-      validManifest(),
-      context({ artifactContents: { [buildPath]: buildBytes } }),
-    );
-
-    expect(codes(changed)).toContain('ARTIFACT_HASH_MISMATCH');
-    expect(codes(missing)).toContain('ARTIFACT_MISSING');
-  });
-
-  it.each([
-    ['requirementsCoverage', 'PLAN-05', 'REQUIREMENT_COVERAGE_MISSING'],
-    ['decisionCoverage', 'D-34', 'DECISION_COVERAGE_MISSING'],
-  ] as const)('requires complete %s references', (field, omitted, code) => {
-    const manifest = validManifest();
-    (manifest as unknown as Record<string, string[]>)[field] = (
-      manifest as unknown as Record<string, string[]>
-    )[field]!.filter((id) => id !== omitted);
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(code);
-  });
-
-  it('requires all four exact ordered stage cells', () => {
-    const manifest = validManifest();
-    manifest.stages[2]!.stage = 'friends-pc';
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
-      'PROMOTION_STAGE_SEQUENCE_INVALID',
-    );
-  });
-
-  const requiredRunFields = [
-    'id',
-    'stage',
-    'evidenceKind',
-    'status',
-    'operationVersion',
-    'buildId',
-    'participantId',
-    'recordedAt',
-    'expiresAt',
-    'artifacts',
-    'cycle',
-    'journalSha256',
-    'receiptSha256',
-    'security',
-    'faults',
-    'accessibility',
-    'diagnostics',
-    'revocation',
-    'coverageGaps',
-    'universalSupportClaim',
-    'manualOverride',
-  ] as const;
-
-  it.each(requiredRunFields)('rejects omitted run evidence field %s', (field) => {
-    const manifest = validManifest();
-    delete (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)[field];
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
-      'EVIDENCE_MANIFEST_INVALID',
-    );
-  });
-
-  const nestedRunFields = [
-    ['cycle', 'prepare'],
-    ['cycle', 'apply'],
-    ['cycle', 'verifyApply'],
-    ['cycle', 'restartRequired'],
-    ['cycle', 'restart'],
-    ['cycle', 'restore'],
-    ['cycle', 'verifyRestore'],
-    ['security', 'ipcAdversarial'],
-    ['security', 'replayRejected'],
-    ['security', 'identitySpoofRejected'],
-    ['security', 'sessionSwapRejected'],
-    ['faults', 'diskFull'],
-    ['faults', 'crash'],
-    ['faults', 'reboot'],
-    ['faults', 'drift'],
-    ['accessibility', 'status'],
-    ['accessibility', 'seriousOrCriticalViolations'],
-    ['diagnostics', 'redacted'],
-    ['diagnostics', 'previewed'],
-    ['diagnostics', 'consentBound'],
-    ['diagnostics', 'autoUpload'],
-    ['diagnostics', 'rawFieldsFound'],
-    ['revocation', 'signed'],
-    ['revocation', 'blocksNewApply'],
-    ['revocation', 'localRecoveryAvailable'],
-    ['revocation', 'remoteRollback'],
-    ['revocation', 'remoteExecution'],
-  ] as const;
-
-  it.each(nestedRunFields)('rejects omitted nested evidence field %s.%s', (group, field) => {
-    const manifest = validManifest();
-    const run = manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>;
-    delete (run[group] as Record<string, unknown>)[field];
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
-      'EVIDENCE_MANIFEST_INVALID',
-    );
-  });
-
-  const requiredReviewFields = [
-    'status',
-    'id',
-    'reviewerId',
-    'participantId',
-    'recordedAt',
-    'response',
-    'verdict',
-    'operationVersion',
-    'buildId',
-    'stage',
-    'runEvidenceId',
-    'runEvidenceSha256',
-    'artifactHashes',
-  ] as const;
-
-  it.each(requiredReviewFields)('rejects omitted decided-review field %s', (field) => {
-    const manifest = validManifest();
-    withPhysicalStage(manifest, 'clean-windows-vm');
-    delete (manifest.stages[1]!.humanReview as unknown as Record<string, unknown>)[field];
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'EVIDENCE_MANIFEST_INVALID',
-    );
-  });
-
-  it('rejects a review artifact-hash swap even when its run hash still matches', () => {
-    const manifest = validManifest();
-    const run = withPhysicalStage(manifest, 'clean-windows-vm');
-    manifest.stages[1]!.humanReview = {
-      ...approvedReview(run),
-      artifactHashes: [sha256('swapped'), run.artifacts[1]!.sha256],
-    } as never;
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toContain(
-      'REVIEW_ARTIFACT_HASH_MISMATCH',
-    );
-  });
-
-  it('rejects a failed earlier physical run and blocks every supplied later stage', () => {
-    const manifest = fullyReviewedManifest();
-    manifest.stages[1]!.runEvidence!.status = 'FAIL';
-    expect(codes(evaluatePhase6Evidence(manifest, context({ mode: 'final' })))).toEqual(
-      expect.arrayContaining(['RUN_EVIDENCE_NOT_PASSED', 'PROMOTION_STAGE_SKIPPED']),
-    );
-  });
-
-  it('rejects already-decided review bytes in run-evidence collection mode', () => {
-    const manifest = validManifest();
-    withPhysicalStage(manifest, 'clean-windows-vm');
-    expect(
-      codes(evaluatePhase6Evidence(manifest, context({ requireRunEvidence: 'clean-windows-vm' }))),
-    ).toContain('RUN_REVIEW_ALREADY_DECIDED');
-  });
-
-  it('rejects additional unreviewed fields at every closed trust boundary', () => {
-    const manifest = validManifest();
-    (manifest.stages[0]!.runEvidence as unknown as Record<string, unknown>)['rawMachineId'] =
-      'forbidden';
-    expect(codes(evaluatePhase6Evidence(manifest, context()))).toContain(
-      'EVIDENCE_MANIFEST_INVALID',
-    );
+  it('does not count legacy blocked references toward current cardinality', () => {
+    const value = reviewedThrough('owner-pc');
+    value.legacyBlockedAttempts.push({ path: 'evidence/legacy/friends-pass.json', sha256: sha256('fake pass') });
+    expect(evaluatePhase6Evidence(value, context({ mode: 'final' })).ok).toBe(false);
   });
 });
