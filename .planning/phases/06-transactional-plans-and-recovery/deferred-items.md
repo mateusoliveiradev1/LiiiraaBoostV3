@@ -3,3 +3,7 @@
 ## 2026-08-13 — Plan 06-02
 
 - `crates/contracts-rust/tests/transactional_plans_corpus.rs`: workspace-wide `cargo fmt --all -- --check` reports formatting drift introduced before Plan 06-02. It is outside this plan's ownership; `cargo fmt -p liiiraa-plan-engine -- --check` passes.
+
+## 2026-08-13 — Plan 06-08
+
+- `crates/plan-engine/tests/risk_policy.rs`: the full-crate sweep found the pre-existing property `every_exact_proof_binding_dimension_rejects_mismatch` fails for `drift_index = 3, suffix = "1"` (introduced before 06-08). The generated `risk_policy.proptest-regressions` artifact was removed; focused reconciliation, formatting, check, clippy, and architecture gates pass.
