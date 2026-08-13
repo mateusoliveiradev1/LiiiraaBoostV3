@@ -12,7 +12,7 @@ use serde_json::{Map, Value, json};
 use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
 
-use super::dedup_store::{DedupStore, FaultPoint, Reservation, StoreError};
+use super::dedup_store::{DedupStore, FaultPoint, Reservation, ReserveRequest, StoreError};
 
 pub const PIPE_REJECT_REMOTE_CLIENTS: u32 = 0x0000_0008;
 pub const MAX_REPLAY_RETENTION_SECONDS: i64 = 180 * 24 * 60 * 60;
@@ -50,6 +50,7 @@ pub struct BrokerConfig {
     pub database_custody_verified: bool,
     pub now_unix_seconds: i64,
     pub max_message_bytes: usize,
+    pub request_timeout_millis: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -103,7 +104,6 @@ pub enum BrokerErrorCode {
     InvalidMac,
     InvalidMessage,
     MessageTooLarge,
-    NotImplemented,
     ReplayRejected,
     ServerStopping,
     Timeout,
@@ -131,7 +131,7 @@ pub trait OperationDispatcher {
 struct SessionState {
     server_nonce: String,
     session_key: Vec<u8>,
-    highest_counter: Option<u32>,
+    principal_id: String,
 }
 
 pub struct Broker {
@@ -214,7 +214,10 @@ impl Broker {
             SessionState {
                 server_nonce: server_nonce.clone(),
                 session_key: session_key.clone(),
-                highest_counter: None,
+                principal_id: format!(
+                    "{}:{}:{}",
+                    identity.logon_sid, identity.session_id, identity.process_image_hash
+                ),
             },
         );
         Ok(SessionTicket {
@@ -253,8 +256,22 @@ impl Broker {
         dispatcher: &mut dyn OperationDispatcher,
         fault: FaultPoint,
     ) -> Result<BrokerReply, BrokerError> {
+        self.submit_with_elapsed(ticket, envelope, dispatcher, fault, 0)
+    }
+
+    pub fn submit_with_elapsed(
+        &mut self,
+        ticket: &SessionTicket,
+        envelope: &BrokerEnvelope,
+        dispatcher: &mut dyn OperationDispatcher,
+        fault: FaultPoint,
+        elapsed_millis: u64,
+    ) -> Result<BrokerReply, BrokerError> {
         if self.stopping {
             return Err(error(BrokerErrorCode::ServerStopping));
+        }
+        if elapsed_millis > self.config.request_timeout_millis {
+            return Err(error(BrokerErrorCode::Timeout));
         }
         if envelope.transaction_id.trim().is_empty()
             || envelope.step_id.trim().is_empty()
@@ -287,7 +304,7 @@ impl Broker {
             return Err(error(BrokerErrorCode::InvalidMac));
         }
 
-        let (operation, counter) = validate_broker_request(
+        let (operation, counter, request_nonce) = validate_broker_request(
             &envelope.request,
             &envelope.transaction_id,
             &envelope.step_id,
@@ -295,13 +312,16 @@ impl Broker {
         let request_hash = hash_request(envelope);
         match self
             .store
-            .reserve(
-                &envelope.transaction_id,
-                &envelope.step_id,
-                &request_hash,
-                &envelope.operation_version_id,
-                self.config.now_unix_seconds,
-            )
+            .reserve(ReserveRequest {
+                transaction_id: &envelope.transaction_id,
+                step_id: &envelope.step_id,
+                request_hash: &request_hash,
+                operation_version_id: &envelope.operation_version_id,
+                principal_id: &session.principal_id,
+                request_nonce: &request_nonce,
+                counter,
+                created_at: self.config.now_unix_seconds,
+            })
             .map_err(map_store_error)?
         {
             Reservation::Terminal(document) => {
@@ -312,16 +332,9 @@ impl Broker {
             }
             Reservation::ObservationRequired => return Ok(observation_required(envelope)),
             Reservation::Conflict => return Err(error(BrokerErrorCode::DuplicateConflict)),
+            Reservation::Replay => return Err(error(BrokerErrorCode::ReplayRejected)),
             Reservation::New => {}
         }
-
-        if session
-            .highest_counter
-            .is_some_and(|highest| counter <= highest)
-        {
-            return Err(error(BrokerErrorCode::ReplayRejected));
-        }
-        session.highest_counter = Some(counter);
         if fault == FaultPoint::AfterReserve {
             return Err(error(BrokerErrorCode::DatabaseUnavailable));
         }
@@ -356,8 +369,12 @@ impl Broker {
     }
 
     pub fn prune_terminal_before(&mut self, cutoff: i64) -> Result<usize, BrokerError> {
+        let horizon_cutoff = self
+            .config
+            .now_unix_seconds
+            .saturating_sub(MAX_REPLAY_RETENTION_SECONDS);
         self.store
-            .prune_terminal_before(cutoff)
+            .prune_terminal_before(cutoff.min(horizon_cutoff))
             .map_err(map_store_error)
     }
 
@@ -380,7 +397,7 @@ fn validate_broker_request(
     request: &Value,
     transaction_id: &str,
     step_id: &str,
-) -> Result<(AllowedOperation, u32), BrokerError> {
+) -> Result<(AllowedOperation, u32, String), BrokerError> {
     let validated = validate_transactional_recovery_document(request)
         .map_err(|_| error(BrokerErrorCode::InvalidMessage))?;
     let TransactionalRecoveryDocument::PrivilegedBrokerRequest(request) = validated else {
@@ -402,6 +419,12 @@ fn validate_broker_request(
         .and_then(Value::as_u64)
         .and_then(|value| u32::try_from(value).ok())
         .ok_or_else(|| error(BrokerErrorCode::InvalidMessage))?;
+    let nonce = request_json
+        .get("nonce")
+        .and_then(Value::as_str)
+        .filter(|value| !value.trim().is_empty())
+        .ok_or_else(|| error(BrokerErrorCode::InvalidMessage))?
+        .to_owned();
     let operation = match request {
         PrivilegedBrokerRequest::ObservePowerSchemeRequest(_) => {
             AllowedOperation::ObservePowerScheme
@@ -419,7 +442,7 @@ fn validate_broker_request(
             AllowedOperation::PrepareRestorePoint
         }
     };
-    Ok((operation, counter))
+    Ok((operation, counter, nonce))
 }
 
 fn request_value(request: &PrivilegedBrokerRequest) -> Value {
@@ -474,7 +497,7 @@ fn sort_json(value: &Value) -> Value {
     match value {
         Value::Object(input) => {
             let mut entries: Vec<_> = input.iter().collect();
-            entries.sort_by(|(left, _), (right, _)| left.cmp(right));
+            entries.sort_by_key(|(key, _)| *key);
             let mut output = Map::new();
             for (key, value) in entries {
                 output.insert(key.clone(), sort_json(value));

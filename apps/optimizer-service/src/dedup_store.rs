@@ -28,11 +28,23 @@ pub enum Reservation {
     Terminal(Value),
     ObservationRequired,
     Conflict,
+    Replay,
 }
 
 #[derive(Debug)]
 pub struct DedupStore {
     connection: Connection,
+}
+
+pub struct ReserveRequest<'a> {
+    pub transaction_id: &'a str,
+    pub step_id: &'a str,
+    pub request_hash: &'a str,
+    pub operation_version_id: &'a str,
+    pub principal_id: &'a str,
+    pub request_nonce: &'a str,
+    pub counter: u32,
+    pub created_at: i64,
 }
 
 impl DedupStore {
@@ -78,14 +90,7 @@ impl DedupStore {
         Ok(Self { connection })
     }
 
-    pub fn reserve(
-        &mut self,
-        transaction_id: &str,
-        step_id: &str,
-        request_hash: &str,
-        operation_version_id: &str,
-        created_at: i64,
-    ) -> Result<Reservation, StoreError> {
+    pub fn reserve(&mut self, request: ReserveRequest<'_>) -> Result<Reservation, StoreError> {
         let transaction = self
             .connection
             .transaction_with_behavior(TransactionBehavior::Immediate)
@@ -95,7 +100,7 @@ impl DedupStore {
                 "SELECT request_mac_hash, operation_version_id, state, result_json
                  FROM broker_dedup
                  WHERE transaction_id = ?1 AND step_id = ?2",
-                params![transaction_id, step_id],
+                params![request.transaction_id, request.step_id],
                 |row| {
                     Ok((
                         row.get::<_, String>(0)?,
@@ -110,7 +115,9 @@ impl DedupStore {
 
         if let Some((stored_hash, stored_operation, state, result)) = existing {
             transaction.commit().map_err(|_| StoreError::Database)?;
-            if stored_hash != request_hash || stored_operation != operation_version_id {
+            if stored_hash != request.request_hash
+                || stored_operation != request.operation_version_id
+            {
                 return Ok(Reservation::Conflict);
             }
             return match state.as_str() {
@@ -123,6 +130,31 @@ impl DedupStore {
             };
         }
 
+        let highest_counter = transaction
+            .query_row(
+                "SELECT highest_counter FROM broker_replay_counters WHERE principal_id = ?1",
+                params![request.principal_id],
+                |row| row.get::<_, i64>(0),
+            )
+            .optional()
+            .map_err(|_| StoreError::Database)?;
+        let nonce_seen = transaction
+            .query_row(
+                "SELECT 1 FROM broker_replay_nonces
+                 WHERE principal_id = ?1 AND request_nonce = ?2",
+                params![request.principal_id, request.request_nonce],
+                |_| Ok(()),
+            )
+            .optional()
+            .map_err(|_| StoreError::Database)?
+            .is_some();
+        if highest_counter.is_some_and(|highest| i64::from(request.counter) <= highest)
+            || nonce_seen
+        {
+            transaction.commit().map_err(|_| StoreError::Database)?;
+            return Ok(Reservation::Replay);
+        }
+
         transaction
             .execute(
                 "INSERT INTO broker_dedup (
@@ -131,11 +163,30 @@ impl DedupStore {
                     retention_eligible, recovery_referenced
                  ) VALUES (?1, ?2, ?3, ?4, 'reserved', NULL, ?5, NULL, 0, 0)",
                 params![
-                    transaction_id,
-                    step_id,
-                    request_hash,
-                    operation_version_id,
-                    created_at
+                    request.transaction_id,
+                    request.step_id,
+                    request.request_hash,
+                    request.operation_version_id,
+                    request.created_at
+                ],
+            )
+            .map_err(|_| StoreError::Database)?;
+        transaction
+            .execute(
+                "INSERT INTO broker_replay_counters (principal_id, highest_counter)
+                 VALUES (?1, ?2)
+                 ON CONFLICT(principal_id) DO UPDATE SET highest_counter = excluded.highest_counter",
+                params![request.principal_id, i64::from(request.counter)],
+            )
+            .map_err(|_| StoreError::Database)?;
+        transaction
+            .execute(
+                "INSERT INTO broker_replay_nonces (principal_id, request_nonce, first_seen_at)
+                 VALUES (?1, ?2, ?3)",
+                params![
+                    request.principal_id,
+                    request.request_nonce,
+                    request.created_at
                 ],
             )
             .map_err(|_| StoreError::Database)?;
@@ -267,6 +318,17 @@ fn migrate(connection: &Connection) -> Result<(), StoreError> {
                      ) STRICT;
                      CREATE INDEX broker_dedup_retention_idx
                        ON broker_dedup(state, retention_eligible, recovery_referenced, completed_at);
+                     CREATE TABLE broker_replay_counters (
+                       principal_id TEXT PRIMARY KEY,
+                       highest_counter INTEGER NOT NULL
+                         CHECK(highest_counter BETWEEN 0 AND 4294967295)
+                     ) STRICT;
+                     CREATE TABLE broker_replay_nonces (
+                       principal_id TEXT NOT NULL,
+                       request_nonce TEXT NOT NULL,
+                       first_seen_at INTEGER NOT NULL,
+                       PRIMARY KEY (principal_id, request_nonce)
+                     ) STRICT;
                      PRAGMA user_version = 1;
                      COMMIT;",
                 )
