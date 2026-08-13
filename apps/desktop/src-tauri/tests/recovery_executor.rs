@@ -14,7 +14,10 @@ use liiiraa_plan_engine::{
     domain::{PlanEngineResult, PreparedTransactionIdentity},
     executor::{DurableJournalPort, JournalAppend, RecoveryLoad},
 };
-use plan_commands::{PLAN_COMMANDS, PlanCommand, validate_plan_document};
+use plan_commands::{
+    ADVANCED_PREFERENCE_COMMANDS, PLAN_COMMANDS, AdvancedPreferenceCommand,
+    validate_advanced_preference_request, PlanCommand, validate_plan_document,
+};
 use plan_executor::{
     DiagnosticConsent, ExecutionState, PlanExecutor, PlanExecutorError, RecoveryDiagnosticSource,
 };
@@ -225,6 +228,58 @@ fn command_surface_is_closed_and_restore_targets_cannot_be_confused() {
             Err(PlanExecutorError::InvalidRequest),
         ));
     }
+}
+
+#[test]
+fn advanced_preference_commands_accept_only_bounded_intent_and_proof_references() {
+    assert_eq!(ADVANCED_PREFERENCE_COMMANDS, [
+        "read_advanced_preference",
+        "enable_advanced_preference",
+        "revoke_advanced_preference",
+    ]);
+    let request = json!({
+        "intentId": "advanced-intent-0001",
+        "authorizationContextId": "advanced-review-0001",
+        "proofReference": "opaque_native_receipt_abcdefghijklmnopqrstuvwxyz_0123456789",
+        "expectedSequence": 0,
+        "requestedAt": "2030-01-20T00:00:00Z"
+    });
+    assert!(validate_advanced_preference_request(AdvancedPreferenceCommand::Enable, &request).is_ok());
+    assert!(validate_advanced_preference_request(AdvancedPreferenceCommand::Revoke, &request).is_ok());
+
+    for forged in [
+        ("enabled", json!(true)),
+        ("authenticated", json!(true)),
+        ("hardwareFingerprint", json!(format!("sha256:{}", "a".repeat(64)))),
+        ("securityPostureFingerprint", json!(format!("sha256:{}", "b".repeat(64)))),
+        ("credential", json!("secret")),
+    ] {
+        let mut candidate = request.clone();
+        candidate[forged.0] = forged.1;
+        assert!(validate_advanced_preference_request(AdvancedPreferenceCommand::Enable, &candidate).is_err());
+    }
+}
+
+#[test]
+fn advanced_preference_is_revalidated_before_projection_and_apply_without_widening_recovery() {
+    let main_source = include_str!("../src/main.rs");
+    let executor_source = include_str!("../src/plan_executor.rs");
+    let capability: Value =
+        serde_json::from_str(include_str!("../capabilities/main.json")).unwrap();
+    let permissions = capability["permissions"].as_array().unwrap();
+
+    for command in ADVANCED_PREFERENCE_COMMANDS {
+        let permission = format!("allow-{}", command.replace('_', "-"));
+        assert!(permissions.iter().any(|value| value == &permission));
+        assert!(main_source.contains(&format!("            {command},")));
+    }
+    assert!(executor_source.contains("revalidate_advanced_preference"));
+    let revalidate = main_source.find("revalidate_advanced_preference").unwrap();
+    let broker_failure = main_source.find("PlanExecutorError::BrokerUnavailable").unwrap();
+    assert!(revalidate < broker_failure);
+    assert!(main_source.contains("fn restore_plan_operation"));
+    assert!(main_source.contains("fn restore_plan("));
+    assert!(main_source.contains("fn restore_recovery_checkpoint"));
 }
 
 #[test]

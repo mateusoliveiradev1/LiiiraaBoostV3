@@ -462,6 +462,35 @@ fn changed_posture_is_invalidated_automatically_during_restart_open() {
 }
 
 #[test]
+fn repeated_read_and_preapply_revalidation_append_only_one_invalidation() {
+    let database = TestDatabase::new();
+    let anchor = FakeAnchor::default();
+    let original = default_device();
+    let changed = device("device-0001", "hardware-a", "security-after-read");
+    let mut store = open(&database, &anchor, original.clone(), AT_1).unwrap();
+    store
+        .enable(
+            &proof(
+                AdvancedPreferenceAction::Enable,
+                &original,
+                "enable-before-revalidation",
+            ),
+            NOW_MS,
+            AT_1,
+        )
+        .unwrap();
+
+    store.observe_binding(changed.clone(), AT_2).unwrap();
+    store.observe_binding(changed, AT_3).unwrap();
+
+    assert_eq!(
+        store.projection().state,
+        AdvancedPreferenceState::RevalidationRequired
+    );
+    assert_eq!(store.history().unwrap().len(), 2);
+}
+
+#[test]
 fn append_only_history_rejects_update_delete_and_detects_chain_tamper() {
     let database = TestDatabase::new();
     let anchor = FakeAnchor::default();
