@@ -41,7 +41,7 @@ impl OperationDispatcher for SpyDispatcher {
         };
         Ok(json!({
             "kind": "broker-accepted-response",
-            "schemaVersion": "1.0.0",
+            "schemaVersion": "1.0",
             "responseId": format!("response-{request_id}"),
             "requestId": request_id,
             "outcome": "accepted",
@@ -52,7 +52,8 @@ impl OperationDispatcher for SpyDispatcher {
 
 fn database_path(label: &str) -> PathBuf {
     let id = NEXT_DATABASE.fetch_add(1, Ordering::Relaxed);
-    let root = std::env::temp_dir().join(format!("liiiraa-ipc-{label}-{}-{id}", std::process::id()));
+    let root =
+        std::env::temp_dir().join(format!("liiiraa-ipc-{label}-{}-{id}", std::process::id()));
     fs::create_dir_all(&root).expect("create isolated test directory");
     root.join("broker.sqlite3")
 }
@@ -85,7 +86,7 @@ fn legitimate_identity() -> ClientIdentity {
 fn observe_request(counter: u32) -> Value {
     json!({
         "kind": "observe-power-scheme-request",
-        "schemaVersion": "1.0.0",
+        "schemaVersion": "1.0",
         "requestId": "step-observe",
         "deviceBindingId": "device-verified",
         "issuedAt": "2026-08-13T08:00:00Z",
@@ -120,8 +121,14 @@ fn pipe_policy_is_local_only_and_has_an_explicit_service_dacl() {
     for required_sid in ["SY", "BA", "S-1-5-5-7-42", "S-1-5-80-424242"] {
         assert!(policy.sddl.contains(required_sid), "missing {required_sid}");
     }
-    assert!(!policy.sddl.contains("WD"), "Everyone must not receive access");
-    assert!(!policy.sddl.contains("AN"), "anonymous must not receive access");
+    assert!(
+        !policy.sddl.contains("WD"),
+        "Everyone must not receive access"
+    );
+    assert!(
+        !policy.sddl.contains("AN"),
+        "anonymous must not receive access"
+    );
 }
 
 #[test]
