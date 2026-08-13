@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 use std::cell::Cell;
 
 const FIXTURE: &str =
-    include_str!("../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
+    include_str!("../../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
 
 fn fixture_value(id: &str) -> Value {
     let root: Value = serde_json::from_str(FIXTURE).unwrap();
@@ -50,7 +50,7 @@ fn raw_invalid_or_unknown_broker_messages_are_rejected_before_transport() {
     };
     let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
 
-    assert_eq!(
+    assert!(matches!(
         client.exchange_validated(
             "transaction-0001",
             "step-0001",
@@ -58,7 +58,7 @@ fn raw_invalid_or_unknown_broker_messages_are_rejected_before_transport() {
             json!({"kind": "run-powershell", "script": "whoami"}),
         ),
         Err(BrokerClientError::InvalidRequest),
-    );
+    ));
     assert_eq!(client.transport().exchanges.get(), 0);
 }
 
@@ -79,7 +79,10 @@ fn generated_request_is_authenticated_and_response_is_validated_before_mapping()
             fixture_value("narrow broker request"),
         )
         .unwrap();
-    assert!(matches!(result, PrivilegedBrokerResponse::ObservationResponse(_)));
+    assert!(matches!(
+        result,
+        PrivilegedBrokerResponse::ObservationResponse(_)
+    ));
     assert_eq!(client.transport().exchanges.get(), 1);
     assert_eq!(client.next_counter(), 2);
 }

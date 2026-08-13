@@ -2483,6 +2483,7 @@ dependencies = [
  "hmac 0.13.0",
  "keyring",
  "liiiraa-contracts-rust",
+ "liiiraa-plan-engine",
  "proptest",
  "rusqlite",
  "rusqlite_migration",

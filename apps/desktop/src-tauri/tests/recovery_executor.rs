@@ -1,3 +1,5 @@
+#[path = "../src/plan_commands.rs"]
+mod plan_commands;
 #[path = "../src/plan_executor.rs"]
 mod plan_executor;
 
@@ -8,10 +10,9 @@ use liiiraa_contracts_rust::{
 };
 use liiiraa_plan_engine::{
     domain::{PlanEngineResult, PreparedTransactionIdentity},
-    executor::{
-        DurableJournalPort, JournalAppend, RecoveryLoad,
-    },
+    executor::{DurableJournalPort, JournalAppend, RecoveryLoad},
 };
+use plan_commands::{PLAN_COMMANDS, PlanCommand, validate_plan_document};
 use plan_executor::{
     DiagnosticConsent, ExecutionState, PlanExecutor, PlanExecutorError, RecoveryDiagnosticSource,
 };
@@ -20,7 +21,7 @@ use serde_json::{Value, json};
 use std::{cell::Cell, fs, path::PathBuf};
 
 const FIXTURE: &str =
-    include_str!("../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
+    include_str!("../../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
 
 fn fixture<T: DeserializeOwned>(id: &str) -> T {
     let root: Value = serde_json::from_str(FIXTURE).unwrap();
@@ -97,7 +98,10 @@ fn startup_reconciliation_has_priority_and_survives_renderer_reconnect() {
 
     let startup = executor.reconcile_startup().unwrap();
     assert_eq!(startup.state, ExecutionState::RecoveryRequired);
-    assert_eq!(startup.transaction_id.as_deref(), Some(transaction_id.as_str()));
+    assert_eq!(
+        startup.transaction_id.as_deref(),
+        Some(transaction_id.as_str())
+    );
     assert!(!executor.accepts_new_mutation());
 
     let reopened = executor.read_execution();
@@ -125,18 +129,19 @@ fn progress_reduction_is_monotonic_and_sequence_gaps_require_snapshot_refetch() 
         diagnostics: json!({"events": []}),
     };
     let executor = PlanExecutor::new(journal);
-    let snapshot = fixture::<ProgressSnapshotDocument>("progress snapshot");
-    let event = fixture::<ProgressEventDocument>("progress event");
+    let mut snapshot = fixture::<ProgressSnapshotDocument>("authoritative progress snapshot");
+    snapshot.sequence = 1;
+    let event = fixture::<ProgressEventDocument>("contiguous progress event");
 
     let reduced = executor.reduce_progress(&snapshot, &event).unwrap();
     assert!(reduced.sequence > snapshot.sequence);
 
     let mut gap = event;
     gap.sequence = snapshot.sequence.saturating_add(2);
-    assert_eq!(
+    assert!(matches!(
         executor.reduce_progress(&snapshot, &gap),
         Err(PlanExecutorError::AuthoritativeSnapshotRequired),
-    );
+    ));
 }
 
 #[test]
@@ -181,6 +186,45 @@ fn diagnostic_export_requires_exact_preview_consent_and_returns_bounded_receipt(
     let _ = fs::remove_file(destination);
 }
 
+#[test]
+fn command_surface_is_closed_and_restore_targets_cannot_be_confused() {
+    assert_eq!(PLAN_COMMANDS.len(), 11);
+    assert!(PLAN_COMMANDS.iter().all(|command| {
+        !command.contains("shell") && !command.contains("execute") && !command.contains("registry")
+    }));
+    assert_eq!(
+        PlanCommand::try_from("run_native"),
+        Err(PlanExecutorError::InvalidRequest),
+    );
+
+    let transaction = fixture::<PlanTransactionDocument>("auditable apply transaction");
+    let restore_targets = [
+        (
+            PlanCommand::RestoreOperation,
+            liiiraa_contracts_rust::TransactionIntent::RestoreOperation,
+        ),
+        (
+            PlanCommand::RestorePlan,
+            liiiraa_contracts_rust::TransactionIntent::RestorePlan,
+        ),
+        (
+            PlanCommand::RestoreCheckpoint,
+            liiiraa_contracts_rust::TransactionIntent::RestoreCheckpoint,
+        ),
+    ];
+    for (command, intent) in restore_targets {
+        let mut exact = transaction.clone();
+        exact.intent = intent;
+        exact.parent_transaction_id = Some("transaction-parent-0001".parse().unwrap());
+        let value = serde_json::to_value(exact).unwrap();
+        assert!(validate_plan_document(command, &value).is_ok());
+        assert!(matches!(
+            validate_plan_document(PlanCommand::Apply, &value),
+            Err(PlanExecutorError::InvalidRequest),
+        ));
+    }
+}
+
 fn temporary_export_path() -> PathBuf {
     let sequence = Cell::new(0_u64);
     sequence.set(sequence.get() + 1);
@@ -190,4 +234,3 @@ fn temporary_export_path() -> PathBuf {
         sequence.get(),
     ))
 }
-
