@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 Phase: 06 (transactional-plans-and-recovery) — READY
 Plan: Not started
 Status: Phase 05 admitted; Phase 06 is ready for specification and planning
-Last activity: 2026-08-12
+Last activity: 2026-08-13 - Completed quick task 260812-tmh: Finalizar convidado Windows do laboratório Hyper-V e criar checkpoint limpo
 
 Progress: [██████████] Phase 05 11/11 plans complete
 
@@ -804,6 +804,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260811-4iv | Registrar PASS do proprietario para Convites da beta no UAT da Fase 4 | 2026-08-11 | cfef0c1 | Verified | [260811-4iv-registrar-pass-do-proprietario-para-conv](./quick/260811-4iv-registrar-pass-do-proprietario-para-conv/) |
 | 260811-m8o | Recuperar a experiência visual e operacional do Admin | 2026-08-11 | 44eed22 | Verified | [260811-m8o-validate-redesenhar-o-admin-da-fase-4-co](./quick/260811-m8o-validate-redesenhar-o-admin-da-fase-4-co/) |
 | 260811-n4i | Refinar a experiência decisória do Admin da Fase 4 | 2026-08-11 | f194e84 | Verified | [260811-n4i-refinar-a-experiencia-do-admin-da-fase-4](./quick/260811-n4i-refinar-a-experiencia-do-admin-da-fase-4/) |
+| 260812-tmh | Finalizar convidado Windows do laboratório Hyper-V e criar checkpoint limpo | 2026-08-13 | d93db5f5 | Verified | [260812-tmh-finalizar-convidado-windows-do-laborator](./quick/260812-tmh-finalizar-convidado-windows-do-laborator/) |
 
 ## Session Continuity
 
