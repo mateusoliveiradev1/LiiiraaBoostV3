@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'Checkpoint')]
+    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint')]
     [string]$Action = 'Status',
 
     [string]$LabRoot = (Join-Path $env:USERPROFILE 'VM-Lab'),
@@ -132,6 +132,7 @@ switch ($Action) {
             hyperVFeature = 'Enabled'
             services = @(Get-Service vmms, vmcompute | Select-Object Name, Status)
             switches = $switches
+            integrationServices = @(Get-VMIntegrationService -VMName $VmName -ErrorAction SilentlyContinue | Select-Object Name, Enabled, PrimaryStatusDescription, SecondaryStatusDescription)
             vm = Get-LabStatus -Name $VmName
         }
         $evidencePath = New-EvidenceRecord -EvidenceDirectory $evidenceDirectory -Operation 'audit' -Payload $payload
@@ -273,6 +274,62 @@ switch ($Action) {
         }
         Write-Host "Evidência: $evidencePath"
         Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\vmconnect.exe') -ArgumentList 'localhost', $VmName
+    }
+
+    'StageGuest' {
+        $vm = Get-VM -Name $VmName -ErrorAction Stop
+        if ($vm.State -ne 'Running') {
+            throw "A VM '$VmName' precisa estar em execução para receber a preparação."
+        }
+
+        $guestDirectory = Join-Path $PSScriptRoot 'guest'
+        $files = @(
+            Join-Path $guestDirectory 'Prepare-LiiiraaBoostGuest.ps1'
+            Join-Path $guestDirectory 'Preparar-Laboratorio.cmd'
+        )
+        foreach ($file in $files) {
+            if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+                throw "Arquivo de preparação ausente: '$file'."
+            }
+        }
+
+        $guestService = Get-VMIntegrationService -VMName $VmName | Where-Object {
+            $_.Name -match 'Guest Service|Interface de Serviço|Serviço de Convidado|Convidado'
+        } | Select-Object -First 1
+        if ($null -eq $guestService) {
+            throw 'A Interface de Serviço de Convidado do Hyper-V não foi localizada.'
+        }
+        if (-not $guestService.Enabled) {
+            Enable-VMIntegrationService -VMName $VmName -Name $guestService.Name
+        }
+
+        $targetRoot = 'C:\Users\Public\Desktop\LiiiraaBoost-Lab'
+        foreach ($file in $files) {
+            $targetPath = Join-Path $targetRoot (Split-Path -Leaf $file)
+            Copy-VMFile `
+                -VMName $VmName `
+                -SourcePath $file `
+                -DestinationPath $targetPath `
+                -FileSource Host `
+                -CreateFullPath `
+                -Force
+        }
+
+        $dvd = Get-VMDvdDrive -VMName $VmName -ErrorAction SilentlyContinue
+        $mountedIso = $dvd.Path
+        if ($null -ne $dvd -and -not [string]::IsNullOrWhiteSpace($mountedIso)) {
+            Set-VMDvdDrive -VMName $VmName -ControllerNumber $dvd.ControllerNumber -ControllerLocation $dvd.ControllerLocation -Path $null
+        }
+
+        $evidencePath = New-EvidenceRecord -EvidenceDirectory $evidenceDirectory -Operation 'stage-guest' -Payload @{
+            vmName = $VmName
+            integrationService = $guestService.Name
+            targetRoot = $targetRoot
+            files = @($files | ForEach-Object { Split-Path -Leaf $_ })
+            ejectedIso = $mountedIso
+        }
+        Write-Host "Preparação copiada para: $targetRoot"
+        Write-Host "Evidência: $evidencePath"
     }
 
     'Checkpoint' {

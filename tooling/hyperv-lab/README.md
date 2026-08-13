@@ -30,10 +30,13 @@ $script = 'C:\Users\Liiiraa\Documents\estudos\LiiiraaBoostV3\tooling\hyperv-lab\
 & $script -Action Create -StartAfterCreate
 & $script -Action Status
 & $script -Action Open
+& $script -Action StageGuest
 & $script -Action Checkpoint -CheckpointName 'Clean-Windows-Ready'
 ```
 
 Para registrar também a saída administrativa em `Evidence`, use `Run-LabElevated.ps1` com os mesmos parâmetros.
+
+`StageGuest` habilita somente a Interface de Serviço de Convidado, copia o bootstrap para `C:\Users\Public\Desktop\LiiiraaBoost-Lab` e ejeta a ISO já utilizada. Dentro da VM, execute `Preparar-Laboratorio.cmd`; ele solicita elevação local, instala somente atualizações oficiais de software pelo Windows Update, reinicia quando necessário e cria o marcador `Liiiraa Boost Lab - PREPARADO.txt` quando não restar atualização pendente.
 
 Depois da instalação limpa do Windows e das atualizações, crie `Clean-Windows-Ready`. Depois de instalar o Liiiraa Boost, crie `LiiiraaBoost-Installed`. Antes de cada plano da Fase 6, crie um checkpoint específico para o cenário.
 

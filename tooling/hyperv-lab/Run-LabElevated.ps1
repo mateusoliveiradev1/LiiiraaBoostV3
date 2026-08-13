@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'Checkpoint')]
+    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint')]
     [string]$Action = 'Status',
 
     [string]$LabRoot = (Join-Path $env:USERPROFILE 'VM-Lab'),
