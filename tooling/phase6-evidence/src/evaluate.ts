@@ -887,6 +887,18 @@ export const evaluatePhase6Evidence = (
     const cellPath = `$.stages[${String(index)}]`;
     const run = cell.runEvidence;
     if (run === null) {
+      if (
+        stage !== 'deterministic-simulation' &&
+        (context.mode === 'final' || context.requireRunEvidence === stage)
+      ) {
+        diagnostics.push(
+          diagnostic(
+            'PHYSICAL_RUN_EVIDENCE_MISSING',
+            `${cellPath}.runEvidence`,
+            `Physical stage ${stage} requires already-persisted exact run evidence.`,
+          ),
+        );
+      }
       if (cell.humanReview.status === 'approved' || cell.humanReview.status === 'rejected') {
         diagnostics.push(
           diagnostic(

@@ -234,6 +234,16 @@ describe('Phase 6 exact-version sequential evidence authority', () => {
     expect(result.diagnostics).toEqual([]);
   });
 
+  it('reports each missing physical run explicitly in final mode', () => {
+    const result = evaluatePhase6Evidence(validManifest(), context({ mode: 'final' }));
+
+    expect(result.ok).toBe(false);
+    expect(codes(result).filter((code) => code === 'PHYSICAL_RUN_EVIDENCE_MISSING')).toHaveLength(
+      3,
+    );
+    expect(result.pendingStages).toEqual(['clean-windows-vm', 'owner-pc', 'friends-pc']);
+  });
+
   it('accepts persisted physical run evidence for later review without admitting the stage', () => {
     const manifest = validManifest();
     withPhysicalStage(manifest, 'clean-windows-vm', 'pending');
