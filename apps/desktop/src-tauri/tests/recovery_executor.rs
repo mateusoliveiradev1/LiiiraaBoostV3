@@ -1,0 +1,193 @@
+#[path = "../src/plan_executor.rs"]
+mod plan_executor;
+
+use liiiraa_contracts_rust::{
+    DurableJournalEvent, ExactOperationState, PlanTransactionDocument, ProgressEventDocument,
+    ProgressSnapshotDocument, RecoveryCheckpointDocument, TransactionHash,
+    TransactionReceiptDocument,
+};
+use liiiraa_plan_engine::{
+    domain::{PlanEngineResult, PreparedTransactionIdentity},
+    executor::{
+        DurableJournalPort, JournalAppend, RecoveryLoad,
+    },
+};
+use plan_executor::{
+    DiagnosticConsent, ExecutionState, PlanExecutor, PlanExecutorError, RecoveryDiagnosticSource,
+};
+use serde::de::DeserializeOwned;
+use serde_json::{Value, json};
+use std::{cell::Cell, fs, path::PathBuf};
+
+const FIXTURE: &str =
+    include_str!("../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
+
+fn fixture<T: DeserializeOwned>(id: &str) -> T {
+    let root: Value = serde_json::from_str(FIXTURE).unwrap();
+    let value = root["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|case| case["id"] == id)
+        .unwrap()["document"]
+        .clone();
+    serde_json::from_value(value).unwrap()
+}
+
+struct MemoryJournal {
+    recovery: RecoveryLoad,
+    diagnostics: Value,
+}
+
+impl DurableJournalPort for MemoryJournal {
+    fn append_prepared(
+        &mut self,
+        _: &PlanTransactionDocument,
+        _: &DurableJournalEvent,
+    ) -> PlanEngineResult<()> {
+        panic!("startup reconciliation must not append")
+    }
+
+    fn append(&mut self, _: JournalAppend<'_>) -> PlanEngineResult<TransactionHash> {
+        panic!("startup reconciliation must not append")
+    }
+
+    fn store_checkpoint(
+        &mut self,
+        _: &PreparedTransactionIdentity,
+        _: &ExactOperationState,
+        _: &RecoveryCheckpointDocument,
+    ) -> PlanEngineResult<()> {
+        panic!("startup reconciliation must not store checkpoints")
+    }
+
+    fn store_receipt(
+        &mut self,
+        _: &PreparedTransactionIdentity,
+        _: &ExactOperationState,
+        _: &TransactionReceiptDocument,
+    ) -> PlanEngineResult<()> {
+        panic!("startup reconciliation must not store receipts")
+    }
+
+    fn load_recovery(&self) -> PlanEngineResult<RecoveryLoad> {
+        Ok(self.recovery.clone())
+    }
+}
+
+impl RecoveryDiagnosticSource for MemoryJournal {
+    fn redacted_diagnostics(&self) -> Result<Value, PlanExecutorError> {
+        Ok(self.diagnostics.clone())
+    }
+}
+
+#[test]
+fn startup_reconciliation_has_priority_and_survives_renderer_reconnect() {
+    let transaction = fixture::<PlanTransactionDocument>("auditable apply transaction");
+    let latest_event = fixture::<DurableJournalEvent>("journal prepared");
+    let transaction_id = transaction.transaction_id.to_string();
+    let journal = MemoryJournal {
+        recovery: RecoveryLoad::Pending {
+            transaction: Box::new(transaction),
+            latest_event: Box::new(latest_event),
+        },
+        diagnostics: json!({"events": []}),
+    };
+    let mut executor = PlanExecutor::new(journal);
+
+    let startup = executor.reconcile_startup().unwrap();
+    assert_eq!(startup.state, ExecutionState::RecoveryRequired);
+    assert_eq!(startup.transaction_id.as_deref(), Some(transaction_id.as_str()));
+    assert!(!executor.accepts_new_mutation());
+
+    let reopened = executor.read_execution();
+    assert_eq!(reopened, startup);
+    assert_eq!(executor.dispatch_count(), 0);
+}
+
+#[test]
+fn corrupt_or_unavailable_recovery_state_fails_closed() {
+    let journal = MemoryJournal {
+        recovery: RecoveryLoad::CorruptOrUnavailable,
+        diagnostics: json!({"events": []}),
+    };
+    let mut executor = PlanExecutor::new(journal);
+
+    let snapshot = executor.reconcile_startup().unwrap();
+    assert_eq!(snapshot.state, ExecutionState::JournalUnavailable);
+    assert!(!executor.accepts_new_mutation());
+}
+
+#[test]
+fn progress_reduction_is_monotonic_and_sequence_gaps_require_snapshot_refetch() {
+    let journal = MemoryJournal {
+        recovery: RecoveryLoad::Clear,
+        diagnostics: json!({"events": []}),
+    };
+    let executor = PlanExecutor::new(journal);
+    let snapshot = fixture::<ProgressSnapshotDocument>("progress snapshot");
+    let event = fixture::<ProgressEventDocument>("progress event");
+
+    let reduced = executor.reduce_progress(&snapshot, &event).unwrap();
+    assert!(reduced.sequence > snapshot.sequence);
+
+    let mut gap = event;
+    gap.sequence = snapshot.sequence.saturating_add(2);
+    assert_eq!(
+        executor.reduce_progress(&snapshot, &gap),
+        Err(PlanExecutorError::AuthoritativeSnapshotRequired),
+    );
+}
+
+#[test]
+fn diagnostic_export_requires_exact_preview_consent_and_returns_bounded_receipt() {
+    let journal = MemoryJournal {
+        recovery: RecoveryLoad::Clear,
+        diagnostics: json!({
+            "databaseId": "recovery-db-1",
+            "events": [{"kind": "prepared", "contentHash": "sha256:redacted"}],
+        }),
+    };
+    let executor = PlanExecutor::new(journal);
+    let preview = executor.preview_diagnostics().unwrap();
+    assert!(!preview.canonical_json.contains("session_secret"));
+
+    let destination = temporary_export_path();
+    assert_eq!(
+        executor.export_diagnostics(
+            &destination,
+            DiagnosticConsent {
+                preview_fingerprint: "sha256:wrong".to_owned(),
+                approved: true,
+            },
+        ),
+        Err(PlanExecutorError::ConsentRequired),
+    );
+    assert!(!destination.exists());
+
+    let receipt = executor
+        .export_diagnostics(
+            &destination,
+            DiagnosticConsent {
+                preview_fingerprint: preview.fingerprint.clone(),
+                approved: true,
+            },
+        )
+        .unwrap();
+    assert!(destination.exists());
+    assert_eq!(receipt.preview_fingerprint, preview.fingerprint);
+    assert!(receipt.bytes_written > 0 && receipt.bytes_written <= 65_536);
+    assert!(receipt.path.len() <= 512);
+    let _ = fs::remove_file(destination);
+}
+
+fn temporary_export_path() -> PathBuf {
+    let sequence = Cell::new(0_u64);
+    sequence.set(sequence.get() + 1);
+    std::env::temp_dir().join(format!(
+        "liiiraa-recovery-export-{}-{}.json",
+        std::process::id(),
+        sequence.get(),
+    ))
+}
+
