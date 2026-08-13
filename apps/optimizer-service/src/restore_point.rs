@@ -232,14 +232,14 @@ fn projection(
 
 #[cfg(windows)]
 pub mod windows_adapter {
-    use std::{mem::transmute, ptr};
+    use std::{marker::PhantomData, mem::transmute, ptr, rc::Rc};
 
     use windows::{
         Win32::{
             Foundation::{FreeLibrary, HMODULE},
             System::{
-                Com::{COINIT_MULTITHREADED, CoInitializeEx},
-                LibraryLoader::{GetProcAddress, LoadLibraryW},
+                Com::{COINIT_MULTITHREADED, CoInitializeEx, CoUninitialize},
+                LibraryLoader::{GetProcAddress, LOAD_LIBRARY_SEARCH_SYSTEM32, LoadLibraryExW},
                 Restore::{
                     APPLICATION_INSTALL, BEGIN_SYSTEM_CHANGE, END_SYSTEM_CHANGE, RESTOREPOINTINFOW,
                     STATEMGRSTATUS,
@@ -261,8 +261,10 @@ pub mod windows_adapter {
         library: Option<HMODULE>,
         set_restore_point: Option<SrSetRestorePointW>,
         com_initialized: bool,
+        owns_com_apartment: bool,
         com_callback_security_ready: bool,
         shutting_down: bool,
+        thread_bound: PhantomData<Rc<()>>,
     }
 
     impl WindowsRestorePointApi {
@@ -273,11 +275,11 @@ pub mod windows_adapter {
         /// NetworkService, SYSTEM, SELF, and Administrators as documented by
         /// Microsoft. This adapter does not broaden or replace that host policy.
         pub fn load(com_callback_security_ready: bool) -> Self {
-            let com_initialized = unsafe {
-                let result = CoInitializeEx(None, COINIT_MULTITHREADED);
-                result.is_ok() || result.0 == 0x80010106_u32 as i32
-            };
-            let library = unsafe { LoadLibraryW(w!("SrClient.dll")) }.ok();
+            let com_result = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
+            let com_initialized = com_result.is_ok();
+            let library =
+                unsafe { LoadLibraryExW(w!("SrClient.dll"), None, LOAD_LIBRARY_SEARCH_SYSTEM32) }
+                    .ok();
             let set_restore_point = library.and_then(|handle| unsafe {
                 GetProcAddress(handle, PCSTR(SR_SET_RESTORE_POINT_W_SYMBOL.as_ptr())).map(
                     |address| {
@@ -291,8 +293,10 @@ pub mod windows_adapter {
                 library,
                 set_restore_point,
                 com_initialized,
+                owns_com_apartment: com_initialized,
                 com_callback_security_ready,
                 shutting_down: false,
+                thread_bound: PhantomData,
             }
         }
 
@@ -376,6 +380,12 @@ pub mod windows_adapter {
                 unsafe {
                     let _ = FreeLibrary(library);
                 }
+            }
+            if self.owns_com_apartment {
+                unsafe {
+                    CoUninitialize();
+                }
+                self.owns_com_apartment = false;
             }
         }
     }

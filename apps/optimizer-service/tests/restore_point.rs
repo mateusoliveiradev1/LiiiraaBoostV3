@@ -108,6 +108,10 @@ fn fixes_the_dynamic_boundary_to_srclient_and_srsetrestorepointw() {
             "forbidden fallback: {forbidden}"
         );
     }
+    assert!(source.contains("loadlibraryexw"));
+    assert!(source.contains("load_library_search_system32"));
+    assert!(source.contains("freelibrary"));
+    assert!(source.contains("couninitialize"));
 }
 
 #[test]
@@ -279,6 +283,75 @@ fn records_begin_and_end_failures_without_observing_or_discarding_manifest_recov
     );
     assert!(end_observer.sequences.is_empty());
     assert!(end_projection.primary_manifest_preserved);
+}
+
+#[test]
+fn rejects_partial_end_and_mismatched_observation_sequences() {
+    let mut partial_end_api = ScriptedApi {
+        end: evidence(true, ERROR_SUCCESS, 0),
+        ..ScriptedApi::successful(52)
+    };
+    let mut observer = ScriptedObserver::new(PointObservation::Usable {
+        sequence_number: 52,
+    });
+    let partial_end = prepare_restore_point(
+        &mut partial_end_api,
+        &mut observer,
+        request(RiskClass::Experimental),
+    );
+    assert_eq!(
+        partial_end.state,
+        ComplementaryState::Failed(FailureEvidence {
+            stage: FailureStage::End,
+            status: Some(ERROR_SUCCESS),
+        })
+    );
+    assert!(observer.sequences.is_empty());
+
+    let mut mismatched_api = ScriptedApi::successful(52);
+    let mut mismatched_observer = ScriptedObserver::new(PointObservation::Usable {
+        sequence_number: 51,
+    });
+    let mismatched = prepare_restore_point(
+        &mut mismatched_api,
+        &mut mismatched_observer,
+        request(RiskClass::Experimental),
+    );
+    assert_eq!(mismatched.state, ComplementaryState::NotCreated);
+    assert_eq!(mismatched.admission, Admission::Blocked);
+}
+
+#[test]
+fn preserves_explicit_observation_unavailability_and_failure() {
+    let mut unavailable_api = ScriptedApi::successful(83);
+    let mut unavailable_observer = ScriptedObserver::new(PointObservation::Unavailable(
+        UnavailableReason::PolicyDenied,
+    ));
+    let unavailable = prepare_restore_point(
+        &mut unavailable_api,
+        &mut unavailable_observer,
+        request(RiskClass::Advanced),
+    );
+    assert_eq!(
+        unavailable.state,
+        ComplementaryState::Unavailable(UnavailableReason::PolicyDenied)
+    );
+
+    let mut failed_api = ScriptedApi::successful(84);
+    let mut failed_observer = ScriptedObserver::new(PointObservation::Failed { status: 1168 });
+    let failed = prepare_restore_point(
+        &mut failed_api,
+        &mut failed_observer,
+        request(RiskClass::Experimental),
+    );
+    assert_eq!(
+        failed.state,
+        ComplementaryState::Failed(FailureEvidence {
+            stage: FailureStage::Observation,
+            status: Some(1168),
+        })
+    );
+    assert_eq!(failed.admission, Admission::Blocked);
 }
 
 #[test]
