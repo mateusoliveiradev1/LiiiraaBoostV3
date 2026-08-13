@@ -6,10 +6,10 @@ use std::{
 };
 
 use liiiraa_contracts_rust::{
-    DurableJournalEvent, ExactOperationState, PlanTransactionDocument, PrivilegedBrokerRequest,
-    PrivilegedBrokerResponse, ProgressEventDocument, ProgressSnapshotDocument,
-    RecoveryCheckpointDocument, TransactionHash, TransactionReceiptDocument,
-    TransactionalRecoveryDocument, validate_transactional_recovery_document,
+    DurableJournalEvent, ExactOperationState, PlanTransactionDocument, PrivilegedBrokerResponse,
+    ProgressEventDocument, ProgressSnapshotDocument, RecoveryCheckpointDocument, TransactionHash,
+    TransactionReceiptDocument, TransactionalRecoveryDocument,
+    validate_transactional_recovery_document,
 };
 use liiiraa_plan_engine::{
     domain::{
@@ -85,6 +85,10 @@ impl Default for ExecutionSnapshot {
 
 pub trait RecoveryDiagnosticSource {
     fn redacted_diagnostics(&self) -> Result<Value, PlanExecutorError>;
+}
+
+pub trait PlanAuthorityStore {
+    fn append_authority_document(&mut self, document: &Value) -> Result<(), PlanExecutorError>;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -277,6 +281,18 @@ where
             bytes_written,
             path: path.to_string_lossy().into_owned(),
         })
+    }
+}
+
+impl<J> PlanExecutor<J>
+where
+    J: DurableJournalPort + PlanAuthorityStore,
+{
+    /// Stores only native-recomputed generated authority. Tauri command
+    /// adapters validate renderer intent separately and must not call this
+    /// method with renderer-authored authority documents.
+    pub fn record_native_authority(&mut self, document: &Value) -> Result<(), PlanExecutorError> {
+        self.journal.append_authority_document(document)
     }
 }
 
@@ -661,7 +677,6 @@ impl<T: BrokerTransport> PrivilegedBrokerPort for AuthenticatedBrokerClient<T> {
     }
 }
 
-#[cfg(not(test))]
 mod production_store_adapter {
     use super::*;
     use crate::recovery_store::{RecoveryStore, RecoveryStoreError};
@@ -757,6 +772,16 @@ mod production_store_adapter {
                 })).collect::<Vec<_>>(),
             }))
             .map_err(|_| PlanExecutorError::InvalidResponse)
+        }
+    }
+
+    impl PlanAuthorityStore for RecoveryStore {
+        fn append_authority_document(&mut self, document: &Value) -> Result<(), PlanExecutorError> {
+            validate_transactional_recovery_document(document)
+                .map_err(|_| PlanExecutorError::InvalidRequest)?;
+            self.append_document(document)
+                .map(|_| ())
+                .map_err(|_| PlanExecutorError::JournalUnavailable)
         }
     }
 

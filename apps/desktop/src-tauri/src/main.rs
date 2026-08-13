@@ -31,13 +31,22 @@ mod phase5_probe;
 #[allow(dead_code)]
 mod plan_auth;
 #[allow(dead_code)]
+mod plan_commands;
+#[allow(dead_code)]
+mod plan_executor;
+#[allow(dead_code)]
 mod premium_authority;
+#[allow(dead_code)]
+mod recovery_store;
 mod tray;
 mod window;
 #[allow(dead_code)]
 mod windows_lifecycle;
 
-use std::sync::Mutex;
+use std::{
+    fs,
+    sync::{Arc, Mutex},
+};
 
 use account_sync::{AccountSyncRequest, AccountSyncResponse, AccountSyncState};
 use credential_store::WindowsCredentialStore;
@@ -53,6 +62,15 @@ use identity::{
     open_admin_in_system_browser, perform_desktop_sign_in, sign_out_desktop, validate_https_origin,
 };
 use live_telemetry::{LiveTelemetrySampler, LiveTelemetrySnapshot};
+use plan_commands::{
+    AcceptedPlanIntent, DiagnosticExportRequest, PlanCommand, PlanDocumentRequest,
+    command_acceptance, validate_export_file_name, validate_plan_document,
+};
+use plan_executor::{
+    DiagnosticConsent, DiagnosticExportReceipt, DiagnosticPreview, ExecutionSnapshot,
+    ExecutionState, PlanExecutor, PlanExecutorError,
+};
+use recovery_store::{RecoveryStore, integrity_anchor::WindowsIntegrityAnchor};
 
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
@@ -72,7 +90,8 @@ use serde_json::Value;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent, TrayIconId};
 use tauri::{
-    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State, WebviewWindow, WindowEvent,
+    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, RunEvent, State, WebviewWindow,
+    WindowEvent, ipc::Channel,
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_deep_link::DeepLinkExt;
@@ -87,6 +106,7 @@ use window::{
 
 const FIXTURE_ADAPTER: &str = "fixture";
 const ADAPTER_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_DESKTOP_ADAPTER";
+type NativePlanExecutor = PlanExecutor<RecoveryStore>;
 
 #[derive(Clone, Debug)]
 struct DesktopRuntimeOrigins {
@@ -857,6 +877,148 @@ async fn desktop_sign_out(
     .map_err(|_| DesktopAuthCommandError::Unavailable)?
 }
 
+fn accept_renderer_plan_intent(
+    command: PlanCommand,
+    request: PlanDocumentRequest,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    let document = validate_plan_document(command, &request.document)?;
+    command_acceptance(command, &document).ok_or(PlanExecutorError::InvalidRequest)
+}
+
+#[tauri::command]
+fn compose_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    accept_renderer_plan_intent(PlanCommand::Compose, request)
+}
+
+#[tauri::command]
+fn revise_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    accept_renderer_plan_intent(PlanCommand::Revise, request)
+}
+
+#[tauri::command]
+fn approve_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    accept_renderer_plan_intent(PlanCommand::Approve, request)
+}
+
+fn reject_unavailable_mutation(
+    executor: &Mutex<NativePlanExecutor>,
+    command: PlanCommand,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    let accepted = accept_renderer_plan_intent(command, request)?;
+    let executor = executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?;
+    let snapshot = executor.read_execution();
+    progress
+        .send(snapshot)
+        .map_err(|_| PlanExecutorError::InvalidResponse)?;
+    if !executor.accepts_new_mutation() {
+        return Err(PlanExecutorError::RecoveryRequired);
+    }
+    // A renderer document is only intent. The physical request and proof must
+    // be recomputed from native authority and sent by the authenticated broker
+    // transport; until a verified packaged broker session exists, fail closed.
+    let _ = accepted;
+    Err(PlanExecutorError::BrokerUnavailable)
+}
+
+#[tauri::command]
+fn apply_plan(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    reject_unavailable_mutation(&executor, PlanCommand::Apply, request, progress)
+}
+
+#[tauri::command]
+fn restore_operation(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    reject_unavailable_mutation(&executor, PlanCommand::RestoreOperation, request, progress)
+}
+
+#[tauri::command]
+fn restore_plan(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    reject_unavailable_mutation(&executor, PlanCommand::RestorePlan, request, progress)
+}
+
+#[tauri::command]
+fn restore_checkpoint(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    reject_unavailable_mutation(&executor, PlanCommand::RestoreCheckpoint, request, progress)
+}
+
+#[tauri::command]
+fn read_execution(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+) -> Result<ExecutionSnapshot, PlanExecutorError> {
+    executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)
+        .map(|executor| executor.read_execution())
+}
+
+#[tauri::command]
+fn create_restart_checkpoint(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+) -> Result<ExecutionSnapshot, PlanExecutorError> {
+    let snapshot = executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?
+        .read_execution();
+    if snapshot.state != ExecutionState::RestartVerificationRequired {
+        return Err(PlanExecutorError::RecoveryRequired);
+    }
+    Ok(snapshot)
+}
+
+#[tauri::command]
+fn preview_recovery_diagnostics(
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+) -> Result<DiagnosticPreview, PlanExecutorError> {
+    executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?
+        .preview_diagnostics()
+}
+
+#[tauri::command]
+fn export_recovery_diagnostics(
+    app: AppHandle,
+    executor: State<'_, Mutex<NativePlanExecutor>>,
+    request: DiagnosticExportRequest,
+) -> Result<DiagnosticExportReceipt, PlanExecutorError> {
+    validate_export_file_name(&request.file_name)?;
+    let export_root = app
+        .path()
+        .app_data_dir()
+        .map_err(|_| PlanExecutorError::ExportFailed)?
+        .join("recovery-exports");
+    fs::create_dir_all(&export_root).map_err(|_| PlanExecutorError::ExportFailed)?;
+    executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?
+        .export_diagnostics(
+            &export_root.join(request.file_name),
+            DiagnosticConsent {
+                preview_fingerprint: request.preview_fingerprint,
+                approved: request.approved,
+            },
+        )
+}
+
 fn run() -> Result<(), String> {
     let configured_adapter = std::env::var(ADAPTER_ENVIRONMENT_VARIABLE).ok();
     ShellContract::authorize_startup(build_profile(), configured_adapter.as_deref())
@@ -893,6 +1055,20 @@ fn run() -> Result<(), String> {
         .setup(|app| {
             let origins = desktop_runtime_origins(app.config().plugins.0.get("liiiraa-shell"));
             app.manage(DesktopRuntimeConfig { origins });
+            let recovery_root = app.path().app_data_dir()?.join("transactional-recovery");
+            fs::create_dir_all(&recovery_root)?;
+            let recovery_store = RecoveryStore::open(
+                &recovery_root.join("recovery.sqlite3"),
+                Arc::new(WindowsIntegrityAnchor::new()),
+            )
+            .map_err(|_| {
+                std::io::Error::other("native recovery authority could not be initialized")
+            })?;
+            let mut plan_executor = PlanExecutor::new(recovery_store);
+            plan_executor.reconcile_startup().map_err(|_| {
+                std::io::Error::other("native recovery authority could not be reconciled")
+            })?;
+            app.manage(Mutex::new(plan_executor));
             let evidence_root = app.path().app_data_dir()?.join("evidence-authority");
             let evidence_authority = EvidenceAuthority::open(evidence_root).map_err(|_| {
                 std::io::Error::other("native evidence authority could not be initialized")
@@ -947,23 +1123,34 @@ fn run() -> Result<(), String> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            apply_plan,
+            approve_plan,
             bind_current_device,
             cancel_measurement_capture,
             compare_measurement_sessions,
+            compose_plan,
+            create_restart_checkpoint,
             desktop_sign_in,
             desktop_sign_out,
             dispatch_shell_command,
             export_evidence_report,
+            export_recovery_diagnostics,
             finish_measurement_capture,
             get_shell_bootstrap,
             open_account_subscription,
             open_admin,
             prepare_device_binding,
+            preview_recovery_diagnostics,
+            read_execution,
             read_live_telemetry,
             read_evidence_health,
             read_hardware_inventory,
             refresh_hardware_inventory,
             render_evidence_report,
+            restore_checkpoint,
+            restore_operation,
+            restore_plan,
+            revise_plan,
             sample_measurement_capture,
             start_measurement_capture,
             sync_account
@@ -1016,8 +1203,18 @@ fn run() -> Result<(), String> {
                 _ => {}
             }
         })
-        .run(tauri::generate_context!())
-        .map_err(|error| format!("desktop host failed: {error}"))
+        .build(tauri::generate_context!())
+        .map_err(|error| format!("desktop host failed: {error}"))?
+        .run(|app, event| {
+            if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
+                if let Some(executor) = app.try_state::<Mutex<NativePlanExecutor>>() {
+                    if let Ok(mut executor) = executor.lock() {
+                        executor.begin_shutdown();
+                    }
+                }
+            }
+        });
+    Ok(())
 }
 
 fn main() {

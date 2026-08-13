@@ -1,5 +1,7 @@
 #[path = "../src/plan_executor.rs"]
 mod plan_executor;
+#[path = "../src/recovery_store/mod.rs"]
+mod recovery_store;
 
 use liiiraa_contracts_rust::PrivilegedBrokerResponse;
 use plan_executor::{

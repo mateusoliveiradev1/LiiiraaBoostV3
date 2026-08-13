@@ -65,9 +65,22 @@ pub struct PlanDocumentRequest {
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DiagnosticExportRequest {
-    pub destination: String,
+    pub file_name: String,
     pub preview_fingerprint: String,
     pub approved: bool,
+}
+
+pub fn validate_export_file_name(value: &str) -> Result<(), PlanExecutorError> {
+    if !(1..=128).contains(&value.len())
+        || !value.ends_with(".json")
+        || value.starts_with('.')
+        || !value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
+    {
+        return Err(PlanExecutorError::InvalidRequest);
+    }
+    Ok(())
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

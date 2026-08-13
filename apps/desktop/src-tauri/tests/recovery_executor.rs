@@ -2,6 +2,8 @@
 mod plan_commands;
 #[path = "../src/plan_executor.rs"]
 mod plan_executor;
+#[path = "../src/recovery_store/mod.rs"]
+mod recovery_store;
 
 use liiiraa_contracts_rust::{
     DurableJournalEvent, ExactOperationState, PlanTransactionDocument, ProgressEventDocument,
@@ -223,6 +225,46 @@ fn command_surface_is_closed_and_restore_targets_cannot_be_confused() {
             Err(PlanExecutorError::InvalidRequest),
         ));
     }
+}
+
+#[test]
+fn tauri_startup_and_capability_keep_recovery_first_and_least_privilege() {
+    let main_source = include_str!("../src/main.rs");
+    let build_source = include_str!("../build.rs");
+    let capability: Value =
+        serde_json::from_str(include_str!("../capabilities/main.json")).unwrap();
+    let permissions = capability["permissions"].as_array().unwrap();
+
+    assert_eq!(capability["windows"], json!(["main"]));
+    assert_eq!(capability["webviews"], json!(["main"]));
+    for command in PLAN_COMMANDS {
+        let permission = format!("allow-{}", command.replace('_', "-"));
+        assert!(permissions.iter().any(|value| value == &permission));
+        assert!(build_source.contains(&format!("\"{command}\"")));
+        assert!(main_source.contains(&format!("            {command},")));
+    }
+    assert!(permissions.iter().all(|value| {
+        value.as_str().is_some_and(|permission| {
+            !permission.starts_with("shell:")
+                && !permission.contains("execute-arbitrary")
+                && !permission.contains("generic-native")
+        })
+    }));
+
+    let open = main_source.find("RecoveryStore::open").unwrap();
+    let reconcile = main_source
+        .find("plan_executor.reconcile_startup()")
+        .unwrap();
+    let manage = main_source
+        .find("app.manage(Mutex::new(plan_executor))")
+        .unwrap();
+    let commands = main_source
+        .find(".invoke_handler(tauri::generate_handler!")
+        .unwrap();
+    assert!(open < reconcile && reconcile < manage && manage < commands);
+    assert!(main_source.contains("WindowEvent::CloseRequested"));
+    assert!(main_source.contains("CloseAction::HideToTray"));
+    assert!(main_source.contains("executor.begin_shutdown()"));
 }
 
 fn temporary_export_path() -> PathBuf {
