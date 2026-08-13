@@ -29,6 +29,8 @@ mod notifications;
 mod offline_entitlement;
 mod phase5_probe;
 #[allow(dead_code)]
+mod plan_auth;
+#[allow(dead_code)]
 mod premium_authority;
 mod tray;
 mod window;

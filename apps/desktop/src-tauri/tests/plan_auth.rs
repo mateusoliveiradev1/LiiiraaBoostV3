@@ -56,10 +56,10 @@ impl PlanApprovalApi for RecordingApi {
             credential.to_owned(),
             serde_json::from_slice(body).expect("native proof request should be JSON"),
         ));
-        self.response.borrow_mut().as_ref().map_or_else(
-            |error| Err(*error),
-            |response| Ok(response.clone()),
-        )
+        self.response
+            .borrow_mut()
+            .as_ref()
+            .map_or_else(|error| Err(*error), |response| Ok(response.clone()))
     }
 }
 
@@ -121,7 +121,7 @@ fn apply_proof() -> serde_json::Value {
         "authorizationContextId": "plan-review-0001",
         "evidenceId": "receipt-evidence-0001",
         "deviceId": "device-0001",
-        "targetFingerprint": "server-computed-by-green",
+        "targetFingerprint": "929d0c43df5d31f90ce6d3a05fa0e93ef9ab9d0e2e24e106b08fb1bb1fbcf885",
         "verifiedAtUnixMs": NOW_MS - 60_000,
         "expiresAtUnixMs": NOW_MS + 240_000,
         "consumedAtUnixMs": NOW_MS
@@ -129,6 +129,15 @@ fn apply_proof() -> serde_json::Value {
 }
 
 fn preference_proof(action: &str) -> serde_json::Value {
+    let target_fingerprint = match action {
+        "enable-advanced-preference" => {
+            "803e273cd53ec747a0ec41289412d5259b6d86b375601da8bd75178ad07a15cc"
+        }
+        "revoke-advanced-preference" => {
+            "da4d0e78ffadc065c1a72c00fdd5412786b76024a445c344fdbfface539f8107"
+        }
+        _ => "invalid",
+    };
     json!({
         "kind": "consumed-advanced-preference",
         "action": action,
@@ -136,7 +145,7 @@ fn preference_proof(action: &str) -> serde_json::Value {
         "authorizationContextId": "advanced-preference-review-0001",
         "evidenceId": "receipt-evidence-0002",
         "deviceId": "device-0001",
-        "targetFingerprint": "server-computed-by-green",
+        "targetFingerprint": target_fingerprint,
         "verifiedAtUnixMs": NOW_MS - 60_000,
         "expiresAtUnixMs": NOW_MS + 240_000,
         "consumedAtUnixMs": NOW_MS
@@ -159,8 +168,17 @@ fn apply_consumes_exact_plan_and_operation_versions_with_native_credential_custo
     assert_eq!(calls[0].0, CREDENTIAL);
     assert_eq!(calls[0].1["action"], "apply-transactional-plan");
     assert_eq!(calls[0].1["resource"], "desktop-plan");
-    assert_eq!(calls[0].1["binding"]["planFingerprint"], "plan-fingerprint-0001");
-    assert_eq!(calls[0].1["binding"]["operationVersions"].as_array().unwrap().len(), 2);
+    assert_eq!(
+        calls[0].1["binding"]["planFingerprint"],
+        "plan-fingerprint-0001"
+    );
+    assert_eq!(
+        calls[0].1["binding"]["operationVersions"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
     assert_eq!(calls[0].1["receipt"], RECEIPT);
     assert!(!format!("{proof:?}").contains(RECEIPT));
 }
@@ -168,30 +186,30 @@ fn apply_consumes_exact_plan_and_operation_versions_with_native_credential_custo
 #[test]
 fn enable_and_revoke_use_closed_non_interchangeable_proof_types() {
     for (action, wire_action) in [
-        (AdvancedPreferenceAction::Enable, "enable-advanced-preference"),
-        (AdvancedPreferenceAction::Revoke, "revoke-advanced-preference"),
+        (
+            AdvancedPreferenceAction::Enable,
+            "enable-advanced-preference",
+        ),
+        (
+            AdvancedPreferenceAction::Revoke,
+            "revoke-advanced-preference",
+        ),
     ] {
         let store = store();
         let api = RecordingApi {
             response: RefCell::new(Ok(response(preference_proof(wire_action)))),
             calls: RefCell::new(Vec::new()),
         };
-        let proof = consume_advanced_preference_approval(
-            &store,
-            &api,
-            preference_request(action),
-            NOW_MS,
-        )
-        .expect("exact preference proof should be admitted");
+        let proof =
+            consume_advanced_preference_approval(&store, &api, preference_request(action), NOW_MS)
+                .expect("exact preference proof should be admitted");
         assert_eq!(proof.action(), action);
         assert_eq!(proof.evidence_id(), "receipt-evidence-0002");
     }
 
     let store = store();
     let api = RecordingApi {
-        response: RefCell::new(Ok(response(preference_proof(
-            "revoke-advanced-preference",
-        )))),
+        response: RefCell::new(Ok(response(preference_proof("revoke-advanced-preference")))),
         calls: RefCell::new(Vec::new()),
     };
     assert_eq!(
@@ -258,8 +276,16 @@ fn local_recovery_needs_neither_network_nor_authentication() {
 #[test]
 fn renderer_boolean_and_plaintext_sqlite_are_absent_from_native_proof_boundary() {
     let source = include_str!("../src/plan_auth.rs");
-    for prohibited in ["strongAuth: true", "strong_auth: bool", "rusqlite", "localStorage"] {
-        assert!(!source.contains(prohibited), "prohibited proof surface: {prohibited}");
+    for prohibited in [
+        "strongAuth: true",
+        "strong_auth: bool",
+        "rusqlite",
+        "localStorage",
+    ] {
+        assert!(
+            !source.contains(prohibited),
+            "prohibited proof surface: {prohibited}"
+        );
     }
     assert!(!format!("{:?}", receipt()).contains(RECEIPT));
 }

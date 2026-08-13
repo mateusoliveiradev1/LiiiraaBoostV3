@@ -171,6 +171,7 @@ const createHarness = async () => {
   await registerStrongAuthRoutes(app, {
     allowedOrigins: [ORIGIN],
     authority,
+    clock: { now: () => new Date(now) },
     csrfSecret: CSRF_SECRET,
     resolveActor: () => Promise.resolve(actor),
   });
@@ -190,7 +191,7 @@ const createHarness = async () => {
 const post = (
   app: Awaited<ReturnType<typeof createHarness>>['app'],
   path: string,
-  body: unknown,
+  body: Readonly<Record<string, unknown>>,
 ) =>
   app.inject({
     method: 'POST',
