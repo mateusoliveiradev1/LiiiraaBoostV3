@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-19-PLAN.md
-last_updated: "2026-08-13T17:00:42.623Z"
+stopped_at: Completed 06-18-PLAN.md
+last_updated: "2026-08-13T17:22:18.586Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 234
+  completed_plans: 235
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 20 of 28
+Plan: 21 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -262,6 +262,7 @@ _Updated after plan completion_
 | Phase 06 P14 | 16 min | 3 tasks | 2 files |
 | Phase 06 P15 | 8 min | 3 tasks | 5 files |
 | Phase 06 P19 | 12m | 2 tasks | 3 files |
+| Phase 06 P18 | 18 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -835,6 +836,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Authoritative Improve and Recovery branches consume immutable PlanAuthority snapshots and emit intents; legacy preview branches remain only when no authority is supplied.
 - [Phase 06]: Receipts, checkpoints, journals, and revocations render only from typed validated documents; absent authority evidence produces disabled or pending states instead of synthetic success.
 - [Phase 06]: Extreme plans remain structurally non-executable, while proportional gates and exact confirmation language apply to lower risk levels.
+- [Phase 06]: Reconcile the HMAC-anchored journal during Tauri setup before exposing plan commands — Unresolved durable state must close new mutation admission.
+- [Phase 06]: Keep broker session secrets native-only and validate generated request and response documents — Renderer and malformed transport data cannot acquire broker authority.
+- [Phase 06]: Bind exact custom Tauri commands to the trusted main window/webview through a generated app ACL manifest — Custom commands need enforceable per-command least privilege.
 
 ### Pending Todos
 
@@ -885,6 +889,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T17:00:42.615Z
-Stopped at: Completed 06-19-PLAN.md
+Last session: 2026-08-13T17:22:18.579Z
+Stopped at: Completed 06-18-PLAN.md
 Resume file: None
