@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
@@ -46,7 +47,10 @@ const runEvidence = (
   predecessorRunEvidenceSha256: string | null = null,
 ) => ({
   id: `run-${stage}-${participantId}`,
-  source: stage === 'deterministic-simulation' ? 'phase6-deterministic-rust-1' : 'phase6-physical-runner-rust-1',
+  source:
+    stage === 'deterministic-simulation'
+      ? 'phase6-deterministic-rust-1'
+      : 'phase6-physical-runner-rust-1',
   stage,
   evidenceKind: stage === 'deterministic-simulation' ? 'deterministic' : 'physical',
   status: 'PASS',
@@ -178,7 +182,7 @@ const manifest = () => {
       artifactManifestSha256,
     },
     promotionStage: 'deterministic-simulation' as Stage,
-    requirementsCoverage: [...REQUIREMENTS],
+    requirementsCoverage: [...REQUIREMENTS] as string[],
     decisionCoverage: [...DECISIONS],
     legacyBlockedAttempts: [
       { path: 'evidence/legacy/managed-power-scheme-v2.json', sha256: sha256('legacy') },
@@ -196,12 +200,14 @@ const manifest = () => {
 
 type Manifest = ReturnType<typeof manifest>;
 
-const context = (overrides: Record<string, unknown> = {}) => ({
-  mode: 'planned' as const,
-  evaluatedAt: '2030-01-16T00:00:00.000Z',
-  artifactContents: { [buildPath]: buildBytes, [evidencePath]: evidenceBytes },
-  ...overrides,
-});
+const context = (overrides: Record<string, unknown> = {}) =>
+  ({
+    mode: 'planned' as const,
+    requireAdmittedStage: 'deterministic-simulation' as const,
+    evaluatedAt: '2030-01-16T00:00:00.000Z',
+    artifactContents: { [buildPath]: buildBytes, [evidencePath]: evidenceBytes },
+    ...overrides,
+  }) as Parameters<typeof evaluatePhase6Evidence>[1];
 
 const codes = (result: ReturnType<typeof evaluatePhase6Evidence>): string[] =>
   result.diagnostics.map(({ code }) => code);
@@ -209,11 +215,19 @@ const codes = (result: ReturnType<typeof evaluatePhase6Evidence>): string[] =>
 const appendPhysical = (value: Manifest, stage: PhysicalStage, review = true): Run[] => {
   const index = PHASE6_PROMOTION_STAGES.indexOf(stage);
   const cell = value.stages[index]!;
-  const predecessor = value.stages[index - 1]!.runs.at(-1)!;
-  const bindings = stage === 'friends-pc' ? roster().participants : [{ participantId: `participant-${stage}`, machineSlot: null }];
+  const predecessor = value.stages[index - 1]?.runs.at(-1);
+  const bindings =
+    stage === 'friends-pc'
+      ? roster().participants
+      : [{ participantId: `participant-${stage}`, machineSlot: null }];
   if (stage === 'friends-pc') cell.friendsRoster = roster();
   cell.runs = bindings.map(({ participantId, machineSlot }) =>
-    runEvidence(stage, participantId, machineSlot, phase6EvidenceSha256(predecessor)),
+    runEvidence(
+      stage,
+      participantId,
+      machineSlot,
+      predecessor === undefined ? sha256('missing predecessor') : phase6EvidenceSha256(predecessor),
+    ),
   );
   if (stage === 'friends-pc') cell.consents = cell.runs.map(consentFor);
   if (review) {
@@ -235,14 +249,20 @@ const reviewedThrough = (stage: PhysicalStage): Manifest => {
 
 describe('closed Phase 6 CLI grammar', () => {
   it.each([
-    [['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm'], { mode: 'planned', requireRunEvidence: 'clean-windows-vm' }],
-    [['--mode', 'planned', '--require-admitted-stage', 'owner-pc'], { mode: 'planned', requireAdmittedStage: 'owner-pc' }],
+    [
+      ['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm'],
+      { mode: 'planned', requireRunEvidence: 'clean-windows-vm' },
+    ],
+    [
+      ['--mode', 'planned', '--require-admitted-stage', 'owner-pc'],
+      { mode: 'planned', requireAdmittedStage: 'owner-pc' },
+    ],
     [['--mode', 'final'], { mode: 'final' }],
   ] as const)('accepts only canonical invocation %j', (args, expected) => {
     expect(parsePhase6CliOptions(args)).toEqual(expected);
   });
 
-  it.each([
+  const invalidArguments = [
     [],
     ['--mode'],
     ['--mode', 'planned'],
@@ -254,8 +274,17 @@ describe('closed Phase 6 CLI grammar', () => {
     ['--mode', 'planned', '--require-run-evidence', 'friends-pcs'],
     ['--mode', 'planned', '--stage', 'clean-windows-vm'],
     ['--mode', 'planned', '--unknown'],
-    ['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm', '--require-admitted-stage', 'clean-windows-vm'],
-  ])('rejects noncanonical invocation %j before evaluation', (args) => {
+    [
+      '--mode',
+      'planned',
+      '--require-run-evidence',
+      'clean-windows-vm',
+      '--require-admitted-stage',
+      'clean-windows-vm',
+    ],
+  ].map((args) => [args] as const);
+
+  it.each(invalidArguments)('rejects noncanonical invocation %j before evaluation', (args) => {
     expect(() => parsePhase6CliOptions(args)).toThrow(/Phase 6 CLI/u);
   });
 });
@@ -263,8 +292,20 @@ describe('closed Phase 6 CLI grammar', () => {
 describe('exact PLAN-01 through PLAN-08 coverage', () => {
   it('keeps evaluator and schema on the exact ordered closed set', () => {
     const schema = JSON.parse(
-      readFileSync(new URL('../evidence-manifest.schema.json', import.meta.url), 'utf8'),
-    ) as Record<string, any>;
+      readFileSync(
+        fileURLToPath(new URL('../evidence-manifest.schema.json', import.meta.url).href),
+        'utf8',
+      ),
+    ) as {
+      properties: {
+        requirementsCoverage: {
+          items: { enum: string[] };
+          minItems: number;
+          maxItems: number;
+          uniqueItems: boolean;
+        };
+      };
+    };
     const coverage = schema.properties.requirementsCoverage;
 
     expect(PHASE6_REQUIREMENTS).toEqual(REQUIREMENTS);
@@ -277,9 +318,14 @@ describe('exact PLAN-01 through PLAN-08 coverage', () => {
     (omitted) => {
       const value = manifest();
       value.requirementsCoverage = value.requirementsCoverage.filter((id) => id !== omitted);
-      expect(codes(evaluatePhase6Evidence(value, context({ requireAdmittedStage: 'deterministic-simulation' })))).toContain(
-        'REQUIREMENT_COVERAGE_MISSING',
-      );
+      expect(
+        codes(
+          evaluatePhase6Evidence(
+            value,
+            context({ requireAdmittedStage: 'deterministic-simulation' }),
+          ),
+        ),
+      ).toContain('REQUIREMENT_COVERAGE_MISSING');
     },
   );
 
@@ -292,9 +338,14 @@ describe('exact PLAN-01 through PLAN-08 coverage', () => {
   ])('rejects %s requirement coverage', (_name, mutate) => {
     const value = manifest();
     value.requirementsCoverage = mutate(value.requirementsCoverage);
-    expect(codes(evaluatePhase6Evidence(value, context({ requireAdmittedStage: 'deterministic-simulation' })))).toContain(
-      'REQUIREMENT_COVERAGE_INVALID',
-    );
+    expect(
+      codes(
+        evaluatePhase6Evidence(
+          value,
+          context({ requireAdmittedStage: 'deterministic-simulation' }),
+        ),
+      ),
+    ).toContain('REQUIREMENT_COVERAGE_INVALID');
   });
 });
 
@@ -302,7 +353,10 @@ describe('targeted and final stage evaluation', () => {
   it('accepts one pending clean run while later stages are absent', () => {
     const value = manifest();
     appendPhysical(value, 'clean-windows-vm', false);
-    const result = evaluatePhase6Evidence(value, context({ requireRunEvidence: 'clean-windows-vm' }));
+    const result = evaluatePhase6Evidence(
+      value,
+      context({ requireRunEvidence: 'clean-windows-vm' }),
+    );
     expect(result.ok).toBe(true);
     expect(result.runReadyForReview).toBe(true);
     expect(result.highestAdmittedStage).toBe('deterministic-simulation');
@@ -316,41 +370,101 @@ describe('targeted and final stage evaluation', () => {
   });
 
   it('requires the complete four-stage chain in final mode', () => {
-    expect(evaluatePhase6Evidence(reviewedThrough('friends-pc'), context({ mode: 'final' })).ok).toBe(true);
-    expect(evaluatePhase6Evidence(reviewedThrough('owner-pc'), context({ mode: 'final' })).ok).toBe(false);
+    expect(
+      evaluatePhase6Evidence(reviewedThrough('friends-pc'), context({ mode: 'final' })).ok,
+    ).toBe(true);
+    expect(evaluatePhase6Evidence(reviewedThrough('owner-pc'), context({ mode: 'final' })).ok).toBe(
+      false,
+    );
   });
 
   it('rejects skipped predecessors even for targeted gates', () => {
     const value = manifest();
     appendPhysical(value, 'owner-pc', false);
-    expect(codes(evaluatePhase6Evidence(value, context({ requireRunEvidence: 'owner-pc' })))).toContain(
-      'PROMOTION_STAGE_SKIPPED',
-    );
+    expect(
+      codes(evaluatePhase6Evidence(value, context({ requireRunEvidence: 'owner-pc' }))),
+    ).toContain('PROMOTION_STAGE_SKIPPED');
   });
 });
 
 describe('frozen friends roster and one-to-one append-only evidence', () => {
   it('admits exactly one run, consent, and later review for each frozen roster member', () => {
-    const result = evaluatePhase6Evidence(reviewedThrough('friends-pc'), context({ mode: 'final' }));
+    const result = evaluatePhase6Evidence(
+      reviewedThrough('friends-pc'),
+      context({ mode: 'final' }),
+    );
     expect(result.ok).toBe(true);
     expect(result.highestAdmittedStage).toBe('friends-pc');
   });
 
   it.each([
     ['missing run', (value: Manifest) => value.stages[3]!.runs.pop()],
-    ['extra run', (value: Manifest) => value.stages[3]!.runs.push({ ...value.stages[3]!.runs[0]!, id: 'run-extra', participantId: 'friend-extra', machineSlot: 'friends-slot-03' })],
+    [
+      'extra run',
+      (value: Manifest) =>
+        value.stages[3]!.runs.push({
+          ...value.stages[3]!.runs[0]!,
+          id: 'run-extra',
+          participantId: 'friend-extra',
+          machineSlot: 'friends-slot-03',
+        }),
+    ],
     ['duplicate run', (value: Manifest) => value.stages[3]!.runs.push(value.stages[3]!.runs[0]!)],
     ['missing consent', (value: Manifest) => value.stages[3]!.consents.pop()],
-    ['extra consent', (value: Manifest) => value.stages[3]!.consents.push({ ...value.stages[3]!.consents[0]!, id: 'consent-extra' })],
+    [
+      'extra consent',
+      (value: Manifest) =>
+        value.stages[3]!.consents.push({ ...value.stages[3]!.consents[0]!, id: 'consent-extra' }),
+    ],
     ['missing review', (value: Manifest) => value.stages[3]!.reviews.pop()],
-    ['extra review', (value: Manifest) => value.stages[3]!.reviews.push({ ...value.stages[3]!.reviews[0]!, id: 'review-extra' })],
-    ['swapped slot', (value: Manifest) => { value.stages[3]!.runs[0]!.machineSlot = 'friends-slot-02'; }],
-    ['unknown participant', (value: Manifest) => { value.stages[3]!.runs[0]!.participantId = 'friend-unknown'; }],
-    ['rejected review', (value: Manifest) => { value.stages[3]!.reviews[0]!.verdict = 'REJECTED'; value.stages[3]!.reviews[0]!.response = 'REJECTED'; }],
-    ['review before run', (value: Manifest) => { value.stages[3]!.reviews[0]!.recordedAt = value.stages[3]!.runs[0]!.recordedAt; }],
-    ['consent after export', (value: Manifest) => { value.stages[3]!.consents[0]!.recordedAt = value.stages[3]!.runs[0]!.exportedAt!; }],
-    ['roster hash mismatch', (value: Manifest) => { value.stages[3]!.runs[0]!.friendsRosterSha256 = sha256('other roster'); }],
-    ['run hash mismatch', (value: Manifest) => { value.stages[3]!.reviews[0]!.runEvidenceSha256 = sha256('other run'); }],
+    [
+      'extra review',
+      (value: Manifest) =>
+        value.stages[3]!.reviews.push({ ...value.stages[3]!.reviews[0]!, id: 'review-extra' }),
+    ],
+    [
+      'swapped slot',
+      (value: Manifest) => {
+        value.stages[3]!.runs[0]!.machineSlot = 'friends-slot-02';
+      },
+    ],
+    [
+      'unknown participant',
+      (value: Manifest) => {
+        value.stages[3]!.runs[0]!.participantId = 'friend-unknown';
+      },
+    ],
+    [
+      'rejected review',
+      (value: Manifest) => {
+        value.stages[3]!.reviews[0]!.verdict = 'REJECTED';
+        value.stages[3]!.reviews[0]!.response = 'REJECTED';
+      },
+    ],
+    [
+      'review before run',
+      (value: Manifest) => {
+        value.stages[3]!.reviews[0]!.recordedAt = value.stages[3]!.runs[0]!.recordedAt;
+      },
+    ],
+    [
+      'consent after export',
+      (value: Manifest) => {
+        value.stages[3]!.consents[0]!.recordedAt = value.stages[3]!.runs[0]!.exportedAt!;
+      },
+    ],
+    [
+      'roster hash mismatch',
+      (value: Manifest) => {
+        value.stages[3]!.runs[0]!.friendsRosterSha256 = sha256('other roster');
+      },
+    ],
+    [
+      'run hash mismatch',
+      (value: Manifest) => {
+        value.stages[3]!.reviews[0]!.runEvidenceSha256 = sha256('other run');
+      },
+    ],
   ])('blocks final admission for %s', (_name, mutate) => {
     const value = reviewedThrough('friends-pc');
     mutate(value);
@@ -358,12 +472,24 @@ describe('frozen friends roster and one-to-one append-only evidence', () => {
   });
 
   it.each([
-    ['duplicate participant', (value: Manifest) => { value.stages[3]!.friendsRoster!.participants[1]!.participantId = 'friend-alpha'; }],
-    ['duplicate slot', (value: Manifest) => { value.stages[3]!.friendsRoster!.participants[1]!.machineSlot = 'friends-slot-01'; }],
+    [
+      'duplicate participant',
+      (value: Manifest) => {
+        value.stages[3]!.friendsRoster!.participants[1]!.participantId = 'friend-alpha';
+      },
+    ],
+    [
+      'duplicate slot',
+      (value: Manifest) => {
+        value.stages[3]!.friendsRoster!.participants[1]!.machineSlot = 'friends-slot-01';
+      },
+    ],
   ])('rejects %s in the immutable roster', (_name, mutate) => {
     const value = reviewedThrough('friends-pc');
     mutate(value);
-    expect(codes(evaluatePhase6Evidence(value, context({ mode: 'final' })))).toContain('FRIENDS_ROSTER_INVALID');
+    expect(codes(evaluatePhase6Evidence(value, context({ mode: 'final' })))).toContain(
+      'FRIENDS_ROSTER_INVALID',
+    );
   });
 });
 
@@ -377,7 +503,10 @@ describe('legacy evidence remains blocked history', () => {
 
   it('does not count legacy blocked references toward current cardinality', () => {
     const value = reviewedThrough('owner-pc');
-    value.legacyBlockedAttempts.push({ path: 'evidence/legacy/friends-pass.json', sha256: sha256('fake pass') });
+    value.legacyBlockedAttempts.push({
+      path: 'evidence/legacy/friends-pass.json',
+      sha256: sha256('fake pass'),
+    });
     expect(evaluatePhase6Evidence(value, context({ mode: 'final' })).ok).toBe(false);
   });
 });
