@@ -30,8 +30,8 @@ pub struct JournalAppend<'a> {
 pub enum RecoveryLoad {
     Clear,
     Pending {
-        transaction: PlanTransactionDocument,
-        latest_event: DurableJournalEvent,
+        transaction: Box<PlanTransactionDocument>,
+        latest_event: Box<DurableJournalEvent>,
     },
     CorruptOrUnavailable,
 }
@@ -617,97 +617,18 @@ impl DeterministicTransactionExecutor {
             ));
         }
 
-        let reconcile_operation = match request.operation {
-            ExecutionOperation::Apply => ReconcileOperation::Apply,
-            ExecutionOperation::Restore => ReconcileOperation::Restore,
-        };
-        let reconciliation =
-            ObservationFirstReconciliationPolicy.reconcile_apply_or_restore(ReconcileInput {
-                transaction_id: &request.transaction.transaction_id,
-                operation_version_id: &request.operation_version_id,
-                exact_prior_state: &request.exact_prior_state,
-                exact_requested_state: &request.exact_requested_state,
-                exact_observed_state: &observed,
-                operation: reconcile_operation,
-                dispatch: dispatch_evidence,
-            })?;
-
-        if reconciliation.receipt_eligible() && request.restart_required {
-            let Some(checkpoint) = request.artifacts.restart_checkpoint.as_ref() else {
-                return Err(invalid_artifact(&request.operation_version_id));
-            };
-            if journal
-                .store_checkpoint(&transaction, &request.exact_prior_state, checkpoint)
-                .is_err()
-            {
-                return Ok(journal_failure(
-                    sequences,
-                    dispatch_count,
-                    read_attempts,
-                    Some(observed),
-                ));
-            }
-            return Ok(outcome(
-                ExecutionVerdict::RestartVerificationRequired,
-                MutationGateState::ClosedForRestartVerification,
-                NextSafeAction::VerifyAfterRestart,
-                sequences,
-                dispatch_count,
-                read_attempts,
-                false,
-                Some(observed),
-            ));
-        }
-
-        let (verdict, gate, action, verdict_event) = verdict_projection(request, &reconciliation);
-        if append_next(
+        finalize_observation(
+            request,
             journal,
             &transaction,
-            verdict_event,
-            &mut current_head,
-            &mut sequences,
-        )
-        .is_err()
-        {
-            return Ok(journal_failure(
-                sequences,
-                dispatch_count,
-                read_attempts,
-                Some(observed),
-            ));
-        }
-
-        let mut receipt_stored = false;
-        if reconciliation.receipt_eligible() {
-            validate_receipt(request, &observed, &current_head)?;
-            if journal
-                .store_receipt(
-                    &transaction,
-                    &request.exact_prior_state,
-                    &request.artifacts.receipt,
-                )
-                .is_err()
-            {
-                return Ok(journal_failure(
-                    sequences,
-                    dispatch_count,
-                    read_attempts,
-                    Some(observed),
-                ));
-            }
-            receipt_stored = true;
-        }
-
-        Ok(outcome(
-            verdict,
-            gate,
-            action,
-            sequences,
+            observed,
+            dispatch_evidence,
             dispatch_count,
             read_attempts,
-            receipt_stored,
-            Some(observed),
-        ))
+            current_head,
+            sequences,
+            true,
+        )
     }
 
     /// Reconciles one transaction already found in the durable journal. This
@@ -733,7 +654,7 @@ impl DeterministicTransactionExecutor {
             Ok(RecoveryLoad::Pending {
                 transaction,
                 latest_event,
-            }) => (transaction, latest_event),
+            }) => (*transaction, *latest_event),
             Ok(RecoveryLoad::Clear) => {
                 return Err(PlanEngineError::new(
                     PlanEngineErrorCode::RecoveryRequired,
@@ -785,63 +706,24 @@ impl DeterministicTransactionExecutor {
             return Ok(journal_failure(sequences, 0, read_attempts, Some(observed)));
         }
 
-        let reconcile_operation = match request.operation {
-            ExecutionOperation::Apply => ReconcileOperation::Apply,
-            ExecutionOperation::Restore => ReconcileOperation::Restore,
-        };
         let dispatch = match latest_event {
             DurableJournalEvent::DispatchReturnedJournalEvent(_) => {
                 DispatchEvidence::ReturnedSuccess
             }
             _ => DispatchEvidence::NotDispatched,
         };
-        let reconciliation =
-            ObservationFirstReconciliationPolicy.reconcile_apply_or_restore(ReconcileInput {
-                transaction_id: &request.transaction.transaction_id,
-                operation_version_id: &request.operation_version_id,
-                exact_prior_state: &request.exact_prior_state,
-                exact_requested_state: &request.exact_requested_state,
-                exact_observed_state: &observed,
-                operation: reconcile_operation,
-                dispatch,
-            })?;
-        let (verdict, gate, action, verdict_event) = verdict_projection(request, &reconciliation);
-        if append_next(
+        finalize_observation(
+            request,
             journal,
             &transaction,
-            verdict_event,
-            &mut current_head,
-            &mut sequences,
-        )
-        .is_err()
-        {
-            return Ok(journal_failure(sequences, 0, read_attempts, Some(observed)));
-        }
-        let mut receipt_stored = false;
-        if reconciliation.receipt_eligible() {
-            validate_receipt(request, &observed, &current_head)?;
-            if journal
-                .store_receipt(
-                    &transaction,
-                    &request.exact_prior_state,
-                    &request.artifacts.receipt,
-                )
-                .is_err()
-            {
-                return Ok(journal_failure(sequences, 0, read_attempts, Some(observed)));
-            }
-            receipt_stored = true;
-        }
-        Ok(outcome(
-            verdict,
-            gate,
-            action,
-            sequences,
+            observed,
+            dispatch,
             0,
             read_attempts,
-            receipt_stored,
-            Some(observed),
-        ))
+            current_head,
+            sequences,
+            false,
+        )
     }
 
     /// Restores exactly the dependency policy's verified affected closure.
@@ -917,6 +799,113 @@ impl ObservationFirstReconciliationPolicy {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+fn finalize_observation<J: DurableJournalPort>(
+    request: &ExecutionRequest,
+    journal: &mut J,
+    transaction: &PreparedTransactionIdentity,
+    observed: ExactOperationState,
+    dispatch: DispatchEvidence,
+    dispatch_count: u32,
+    read_attempts: u32,
+    mut current_head: TransactionHash,
+    mut sequences: Vec<u32>,
+    may_create_restart_checkpoint: bool,
+) -> PlanEngineResult<ExecutionOutcome> {
+    let operation = match request.operation {
+        ExecutionOperation::Apply => ReconcileOperation::Apply,
+        ExecutionOperation::Restore => ReconcileOperation::Restore,
+    };
+    let reconciliation =
+        ObservationFirstReconciliationPolicy.reconcile_apply_or_restore(ReconcileInput {
+            transaction_id: &request.transaction.transaction_id,
+            operation_version_id: &request.operation_version_id,
+            exact_prior_state: &request.exact_prior_state,
+            exact_requested_state: &request.exact_requested_state,
+            exact_observed_state: &observed,
+            operation,
+            dispatch,
+        })?;
+
+    if reconciliation.receipt_eligible()
+        && request.restart_required
+        && may_create_restart_checkpoint
+    {
+        let Some(checkpoint) = request.artifacts.restart_checkpoint.as_ref() else {
+            return Err(invalid_artifact(&request.operation_version_id));
+        };
+        if journal
+            .store_checkpoint(transaction, &request.exact_prior_state, checkpoint)
+            .is_err()
+        {
+            return Ok(journal_failure(
+                sequences,
+                dispatch_count,
+                read_attempts,
+                Some(observed),
+            ));
+        }
+        return Ok(outcome(
+            ExecutionVerdict::RestartVerificationRequired,
+            MutationGateState::ClosedForRestartVerification,
+            NextSafeAction::VerifyAfterRestart,
+            sequences,
+            dispatch_count,
+            read_attempts,
+            false,
+            Some(observed),
+        ));
+    }
+
+    let (verdict, gate, action, verdict_event) = verdict_projection(request, &reconciliation);
+    if append_next(
+        journal,
+        transaction,
+        verdict_event,
+        &mut current_head,
+        &mut sequences,
+    )
+    .is_err()
+    {
+        return Ok(journal_failure(
+            sequences,
+            dispatch_count,
+            read_attempts,
+            Some(observed),
+        ));
+    }
+    let mut receipt_stored = false;
+    if reconciliation.receipt_eligible() {
+        validate_receipt(request, &observed, &current_head)?;
+        if journal
+            .store_receipt(
+                transaction,
+                &request.exact_prior_state,
+                &request.artifacts.receipt,
+            )
+            .is_err()
+        {
+            return Ok(journal_failure(
+                sequences,
+                dispatch_count,
+                read_attempts,
+                Some(observed),
+            ));
+        }
+        receipt_stored = true;
+    }
+    Ok(outcome(
+        verdict,
+        gate,
+        action,
+        sequences,
+        dispatch_count,
+        read_attempts,
+        receipt_stored,
+        Some(observed),
+    ))
+}
+
 fn observe_bounded<B: PrivilegedBrokerPort>(
     broker: &B,
     observation: &PreparedObservation,
@@ -970,6 +959,7 @@ fn gate_for_admission_error(code: PlanEngineErrorCode) -> MutationGateState {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn outcome(
     verdict: ExecutionVerdict,
     gate: MutationGateState,
