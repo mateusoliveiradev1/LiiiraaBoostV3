@@ -259,9 +259,14 @@ const errorResult = <Value>(error: PlanClientError): Result<Value, PlanClientErr
 const successResult = <Value>(value: Value): Result<Value, PlanClientError> =>
   Object.freeze({ ok: true, value });
 
-const findMarkerPath = (
+type NestedRecordInspector = (
+  record: Readonly<Record<string, unknown>>,
+  path: string,
+) => string | undefined;
+
+const findNestedRecordPath = (
   value: unknown,
-  predicate: (key: string, record: Readonly<Record<string, unknown>>) => boolean,
+  inspect: NestedRecordInspector,
   path = '$',
   seen = new WeakSet<object>(),
 ): string | undefined => {
@@ -271,7 +276,7 @@ const findMarkerPath = (
   seen.add(value);
   if (Array.isArray(value)) {
     for (const [index, nested] of value.entries()) {
-      const finding = findMarkerPath(nested, predicate, `${path}[${String(index)}]`, seen);
+      const finding = findNestedRecordPath(nested, inspect, `${path}[${String(index)}]`, seen);
       if (finding !== undefined) {
         return finding;
       }
@@ -280,11 +285,12 @@ const findMarkerPath = (
   }
 
   const record = value as Readonly<Record<string, unknown>>;
+  const inspected = inspect(record, path);
+  if (inspected !== undefined) {
+    return inspected;
+  }
   for (const key of Object.keys(record).toSorted()) {
-    if (predicate(key, record)) {
-      return path === '$' ? `$.${key}` : `${path}.${key}`;
-    }
-    const finding = findMarkerPath(record[key], predicate, `${path}.${key}`, seen);
+    const finding = findNestedRecordPath(record[key], inspect, `${path}.${key}`, seen);
     if (finding !== undefined) {
       return finding;
     }
@@ -292,43 +298,22 @@ const findMarkerPath = (
   return undefined;
 };
 
-const findFixturePath = (
-  value: unknown,
-  path = '$',
-  seen = new WeakSet<object>(),
-): string | undefined => {
-  if (typeof value !== 'object' || value === null || seen.has(value)) {
-    return undefined;
-  }
-  seen.add(value);
-  if (Array.isArray(value)) {
-    for (const [index, nested] of value.entries()) {
-      const finding = findFixturePath(nested, `${path}[${String(index)}]`, seen);
-      if (finding !== undefined) {
-        return finding;
-      }
-    }
-    return undefined;
-  }
-  const record = value as Readonly<Record<string, unknown>>;
-  if (
+const findFixturePath = (value: unknown): string | undefined =>
+  findNestedRecordPath(value, (record, path) =>
     record['kind'] === 'fixture' ||
     Object.hasOwn(record, 'scenarioId') ||
     Object.hasOwn(record, 'fixtureVersion')
-  ) {
-    return path;
-  }
-  for (const key of Object.keys(record).toSorted()) {
-    const finding = findFixturePath(record[key], `${path}.${key}`, seen);
-    if (finding !== undefined) {
-      return finding;
-    }
-  }
-  return undefined;
-};
+      ? path
+      : undefined,
+  );
 
 const findForbiddenIntentPath = (input: unknown): string | undefined =>
-  findMarkerPath(input, (key) => FORBIDDEN_INTENT_KEYS.has(key));
+  findNestedRecordPath(input, (record, path) => {
+    const forbiddenKey = Object.keys(record)
+      .toSorted()
+      .find((key) => FORBIDDEN_INTENT_KEYS.has(key));
+    return forbiddenKey === undefined ? undefined : `${path}.${forbiddenKey}`;
+  });
 
 const validationIssues = (): readonly Readonly<{ path: string; keyword: string }>[] =>
   Object.freeze(
@@ -412,7 +397,10 @@ const createPlanAuthority = (
   const listeners = new Set<PlanListener>();
   const nativeDetachers = new Set<() => void>();
   let disposed = false;
-  let refetch: Promise<Result<ProgressSnapshotDocumentJson, PlanClientError>> | null = null;
+  let refetch: Readonly<{
+    transactionId: string;
+    promise: Promise<Result<ProgressSnapshotDocumentJson, PlanClientError>>;
+  }> | null = null;
   let snapshot: PlanAuthoritySnapshot = deepFreeze({
     revision: 0,
     origin,
@@ -446,11 +434,26 @@ const createPlanAuthority = (
     return path === undefined ? undefined : errorResult({ code: 'INTENT_INVALID', path });
   };
 
+  const registerNativeDetacher = (detach: () => void): (() => void) => {
+    let detached = false;
+    const detachOnce = (): void => {
+      if (detached) {
+        return;
+      }
+      detached = true;
+      nativeDetachers.delete(detachOnce);
+      detach();
+    };
+    nativeDetachers.add(detachOnce);
+    return detachOnce;
+  };
+
   const runDocumentCommand = async <Kind extends TransactionalRecoveryDocumentJson['kind']>(
     command: Exclude<PlanInvokeCommand, typeof PLAN_COMMANDS.subscribeExecution>,
     input: AbortableInput & Readonly<{ request: unknown }>,
     expectedKind: Kind,
     mutation: boolean,
+    expectedIntent?: TransactionIntentJson,
   ): Promise<Result<ExpectedDocument<Kind>, PlanClientError>> => {
     if (disposed) {
       return disposedResult();
@@ -491,6 +494,18 @@ const createPlanAuthority = (
     if (!validated.ok) {
       publish({ status: 'error', error: validated.error });
       return validated;
+    }
+    if (
+      expectedIntent !== undefined &&
+      (!('intent' in validated.value) || validated.value.intent !== expectedIntent)
+    ) {
+      const error = deepFreeze({
+        code: 'CONTRACT_INVALID' as const,
+        expectedKind,
+        issues: Object.freeze([Object.freeze({ path: '$.intent', keyword: 'const' })]),
+      });
+      publish({ status: 'error', error });
+      return errorResult(error);
     }
     publish({ status: 'ready', error: null });
     return validated;
@@ -543,16 +558,19 @@ const createPlanAuthority = (
   const authoritativeRefetch = (
     transactionId: string,
   ): Promise<Result<ProgressSnapshotDocumentJson, PlanClientError>> => {
+    if (refetch?.transactionId === transactionId) {
+      return refetch.promise;
+    }
     if (refetch !== null) {
-      return refetch;
+      return refetch.promise.then(async () => authoritativeRefetch(transactionId));
     }
     publish({ status: 'reconnecting', stale: true, error: null });
     const pending = readExecution({ transactionId }).finally(() => {
-      if (refetch === pending) {
+      if (refetch?.promise === pending) {
         refetch = null;
       }
     });
-    refetch = pending;
+    refetch = Object.freeze({ transactionId, promise: pending });
     return pending;
   };
 
@@ -629,7 +647,13 @@ const createPlanAuthority = (
       return result;
     },
     async apply(input: ApplyPlanInput) {
-      const result = await runDocumentCommand(PLAN_COMMANDS.apply, input, 'plan-transaction', true);
+      const result = await runDocumentCommand(
+        PLAN_COMMANDS.apply,
+        input,
+        'plan-transaction',
+        true,
+        'apply',
+      );
       if (result.ok) {
         publish({ transaction: result.value, transactionId: result.value.transactionId });
       }
@@ -641,6 +665,7 @@ const createPlanAuthority = (
         input,
         'plan-transaction',
         true,
+        'restore-operation',
       );
       if (result.ok) {
         publish({ transaction: result.value, transactionId: result.value.transactionId });
@@ -653,6 +678,7 @@ const createPlanAuthority = (
         input,
         'plan-transaction',
         true,
+        'restore-plan',
       );
       if (result.ok) {
         publish({ transaction: result.value, transactionId: result.value.transactionId });
@@ -665,6 +691,7 @@ const createPlanAuthority = (
         input,
         'plan-transaction',
         true,
+        'restore-checkpoint',
       );
       if (result.ok) {
         publish({ transaction: result.value, transactionId: result.value.transactionId });
@@ -688,16 +715,7 @@ const createPlanAuthority = (
             applyProgressEvent(payload, input.transactionId);
           },
         );
-        let detached = false;
-        const detachOnce = (): void => {
-          if (detached) {
-            return;
-          }
-          detached = true;
-          nativeDetachers.delete(detachOnce);
-          detach();
-        };
-        nativeDetachers.add(detachOnce);
+        const detachOnce = registerNativeDetacher(detach);
         return successResult<() => void>(detachOnce);
       } catch {
         const error = deepFreeze({
@@ -737,12 +755,12 @@ const createPlanAuthority = (
       if (disposed) {
         return;
       }
+      disposed = true;
       for (const detach of [...nativeDetachers]) {
         detach();
       }
       nativeDetachers.clear();
       listeners.clear();
-      disposed = true;
       snapshot = deepFreeze({ ...snapshot, status: 'disposed', revision: snapshot.revision + 1 });
     },
   });

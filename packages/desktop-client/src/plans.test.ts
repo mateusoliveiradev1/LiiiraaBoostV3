@@ -288,7 +288,7 @@ describe.each([
       request: { planId: 'plan-0001', exportId: 'export-0001' },
     });
 
-    expect([
+    const results = [
       composed,
       revised,
       approved,
@@ -299,7 +299,8 @@ describe.each([
       read,
       previewed,
       exported,
-    ]).toEqual(expect.arrayContaining([expect.objectContaining({ ok: true })]));
+    ];
+    expect(results.every((result) => result.ok)).toBe(true);
     expect(authority.origin).toBe(origin);
     expect(authority.snapshot()).toMatchObject({ origin, stale: false, sequence: 1 });
     expect(Object.isFrozen(authority.snapshot())).toBe(true);
@@ -410,6 +411,48 @@ describe('native plan authority truth boundary', () => {
     });
     expect(authority.snapshot()).toMatchObject({ plan: null, status: 'error' });
   });
+
+  it('bounds malformed contract detail and never echoes rejected values', async () => {
+    const malformed = Object.fromEntries(
+      Array.from({ length: 32 }, (_, index) => [
+        `secret-${String(index)}`,
+        `value-${String(index)}`,
+      ]),
+    );
+    const authority = createTauriPlanAuthority({
+      invoke: scriptedInvoke({ [PLAN_COMMANDS.compose]: malformed }),
+      subscribe: inertSubscribe,
+    });
+
+    const result = await authority.compose(composeInput);
+
+    expect(result).toMatchObject({ ok: false, error: { code: 'CONTRACT_INVALID' } });
+    if (result.ok || result.error.code !== 'CONTRACT_INVALID') {
+      throw new Error('Expected a bounded generated-contract error.');
+    }
+    expect(result.error.issues.length).toBeLessThanOrEqual(8);
+    expect(
+      result.error.issues.every((issue) => Object.keys(issue).toSorted().join() === 'keyword,path'),
+    ).toBe(true);
+    expect(JSON.stringify(result.error)).not.toContain('value-');
+  });
+
+  it('rejects a valid transaction returned for the wrong closed command', async () => {
+    const authority = createTauriPlanAuthority({
+      invoke: scriptedInvoke({ [PLAN_COMMANDS.apply]: transaction('restore-plan') }),
+      subscribe: inertSubscribe,
+    });
+
+    await expect(authority.apply(applyInput)).resolves.toEqual({
+      ok: false,
+      error: {
+        code: 'CONTRACT_INVALID',
+        expectedKind: 'plan-transaction',
+        issues: [{ path: '$.intent', keyword: 'const' }],
+      },
+    });
+    expect(authority.snapshot().transaction).toBeNull();
+  });
 });
 
 describe('plan execution continuity', () => {
@@ -458,6 +501,38 @@ describe('plan execution continuity', () => {
       expect.objectContaining({ ok: true }),
     ]);
     expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('deduplicates malformed nested events and reconnect races behind one read gate', async () => {
+    let release: ((value: unknown) => void) | undefined;
+    const pending = new Promise<unknown>((resolve) => {
+      release = resolve;
+    });
+    const invoke = scriptedInvoke({ [PLAN_COMMANDS.readExecution]: progress(1) });
+    let receive: ((payload: unknown) => void) | undefined;
+    const subscribe = vi.fn<PlanEventSubscribe>(async (_command, _input, listener) => {
+      receive = listener;
+      return () => undefined;
+    });
+    const authority = createTauriPlanAuthority({ invoke, subscribe });
+    await authority.readExecution({ transactionId: 'transaction-apply' });
+    vi.mocked(invoke).mockImplementation(async () => pending);
+    await authority.subscribeExecution({ transactionId: 'transaction-apply' });
+
+    const malformedNested = {
+      ...event(2, 1),
+      detail: { provenance: [{ fixtureVersion: 'fixture-v1' }] },
+    };
+    receive?.(malformedNested);
+    const trayReopen = authority.reconnect('transaction-apply');
+    receive?.(event(4, 3));
+
+    expect(authority.snapshot()).toMatchObject({ sequence: 1, stale: true });
+    expect(invoke).toHaveBeenCalledTimes(2);
+    release?.(progress(4));
+    await expect(trayReopen).resolves.toMatchObject({ ok: true });
+    expect(authority.snapshot()).toMatchObject({ sequence: 4, stale: false });
+    expect(invoke).toHaveBeenCalledTimes(2);
   });
 
   it('detaches native and local listeners on unsubscribe and dispose', async () => {
