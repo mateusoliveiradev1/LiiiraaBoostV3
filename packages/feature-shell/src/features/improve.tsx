@@ -33,6 +33,8 @@ import type {
   TransactionalRecoveryDocumentJson,
 } from '@liiiraa/contracts-ts';
 import type {
+  AdvancedPreferenceIntentInput,
+  AdvancedPreferenceProjection,
   DesktopScenarioId,
   PhaseBoundaryExplanation,
   PlanAuthority,
@@ -118,6 +120,7 @@ export interface ImproveSurfaceProps {
   readonly locale: ShellLocale;
   readonly onCancelSafely?: (transactionId: string) => void;
   readonly onNavigate?: (view: ImproveView, targetId?: string) => void;
+  readonly onRequestAdvancedPreferenceAuth?: AdvancedPreferenceStrongAuth;
   readonly onRiskPolicyChange?: (risk: OperationRisk) => void;
   readonly scenarioId: string;
   readonly selectedComponent?: ImproveComponent;
@@ -126,6 +129,41 @@ export interface ImproveSurfaceProps {
   readonly validatedDocuments?: readonly TransactionalRecoveryDocumentJson[];
   readonly view: ImproveView;
 }
+
+export type AdvancedPreferenceStrongAuthAction =
+  | 'enable-advanced-preference'
+  | 'revoke-advanced-preference';
+
+export interface AdvancedPreferenceStrongAuthProof {
+  readonly intentId: string;
+  readonly authorizationContextId: string;
+  readonly proofReference: string;
+  readonly requestedAt: string;
+}
+
+export type AdvancedPreferenceStrongAuth = (
+  action: AdvancedPreferenceStrongAuthAction,
+) => Promise<AdvancedPreferenceStrongAuthProof | null>;
+
+export const performAdvancedPreferenceTransition = async ({
+  action,
+  authority,
+  authorize,
+}: Readonly<{
+  action: AdvancedPreferenceStrongAuthAction;
+  authority: PlanAuthority;
+  authorize: AdvancedPreferenceStrongAuth;
+}>) => {
+  const proof = await authorize(action);
+  if (proof === null) return null;
+  const expectedSequence = authority.snapshot().advancedPreference?.sequence ?? 0;
+  const input: AdvancedPreferenceIntentInput = {
+    request: { ...proof, expectedSequence },
+  };
+  return action === 'enable-advanced-preference'
+    ? authority.enableAdvancedPreference(input)
+    : authority.revokeAdvancedPreference(input);
+};
 
 interface LocalizedCopy {
   readonly en: string;
@@ -1944,6 +1982,276 @@ const AuthorityExecution = ({
   );
 };
 
+const AdvancedPreferenceLifecycle = ({
+  authority,
+  locale,
+  onOpenRecovery,
+  onRequestAuth,
+  projection,
+}: Readonly<{
+  authority: PlanAuthority;
+  locale: ShellLocale;
+  onOpenRecovery?: () => void;
+  onRequestAuth?: AdvancedPreferenceStrongAuth;
+  projection: AdvancedPreferenceProjection | null;
+}>) => {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const actionRef = useRef<HTMLButtonElement>(null);
+  const [pending, setPending] = useState<Readonly<{
+    action: AdvancedPreferenceStrongAuthAction;
+    startingSequence: number;
+  }> | null>(null);
+  const state = projection?.state ?? 'unavailable';
+  const reason =
+    projection?.reason ??
+    localized(
+      {
+        en: 'Native Advanced preference authority has not returned a projection yet.',
+        'pt-BR':
+          'A autoridade nativa da preferÃªncia AvanÃ§ada ainda nÃ£o retornou uma projeÃ§Ã£o.',
+      },
+      locale,
+    );
+  const action: AdvancedPreferenceStrongAuthAction | null =
+    state === 'enabled'
+      ? 'revoke-advanced-preference'
+      : state === 'unavailable'
+        ? null
+        : 'enable-advanced-preference';
+  const actionLabel =
+    state === 'enabled'
+      ? localized(
+          {
+            en: 'Revoke Advanced on this PC',
+            'pt-BR': 'Revogar AvanÃ§ado neste PC',
+          },
+          locale,
+        )
+      : state === 'invalidated'
+        ? localized(
+            {
+              en: 'Revalidate Advanced on this PC',
+              'pt-BR': 'Revalidar AvanÃ§ado neste PC',
+            },
+            locale,
+          )
+        : state === 'unavailable'
+          ? localized(
+              {
+                en: 'Advanced authority is unavailable',
+                'pt-BR': 'A autoridade AvanÃ§ada estÃ¡ indisponÃ­vel',
+              },
+              locale,
+            )
+          : localized(
+              {
+                en: 'Enable Advanced on this PC',
+                'pt-BR': 'Ativar AvanÃ§ado neste PC',
+              },
+              locale,
+            );
+  const statusLabel = localized(
+    {
+      en: {
+        disabled: 'Disabled',
+        enabled: 'Enabled and current',
+        invalidated: 'Revalidation required',
+        revoked: 'Revoked',
+        unavailable: 'Unavailable',
+      }[state],
+      'pt-BR': {
+        disabled: 'Desativada',
+        enabled: 'Ativada e atual',
+        invalidated: 'RevalidaÃ§Ã£o necessÃ¡ria',
+        revoked: 'Revogada',
+        unavailable: 'IndisponÃ­vel',
+      }[state],
+    },
+    locale,
+  );
+
+  useEffect(() => {
+    if (state === 'invalidated') headingRef.current?.focus();
+  }, [state, projection?.sequence]);
+
+  useEffect(() => {
+    if (
+      pending !== null &&
+      projection !== null &&
+      projection.sequence > pending.startingSequence &&
+      ((pending.action === 'enable-advanced-preference' && projection.state === 'enabled') ||
+        (pending.action === 'revoke-advanced-preference' && projection.state === 'revoked'))
+    ) {
+      setPending(null);
+    }
+  }, [pending, projection]);
+
+  const requestTransition = useCallback(() => {
+    if (action === null || onRequestAuth === undefined || pending !== null) return;
+    setPending({ action, startingSequence: projection?.sequence ?? 0 });
+    void performAdvancedPreferenceTransition({
+      action,
+      authority,
+      authorize: onRequestAuth,
+    })
+      .then((result) => {
+        if (result === null || !result.ok) setPending(null);
+      })
+      .finally(() => {
+        actionRef.current?.focus();
+      });
+  }, [action, authority, onRequestAuth, pending, projection?.sequence]);
+
+  const actionBlocked = action !== null && onRequestAuth === undefined;
+  const blockerId = 'advanced-preference-auth-blocker';
+
+  return (
+    <section
+      aria-labelledby="advanced-preference-heading"
+      className="lb-advanced-preference"
+      data-advanced-preference-state={state}
+      data-app-scale-safe="150%"
+      data-forced-colors="preserve-text-icon-pattern"
+      data-reduced-motion="immediate"
+      data-reflow-safe="200%"
+      data-status-pattern={state === 'enabled' ? 'solid' : state === 'unavailable' ? 'dotted' : 'double'}
+    >
+      <div className="lb-transaction-heading">
+        <ProductIcon name="shield" size={20} />
+        <h2 id="advanced-preference-heading" ref={headingRef} tabIndex={-1}>
+          {localized(
+            {
+              en: 'Advanced preference for this PC',
+              'pt-BR': 'PreferÃªncia AvanÃ§ada deste PC',
+            },
+            locale,
+          )}
+        </h2>
+      </div>
+      <p>
+        {localized(
+          {
+            en: 'Device-local and persistent across app restarts. It is never synchronized to the cloud.',
+            'pt-BR':
+              'Local do dispositivo e persistente entre reinicializaÃ§Ãµes do aplicativo. Nunca Ã© sincronizada com a nuvem.',
+          },
+          locale,
+        )}
+      </p>
+      <p>
+        {localized(
+          {
+            en: 'The maximum risk ceiling cannot enable Advanced and changing that ceiling does not silently revoke this preference.',
+            'pt-BR':
+              'O limite mÃ¡ximo de risco nÃ£o ativa AvanÃ§ado, e mudar esse limite nÃ£o revoga silenciosamente esta preferÃªncia.',
+          },
+          locale,
+        )}
+      </p>
+      <div
+        aria-live={state === 'invalidated' ? 'assertive' : undefined}
+        data-preference-status
+        role={state === 'invalidated' ? 'alert' : 'status'}
+      >
+        <strong>{statusLabel}</strong>
+        <p>{reason}</p>
+      </div>
+      <dl>
+        <div>
+          <dt>{localized({ en: 'Scope', 'pt-BR': 'Escopo' }, locale)}</dt>
+          <dd>{localized({ en: 'This PC only', 'pt-BR': 'Somente este PC' }, locale)}</dd>
+        </div>
+        <div>
+          <dt>{localized({ en: 'Last validation', 'pt-BR': 'Ãšltima validaÃ§Ã£o' }, locale)}</dt>
+          <dd>{projection?.updatedAt ?? localized({ en: 'Not available', 'pt-BR': 'IndisponÃ­vel' }, locale)}</dd>
+        </div>
+        <div>
+          <dt>{localized({ en: 'Binding', 'pt-BR': 'VÃ­nculo' }, locale)}</dt>
+          <dd>{projection?.bindingFreshness ?? 'unavailable'}</dd>
+        </div>
+      </dl>
+      {state === 'invalidated' ? (
+        <p id="advanced-preference-apply-blocker">
+          {localized(
+            {
+              en: 'Hardware or security posture changed. Advanced apply is blocked until a fresh, action-specific strong authentication revalidates this PC.',
+              'pt-BR':
+                'O hardware ou a postura de seguranÃ§a mudou. A aplicaÃ§Ã£o AvanÃ§ada fica bloqueada atÃ© uma autenticaÃ§Ã£o forte, nova e especÃ­fica para esta aÃ§Ã£o, revalidar este PC.',
+            },
+            locale,
+          )}
+        </p>
+      ) : null}
+      {pending !== null ? (
+        <p aria-live="polite" role="status">
+          {localized(
+            {
+              en: 'Strong authentication completed. Waiting for the authoritative native projection; no state changed optimistically.',
+              'pt-BR':
+                'AutenticaÃ§Ã£o forte concluÃ­da. Aguardando a projeÃ§Ã£o nativa autoritativa; nenhum estado mudou de forma otimista.',
+            },
+            locale,
+          )}
+        </p>
+      ) : null}
+      {action === null || actionBlocked ? (
+        <button
+          aria-describedby={actionBlocked ? blockerId : undefined}
+          className="lb-button"
+          data-lb-control
+          data-lb-variant="secondary"
+          disabled
+          ref={actionRef}
+          type="button"
+        >
+          {actionLabel}
+        </button>
+      ) : (
+        <LbButton
+          buttonRef={actionRef}
+          isLoading={pending !== null}
+          loadingLabel={localized(
+            { en: 'Waiting for native truth', 'pt-BR': 'Aguardando verdade nativa' },
+            locale,
+          )}
+          onPress={requestTransition}
+          variant={state === 'enabled' ? 'quiet' : 'secondary'}
+        >
+          {actionLabel}
+        </LbButton>
+      )}
+      {actionBlocked ? (
+        <p id={blockerId}>
+          {localized(
+            {
+              en: 'Fresh strong authentication must be available for this exact enable or revoke action.',
+              'pt-BR':
+                'Uma autenticaÃ§Ã£o forte nova deve estar disponÃ­vel para esta aÃ§Ã£o exata de ativaÃ§Ã£o ou revogaÃ§Ã£o.',
+            },
+            locale,
+          )}
+        </p>
+      ) : null}
+      <p>
+        {localized(
+          {
+            en: 'Recovery remains available offline, signed out, revoked, invalidated, or while authentication is unavailable.',
+            'pt-BR':
+              'A recuperaÃ§Ã£o continua disponÃ­vel offline, sem sessÃ£o, revogada, invalidada ou quando a autenticaÃ§Ã£o estiver indisponÃ­vel.',
+          },
+          locale,
+        )}
+      </p>
+      <LbButton onPress={onOpenRecovery ?? (() => undefined)} variant="secondary">
+        {localized(
+          { en: 'Open Recovery Center', 'pt-BR': 'Abrir Central de RecuperaÃ§Ã£o' },
+          locale,
+        )}
+      </LbButton>
+    </section>
+  );
+};
+
 const AuthoritativeImproveSurface = ({
   approvalProofReference,
   authority,
@@ -1951,6 +2259,8 @@ const AuthoritativeImproveSurface = ({
   goalReferences = [],
   locale,
   onCancelSafely,
+  onNavigate,
+  onRequestAdvancedPreferenceAuth,
   validatedDocuments = [],
   view,
 }: ImproveSurfaceProps & Readonly<{ authority: PlanAuthority }>) => {
@@ -1968,6 +2278,10 @@ const AuthoritativeImproveSurface = ({
   useEffect(() => {
     if (hasStaleApproval) diffHeadingRef.current?.focus();
   }, [hasStaleApproval, plan?.revision]);
+
+  useEffect(() => {
+    void authority.reopen();
+  }, [authority]);
 
   if (plan === null) {
     return (
@@ -2001,10 +2315,17 @@ const AuthoritativeImproveSurface = ({
   const blockedByCompatibility = plan.operations.some(
     (operationValue) => operationValue.compatibility.verdict !== 'compatible',
   );
+  const advancedPreferenceRequired =
+    plan.effectiveRisk === 'advanced' || plan.effectiveRisk === 'experimental';
+  const advancedPreferenceReady =
+    snapshot.advancedPreference?.state === 'enabled' &&
+    snapshot.advancedPreference.bindingFreshness === 'current';
+  const blockedByAdvancedPreference = advancedPreferenceRequired && !advancedPreferenceReady;
   const mutationBlocked =
     snapshot.stale ||
     snapshot.status !== 'ready' ||
     blockedByCompatibility ||
+    blockedByAdvancedPreference ||
     plan.lifecycle === 'blocked' ||
     plan.effectiveRisk === 'extreme-locked';
   const proofRequired = plan.effectiveRisk !== 'verified';
@@ -2076,6 +2397,16 @@ const AuthoritativeImproveSurface = ({
             operationCount={plan.operations.length}
             recoveryReady={approval?.recoveryCoverage === 'ready'}
             revisionId={`${plan.planId} · revision ${String(plan.revision)}`}
+          />
+
+          <AdvancedPreferenceLifecycle
+            authority={authority}
+            locale={locale}
+            onOpenRecovery={() => onNavigate?.('recovery-history')}
+            {...(onRequestAdvancedPreferenceAuth === undefined
+              ? {}
+              : { onRequestAuth: onRequestAdvancedPreferenceAuth })}
+            projection={snapshot.advancedPreference}
           />
 
           <LbRadioGroup
@@ -2260,7 +2591,11 @@ const AuthoritativeImproveSurface = ({
               ) : null}
               {confirmationBlocked ? (
                 <button
-                  aria-describedby="plan-confirmation-blocker"
+                  aria-describedby={
+                    blockedByAdvancedPreference
+                      ? 'advanced-preference-apply-blocker'
+                      : 'plan-confirmation-blocker'
+                  }
                   className="lb-button"
                   data-lb-control
                   data-lb-variant="primary"
@@ -2292,7 +2627,7 @@ const AuthoritativeImproveSurface = ({
                   )}
                 </LbButton>
               )}
-              {confirmationBlocked ? (
+              {confirmationBlocked && !blockedByAdvancedPreference ? (
                 <p id="plan-confirmation-blocker">
                   {localized(
                     {
@@ -2317,7 +2652,11 @@ const AuthoritativeImproveSurface = ({
               </h2>
               {applyBlocked ? (
                 <button
-                  aria-describedby="plan-apply-blocker"
+                  aria-describedby={
+                    blockedByAdvancedPreference
+                      ? 'advanced-preference-apply-blocker'
+                      : 'plan-apply-blocker'
+                  }
                   className="lb-button"
                   data-lb-control
                   data-lb-variant="primary"
@@ -2348,7 +2687,7 @@ const AuthoritativeImproveSurface = ({
                   )}
                 </LbButton>
               )}
-              {applyBlocked ? (
+              {applyBlocked && !blockedByAdvancedPreference ? (
                 <p id="plan-apply-blocker">
                   {localized(
                     {
@@ -2429,6 +2768,7 @@ export const ImproveSurface = ({
   locale,
   onCancelSafely,
   onNavigate,
+  onRequestAdvancedPreferenceAuth,
   onRiskPolicyChange,
   scenarioId,
   selectedComponent = 'cpu-power',
@@ -2446,6 +2786,10 @@ export const ImproveSurface = ({
         {...(goalReferences === undefined ? {} : { goalReferences })}
         locale={locale}
         {...(onCancelSafely === undefined ? {} : { onCancelSafely })}
+        {...(onNavigate === undefined ? {} : { onNavigate })}
+        {...(onRequestAdvancedPreferenceAuth === undefined
+          ? {}
+          : { onRequestAdvancedPreferenceAuth })}
         {...(validatedDocuments === undefined ? {} : { validatedDocuments })}
         scenarioId={scenarioId}
         view={view}
