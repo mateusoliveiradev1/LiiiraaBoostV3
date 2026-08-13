@@ -762,7 +762,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 06-14-PLAN.md — Transaction and recovery executor state machine
+- [x] 06-14-PLAN.md — Transaction and recovery executor state machine
 - [ ] 06-15-PLAN.md — Liiiraa Verificado power-scheme operation
 - [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
 
@@ -888,7 +888,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 17/28 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 18/28 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

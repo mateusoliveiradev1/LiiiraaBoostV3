@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-23-PLAN.md
-last_updated: "2026-08-13T16:11:14.166Z"
+stopped_at: Completed 06-14-PLAN.md
+last_updated: "2026-08-13T16:31:34.238Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 231
+  completed_plans: 232
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 17 of 28
+Plan: 18 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 94%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -259,6 +259,7 @@ _Updated after plan completion_
 | Phase 06 P16 | 5 min | 3 tasks | 4 files |
 | Phase 06 P17 | 8 min | 2 tasks | 3 files |
 | Phase 06 P23 | 14 min | 3 tasks | 6 files |
+| Phase 06 P14 | 16 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -822,6 +823,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Store Advanced preference transitions in the existing globally HMAC-anchored recovery journal and derive current authority only by reducing validated immutable events. — One keyed journal prevents a parallel preference authority and makes restart projection tamper-evident.
 - [Phase 06]: Use distinct consumed enable and revoke proof actions bound to exact device, hardware fingerprint, and security-posture fingerprint; store only the opaque evidence reference. — A proof captured for one transition or posture cannot authorize another transition or device state.
 - [Phase 06]: Represent hardware or security-posture drift as an automatic invalidation event that preserves history and recovery while requiring a fresh enable proof. — Posture uncertainty must block new Advanced work without deleting evidence or recovery access.
+- [Phase 06]: Mint prepared mutation authority only inside the executor after journal commit success. — Prevents adapters from manufacturing durable mutation authority.
+- [Phase 06]: Treat observation and independent verifier evidence as the sole basis for durable outcomes and receipts. — Ensures event publication cannot substitute for proof of execution.
+- [Phase 06]: Resolve prepared recovery by observation before allowing any new mutation. — Prevents restart-time blind redispatch and duplicate side effects.
+- [Phase 06]: Require rollback to restore only dependency-selected prior observations and stop after the first failed restore. — Preserves unrelated changes and keeps failed recovery diagnosable.
 
 ### Pending Todos
 
@@ -872,6 +877,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T16:11:14.159Z
-Stopped at: Completed 06-23-PLAN.md
+Last session: 2026-08-13T16:31:34.231Z
+Stopped at: Completed 06-14-PLAN.md
 Resume file: None
