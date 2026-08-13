@@ -754,7 +754,7 @@ Plans:
 - [x] 06-05-PLAN.md — Immutable personalized plan revisions
 - [x] 06-06-PLAN.md — Proportional risk and approval admission
 - [x] 06-07-PLAN.md — Dependency-scoped rollback planning
-- [ ] 06-08-PLAN.md — Observation-first reconciliation
+- [x] 06-08-PLAN.md — Observation-first reconciliation
 - [ ] 06-10-PLAN.md — Exact-version promotion, revocation, and diagnostics
 - [ ] 06-16-PLAN.md — Complementary Windows Restore preparation
 - [ ] 06-17-PLAN.md — Accessible transactional design-system components
@@ -888,7 +888,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 12/28 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 13/28 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

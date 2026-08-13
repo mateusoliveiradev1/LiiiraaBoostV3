@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-07-PLAN.md
-last_updated: "2026-08-13T15:05:39.096Z"
+stopped_at: Completed 06-08-PLAN.md
+last_updated: "2026-08-13T15:14:53.707Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 226
+  completed_plans: 227
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 12 of 28
+Plan: 13 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -254,6 +254,7 @@ _Updated after plan completion_
 | Phase 06 P05 | 6 min | 3 tasks | 2 files |
 | Phase 06 P06 | 11 min | 3 tasks | 2 files |
 | Phase 06 P07 | 6 min | 3 tasks | 2 files |
+| Phase 06 P08 | 7 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -803,6 +804,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Scope rollback to the failed dependency ancestry — Prevents a partial failure from restoring independent verified groups.
 - [Phase 06]: Restore only verified applied nodes in reverse canonical order — Preserves exact prior-state authority and dependent-before-dependency safety.
 - [Phase 06]: Keep cancellation and restore failure fail closed — No automatic mutation retry is emitted while recovery remains incomplete or failed.
+- [Phase 06]: Compare known Windows state by exact scheme identity and canonical state hash while retaining observation timestamps as immutable evidence metadata. — Separates durable state identity from observation-time metadata while preserving exact evidence.
+- [Phase 06]: Treat broker return, failure, timeout, response loss, and abandoned mutex as diagnostic only; observed Windows truth exclusively selects the verdict. — A broker return cannot prove the final external Windows state.
+- [Phase 06]: Resolve drift and conflict only through a new child transaction intent whose prior is the observed current state; never rewrite the original transaction evidence. — Preserves immutable audit history and requires explicit safe user resolution.
 
 ### Pending Todos
 
@@ -853,6 +857,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:05:39.090Z
-Stopped at: Completed 06-07-PLAN.md
+Last session: 2026-08-13T15:14:53.698Z
+Stopped at: Completed 06-08-PLAN.md
 Resume file: None
