@@ -444,8 +444,185 @@ fn cleanup_never_deletes_a_target_changed_after_restore() {
 }
 
 #[test]
+fn generated_observations_are_repeatable_and_never_mutate() {
+    for seed in 1_u128..=128 {
+        let prior = snapshot(
+            seed << 64 | seed.rotate_left(17),
+            &format!("Scheme {seed}"),
+            &format!("settings-{seed:032x}"),
+        );
+        let mut port = FakePowrProf::with_prior(prior.clone());
+        let original = port.schemes.clone();
+
+        for _ in 0..4 {
+            assert_eq!(
+                port.observe_active(&context()).expect("active observation"),
+                prior
+            );
+            assert_eq!(
+                port.observe_scheme(&context(), prior.id)
+                    .expect("scheme observation"),
+                Some(prior.clone())
+            );
+        }
+
+        assert_eq!(port.schemes, original, "seed {seed}");
+        assert!(!port.calls.iter().any(|call| matches!(
+            call,
+            Call::Duplicate(..) | Call::Activate(..) | Call::Delete(..)
+        )));
+    }
+}
+
+#[test]
+fn generated_guid_lifecycles_are_idempotent_and_preserve_the_prior() {
+    for seed in 1_u128..=96 {
+        let prior = snapshot(seed * 2, "Generated prior", &format!("state-{seed}"));
+        let destination = id(seed * 2 + 1);
+        let mut port = FakePowrProf::with_prior(prior.clone());
+
+        let ApplyOutcome::Applied(record) = apply_managed_scheme(
+            &mut port,
+            &context(),
+            first_apply(prior.clone(), destination),
+        )
+        .expect("generated apply") else {
+            panic!("seed {seed} did not apply");
+        };
+        let calls_after_apply = port.calls.len();
+        assert_eq!(
+            apply_managed_scheme(
+                &mut port,
+                &context(),
+                ApplyRequest {
+                    expected_prior: prior.clone(),
+                    journaled_destination: destination,
+                    known_owned_target: Some(record.target.clone()),
+                },
+            ),
+            Ok(ApplyOutcome::AlreadyApplied(record.clone())),
+            "seed {seed}"
+        );
+        assert!(!port.calls[calls_after_apply..].iter().any(|call| matches!(
+            call,
+            Call::Duplicate(..) | Call::Activate(..) | Call::Delete(..)
+        )));
+
+        assert_eq!(
+            restore_managed_scheme(&mut port, &context(), &record),
+            Ok(RestoreOutcome::Restored {
+                target_deleted: true,
+            }),
+            "seed {seed}"
+        );
+        assert_eq!(port.schemes.get(&prior.id), Some(&prior), "seed {seed}");
+        assert_eq!(
+            restore_managed_scheme(&mut port, &context(), &record),
+            Ok(RestoreOutcome::AlreadyRestored {
+                target_deleted: false,
+            }),
+            "seed {seed}"
+        );
+    }
+}
+
+#[test]
+fn generated_external_target_changes_never_gain_delete_or_overwrite_authority() {
+    for seed in 1_u128..=96 {
+        let prior = snapshot(seed * 3, "Generated prior", &format!("state-{seed}"));
+        let record = applied_record(prior.clone(), id(seed * 3 + 1));
+        let changed = PowerSchemeSnapshot {
+            id: record.target.id,
+            friendly_name: format!("External {seed}"),
+            description: format!("External description {seed}"),
+            settings_fingerprint: format!("external-{seed}"),
+        };
+        let mut port = FakePowrProf::with_prior(prior.clone());
+        port.schemes.insert(record.target.id, changed.clone());
+        port.active = record.target.id;
+
+        assert!(matches!(
+            restore_managed_scheme(&mut port, &context(), &record),
+            Ok(RestoreOutcome::Conflict(ref evidence))
+                if evidence.stage == ConflictStage::RestorePrecondition
+                    && evidence.observed.as_ref() == Some(&changed)
+        ));
+        assert_eq!(port.schemes.get(&record.target.id), Some(&changed));
+        assert_eq!(port.schemes.get(&prior.id), Some(&prior));
+        assert!(
+            !port
+                .calls
+                .iter()
+                .any(|call| matches!(call, Call::Activate(..) | Call::Delete(..)))
+        );
+    }
+}
+
+#[test]
+fn injected_port_errors_stop_at_the_exact_effect_boundary() {
+    let errors = [
+        PowerSchemeError::AccessDenied,
+        PowerSchemeError::NotFound,
+        PowerSchemeError::Windows(5),
+        PowerSchemeError::Windows(87),
+    ];
+    for (index, error) in errors.into_iter().enumerate() {
+        let prior = snapshot(index as u128 + 1, "Prior", "state");
+        let destination = id(index as u128 + 101);
+
+        let mut duplicate = FakePowrProf::with_prior(prior.clone());
+        duplicate.duplicate_error = Some(error);
+        assert_eq!(
+            apply_managed_scheme(
+                &mut duplicate,
+                &context(),
+                first_apply(prior.clone(), destination),
+            ),
+            Err(error)
+        );
+        assert!(
+            !duplicate
+                .calls
+                .iter()
+                .any(|call| matches!(call, Call::Activate(..) | Call::Delete(..)))
+        );
+
+        let record = applied_record(prior.clone(), destination);
+        let mut activate = FakePowrProf::with_prior(prior.clone());
+        activate.schemes.insert(destination, record.target.clone());
+        activate.active = destination;
+        activate.activate_error = Some(error);
+        assert_eq!(
+            restore_managed_scheme(&mut activate, &context(), &record),
+            Err(error)
+        );
+        assert_eq!(activate.schemes.get(&destination), Some(&record.target));
+        assert!(
+            !activate
+                .calls
+                .iter()
+                .any(|call| matches!(call, Call::Delete(..)))
+        );
+
+        let mut delete = FakePowrProf::with_prior(prior.clone());
+        delete.schemes.insert(destination, record.target.clone());
+        delete.delete_error = Some(error);
+        assert_eq!(
+            restore_managed_scheme(&mut delete, &context(), &record),
+            Err(error)
+        );
+        assert_eq!(delete.active, prior.id);
+        assert_eq!(delete.schemes.get(&destination), Some(&record.target));
+        assert_eq!(delete.schemes.get(&prior.id), Some(&prior));
+    }
+}
+
+#[test]
 fn adapter_source_exposes_no_shell_registry_or_generic_mutation_authority() {
     let source = include_str!("../src/operations/power_scheme.rs").to_ascii_lowercase();
+    assert!(source.contains("powergetactivescheme"));
+    assert!(source.contains("copy_and_free_guid"));
+    assert!(source.contains("localfree"));
     for forbidden in [
         "powercfg",
         "powershell",

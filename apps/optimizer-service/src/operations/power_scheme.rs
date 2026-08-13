@@ -399,13 +399,7 @@ pub mod windows_adapter {
             let mut allocated: *mut GUID = ptr::null_mut();
             let status = unsafe { PowerGetActiveScheme(None, &mut allocated) };
             status_result(status)?;
-            if allocated.is_null() {
-                return Err(PowerSchemeError::Windows(13));
-            }
-            let guid = unsafe { *allocated };
-            unsafe {
-                let _ = LocalFree(Some(HLOCAL(allocated.cast())));
-            }
+            let guid = copy_and_free_guid(allocated)?;
             observe_exact(PowerSchemeId(guid.to_u128()))?.ok_or(PowerSchemeError::NotFound)
         }
 
@@ -431,9 +425,12 @@ pub mod windows_adapter {
             let mut destination_pointer = original_pointer;
             let status = unsafe { PowerDuplicateScheme(None, &source, &mut destination_pointer) };
             status_result(status)?;
-            if destination_pointer != original_pointer
-                || destination_guid.to_u128() != destination.as_u128()
-            {
+            let observed_destination = if destination_pointer == original_pointer {
+                destination_guid
+            } else {
+                copy_and_free_guid(destination_pointer)?
+            };
+            if observed_destination.to_u128() != destination.as_u128() {
                 return Err(PowerSchemeError::Windows(13));
             }
             let name = utf16_bytes(MANAGED_SCHEME_FRIENDLY_NAME);
@@ -613,6 +610,17 @@ pub mod windows_adapter {
             .chain(Some(0))
             .flat_map(u16::to_le_bytes)
             .collect()
+    }
+
+    fn copy_and_free_guid(allocated: *mut GUID) -> Result<GUID, PowerSchemeError> {
+        if allocated.is_null() {
+            return Err(PowerSchemeError::Windows(13));
+        }
+        let guid = unsafe { *allocated };
+        unsafe {
+            let _ = LocalFree(Some(HLOCAL(allocated.cast())));
+        }
+        Ok(guid)
     }
 
     const fn guid(id: PowerSchemeId) -> GUID {
