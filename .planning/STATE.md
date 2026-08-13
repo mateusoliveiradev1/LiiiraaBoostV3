@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-17-PLAN.md
-last_updated: "2026-08-13T15:53:59.590Z"
+stopped_at: Completed 06-23-PLAN.md
+last_updated: "2026-08-13T16:11:14.166Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 230
+  completed_plans: 231
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 16 of 28
+Plan: 17 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -258,6 +258,7 @@ _Updated after plan completion_
 | Phase 06 P10 | 10 min | 3 tasks | 2 files |
 | Phase 06 P16 | 5 min | 3 tasks | 4 files |
 | Phase 06 P17 | 8 min | 2 tasks | 3 files |
+| Phase 06 P23 | 14 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -818,6 +819,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Load only SrClient.dll from System32 and resolve only SRSetRestorePointW; expose no generic loader, registry mutation, PowerShell, or WMI authority.
 - [Phase 06]: Make Extreme transaction presentation structurally non-executable by omitting supplied actions from the DOM. — A visible disabled execution affordance would violate the approved UI contract.
 - [Phase 06]: Fail closed when transactional timelines lack one exact current stage or recovery target identities are not distinct. — Ambiguous identities or progress could induce an unsafe recovery decision.
+- [Phase 06]: Store Advanced preference transitions in the existing globally HMAC-anchored recovery journal and derive current authority only by reducing validated immutable events. — One keyed journal prevents a parallel preference authority and makes restart projection tamper-evident.
+- [Phase 06]: Use distinct consumed enable and revoke proof actions bound to exact device, hardware fingerprint, and security-posture fingerprint; store only the opaque evidence reference. — A proof captured for one transition or posture cannot authorize another transition or device state.
+- [Phase 06]: Represent hardware or security-posture drift as an automatic invalidation event that preserves history and recovery while requiring a fresh enable proof. — Posture uncertainty must block new Advanced work without deleting evidence or recovery access.
 
 ### Pending Todos
 
@@ -868,6 +872,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:53:59.584Z
-Stopped at: Completed 06-17-PLAN.md
+Last session: 2026-08-13T16:11:14.159Z
+Stopped at: Completed 06-23-PLAN.md
 Resume file: None
