@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-39-PLAN.md
-last_updated: "2026-08-13T22:55:35.178Z"
+stopped_at: Completed 06-35-PLAN.md
+last_updated: "2026-08-13T23:22:30.493Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 241
+  completed_plans: 242
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 3 of 39
+Plan: 4 of 39
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 94%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -269,6 +269,7 @@ _Updated after plan completion_
 | Phase 06 P21 | 13min | 3 tasks | 11 files |
 | Phase 06 P29 | 15 min | 1 tasks | 7 files |
 | Phase 06 P39 | 15 min | 1 tasks | 13 files |
+| Phase 06 P35 | 19min | 1 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -864,6 +865,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Keep artifact and roster CMS signatures external; document signer identity is evidence and never caller-provided trust authority. — Detached signatures authenticate canonical bytes without making a document field, environment value, or CLI argument a trust root.
 - [Phase 06]: Encode physical continuation as six exact predecessor and sequence variants with observation required and mutation forbidden after reboot. — The generated shape must reject lifecycle skips and prevent resume from becoming blind mutation authority.
 - [Phase 06]: Emit roster binding uniqueness from TypeSpec and enforce the generated rule equivalently in AJV and Rust. — Object-level uniqueItems cannot reject distinct entries that reuse only a participant ID or only a machine slot.
+- [Phase 06]: Compile one reviewed Phase 2 DER-SPKI SHA-256 pin for installed, portable, and roster custody. — Mutable documents may repeat signer identity only as evidence and cannot replace trust authority.
+- [Phase 06]: Resolve installed and roster custody only from Windows known folders and generated literal paths. — Environment, renderer, and CLI path or trust overrides remain structurally unavailable.
+- [Phase 06]: Read monotonic installation admission only from the fixed ACL-protected ProgramData record. — Product drift, downgrade, and same-version manifest replay fail before service admission.
+- [Phase 06]: Keep desktop, service, and runner as installed roles while requiring both drivers only in portable custody. — Generated fixed-key role separation makes driver-as-installed and missing-driver artifacts schema-invalid.
 
 ### Pending Todos
 
@@ -915,6 +920,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T22:55:35.165Z
-Stopped at: Completed 06-39-PLAN.md
+Last session: 2026-08-13T23:22:30.485Z
+Stopped at: Completed 06-35-PLAN.md
 Resume file: None
