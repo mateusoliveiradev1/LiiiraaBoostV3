@@ -2,6 +2,7 @@
 
 pub mod dedup_store;
 pub mod ipc;
+pub mod operations;
 pub mod restore_point;
 
 #[cfg(windows)]
