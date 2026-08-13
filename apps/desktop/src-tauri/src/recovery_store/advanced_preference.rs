@@ -53,9 +53,11 @@ pub struct AdvancedPreferenceProjection {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AdvancedPreferenceEvent {
     pub sequence: u32,
+    pub event_id: String,
     pub event_kind: String,
     pub proof_reference: Option<String>,
     pub reason_code: String,
+    pub occurred_at: String,
     pub device: DevicePosture,
 }
 
@@ -554,8 +556,9 @@ fn load_validated_events(
 ) -> Result<Vec<AdvancedPreferenceEvent>, AdvancedPreferenceError> {
     let mut statement = connection
         .prepare(
-            "SELECT p.preference_sequence, p.event_kind, p.proof_reference, p.reason_code,
-                    p.device_id, p.hardware_fingerprint, p.security_posture_fingerprint,
+            "SELECT p.preference_sequence, p.event_id, p.event_kind, p.proof_reference,
+                    p.reason_code, p.occurred_at, p.device_id, p.hardware_fingerprint,
+                    p.security_posture_fingerprint,
                     p.previous_event_mac, p.head_event_mac, p.canonical_json, p.content_hash,
                     j.event_kind, j.previous_mac, j.event_mac, j.canonical_json, j.content_hash
              FROM advanced_preference_events p
@@ -568,24 +571,26 @@ fn load_validated_events(
             Ok((
                 AdvancedPreferenceEvent {
                     sequence: row.get(0)?,
-                    event_kind: row.get(1)?,
-                    proof_reference: row.get(2)?,
-                    reason_code: row.get(3)?,
+                    event_id: row.get(1)?,
+                    event_kind: row.get(2)?,
+                    proof_reference: row.get(3)?,
+                    reason_code: row.get(4)?,
+                    occurred_at: row.get(5)?,
                     device: DevicePosture {
-                        device_id: row.get(4)?,
-                        hardware_fingerprint: row.get(5)?,
-                        security_posture_fingerprint: row.get(6)?,
+                        device_id: row.get(6)?,
+                        hardware_fingerprint: row.get(7)?,
+                        security_posture_fingerprint: row.get(8)?,
                     },
                 },
-                row.get::<_, String>(7)?,
-                row.get::<_, String>(8)?,
-                row.get::<_, Vec<u8>>(9)?,
+                row.get::<_, String>(9)?,
                 row.get::<_, String>(10)?,
-                row.get::<_, String>(11)?,
+                row.get::<_, Vec<u8>>(11)?,
                 row.get::<_, String>(12)?,
                 row.get::<_, String>(13)?,
-                row.get::<_, Vec<u8>>(14)?,
+                row.get::<_, String>(14)?,
                 row.get::<_, String>(15)?,
+                row.get::<_, Vec<u8>>(16)?,
+                row.get::<_, String>(17)?,
             ))
         })
         .map_err(map_sqlite_error)?
@@ -622,7 +627,27 @@ fn load_validated_events(
             .map_err(|_| AdvancedPreferenceError::IntegrityFailure)?;
         validate_transactional_recovery_document(&document)
             .map_err(|_| AdvancedPreferenceError::IntegrityFailure)?;
-        if document.get("sequence").and_then(Value::as_u64) != Some(u64::from(event.sequence))
+        let expected_contract_event = match event.event_kind.as_str() {
+            "enabled" => "enabled",
+            "revoked" => "revoked",
+            "invalidated" => "posture-invalidated",
+            _ => return Err(AdvancedPreferenceError::IntegrityFailure),
+        };
+        let expected_proof = event
+            .proof_reference
+            .as_deref()
+            .unwrap_or("native-posture-observation");
+        if document.get("eventId").and_then(Value::as_str) != Some(event.event_id.as_str())
+            || event.event_id != format!("advanced-preference-event-{:010}", event.sequence)
+            || document.get("sequence").and_then(Value::as_u64) != Some(u64::from(event.sequence))
+            || document.get("event").and_then(Value::as_str) != Some(expected_contract_event)
+            || document.get("occurredAt").and_then(Value::as_str)
+                != Some(event.occurred_at.as_str())
+            || document
+                .get("proof")
+                .and_then(|value| value.get("proofReference"))
+                .and_then(Value::as_str)
+                != Some(expected_proof)
             || document
                 .get("device")
                 .and_then(|value| value.get("deviceBindingId"))
@@ -858,6 +883,9 @@ fn map_sqlite_error(error: SqliteError) -> AdvancedPreferenceError {
         }
         SqliteError::SqliteFailure(inner, _) if inner.code == ErrorCode::SystemIoFailure => {
             AdvancedPreferenceError::StorageIo
+        }
+        SqliteError::SqliteFailure(inner, _) if inner.code == ErrorCode::ConstraintViolation => {
+            AdvancedPreferenceError::InvalidTransition
         }
         _ => AdvancedPreferenceError::Storage,
     }

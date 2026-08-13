@@ -13,9 +13,10 @@ use std::{
     fs,
     path::{Path, PathBuf},
     sync::{
-        Arc, Mutex,
+        Arc, Barrier, Mutex,
         atomic::{AtomicU64, Ordering},
     },
+    thread,
 };
 
 use advanced_preference::{
@@ -597,5 +598,230 @@ fn preference_is_only_in_recovery_sqlite_and_has_no_cloud_sync_surface() {
             !source.contains(prohibited),
             "prohibited preference surface: {prohibited}"
         );
+    }
+}
+
+#[test]
+fn state_action_table_rejects_every_non_transition_without_an_append() {
+    for initial in ["disabled", "enabled", "revoked", "invalidated"] {
+        let database = TestDatabase::new();
+        let anchor = FakeAnchor::default();
+        let binding = default_device();
+        let mut store = open(&database, &anchor, binding.clone(), AT_1).unwrap();
+        if initial != "disabled" {
+            store
+                .enable(
+                    &proof(
+                        AdvancedPreferenceAction::Enable,
+                        &binding,
+                        &format!("table-enable-{initial}"),
+                    ),
+                    NOW_MS,
+                    AT_1,
+                )
+                .unwrap();
+        }
+        if initial == "revoked" {
+            store
+                .revoke(
+                    &proof(AdvancedPreferenceAction::Revoke, &binding, "table-revoke"),
+                    NOW_MS,
+                    AT_2,
+                )
+                .unwrap();
+        } else if initial == "invalidated" {
+            store
+                .observe_binding(
+                    device("device-0001", "hardware-table-b", "security-a"),
+                    AT_2,
+                )
+                .unwrap();
+        }
+        let before = count_events(&database.path);
+        let result = match initial {
+            "enabled" => store.enable(
+                &proof(
+                    AdvancedPreferenceAction::Enable,
+                    &binding,
+                    "table-invalid-enable",
+                ),
+                NOW_MS,
+                AT_3,
+            ),
+            _ => {
+                let current = store.projection().device.clone();
+                store.revoke(
+                    &proof(
+                        AdvancedPreferenceAction::Revoke,
+                        &current,
+                        &format!("table-invalid-revoke-{initial}"),
+                    ),
+                    NOW_MS,
+                    AT_3,
+                )
+            }
+        };
+        assert_eq!(result, Err(AdvancedPreferenceError::InvalidTransition));
+        assert_eq!(count_events(&database.path), before);
+    }
+}
+
+#[test]
+fn repeated_reopen_rebuilds_projection_and_ignores_corruptible_cache() {
+    let database = TestDatabase::new();
+    let anchor = FakeAnchor::default();
+    let binding = default_device();
+    let expected = {
+        let mut store = open(&database, &anchor, binding.clone(), AT_1).unwrap();
+        store
+            .enable(
+                &proof(
+                    AdvancedPreferenceAction::Enable,
+                    &binding,
+                    "repeated-reopen-proof",
+                ),
+                NOW_MS,
+                AT_1,
+            )
+            .unwrap();
+        store.projection().clone()
+    };
+    Connection::open(&database.path)
+        .unwrap()
+        .execute(
+            "UPDATE advanced_preference_projection
+             SET state = 'disabled', event_count = 0, last_event_id = NULL",
+            [],
+        )
+        .unwrap();
+
+    for _ in 0..4 {
+        let reopened = open(&database, &anchor, binding.clone(), AT_2).unwrap();
+        assert_eq!(reopened.projection(), &expected);
+    }
+}
+
+#[test]
+fn posture_oscillation_never_silently_reenables_prior_authority() {
+    let database = TestDatabase::new();
+    let anchor = FakeAnchor::default();
+    let original = default_device();
+    let changed = device("device-0001", "hardware-oscillated", "security-a");
+    let mut store = open(&database, &anchor, original.clone(), AT_1).unwrap();
+    store
+        .enable(
+            &proof(
+                AdvancedPreferenceAction::Enable,
+                &original,
+                "oscillation-enable-1",
+            ),
+            NOW_MS,
+            AT_1,
+        )
+        .unwrap();
+    store.observe_binding(changed.clone(), AT_2).unwrap();
+    store.observe_binding(original.clone(), AT_3).unwrap();
+    assert_eq!(
+        store.projection().state,
+        AdvancedPreferenceState::RevalidationRequired
+    );
+    assert_eq!(store.history().unwrap().len(), 2);
+
+    store
+        .enable(
+            &proof(
+                AdvancedPreferenceAction::Enable,
+                &original,
+                "oscillation-enable-2",
+            ),
+            NOW_MS,
+            AT_3,
+        )
+        .unwrap();
+    assert_eq!(store.projection().state, AdvancedPreferenceState::Enabled);
+    assert_eq!(store.history().unwrap().len(), 3);
+}
+
+#[test]
+fn concurrent_enable_attempts_serialize_to_one_durable_event() {
+    let database = TestDatabase::new();
+    let anchor = FakeAnchor::default();
+    let binding = default_device();
+    drop(open(&database, &anchor, binding.clone(), AT_1).unwrap());
+    let barrier = Arc::new(Barrier::new(2));
+    let mut workers = Vec::new();
+    for suffix in ["a", "b"] {
+        let path = database.path.clone();
+        let anchor = anchor.clone();
+        let binding = binding.clone();
+        let barrier = Arc::clone(&barrier);
+        workers.push(thread::spawn(move || {
+            let mut store =
+                AdvancedPreferenceStore::open(&path, Arc::new(anchor), binding.clone(), AT_1)
+                    .unwrap();
+            let consumed = proof(
+                AdvancedPreferenceAction::Enable,
+                &binding,
+                &format!("concurrent-enable-{suffix}"),
+            );
+            barrier.wait();
+            store.enable(&consumed, NOW_MS, AT_1)
+        }));
+    }
+    let results = workers
+        .into_iter()
+        .map(|worker| worker.join().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
+    assert!(results.iter().any(|result| {
+        matches!(
+            result,
+            Err(AdvancedPreferenceError::InvalidTransition)
+                | Err(AdvancedPreferenceError::StorageBusy)
+                | Err(AdvancedPreferenceError::IntegrityFailure)
+        )
+    }));
+    let reopened = open(&database, &anchor, binding, AT_2).unwrap();
+    assert_eq!(
+        reopened.projection().state,
+        AdvancedPreferenceState::Enabled
+    );
+    assert_eq!(reopened.history().unwrap().len(), 1);
+}
+
+#[test]
+fn proof_reference_and_timestamp_column_tamper_fail_projection_rebuild() {
+    for column_update in [
+        "proof_reference = 'substituted-proof'",
+        "occurred_at = '2030-01-20T09:09:09Z'",
+    ] {
+        let database = TestDatabase::new();
+        let anchor = FakeAnchor::default();
+        let binding = default_device();
+        {
+            let mut store = open(&database, &anchor, binding.clone(), AT_1).unwrap();
+            store
+                .enable(
+                    &proof(
+                        AdvancedPreferenceAction::Enable,
+                        &binding,
+                        "column-tamper-proof",
+                    ),
+                    NOW_MS,
+                    AT_1,
+                )
+                .unwrap();
+        }
+        Connection::open(&database.path)
+            .unwrap()
+            .execute_batch(&format!(
+                "DROP TRIGGER advanced_preference_events_no_update;
+                 UPDATE advanced_preference_events SET {column_update};"
+            ))
+            .unwrap();
+        assert!(matches!(
+            open(&database, &anchor, binding, AT_2),
+            Err(AdvancedPreferenceError::IntegrityFailure)
+        ));
     }
 }
