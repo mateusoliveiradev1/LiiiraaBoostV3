@@ -73,8 +73,8 @@ use identity::{
 };
 use live_telemetry::{LiveTelemetrySampler, LiveTelemetrySnapshot};
 use plan_auth::{
-    AdvancedPreferenceAction, AdvancedPreferenceApprovalRequest, OpaqueApprovalReceipt,
-    consume_advanced_preference_approval_from_native,
+    AdvancedPreferenceAction, AdvancedPreferenceApprovalRequest, NativeAdvancedPreferenceApproval,
+    OpaqueApprovalReceipt,
 };
 use plan_commands::{
     AcceptedPlanIntent, AdvancedPreferenceCommand, DiagnosticExportRequest, PlanCommand,
@@ -149,7 +149,7 @@ struct AdvancedPreferenceNativeContext {
 
 struct NativeAdvancedPreferenceAuthority {
     store: AdvancedPreferenceStore,
-    api_origin: Option<String>,
+    approval: Option<NativeAdvancedPreferenceApproval>,
 }
 
 impl AdvancedPreferenceAuthority for NativeAdvancedPreferenceAuthority {
@@ -177,9 +177,9 @@ impl AdvancedPreferenceAuthority for NativeAdvancedPreferenceAuthority {
         {
             return Err(PlanExecutorError::AuthoritativeSnapshotRequired);
         }
-        let api_origin = self
-            .api_origin
-            .as_deref()
+        let approval = self
+            .approval
+            .as_ref()
             .ok_or(PlanExecutorError::AuthenticationFailed)?;
         let action = match transition.action {
             AdvancedPreferenceTransitionAction::Enable => AdvancedPreferenceAction::Enable,
@@ -187,19 +187,19 @@ impl AdvancedPreferenceAuthority for NativeAdvancedPreferenceAuthority {
         };
         let receipt = OpaqueApprovalReceipt::from_native_response(transition.proof_reference)
             .map_err(|_| PlanExecutorError::InvalidRequest)?;
-        let proof = consume_advanced_preference_approval_from_native(
-            api_origin,
-            AdvancedPreferenceApprovalRequest {
-                action,
-                authorization_context_id: transition.authorization_context_id,
-                device_id: posture.device_id.clone(),
-                hardware_fingerprint: posture.hardware_fingerprint.clone(),
-                receipt,
-                security_posture_fingerprint: posture.security_posture_fingerprint.clone(),
-            },
-            transition.now_unix_ms,
-        )
-        .map_err(|_| PlanExecutorError::AuthenticationFailed)?;
+        let proof = approval
+            .consume(
+                AdvancedPreferenceApprovalRequest {
+                    action,
+                    authorization_context_id: transition.authorization_context_id,
+                    device_id: posture.device_id.clone(),
+                    hardware_fingerprint: posture.hardware_fingerprint.clone(),
+                    receipt,
+                    security_posture_fingerprint: posture.security_posture_fingerprint.clone(),
+                },
+                transition.now_unix_ms,
+            )
+            .map_err(|_| PlanExecutorError::AuthenticationFailed)?;
         match transition.action {
             AdvancedPreferenceTransitionAction::Enable => {
                 self.store
@@ -1415,7 +1415,11 @@ fn run() -> Result<(), String> {
             .map_err(|_| std::io::Error::other("Advanced preference authority unavailable"))?;
             let authority = NativeAdvancedPreferenceAuthority {
                 store: advanced_preference,
-                api_origin: advanced_api_origin,
+                approval: advanced_api_origin
+                    .as_deref()
+                    .map(NativeAdvancedPreferenceApproval::from_origin)
+                    .transpose()
+                    .map_err(|_| std::io::Error::other("Advanced preference API origin invalid"))?,
             };
             let mut plan_executor =
                 PlanExecutor::new(recovery_store).with_advanced_preference(Box::new(authority));

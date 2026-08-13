@@ -540,6 +540,28 @@ pub fn consume_advanced_preference_approval_from_native(
     consume_advanced_preference_approval(&store, &api, request, now_unix_ms)
 }
 
+#[derive(Clone, Debug)]
+pub struct NativeAdvancedPreferenceApproval {
+    api_origin: String,
+}
+
+impl NativeAdvancedPreferenceApproval {
+    pub fn from_origin(api_origin: &str) -> Result<Self, PlanAuthError> {
+        WindowsPlanApprovalApi::from_origin(api_origin)?;
+        Ok(Self {
+            api_origin: api_origin.to_owned(),
+        })
+    }
+
+    pub fn consume(
+        &self,
+        request: AdvancedPreferenceApprovalRequest,
+        now_unix_ms: u64,
+    ) -> Result<ConsumedAdvancedPreferenceProof, PlanAuthError> {
+        consume_advanced_preference_approval_from_native(&self.api_origin, request, now_unix_ms)
+    }
+}
+
 #[cfg(target_os = "windows")]
 fn winhttp_consume(
     origin: &HttpsOrigin,
