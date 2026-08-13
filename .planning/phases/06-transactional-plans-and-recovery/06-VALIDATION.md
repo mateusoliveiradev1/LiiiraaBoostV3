@@ -58,7 +58,7 @@ created: 2026-08-12
 | 06-19 | PLAN-01–05,07,08 | T-06-19A/B | After 06-22 admits the UI contract, Improve/Recovery Center present authoritative state and proportional controls accessibly | UI approval record + focused feature-shell Vitest |
 | 06-20 | PLAN-01–08 | T-06-20A/B | Browser and packaged harnesses preserve provenance, cover D-13 lifecycle, and disable physical hooks by default | focused smoke tests; full Playwright/desktop/workspace plan gate |
 | 06-21 | PLAN-01,05–08 | T-06-21A/B | Evaluator rejects omission, tamper, stage skip, version swap, and privacy violations | phase6-evidence Vitest; `phase6:verify --mode planned` |
-| 06-22 | PLAN-01–05,07,08 | T-06-22A | Pending UI-SPEC cannot authorize implementation; only an independent all-six-PASS result can be persisted as approved | blocking checker checkpoint + post-checkpoint approval validator |
+| 06-22 | PLAN-01–05,07,08 | T-06-22A | Pending UI-SPEC cannot authorize implementation; only an independent structured checker report with exactly six unique PASS verdicts, verified SHA-256, disposed findings, and separate human acknowledgement can promote an exactly agreeing UI-SPEC | `rtk node --test .planning/phases/06-transactional-plans-and-recovery/06-22-validate-ui-contract-approval.test.mjs` adversarial suite + read-only `06-22-validate-ui-contract-approval.mjs --check` record/report/UI-SPEC validator |
 | 06-23 | PLAN-04–06 | T-06-23A/B | Device-local Advanced preference is append-audited, strongly authenticated for enable/revoke, restart-persistent, posture-invalidated, and recovery-independent | native `advanced_preference` TDD suite |
 | 06-24 | PLAN-04–06 | T-06-24A/B | Closed Tauri/client commands project and mutate D-13 authority without renderer booleans, optimistic success, or replay | native executor + desktop-client conformance suites |
 | 06-25 | PLAN-04,05 | T-06-25A/B | Accessible bilingual UI covers enable/revoke/restart/invalidation/revalidation while preserving recovery | focused/full feature-shell Vitest |
@@ -77,7 +77,7 @@ created: 2026-08-12
 - [x] Packaged journey hooks and focused contract test are created in 06-20 Task 2.
 - [x] Plan-engine boundary/public-root registration is owned by 06-02; broker boundary registration is owned by 06-13 Task 1 before implementation.
 - [x] The non-auto-approvable `windows-service` legitimacy review is preceded by automated evidence preparation and followed by automated verdict persistence/validation in 06-04; it blocks 06-13.
-- [x] UI-SPEC approval is owned by 06-22 and blocks 06-17/06-19/06-20 until an independent checker returns all six PASS verdicts and the post-checkpoint validator persists them.
+- [x] UI-SPEC approval is owned by 06-22 and blocks 06-17/06-19/06-20 until the schema-backed post-checkpoint gate verifies the independent report bytes/semantics, exact six unique PASS verdicts, findings disposition, human acknowledgement, and coherent UI-SPEC promotion; its negative suite covers contradictory PASS prose, non-PASS/unknown/duplicate/missing dimensions, evidence/hash failures, and status/sign-off disagreement.
 - [x] D-13 storage/auth lifecycle, native/client wiring, and accessible UI witnesses are owned by 06-23, 06-24, and 06-25.
 - [x] Clean-VM, owner-PC, and friends-PC physical work is split across 06-26, 06-27, and 06-28; each run is automated/persisted before a canonical human review and its verdict is persisted afterward.
 

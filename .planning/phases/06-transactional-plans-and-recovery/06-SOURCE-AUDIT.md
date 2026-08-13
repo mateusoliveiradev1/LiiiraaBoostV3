@@ -1,6 +1,6 @@
 # Phase 6 Multi-Source Coverage Audit
 
-All required source items are planned. Security and physical-promotion gates are completion-blocking: missing audit anchor/key custody, privileged IPC/strong-auth failure, or an unavailable/failed mandatory physical stage leaves Phase 6 incomplete. Deferred items are excluded explicitly: executable Extremo, the broad Phase 7 optimizer catalog, Phase 8 game automation, and unresolved Phase 4 public-distribution evidence.
+All required source items are planned. Security and physical-promotion gates are completion-blocking: missing audit anchor/key custody, privileged IPC/strong-auth failure, or an unavailable/failed mandatory physical stage leaves Phase 6 incomplete. Plan 06-22's UI authority is also fail-closed: downstream UI execution requires a schema-valid record bound by verified SHA-256 and semantic comparison to an independently produced checker report, a distinct human acknowledgement, and exact agreement with UI-SPEC status/sign-offs. Deferred items are excluded explicitly: executable Extremo, the broad Phase 7 optimizer catalog, Phase 8 game automation, and unresolved Phase 4 public-distribution evidence.
 
 | SOURCE | ID | Feature / constraint | Plan(s) | Status |
 |---|---|---|---|---|
