@@ -24,7 +24,7 @@ pub enum AdvancedPreferenceAction {
 }
 
 impl AdvancedPreferenceAction {
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Enable => "enable-advanced-preference",
             Self::Revoke => "revoke-advanced-preference",
@@ -115,6 +115,35 @@ impl ConsumedAdvancedPreferenceProof {
 
     pub fn evidence_id(&self) -> &str {
         &self.evidence_id
+    }
+
+    pub(crate) fn authorize(
+        &self,
+        action: AdvancedPreferenceAction,
+        device_id: &str,
+        hardware_fingerprint: &str,
+        security_posture_fingerprint: &str,
+        now_unix_ms: u64,
+    ) -> Result<&str, PlanAuthError> {
+        if self.action != action {
+            return Err(PlanAuthError::InvalidRequest);
+        }
+        if self.device_id != device_id {
+            return Err(PlanAuthError::ProofRejected);
+        }
+        let expected_target = target_fingerprint(&[
+            action.as_str(),
+            device_id,
+            hardware_fingerprint,
+            security_posture_fingerprint,
+        ]);
+        if self.target_fingerprint != expected_target {
+            return Err(PlanAuthError::ProofRejected);
+        }
+        if now_unix_ms >= self.expires_at_unix_ms {
+            return Err(PlanAuthError::InvalidResponse);
+        }
+        Ok(&self.evidence_id)
     }
 }
 

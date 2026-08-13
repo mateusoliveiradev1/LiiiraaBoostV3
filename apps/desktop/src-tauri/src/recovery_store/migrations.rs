@@ -177,5 +177,75 @@ pub fn migrations() -> Migrations<'static> {
             BEFORE DELETE ON operation_promotions BEGIN SELECT RAISE(ABORT, 'append-only operation promotions'); END;
             "#,
         ),
+        M::up(
+            r#"
+            CREATE TABLE advanced_preference_events (
+              event_id TEXT PRIMARY KEY NOT NULL CHECK (length(event_id) BETWEEN 1 AND 128),
+              integrity_sequence INTEGER NOT NULL UNIQUE,
+              preference_sequence INTEGER NOT NULL UNIQUE CHECK (
+                preference_sequence BETWEEN 0 AND 4294967295
+              ),
+              event_kind TEXT NOT NULL CHECK (event_kind IN ('enabled', 'revoked', 'invalidated')),
+              device_id TEXT NOT NULL CHECK (length(device_id) BETWEEN 1 AND 128),
+              hardware_fingerprint TEXT NOT NULL CHECK (
+                length(hardware_fingerprint) = 71
+                AND hardware_fingerprint GLOB 'sha256:[0-9a-f]*'
+              ),
+              security_posture_fingerprint TEXT NOT NULL CHECK (
+                length(security_posture_fingerprint) = 71
+                AND security_posture_fingerprint GLOB 'sha256:[0-9a-f]*'
+              ),
+              proof_reference TEXT CHECK (
+                proof_reference IS NULL OR length(proof_reference) BETWEEN 1 AND 128
+              ),
+              reason_code TEXT NOT NULL CHECK (length(reason_code) BETWEEN 1 AND 128),
+              occurred_at TEXT NOT NULL CHECK (length(occurred_at) BETWEEN 20 AND 64),
+              previous_event_mac TEXT NOT NULL CHECK (
+                length(previous_event_mac) = 76
+                AND previous_event_mac GLOB 'hmac-sha256:[0-9a-f]*'
+              ),
+              head_event_mac TEXT NOT NULL CHECK (
+                length(head_event_mac) = 76
+                AND head_event_mac GLOB 'hmac-sha256:[0-9a-f]*'
+              ),
+              canonical_json BLOB NOT NULL CHECK (length(canonical_json) BETWEEN 2 AND 65536),
+              content_hash TEXT NOT NULL CHECK (
+                length(content_hash) = 71 AND content_hash GLOB 'sha256:[0-9a-f]*'
+              ),
+              CHECK (
+                (event_kind IN ('enabled', 'revoked') AND proof_reference IS NOT NULL)
+                OR (event_kind = 'invalidated' AND proof_reference IS NULL)
+              ),
+              FOREIGN KEY (integrity_sequence) REFERENCES journal_events(sequence) ON DELETE RESTRICT
+            ) STRICT;
+
+            CREATE UNIQUE INDEX advanced_preference_consumed_proof
+              ON advanced_preference_events(proof_reference)
+              WHERE proof_reference IS NOT NULL;
+            CREATE INDEX advanced_preference_integrity_sequence
+              ON advanced_preference_events(integrity_sequence);
+
+            CREATE TABLE advanced_preference_projection (
+              singleton INTEGER PRIMARY KEY NOT NULL CHECK (singleton = 1),
+              state TEXT NOT NULL CHECK (
+                state IN ('disabled', 'enabled', 'revoked', 'revalidation-required')
+              ),
+              preference_sequence INTEGER,
+              event_count INTEGER NOT NULL CHECK (event_count BETWEEN 0 AND 4294967295),
+              device_id TEXT NOT NULL,
+              hardware_fingerprint TEXT NOT NULL,
+              security_posture_fingerprint TEXT NOT NULL,
+              last_event_id TEXT,
+              source_event_mac TEXT
+            ) STRICT;
+
+            CREATE TRIGGER advanced_preference_events_no_update
+            BEFORE UPDATE ON advanced_preference_events
+            BEGIN SELECT RAISE(ABORT, 'append-only advanced preference events'); END;
+            CREATE TRIGGER advanced_preference_events_no_delete
+            BEFORE DELETE ON advanced_preference_events
+            BEGIN SELECT RAISE(ABORT, 'append-only advanced preference events'); END;
+            "#,
+        ),
     ])
 }

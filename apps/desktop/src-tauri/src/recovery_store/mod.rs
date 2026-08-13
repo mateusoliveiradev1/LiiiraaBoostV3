@@ -1,3 +1,5 @@
+#[cfg(not(test))]
+pub mod advanced_preference;
 pub mod integrity_anchor;
 pub mod migrations;
 
