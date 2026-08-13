@@ -401,6 +401,7 @@ const expectedPnpmWorkspaceRoots = [
   'tooling/identity-adapter-spike',
   'tooling/phase4-evidence',
   'tooling/phase5-evidence',
+  'tooling/phase6-evidence',
   'tooling/web-evidence',
   'tooling/workspace-smoke',
 ] as const;
