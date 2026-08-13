@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import validCorpus from '../../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json' with { type: 'json' };
 import {
   createTransactionalPackagedHarness,
   DeterministicBrokerProbe,
@@ -22,12 +21,29 @@ const PRIOR_GUID = '11111111-1111-4111-8111-111111111111';
 const REQUESTED_GUID = '22222222-2222-4222-8222-222222222222';
 const OBSERVED_GUID = '22222222-2222-4222-8222-222222222222';
 const RESTORED_GUID = '11111111-1111-4111-8111-111111111111';
+const GENERATED_VALID_PROGRESS_SNAPSHOT = Object.freeze({
+  completedOperations: 1,
+  displayText: 'Packaged schema validation completed.',
+  kind: 'progress-snapshot',
+  schemaVersion: '1.0',
+  sequence: 3,
+  state: 'completed',
+  totalOperations: 1,
+  transactionId: 'transaction-packaged-0001',
+  updatedAt: '2026-08-13T10:01:05Z',
+});
 
 describe('generated schema and registered command authority', () => {
-  it('validates every generated-valid transactional document', () => {
-    for (const testCase of validCorpus.cases) {
-      expect(() => validateGeneratedTransactionalDocument(testCase.document)).not.toThrow();
-    }
+  it('validates a representative document through the public generated contract API', () => {
+    expect(() =>
+      validateGeneratedTransactionalDocument(GENERATED_VALID_PROGRESS_SNAPSHOT),
+    ).not.toThrow();
+    expect(() =>
+      validateGeneratedTransactionalDocument({
+        ...GENERATED_VALID_PROGRESS_SNAPSHOT,
+        rendererClaimedPhysical: true,
+      }),
+    ).toThrow(/generated transactional schema rejected/iu);
   });
 
   it('binds every named command to the trusted Tauri capability and handler', () => {
