@@ -8,5 +8,8 @@
 
 pub mod dependency;
 pub mod domain;
+pub mod executor;
+pub mod promotion;
+pub mod reconcile;
 pub mod revision;
 pub mod risk;
