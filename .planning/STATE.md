@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-13-PLAN.md
-last_updated: "2026-08-13T08:43:14.681Z"
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-08-13T14:42:52.560Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 223
+  completed_plans: 224
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 9 of 28
+Plan: 10 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -251,6 +251,7 @@ _Updated after plan completion_
 | Phase 06 P11 | 14 min | 3 tasks | 3 files |
 | Phase 06 P12 | 15 min | 3 tasks | 5 files |
 | Phase 06 P13 | 15 min | 3 tasks | 8 files |
+| Phase 06 P05 | 6 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -791,6 +792,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Bind privileged dependency admission to the exact reviewed windows-service 0.8.1 registry checksum and Mullvad source identity. — Prevents a similarly named, differently sourced, or checksum-mismatched privileged crate from entering the service boundary.
 - [Phase 06]: Authenticate the verified local native host before issuing a session secret, then bind canonical messages to durable nonce, counter, transaction, step, and operation identity. — Same-user spoofing, captured messages, stale counters, and reused nonces fail before dispatch.
 - [Phase 06]: Mark admitted broker identities unknown before dispatch so crash recovery observes state and never blindly redispatches. — A crash after reserve or dispatch returns observation-required while the mutation spy remains singular.
+- [Phase 06]: Bind revision identity to native registry metadata, exact Phase 5 evidence, device hardware and security fingerprints, and canonical dependency order. — Prevents renderer or reordered inputs from changing or weakening plan authority.
+- [Phase 06]: Represent unknown, degraded, contradictory, incompatible, and revoked evidence as closed non-admission states. — Uncertain Phase 5 evidence cannot silently become compatible plan truth.
+- [Phase 06]: Retain every prior plan revision as immutable generated-contract bytes. — Add and remove operations append revisions instead of rewriting approval evidence.
 
 ### Pending Todos
 
@@ -841,6 +845,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T08:43:14.674Z
-Stopped at: Completed 06-13-PLAN.md
+Last session: 2026-08-13T14:42:52.554Z
+Stopped at: Completed 06-05-PLAN.md
 Resume file: None
