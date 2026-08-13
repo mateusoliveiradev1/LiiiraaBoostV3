@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-18-PLAN.md
-last_updated: "2026-08-13T17:22:18.586Z"
+stopped_at: Completed 06-24-PLAN.md
+last_updated: "2026-08-13T17:44:22.351Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 235
+  completed_plans: 236
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 21 of 28
+Plan: 22 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -263,6 +263,7 @@ _Updated after plan completion_
 | Phase 06 P15 | 8 min | 3 tasks | 5 files |
 | Phase 06 P19 | 12m | 2 tasks | 3 files |
 | Phase 06 P18 | 18 min | 2 tasks | 12 files |
+| Phase 06 P24 | 18 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -839,6 +840,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Reconcile the HMAC-anchored journal during Tauri setup before exposing plan commands — Unresolved durable state must close new mutation admission.
 - [Phase 06]: Keep broker session secrets native-only and validate generated request and response documents — Renderer and malformed transport data cannot acquire broker authority.
 - [Phase 06]: Bind exact custom Tauri commands to the trusted main window/webview through a generated app ACL manifest — Custom commands need enforceable per-command least privilege.
+- [Phase 06]: Expose exactly read, enable, and revoke preference commands; keep device posture, credentials, and consumed proof material native-only.
+- [Phase 06]: Recompute device posture on startup, read, and immediately before apply; invalidated or unavailable preference authority blocks new Advanced apply work.
+- [Phase 06]: Publish one closed native-attributed projection to the renderer and mutate cached authority only after a validated native response.
+- [Phase 06]: Never gate local recovery on Advanced preference, authentication, subscription, or connectivity.
 
 ### Pending Todos
 
@@ -889,6 +894,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T17:22:18.579Z
-Stopped at: Completed 06-18-PLAN.md
+Last session: 2026-08-13T17:44:22.343Z
+Stopped at: Completed 06-24-PLAN.md
 Resume file: None
