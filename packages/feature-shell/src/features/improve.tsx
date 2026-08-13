@@ -131,8 +131,7 @@ export interface ImproveSurfaceProps {
 }
 
 export type AdvancedPreferenceStrongAuthAction =
-  | 'enable-advanced-preference'
-  | 'revoke-advanced-preference';
+  'enable-advanced-preference' | 'revoke-advanced-preference';
 
 export interface AdvancedPreferenceStrongAuthProof {
   readonly intentId: string;
@@ -2007,8 +2006,7 @@ const AdvancedPreferenceLifecycle = ({
     localized(
       {
         en: 'Native Advanced preference authority has not returned a projection yet.',
-        'pt-BR':
-          'A autoridade nativa da preferÃªncia AvanÃ§ada ainda nÃ£o retornou uma projeÃ§Ã£o.',
+        'pt-BR': 'A autoridade nativa da preferência Avançada ainda não retornou uma projeção.',
       },
       locale,
     );
@@ -2023,7 +2021,7 @@ const AdvancedPreferenceLifecycle = ({
       ? localized(
           {
             en: 'Revoke Advanced on this PC',
-            'pt-BR': 'Revogar AvanÃ§ado neste PC',
+            'pt-BR': 'Revogar Avançado neste PC',
           },
           locale,
         )
@@ -2031,7 +2029,7 @@ const AdvancedPreferenceLifecycle = ({
         ? localized(
             {
               en: 'Revalidate Advanced on this PC',
-              'pt-BR': 'Revalidar AvanÃ§ado neste PC',
+              'pt-BR': 'Revalidar Avançado neste PC',
             },
             locale,
           )
@@ -2039,14 +2037,14 @@ const AdvancedPreferenceLifecycle = ({
           ? localized(
               {
                 en: 'Advanced authority is unavailable',
-                'pt-BR': 'A autoridade AvanÃ§ada estÃ¡ indisponÃ­vel',
+                'pt-BR': 'A autoridade Avançada está indisponível',
               },
               locale,
             )
           : localized(
               {
                 en: 'Enable Advanced on this PC',
-                'pt-BR': 'Ativar AvanÃ§ado neste PC',
+                'pt-BR': 'Ativar Avançado neste PC',
               },
               locale,
             );
@@ -2062,9 +2060,9 @@ const AdvancedPreferenceLifecycle = ({
       'pt-BR': {
         disabled: 'Desativada',
         enabled: 'Ativada e atual',
-        invalidated: 'RevalidaÃ§Ã£o necessÃ¡ria',
+        invalidated: 'Revalidação necessária',
         revoked: 'Revogada',
-        unavailable: 'IndisponÃ­vel',
+        unavailable: 'Indisponível',
       }[state],
     },
     locale,
@@ -2095,7 +2093,7 @@ const AdvancedPreferenceLifecycle = ({
       authorize: onRequestAuth,
     })
       .then((result) => {
-        if (result === null || !result.ok) setPending(null);
+        if (result?.ok !== true) setPending(null);
       })
       .finally(() => {
         actionRef.current?.focus();
@@ -2114,7 +2112,9 @@ const AdvancedPreferenceLifecycle = ({
       data-forced-colors="preserve-text-icon-pattern"
       data-reduced-motion="immediate"
       data-reflow-safe="200%"
-      data-status-pattern={state === 'enabled' ? 'solid' : state === 'unavailable' ? 'dotted' : 'double'}
+      data-status-pattern={
+        state === 'enabled' ? 'solid' : state === 'unavailable' ? 'dotted' : 'double'
+      }
     >
       <div className="lb-transaction-heading">
         <ProductIcon name="shield" size={20} />
@@ -2122,7 +2122,7 @@ const AdvancedPreferenceLifecycle = ({
           {localized(
             {
               en: 'Advanced preference for this PC',
-              'pt-BR': 'PreferÃªncia AvanÃ§ada deste PC',
+              'pt-BR': 'Preferência Avançada deste PC',
             },
             locale,
           )}
@@ -2133,7 +2133,7 @@ const AdvancedPreferenceLifecycle = ({
           {
             en: 'Device-local and persistent across app restarts. It is never synchronized to the cloud.',
             'pt-BR':
-              'Local do dispositivo e persistente entre reinicializaÃ§Ãµes do aplicativo. Nunca Ã© sincronizada com a nuvem.',
+              'Local do dispositivo e persistente entre reinicializações do aplicativo. Nunca é sincronizada com a nuvem.',
           },
           locale,
         )}
@@ -2143,7 +2143,7 @@ const AdvancedPreferenceLifecycle = ({
           {
             en: 'The maximum risk ceiling cannot enable Advanced and changing that ceiling does not silently revoke this preference.',
             'pt-BR':
-              'O limite mÃ¡ximo de risco nÃ£o ativa AvanÃ§ado, e mudar esse limite nÃ£o revoga silenciosamente esta preferÃªncia.',
+              'O limite máximo de risco não ativa Avançado, e mudar esse limite não revoga silenciosamente esta preferência.',
           },
           locale,
         )}
@@ -2162,11 +2162,14 @@ const AdvancedPreferenceLifecycle = ({
           <dd>{localized({ en: 'This PC only', 'pt-BR': 'Somente este PC' }, locale)}</dd>
         </div>
         <div>
-          <dt>{localized({ en: 'Last validation', 'pt-BR': 'Ãšltima validaÃ§Ã£o' }, locale)}</dt>
-          <dd>{projection?.updatedAt ?? localized({ en: 'Not available', 'pt-BR': 'IndisponÃ­vel' }, locale)}</dd>
+          <dt>{localized({ en: 'Last validation', 'pt-BR': 'Última validação' }, locale)}</dt>
+          <dd>
+            {projection?.updatedAt ??
+              localized({ en: 'Not available', 'pt-BR': 'Indisponível' }, locale)}
+          </dd>
         </div>
         <div>
-          <dt>{localized({ en: 'Binding', 'pt-BR': 'VÃ­nculo' }, locale)}</dt>
+          <dt>{localized({ en: 'Binding', 'pt-BR': 'Vínculo' }, locale)}</dt>
           <dd>{projection?.bindingFreshness ?? 'unavailable'}</dd>
         </div>
       </dl>
@@ -2176,7 +2179,7 @@ const AdvancedPreferenceLifecycle = ({
             {
               en: 'Hardware or security posture changed. Advanced apply is blocked until a fresh, action-specific strong authentication revalidates this PC.',
               'pt-BR':
-                'O hardware ou a postura de seguranÃ§a mudou. A aplicaÃ§Ã£o AvanÃ§ada fica bloqueada atÃ© uma autenticaÃ§Ã£o forte, nova e especÃ­fica para esta aÃ§Ã£o, revalidar este PC.',
+                'O hardware ou a postura de segurança mudou. A aplicação Avançada fica bloqueada até uma autenticação forte, nova e específica para esta ação, revalidar este PC.',
             },
             locale,
           )}
@@ -2188,7 +2191,7 @@ const AdvancedPreferenceLifecycle = ({
             {
               en: 'Strong authentication completed. Waiting for the authoritative native projection; no state changed optimistically.',
               'pt-BR':
-                'AutenticaÃ§Ã£o forte concluÃ­da. Aguardando a projeÃ§Ã£o nativa autoritativa; nenhum estado mudou de forma otimista.',
+                'Autenticação forte concluída. Aguardando a projeção nativa autoritativa; nenhum estado mudou de forma otimista.',
             },
             locale,
           )}
@@ -2226,7 +2229,7 @@ const AdvancedPreferenceLifecycle = ({
             {
               en: 'Fresh strong authentication must be available for this exact enable or revoke action.',
               'pt-BR':
-                'Uma autenticaÃ§Ã£o forte nova deve estar disponÃ­vel para esta aÃ§Ã£o exata de ativaÃ§Ã£o ou revogaÃ§Ã£o.',
+                'Uma autenticação forte nova deve estar disponível para esta ação exata de ativação ou revogação.',
             },
             locale,
           )}
@@ -2237,16 +2240,13 @@ const AdvancedPreferenceLifecycle = ({
           {
             en: 'Recovery remains available offline, signed out, revoked, invalidated, or while authentication is unavailable.',
             'pt-BR':
-              'A recuperaÃ§Ã£o continua disponÃ­vel offline, sem sessÃ£o, revogada, invalidada ou quando a autenticaÃ§Ã£o estiver indisponÃ­vel.',
+              'A recuperação continua disponível offline, sem sessão, revogada, invalidada ou quando a autenticação estiver indisponível.',
           },
           locale,
         )}
       </p>
       <LbButton onPress={onOpenRecovery ?? (() => undefined)} variant="secondary">
-        {localized(
-          { en: 'Open Recovery Center', 'pt-BR': 'Abrir Central de RecuperaÃ§Ã£o' },
-          locale,
-        )}
+        {localized({ en: 'Open Recovery Center', 'pt-BR': 'Abrir Central de Recuperação' }, locale)}
       </LbButton>
     </section>
   );

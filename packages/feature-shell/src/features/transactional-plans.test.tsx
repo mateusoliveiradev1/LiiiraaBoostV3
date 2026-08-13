@@ -1,3 +1,5 @@
+// @ts-expect-error Node builtin types are intentionally absent from this browser-owned package.
+import { readFileSync } from 'node:fs';
 // @ts-expect-error The approved runtime includes react-dom; @types/react-dom is intentionally absent.
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
@@ -174,7 +176,8 @@ const createAdvancedPreference = (
   schemaVersion: '1.0',
   state,
   reason: `${state} because native posture authority said so`,
-  bindingFreshness: state === 'enabled' ? 'current' : state === 'unavailable' ? 'unavailable' : 'stale',
+  bindingFreshness:
+    state === 'enabled' ? 'current' : state === 'unavailable' ? 'unavailable' : 'stale',
   sequence: 4,
   updatedAt: NOW,
   provenance: 'native',
@@ -188,28 +191,31 @@ describe('Advanced preference lifecycle', () => {
     ['revoked', 'Enable Advanced on this PC'],
     ['invalidated', 'Revalidate Advanced on this PC'],
     ['unavailable', 'Advanced authority is unavailable'],
-  ] as const)('renders authoritative %s scope, reason, next action, and unconditional recovery', (state, nextAction) => {
-    const markup = renderToStaticMarkup(
-      <ImproveSurface
-        authority={createAuthority(
-          createSnapshot({ advancedPreference: createAdvancedPreference(state) }),
-        )}
-        locale="en"
-        scenarioId="S01"
-        view="plan-review"
-      />,
-    );
+  ] as const)(
+    'renders authoritative %s scope, reason, next action, and unconditional recovery',
+    (state, nextAction) => {
+      const markup = renderToStaticMarkup(
+        <ImproveSurface
+          authority={createAuthority(
+            createSnapshot({ advancedPreference: createAdvancedPreference(state) }),
+          )}
+          locale="en"
+          scenarioId="S01"
+          view="plan-review"
+        />,
+      );
 
-    expect(markup).toContain(`data-advanced-preference-state="${state}"`);
-    expect(markup).toContain('Advanced preference for this PC');
-    expect(markup).toContain('Device-local and persistent across app restarts');
-    expect(markup).toContain(`${state} because native posture authority said so`);
-    expect(markup).toContain(NOW);
-    expect(markup).toContain(nextAction);
-    expect(markup).toContain('The maximum risk ceiling cannot enable Advanced');
-    expect(markup).toContain('Open Recovery Center');
-    expect(markup).not.toContain('cloud sync');
-  });
+      expect(markup).toContain(`data-advanced-preference-state="${state}"`);
+      expect(markup).toContain('Advanced preference for this PC');
+      expect(markup).toContain('Device-local and persistent across app restarts');
+      expect(markup).toContain(`${state} because native posture authority said so`);
+      expect(markup).toContain(NOW);
+      expect(markup).toContain(nextAction);
+      expect(markup).toContain('The maximum risk ceiling cannot enable Advanced');
+      expect(markup).toContain('Open Recovery Center');
+      expect(markup).not.toContain('cloud sync');
+    },
+  );
 
   it('explains posture invalidation, announces once, focuses its heading, and blocks Advanced apply', () => {
     const markup = renderToStaticMarkup(
@@ -239,7 +245,9 @@ describe('Advanced preference lifecycle', () => {
 
   it('uses fresh distinct strong-auth actions and waits for native enable or revoke truth', async () => {
     for (const action of ['enable-advanced-preference', 'revoke-advanced-preference'] as const) {
-      const projection = createAdvancedPreference(action.startsWith('enable') ? 'disabled' : 'enabled');
+      const projection = createAdvancedPreference(
+        action.startsWith('enable') ? 'disabled' : 'enabled',
+      );
       const authority = createAuthority(createSnapshot({ advancedPreference: projection }));
       const authorize = vi.fn().mockResolvedValue({
         intentId: `intent-${action}`,
@@ -284,11 +292,100 @@ describe('Advanced preference lifecycle', () => {
       />,
     );
 
-    expect(markup).toContain('PreferÃªncia AvanÃ§ada deste PC');
-    expect(markup).toContain('Local do dispositivo e persistente entre reinicializaÃ§Ãµes do aplicativo');
-    expect(markup).toContain('Revalidar AvanÃ§ado neste PC');
-    expect(markup).toContain('A recuperaÃ§Ã£o continua disponÃ­vel');
-    expect(markup).not.toMatch(/something went wrong|erro genÃ©rico/iu);
+    expect(markup).toContain('Preferência Avançada deste PC');
+    expect(markup).toContain(
+      'Local do dispositivo e persistente entre reinicializações do aplicativo',
+    );
+    expect(markup).toContain('Revalidar Avançado neste PC');
+    expect(markup).toContain('A recuperação continua disponível');
+    expect(markup).not.toMatch(/something went wrong|erro genérico/iu);
+  });
+
+  it.each([
+    ['disabled', 'Enable Advanced on this PC'],
+    ['enabled', 'Revoke Advanced on this PC'],
+    ['revoked', 'Enable Advanced on this PC'],
+    ['invalidated', 'Revalidate Advanced on this PC'],
+  ] as const)(
+    'keeps the %s action and recovery keyboard reachable with non-color status',
+    (state, label) => {
+      const markup = renderToStaticMarkup(
+        <ImproveSurface
+          authority={createAuthority(
+            createSnapshot({ advancedPreference: createAdvancedPreference(state) }),
+          )}
+          locale="en"
+          onRequestAdvancedPreferenceAuth={async () => null}
+          scenarioId="S01"
+          view="plan-review"
+        />,
+      );
+      const actionLabelIndex = markup.indexOf(label);
+      const actionStart = markup.lastIndexOf('<button', actionLabelIndex);
+      const actionEnd = markup.indexOf('</button>', actionLabelIndex);
+      const actionMarkup = markup.slice(actionStart, actionEnd);
+      const recoveryLabelIndex = markup.indexOf('Open Recovery Center', actionEnd);
+      const recoveryStart = markup.lastIndexOf('<button', recoveryLabelIndex);
+      const recoveryEnd = markup.indexOf('</button>', recoveryLabelIndex);
+      const recoveryMarkup = markup.slice(recoveryStart, recoveryEnd);
+
+      expect(actionStart).toBeGreaterThanOrEqual(0);
+      expect(actionMarkup).not.toContain('disabled=""');
+      expect(actionMarkup).toContain('tabindex="0"');
+      expect(recoveryStart).toBeGreaterThanOrEqual(0);
+      expect(recoveryMarkup).not.toContain('disabled=""');
+      expect(recoveryMarkup).toContain('tabindex="0"');
+      expect(markup).toContain('lb-product-icon');
+      expect(markup).toMatch(/data-status-pattern="(?:solid|double)"/u);
+      expect(markup).toContain('data-forced-colors="preserve-text-icon-pattern"');
+    },
+  );
+
+  it('declares focus return, restart rehydration, reduced motion, and required reflow presentations', () => {
+    const source = readFileSync(new URL('./improve.tsx', import.meta.url), 'utf8');
+    const markup = renderToStaticMarkup(
+      <ImproveSurface
+        authority={createAuthority(
+          createSnapshot({ advancedPreference: createAdvancedPreference('invalidated') }),
+        )}
+        locale="pt-BR"
+        onRequestAdvancedPreferenceAuth={async () => null}
+        scenarioId="S01"
+        view="plan-review"
+      />,
+    );
+
+    expect(source).toContain("if (state === 'invalidated') headingRef.current?.focus();");
+    expect(source).toContain('actionRef.current?.focus();');
+    expect(source).toContain('buttonRef={actionRef}');
+    expect(source).toContain('void authority.reopen();');
+    expect(markup).toContain('data-app-scale-safe="150%"');
+    expect(markup).toContain('data-reflow-safe="200%"');
+    expect(markup).toContain('data-reduced-motion="immediate"');
+    expect(markup).toContain('Revalidar Avançado neste PC');
+    expect(markup).toContain('A recuperação continua disponível offline');
+  });
+
+  it('keeps every preference state recoverable and Extreme structurally non-executable', () => {
+    for (const state of ['disabled', 'enabled', 'revoked', 'invalidated', 'unavailable'] as const) {
+      const markup = renderToStaticMarkup(
+        <ImproveSurface
+          authority={createAuthority(
+            createSnapshot({
+              advancedPreference: createAdvancedPreference(state),
+              plan: createPlan('extreme-locked'),
+            }),
+          )}
+          locale="en"
+          scenarioId="S01"
+          view="confirmation"
+        />,
+      );
+
+      expect(markup).toContain('Open Recovery Center');
+      expect(markup).toContain('Recovery remains available');
+      expect(markup).not.toMatch(/Apply verified plan|APPLY EXPERIMENTAL PLAN/u);
+    }
   });
 });
 
