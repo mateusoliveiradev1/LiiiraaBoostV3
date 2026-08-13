@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-16-PLAN.md
-last_updated: "2026-08-13T15:42:17.052Z"
+stopped_at: Completed 06-17-PLAN.md
+last_updated: "2026-08-13T15:53:59.590Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 229
+  completed_plans: 230
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 15 of 28
+Plan: 16 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [█████████░] 93%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -257,6 +257,7 @@ _Updated after plan completion_
 | Phase 06 P08 | 7 min | 3 tasks | 2 files |
 | Phase 06 P10 | 10 min | 3 tasks | 2 files |
 | Phase 06 P16 | 5 min | 3 tasks | 4 files |
+| Phase 06 P17 | 8 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -815,6 +816,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Treat SRSetRestorePointW return, status, and sequence as request evidence only; only a matching post-call observation can establish a usable point.
 - [Phase 06]: Keep the Liiiraa operation manifest primary: Advanced may continue only with explicit second-layer-unavailable acknowledgement, while Experimental requires an observed usable complement.
 - [Phase 06]: Load only SrClient.dll from System32 and resolve only SRSetRestorePointW; expose no generic loader, registry mutation, PowerShell, or WMI authority.
+- [Phase 06]: Make Extreme transaction presentation structurally non-executable by omitting supplied actions from the DOM. — A visible disabled execution affordance would violate the approved UI contract.
+- [Phase 06]: Fail closed when transactional timelines lack one exact current stage or recovery target identities are not distinct. — Ambiguous identities or progress could induce an unsafe recovery decision.
 
 ### Pending Todos
 
@@ -865,6 +868,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:42:17.044Z
-Stopped at: Completed 06-16-PLAN.md
+Last session: 2026-08-13T15:53:59.584Z
+Stopped at: Completed 06-17-PLAN.md
 Resume file: None
