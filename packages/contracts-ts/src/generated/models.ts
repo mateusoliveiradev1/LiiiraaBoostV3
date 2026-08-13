@@ -300,7 +300,12 @@ export type TransactionalRecoveryDocumentJson =
   | RedactedDiagnosticExportDocumentJson
   | AdvancedPreferenceProjectionDocumentJson
   | AdvancedPreferenceIntentDocumentJson
-  | AdvancedPreferenceEventDocumentJson;
+  | AdvancedPreferenceEventDocumentJson
+  | InstallationManifestDocumentJson
+  | ArtifactManifestDocumentJson
+  | FriendsRosterDocumentJson
+  | PhysicalRunConfigDocumentJson
+  | PhysicalContinuationDocumentJson;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "TransactionSchemaVersion".
@@ -458,6 +463,83 @@ export type AdvancedPreferenceIntentKindJson = 'enable' | 'revoke' | 'posture-in
  * via the `definition` "AdvancedPreferenceEventKind".
  */
 export type AdvancedPreferenceEventKindJson = 'enabled' | 'revoked' | 'posture-invalidated' | 'revalidated';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalVersion".
+ */
+export type PhysicalVersionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSourceCommit".
+ */
+export type PhysicalSourceCommitJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalVersionPolicy".
+ */
+export type PhysicalVersionPolicyJson = 'package-version' | 'file-version' | 'schema-version' | 'not-applicable';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSignaturePolicy".
+ */
+export type PhysicalSignaturePolicyJson = 'authenticode-required' | 'detached-cms-required' | 'manifest-authenticated';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalMachineSlot".
+ */
+export type PhysicalMachineSlotJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalRunConfigDocument".
+ */
+export type PhysicalRunConfigDocumentJson =
+  CleanWindowsVmRunConfigDocumentJson | OwnerPcRunConfigDocumentJson | FriendsPcRunConfigDocumentJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalContinuationDocument".
+ */
+export type PhysicalContinuationDocumentJson =
+  | InstalledReadyContinuationDocumentJson
+  | CheckpointReadyContinuationDocumentJson
+  | RunningContinuationDocumentJson
+  | RebootPendingContinuationDocumentJson
+  | ResumedObservationContinuationDocumentJson
+  | RestoredCompleteContinuationDocumentJson;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalStage".
+ */
+export type PhysicalStageJson = 'clean-windows-vm' | 'owner-pc' | 'friends-pc';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence0".
+ */
+export type PhysicalSequence0Json = number;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence1".
+ */
+export type PhysicalSequence1Json = number;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence2".
+ */
+export type PhysicalSequence2Json = number;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence3".
+ */
+export type PhysicalSequence3Json = number;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence4".
+ */
+export type PhysicalSequence4Json = number;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalSequence5".
+ */
+export type PhysicalSequence5Json = number;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "WebIdentifier".
@@ -3859,6 +3941,520 @@ export interface AdvancedPreferenceEventDocumentJson {
   sequence: number;
   occurredAt: string;
   audit: AuditReferenceJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstallationManifestDocument".
+ */
+export interface InstallationManifestDocumentJson {
+  kind: 'installation-manifest';
+  schemaVersion: TransactionSchemaVersionJson;
+  manifestId: TransactionIdentifierJson;
+  productCode: WindowsSchemeIdentifierJson;
+  packageVersion: PhysicalVersionJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  inputTreeHash: TransactionHashJson;
+  buildId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  createdAt: string;
+  signerSpkiSha256: TransactionHashJson;
+  files: InstalledFileSetJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstalledFileSet".
+ */
+export interface InstalledFileSetJson {
+  desktop: InstalledDesktopFileIdentityJson;
+  service: InstalledServiceFileIdentityJson;
+  runner: InstalledRunnerFileIdentityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstalledDesktopFileIdentity".
+ */
+export interface InstalledDesktopFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodeThumbprint: TransactionHashJson;
+  role: 'desktop';
+  relativePath: 'liiiraa-desktop.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstalledServiceFileIdentity".
+ */
+export interface InstalledServiceFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodeThumbprint: TransactionHashJson;
+  role: 'service';
+  relativePath: 'liiiraa-optimizer-service.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstalledRunnerFileIdentity".
+ */
+export interface InstalledRunnerFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodeThumbprint: TransactionHashJson;
+  role: 'runner';
+  relativePath: 'phase6-physical-runner.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ArtifactManifestDocument".
+ */
+export interface ArtifactManifestDocumentJson {
+  kind: 'artifact-manifest';
+  schemaVersion: TransactionSchemaVersionJson;
+  manifestId: TransactionIdentifierJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  inputTreeHash: TransactionHashJson;
+  buildId: TransactionIdentifierJson;
+  operationVersionId: TransactionIdentifierJson;
+  createdAt: string;
+  files: PortableFileSetJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableFileSet".
+ */
+export interface PortableFileSetJson {
+  msi: PortableMsiFileIdentityJson;
+  installationManifest: PortableInstallationManifestFileIdentityJson;
+  installationManifestSignature: PortableInstallationManifestSignatureFileIdentityJson;
+  cleanWindowsVmConfig: PortableCleanWindowsVmConfigFileIdentityJson;
+  ownerPcConfig: PortableOwnerPcConfigFileIdentityJson;
+  friendsPcConfig: PortableFriendsPcConfigFileIdentityJson;
+  runner: PortableRunnerFileIdentityJson;
+  tauriDriver: PortableTauriDriverFileIdentityJson;
+  msedgeDriver: PortableMsedgeDriverFileIdentityJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableMsiFileIdentity".
+ */
+export interface PortableMsiFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'msi';
+  relativePath: 'liiiraa-boost.msi';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableInstallationManifestFileIdentity".
+ */
+export interface PortableInstallationManifestFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'installation-manifest';
+  relativePath: 'installation-manifest.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableInstallationManifestSignatureFileIdentity".
+ */
+export interface PortableInstallationManifestSignatureFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'installation-manifest-signature';
+  relativePath: 'installation-manifest.json.p7s';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableCleanWindowsVmConfigFileIdentity".
+ */
+export interface PortableCleanWindowsVmConfigFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'clean-windows-vm-config';
+  relativePath: 'configs/clean-windows-vm.run-config.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableOwnerPcConfigFileIdentity".
+ */
+export interface PortableOwnerPcConfigFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'owner-pc-config';
+  relativePath: 'configs/owner-pc.run-config.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableFriendsPcConfigFileIdentity".
+ */
+export interface PortableFriendsPcConfigFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'friends-pc-config';
+  relativePath: 'configs/friends-pc.run-config.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableRunnerFileIdentity".
+ */
+export interface PortableRunnerFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'runner';
+  relativePath: 'phase6-physical-runner.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableTauriDriverFileIdentity".
+ */
+export interface PortableTauriDriverFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'tauri-driver';
+  relativePath: 'tauri-driver.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PortableMsedgeDriverFileIdentity".
+ */
+export interface PortableMsedgeDriverFileIdentityJson {
+  sizeBytes: number;
+  sha256: TransactionHashJson;
+  version: PhysicalVersionJson;
+  versionPolicy: PhysicalVersionPolicyJson;
+  signaturePolicy: PhysicalSignaturePolicyJson;
+  role: 'msedgedriver';
+  relativePath: 'msedgedriver.exe';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FriendsRosterDocument".
+ */
+export interface FriendsRosterDocumentJson {
+  kind: 'friends-roster';
+  schemaVersion: TransactionSchemaVersionJson;
+  rosterId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  friendsConfigSha256: TransactionHashJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  purpose: 'phase6-friends-physical-validation';
+  createdAt: string;
+  /**
+   * @minItems 1
+   * @maxItems 32
+   */
+  participants: [FriendsRosterParticipantJson, ...FriendsRosterParticipantJson[]];
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FriendsRosterParticipant".
+ */
+export interface FriendsRosterParticipantJson {
+  participantId: TransactionHashJson;
+  machineSlot: PhysicalMachineSlotJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CleanWindowsVmRunConfigDocument".
+ */
+export interface CleanWindowsVmRunConfigDocumentJson {
+  kind: 'physical-run-config';
+  schemaVersion: TransactionSchemaVersionJson;
+  configId: TransactionIdentifierJson;
+  artifactManifestPath: 'artifact-manifest.json';
+  artifactManifestSha256: TransactionHashJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  participantIdentityMode: 'purpose-bound-local-hash';
+  scenarios: PhysicalScenarioSetJson;
+  tauriCommands: PhysicalTauriCommandAllowlistJson;
+  stage: 'clean-windows-vm';
+  configPath: 'configs/clean-windows-vm.run-config.json';
+  paths: CleanWindowsVmPhysicalPathsJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalScenarioSet".
+ */
+export interface PhysicalScenarioSetJson {
+  prepareRecovery: true;
+  apply: true;
+  verifyApplied: true;
+  rebootWhenRequired: true;
+  restore: true;
+  verifyRestored: true;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "PhysicalTauriCommandAllowlist".
+ */
+export interface PhysicalTauriCommandAllowlistJson {
+  composePlan: 'compose_plan';
+  revisePlan: 'revise_plan';
+  approvePlan: 'approve_plan';
+  applyPlan: 'apply_plan';
+  restorePlanOperation: 'restore_plan_operation';
+  restorePlan: 'restore_plan';
+  restoreRecoveryCheckpoint: 'restore_recovery_checkpoint';
+  readPlanExecution: 'read_plan_execution';
+  subscribePlanExecution: 'subscribe_plan_execution';
+  previewPlanDiagnostic: 'preview_plan_diagnostic';
+  exportPlanDiagnostic: 'export_plan_diagnostic';
+  readAdvancedPreference: 'read_advanced_preference';
+  enableAdvancedPreference: 'enable_advanced_preference';
+  revokeAdvancedPreference: 'revoke_advanced_preference';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CleanWindowsVmPhysicalPaths".
+ */
+export interface CleanWindowsVmPhysicalPathsJson {
+  runRecordPath: 'state/clean-windows-vm/run-record.json';
+  installedReadyRecordPath: 'state/clean-windows-vm/installed-ready.json';
+  checkpointReadyRecordPath: 'state/clean-windows-vm/checkpoint-ready.json';
+  continuationPath: 'state/clean-windows-vm/physical-continuation.json';
+  rawEnvelopePath: 'evidence/clean-windows-vm/raw-run-envelope.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OwnerPcRunConfigDocument".
+ */
+export interface OwnerPcRunConfigDocumentJson {
+  kind: 'physical-run-config';
+  schemaVersion: TransactionSchemaVersionJson;
+  configId: TransactionIdentifierJson;
+  artifactManifestPath: 'artifact-manifest.json';
+  artifactManifestSha256: TransactionHashJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  participantIdentityMode: 'purpose-bound-local-hash';
+  scenarios: PhysicalScenarioSetJson;
+  tauriCommands: PhysicalTauriCommandAllowlistJson;
+  stage: 'owner-pc';
+  configPath: 'configs/owner-pc.run-config.json';
+  paths: OwnerPcPhysicalPathsJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "OwnerPcPhysicalPaths".
+ */
+export interface OwnerPcPhysicalPathsJson {
+  runRecordPath: 'state/owner-pc/run-record.json';
+  installedReadyRecordPath: 'state/owner-pc/installed-ready.json';
+  checkpointReadyRecordPath: 'state/owner-pc/checkpoint-ready.json';
+  continuationPath: 'state/owner-pc/physical-continuation.json';
+  rawEnvelopePath: 'evidence/owner-pc/raw-run-envelope.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FriendsPcRunConfigDocument".
+ */
+export interface FriendsPcRunConfigDocumentJson {
+  kind: 'physical-run-config';
+  schemaVersion: TransactionSchemaVersionJson;
+  configId: TransactionIdentifierJson;
+  artifactManifestPath: 'artifact-manifest.json';
+  artifactManifestSha256: TransactionHashJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  sourceCommit: PhysicalSourceCommitJson;
+  participantIdentityMode: 'purpose-bound-local-hash';
+  scenarios: PhysicalScenarioSetJson;
+  tauriCommands: PhysicalTauriCommandAllowlistJson;
+  stage: 'friends-pc';
+  configPath: 'configs/friends-pc.run-config.json';
+  paths: FriendsPcPhysicalPathsJson;
+  friendsRosterPath: 'friends/friends-roster.json';
+  friendsRosterSignaturePath: 'friends/friends-roster.json.p7s';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "FriendsPcPhysicalPaths".
+ */
+export interface FriendsPcPhysicalPathsJson {
+  runRecordPath: 'state/friends-pc/run-record.json';
+  installedReadyRecordPath: 'state/friends-pc/installed-ready.json';
+  checkpointReadyRecordPath: 'state/friends-pc/checkpoint-ready.json';
+  continuationPath: 'state/friends-pc/physical-continuation.json';
+  rawEnvelopePath: 'evidence/friends-pc/raw-run-envelope.json';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "InstalledReadyContinuationDocument".
+ */
+export interface InstalledReadyContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'installed-ready';
+  sequence: PhysicalSequence0Json;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "CheckpointReadyContinuationDocument".
+ */
+export interface CheckpointReadyContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'checkpoint-ready';
+  sequence: PhysicalSequence1Json;
+  previousState: 'installed-ready';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RunningContinuationDocument".
+ */
+export interface RunningContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'running';
+  sequence: PhysicalSequence2Json;
+  previousState: 'checkpoint-ready';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RebootPendingContinuationDocument".
+ */
+export interface RebootPendingContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'reboot-pending';
+  sequence: PhysicalSequence3Json;
+  previousState: 'running';
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "ResumedObservationContinuationDocument".
+ */
+export interface ResumedObservationContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'resumed-observation';
+  sequence: PhysicalSequence4Json;
+  previousState: 'reboot-pending';
+  observationRequired: true;
+  mutationAuthorized: false;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "RestoredCompleteContinuationDocument".
+ */
+export interface RestoredCompleteContinuationDocumentJson {
+  kind: 'physical-continuation';
+  schemaVersion: TransactionSchemaVersionJson;
+  continuationId: TransactionIdentifierJson;
+  artifactManifestSha256: TransactionHashJson;
+  configSha256: TransactionHashJson;
+  runnerSha256: TransactionHashJson;
+  stage: PhysicalStageJson;
+  operationVersionId: TransactionIdentifierJson;
+  buildId: TransactionIdentifierJson;
+  runId: TransactionIdentifierJson;
+  transactionId: TransactionIdentifierJson;
+  previousRecordHash: TransactionHashJson;
+  recordHash: TransactionHashJson;
+  observedJournalHeadHash: TransactionHashJson;
+  recordedAt: string;
+  state: 'restored-complete';
+  sequence: PhysicalSequence5Json;
+  previousState: 'resumed-observation';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema

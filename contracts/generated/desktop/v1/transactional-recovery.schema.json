@@ -308,6 +308,56 @@
         }
       ]
     },
+    "ArtifactManifestDocument": {
+      "$id": "ArtifactManifestDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "files": {
+          "$ref": "PortableFileSet.json"
+        },
+        "inputTreeHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "artifact-manifest",
+          "type": "string"
+        },
+        "manifestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "manifestId",
+        "sourceCommit",
+        "inputTreeHash",
+        "buildId",
+        "operationVersionId",
+        "createdAt",
+        "files"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "AuditReference": {
       "$id": "AuditReference.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -513,6 +563,204 @@
         "outcome",
         "reasonCode",
         "completedAt"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CheckpointReadyContinuationDocument": {
+      "$id": "CheckpointReadyContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "previousState": {
+          "const": "installed-ready",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence1.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "checkpoint-ready",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence",
+        "previousState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CleanWindowsVmPhysicalPaths": {
+      "$id": "CleanWindowsVmPhysicalPaths.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "checkpointReadyRecordPath": {
+          "const": "state/clean-windows-vm/checkpoint-ready.json",
+          "type": "string"
+        },
+        "continuationPath": {
+          "const": "state/clean-windows-vm/physical-continuation.json",
+          "type": "string"
+        },
+        "installedReadyRecordPath": {
+          "const": "state/clean-windows-vm/installed-ready.json",
+          "type": "string"
+        },
+        "rawEnvelopePath": {
+          "const": "evidence/clean-windows-vm/raw-run-envelope.json",
+          "type": "string"
+        },
+        "runRecordPath": {
+          "const": "state/clean-windows-vm/run-record.json",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runRecordPath",
+        "installedReadyRecordPath",
+        "checkpointReadyRecordPath",
+        "continuationPath",
+        "rawEnvelopePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "CleanWindowsVmRunConfigDocument": {
+      "$id": "CleanWindowsVmRunConfigDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestPath": {
+          "const": "artifact-manifest.json",
+          "type": "string"
+        },
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configPath": {
+          "const": "configs/clean-windows-vm.run-config.json",
+          "type": "string"
+        },
+        "kind": {
+          "const": "physical-run-config",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "participantIdentityMode": {
+          "const": "purpose-bound-local-hash",
+          "type": "string"
+        },
+        "paths": {
+          "$ref": "CleanWindowsVmPhysicalPaths.json"
+        },
+        "scenarios": {
+          "$ref": "PhysicalScenarioSet.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        },
+        "stage": {
+          "const": "clean-windows-vm",
+          "type": "string"
+        },
+        "tauriCommands": {
+          "$ref": "PhysicalTauriCommandAllowlist.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "configId",
+        "artifactManifestPath",
+        "artifactManifestSha256",
+        "operationVersionId",
+        "buildId",
+        "sourceCommit",
+        "participantIdentityMode",
+        "scenarios",
+        "tauriCommands",
+        "stage",
+        "configPath",
+        "paths"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -1114,6 +1362,126 @@
         "not": {}
       }
     },
+    "FriendsPcPhysicalPaths": {
+      "$id": "FriendsPcPhysicalPaths.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "checkpointReadyRecordPath": {
+          "const": "state/friends-pc/checkpoint-ready.json",
+          "type": "string"
+        },
+        "continuationPath": {
+          "const": "state/friends-pc/physical-continuation.json",
+          "type": "string"
+        },
+        "installedReadyRecordPath": {
+          "const": "state/friends-pc/installed-ready.json",
+          "type": "string"
+        },
+        "rawEnvelopePath": {
+          "const": "evidence/friends-pc/raw-run-envelope.json",
+          "type": "string"
+        },
+        "runRecordPath": {
+          "const": "state/friends-pc/run-record.json",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runRecordPath",
+        "installedReadyRecordPath",
+        "checkpointReadyRecordPath",
+        "continuationPath",
+        "rawEnvelopePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "FriendsPcRunConfigDocument": {
+      "$id": "FriendsPcRunConfigDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestPath": {
+          "const": "artifact-manifest.json",
+          "type": "string"
+        },
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configPath": {
+          "const": "configs/friends-pc.run-config.json",
+          "type": "string"
+        },
+        "friendsRosterPath": {
+          "const": "friends/friends-roster.json",
+          "type": "string"
+        },
+        "friendsRosterSignaturePath": {
+          "const": "friends/friends-roster.json.p7s",
+          "type": "string"
+        },
+        "kind": {
+          "const": "physical-run-config",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "participantIdentityMode": {
+          "const": "purpose-bound-local-hash",
+          "type": "string"
+        },
+        "paths": {
+          "$ref": "FriendsPcPhysicalPaths.json"
+        },
+        "scenarios": {
+          "$ref": "PhysicalScenarioSet.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        },
+        "stage": {
+          "const": "friends-pc",
+          "type": "string"
+        },
+        "tauriCommands": {
+          "$ref": "PhysicalTauriCommandAllowlist.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "configId",
+        "artifactManifestPath",
+        "artifactManifestSha256",
+        "operationVersionId",
+        "buildId",
+        "sourceCommit",
+        "participantIdentityMode",
+        "scenarios",
+        "tauriCommands",
+        "stage",
+        "configPath",
+        "paths",
+        "friendsRosterPath",
+        "friendsRosterSignaturePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "FriendsPromotionDocument": {
       "$id": "FriendsPromotionDocument.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1173,6 +1541,396 @@
         "stage",
         "previousStage",
         "previousPromotionId"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "FriendsRosterDocument": {
+      "$id": "FriendsRosterDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "friendsConfigSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "friends-roster",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "participants": {
+          "items": {
+            "$ref": "FriendsRosterParticipant.json"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true,
+          "x-liiiraa-unique-roster-bindings": true
+        },
+        "purpose": {
+          "const": "phase6-friends-physical-validation",
+          "type": "string"
+        },
+        "rosterId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "rosterId",
+        "artifactManifestSha256",
+        "friendsConfigSha256",
+        "operationVersionId",
+        "buildId",
+        "sourceCommit",
+        "purpose",
+        "createdAt",
+        "participants"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "FriendsRosterParticipant": {
+      "$id": "FriendsRosterParticipant.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "machineSlot": {
+          "$ref": "PhysicalMachineSlot.json"
+        },
+        "participantId": {
+          "$ref": "TransactionHash.json"
+        }
+      },
+      "required": [
+        "participantId",
+        "machineSlot"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstallationManifestDocument": {
+      "$id": "InstallationManifestDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "files": {
+          "$ref": "InstalledFileSet.json"
+        },
+        "inputTreeHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "kind": {
+          "const": "installation-manifest",
+          "type": "string"
+        },
+        "manifestId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "packageVersion": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "productCode": {
+          "$ref": "WindowsSchemeIdentifier.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "signerSpkiSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "manifestId",
+        "productCode",
+        "packageVersion",
+        "sourceCommit",
+        "inputTreeHash",
+        "buildId",
+        "operationVersionId",
+        "createdAt",
+        "signerSpkiSha256",
+        "files"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstalledDesktopFileIdentity": {
+      "$id": "InstalledDesktopFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "authenticodePublisher": {
+          "const": "Liiiraa Boost Development",
+          "type": "string"
+        },
+        "authenticodeThumbprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "relativePath": {
+          "const": "liiiraa-desktop.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "desktop",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "authenticodePublisher",
+        "authenticodeThumbprint",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstalledFileSet": {
+      "$id": "InstalledFileSet.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "desktop": {
+          "$ref": "InstalledDesktopFileIdentity.json"
+        },
+        "runner": {
+          "$ref": "InstalledRunnerFileIdentity.json"
+        },
+        "service": {
+          "$ref": "InstalledServiceFileIdentity.json"
+        }
+      },
+      "required": [
+        "desktop",
+        "service",
+        "runner"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstalledReadyContinuationDocument": {
+      "$id": "InstalledReadyContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence0.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "installed-ready",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstalledRunnerFileIdentity": {
+      "$id": "InstalledRunnerFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "authenticodePublisher": {
+          "const": "Liiiraa Boost Development",
+          "type": "string"
+        },
+        "authenticodeThumbprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "relativePath": {
+          "const": "phase6-physical-runner.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "runner",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "authenticodePublisher",
+        "authenticodeThumbprint",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "InstalledServiceFileIdentity": {
+      "$id": "InstalledServiceFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "authenticodePublisher": {
+          "const": "Liiiraa Boost Development",
+          "type": "string"
+        },
+        "authenticodeThumbprint": {
+          "$ref": "TransactionHash.json"
+        },
+        "relativePath": {
+          "const": "liiiraa-optimizer-service.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "service",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "authenticodePublisher",
+        "authenticodeThumbprint",
+        "role",
+        "relativePath"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -1379,6 +2137,116 @@
         }
       ]
     },
+    "OwnerPcPhysicalPaths": {
+      "$id": "OwnerPcPhysicalPaths.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "checkpointReadyRecordPath": {
+          "const": "state/owner-pc/checkpoint-ready.json",
+          "type": "string"
+        },
+        "continuationPath": {
+          "const": "state/owner-pc/physical-continuation.json",
+          "type": "string"
+        },
+        "installedReadyRecordPath": {
+          "const": "state/owner-pc/installed-ready.json",
+          "type": "string"
+        },
+        "rawEnvelopePath": {
+          "const": "evidence/owner-pc/raw-run-envelope.json",
+          "type": "string"
+        },
+        "runRecordPath": {
+          "const": "state/owner-pc/run-record.json",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runRecordPath",
+        "installedReadyRecordPath",
+        "checkpointReadyRecordPath",
+        "continuationPath",
+        "rawEnvelopePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "OwnerPcRunConfigDocument": {
+      "$id": "OwnerPcRunConfigDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestPath": {
+          "const": "artifact-manifest.json",
+          "type": "string"
+        },
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configPath": {
+          "const": "configs/owner-pc.run-config.json",
+          "type": "string"
+        },
+        "kind": {
+          "const": "physical-run-config",
+          "type": "string"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "participantIdentityMode": {
+          "const": "purpose-bound-local-hash",
+          "type": "string"
+        },
+        "paths": {
+          "$ref": "OwnerPcPhysicalPaths.json"
+        },
+        "scenarios": {
+          "$ref": "PhysicalScenarioSet.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sourceCommit": {
+          "$ref": "PhysicalSourceCommit.json"
+        },
+        "stage": {
+          "const": "owner-pc",
+          "type": "string"
+        },
+        "tauriCommands": {
+          "$ref": "PhysicalTauriCommandAllowlist.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "configId",
+        "artifactManifestPath",
+        "artifactManifestSha256",
+        "operationVersionId",
+        "buildId",
+        "sourceCommit",
+        "participantIdentityMode",
+        "scenarios",
+        "tauriCommands",
+        "stage",
+        "configPath",
+        "paths"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "OwnerPromotionDocument": {
       "$id": "OwnerPromotionDocument.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1443,6 +2311,293 @@
       "unevaluatedProperties": {
         "not": {}
       }
+    },
+    "PhysicalContinuationDocument": {
+      "$id": "PhysicalContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "InstalledReadyContinuationDocument.json"
+        },
+        {
+          "$ref": "CheckpointReadyContinuationDocument.json"
+        },
+        {
+          "$ref": "RunningContinuationDocument.json"
+        },
+        {
+          "$ref": "RebootPendingContinuationDocument.json"
+        },
+        {
+          "$ref": "ResumedObservationContinuationDocument.json"
+        },
+        {
+          "$ref": "RestoredCompleteContinuationDocument.json"
+        }
+      ]
+    },
+    "PhysicalMachineSlot": {
+      "$id": "PhysicalMachineSlot.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 9,
+      "minLength": 9,
+      "pattern": "^friend-[0-9]{2}$",
+      "type": "string"
+    },
+    "PhysicalRunConfigDocument": {
+      "$id": "PhysicalRunConfigDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "oneOf": [
+        {
+          "$ref": "CleanWindowsVmRunConfigDocument.json"
+        },
+        {
+          "$ref": "OwnerPcRunConfigDocument.json"
+        },
+        {
+          "$ref": "FriendsPcRunConfigDocument.json"
+        }
+      ]
+    },
+    "PhysicalScenarioSet": {
+      "$id": "PhysicalScenarioSet.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "apply": {
+          "const": true,
+          "type": "boolean"
+        },
+        "prepareRecovery": {
+          "const": true,
+          "type": "boolean"
+        },
+        "rebootWhenRequired": {
+          "const": true,
+          "type": "boolean"
+        },
+        "restore": {
+          "const": true,
+          "type": "boolean"
+        },
+        "verifyApplied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "verifyRestored": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "prepareRecovery",
+        "apply",
+        "verifyApplied",
+        "rebootWhenRequired",
+        "restore",
+        "verifyRestored"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PhysicalSequence0": {
+      "$id": "PhysicalSequence0.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 0,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "PhysicalSequence1": {
+      "$id": "PhysicalSequence1.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "PhysicalSequence2": {
+      "$id": "PhysicalSequence2.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 2,
+      "minimum": 2,
+      "type": "integer"
+    },
+    "PhysicalSequence3": {
+      "$id": "PhysicalSequence3.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 3,
+      "minimum": 3,
+      "type": "integer"
+    },
+    "PhysicalSequence4": {
+      "$id": "PhysicalSequence4.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 4,
+      "minimum": 4,
+      "type": "integer"
+    },
+    "PhysicalSequence5": {
+      "$id": "PhysicalSequence5.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maximum": 5,
+      "minimum": 5,
+      "type": "integer"
+    },
+    "PhysicalSignaturePolicy": {
+      "$id": "PhysicalSignaturePolicy.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "authenticode-required",
+          "type": "string"
+        },
+        {
+          "const": "detached-cms-required",
+          "type": "string"
+        },
+        {
+          "const": "manifest-authenticated",
+          "type": "string"
+        }
+      ]
+    },
+    "PhysicalSourceCommit": {
+      "$id": "PhysicalSourceCommit.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 40,
+      "minLength": 40,
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "PhysicalStage": {
+      "$id": "PhysicalStage.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "clean-windows-vm",
+          "type": "string"
+        },
+        {
+          "const": "owner-pc",
+          "type": "string"
+        },
+        {
+          "const": "friends-pc",
+          "type": "string"
+        }
+      ]
+    },
+    "PhysicalTauriCommandAllowlist": {
+      "$id": "PhysicalTauriCommandAllowlist.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "applyPlan": {
+          "const": "apply_plan",
+          "type": "string"
+        },
+        "approvePlan": {
+          "const": "approve_plan",
+          "type": "string"
+        },
+        "composePlan": {
+          "const": "compose_plan",
+          "type": "string"
+        },
+        "enableAdvancedPreference": {
+          "const": "enable_advanced_preference",
+          "type": "string"
+        },
+        "exportPlanDiagnostic": {
+          "const": "export_plan_diagnostic",
+          "type": "string"
+        },
+        "previewPlanDiagnostic": {
+          "const": "preview_plan_diagnostic",
+          "type": "string"
+        },
+        "readAdvancedPreference": {
+          "const": "read_advanced_preference",
+          "type": "string"
+        },
+        "readPlanExecution": {
+          "const": "read_plan_execution",
+          "type": "string"
+        },
+        "restorePlan": {
+          "const": "restore_plan",
+          "type": "string"
+        },
+        "restorePlanOperation": {
+          "const": "restore_plan_operation",
+          "type": "string"
+        },
+        "restoreRecoveryCheckpoint": {
+          "const": "restore_recovery_checkpoint",
+          "type": "string"
+        },
+        "revisePlan": {
+          "const": "revise_plan",
+          "type": "string"
+        },
+        "revokeAdvancedPreference": {
+          "const": "revoke_advanced_preference",
+          "type": "string"
+        },
+        "subscribePlanExecution": {
+          "const": "subscribe_plan_execution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "composePlan",
+        "revisePlan",
+        "approvePlan",
+        "applyPlan",
+        "restorePlanOperation",
+        "restorePlan",
+        "restoreRecoveryCheckpoint",
+        "readPlanExecution",
+        "subscribePlanExecution",
+        "previewPlanDiagnostic",
+        "exportPlanDiagnostic",
+        "readAdvancedPreference",
+        "enableAdvancedPreference",
+        "revokeAdvancedPreference"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PhysicalVersion": {
+      "$id": "PhysicalVersion.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[0-9A-Za-z][0-9A-Za-z.+-]*$",
+      "type": "string"
+    },
+    "PhysicalVersionPolicy": {
+      "$id": "PhysicalVersionPolicy.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "anyOf": [
+        {
+          "const": "package-version",
+          "type": "string"
+        },
+        {
+          "const": "file-version",
+          "type": "string"
+        },
+        {
+          "const": "schema-version",
+          "type": "string"
+        },
+        {
+          "const": "not-applicable",
+          "type": "string"
+        }
+      ]
     },
     "PlanApprovalDocument": {
       "$id": "PlanApprovalDocument.json",
@@ -1695,6 +2850,450 @@
         "intent",
         "startedAt",
         "audit"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableCleanWindowsVmConfigFileIdentity": {
+      "$id": "PortableCleanWindowsVmConfigFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "configs/clean-windows-vm.run-config.json",
+          "type": "string"
+        },
+        "role": {
+          "const": "clean-windows-vm-config",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableFileSet": {
+      "$id": "PortableFileSet.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "cleanWindowsVmConfig": {
+          "$ref": "PortableCleanWindowsVmConfigFileIdentity.json"
+        },
+        "friendsPcConfig": {
+          "$ref": "PortableFriendsPcConfigFileIdentity.json"
+        },
+        "installationManifest": {
+          "$ref": "PortableInstallationManifestFileIdentity.json"
+        },
+        "installationManifestSignature": {
+          "$ref": "PortableInstallationManifestSignatureFileIdentity.json"
+        },
+        "msedgeDriver": {
+          "$ref": "PortableMsedgeDriverFileIdentity.json"
+        },
+        "msi": {
+          "$ref": "PortableMsiFileIdentity.json"
+        },
+        "ownerPcConfig": {
+          "$ref": "PortableOwnerPcConfigFileIdentity.json"
+        },
+        "runner": {
+          "$ref": "PortableRunnerFileIdentity.json"
+        },
+        "tauriDriver": {
+          "$ref": "PortableTauriDriverFileIdentity.json"
+        }
+      },
+      "required": [
+        "msi",
+        "installationManifest",
+        "installationManifestSignature",
+        "cleanWindowsVmConfig",
+        "ownerPcConfig",
+        "friendsPcConfig",
+        "runner",
+        "tauriDriver",
+        "msedgeDriver"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableFriendsPcConfigFileIdentity": {
+      "$id": "PortableFriendsPcConfigFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "configs/friends-pc.run-config.json",
+          "type": "string"
+        },
+        "role": {
+          "const": "friends-pc-config",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableInstallationManifestFileIdentity": {
+      "$id": "PortableInstallationManifestFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "installation-manifest.json",
+          "type": "string"
+        },
+        "role": {
+          "const": "installation-manifest",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableInstallationManifestSignatureFileIdentity": {
+      "$id": "PortableInstallationManifestSignatureFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "installation-manifest.json.p7s",
+          "type": "string"
+        },
+        "role": {
+          "const": "installation-manifest-signature",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableMsedgeDriverFileIdentity": {
+      "$id": "PortableMsedgeDriverFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "msedgedriver.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "msedgedriver",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableMsiFileIdentity": {
+      "$id": "PortableMsiFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "liiiraa-boost.msi",
+          "type": "string"
+        },
+        "role": {
+          "const": "msi",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableOwnerPcConfigFileIdentity": {
+      "$id": "PortableOwnerPcConfigFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "configs/owner-pc.run-config.json",
+          "type": "string"
+        },
+        "role": {
+          "const": "owner-pc-config",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableRunnerFileIdentity": {
+      "$id": "PortableRunnerFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "phase6-physical-runner.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "runner",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "PortableTauriDriverFileIdentity": {
+      "$id": "PortableTauriDriverFileIdentity.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "relativePath": {
+          "const": "tauri-driver.exe",
+          "type": "string"
+        },
+        "role": {
+          "const": "tauri-driver",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "signaturePolicy": {
+          "$ref": "PhysicalSignaturePolicy.json"
+        },
+        "sizeBytes": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "PhysicalVersion.json"
+        },
+        "versionPolicy": {
+          "$ref": "PhysicalVersionPolicy.json"
+        }
+      },
+      "required": [
+        "sizeBytes",
+        "sha256",
+        "version",
+        "versionPolicy",
+        "signaturePolicy",
+        "role",
+        "relativePath"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -2077,6 +3676,94 @@
         }
       ]
     },
+    "RebootPendingContinuationDocument": {
+      "$id": "RebootPendingContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "previousState": {
+          "const": "running",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence3.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "reboot-pending",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence",
+        "previousState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "RecoveryCheckpointDocument": {
       "$id": "RecoveryCheckpointDocument.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2295,6 +3982,94 @@
         }
       ]
     },
+    "RestoredCompleteContinuationDocument": {
+      "$id": "RestoredCompleteContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "previousState": {
+          "const": "resumed-observation",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence5.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "restored-complete",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence",
+        "previousState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "RestoredJournalEvent": {
       "$id": "RestoredJournalEvent.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2441,6 +4216,104 @@
         "not": {}
       }
     },
+    "ResumedObservationContinuationDocument": {
+      "$id": "ResumedObservationContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "mutationAuthorized": {
+          "const": false,
+          "type": "boolean"
+        },
+        "observationRequired": {
+          "const": true,
+          "type": "boolean"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "previousState": {
+          "const": "reboot-pending",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence4.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "resumed-observation",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence",
+        "previousState",
+        "observationRequired",
+        "mutationAuthorized"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
     "RiskClass": {
       "$id": "RiskClass.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2462,6 +4335,94 @@
           "type": "string"
         }
       ]
+    },
+    "RunningContinuationDocument": {
+      "$id": "RunningContinuationDocument.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "artifactManifestSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "buildId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "configSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "continuationId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "kind": {
+          "const": "physical-continuation",
+          "type": "string"
+        },
+        "observedJournalHeadHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "operationVersionId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "previousRecordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "previousState": {
+          "const": "checkpoint-ready",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordHash": {
+          "$ref": "TransactionHash.json"
+        },
+        "runId": {
+          "$ref": "TransactionIdentifier.json"
+        },
+        "runnerSha256": {
+          "$ref": "TransactionHash.json"
+        },
+        "schemaVersion": {
+          "$ref": "TransactionSchemaVersion.json"
+        },
+        "sequence": {
+          "$ref": "PhysicalSequence2.json"
+        },
+        "stage": {
+          "$ref": "PhysicalStage.json"
+        },
+        "state": {
+          "const": "running",
+          "type": "string"
+        },
+        "transactionId": {
+          "$ref": "TransactionIdentifier.json"
+        }
+      },
+      "required": [
+        "kind",
+        "schemaVersion",
+        "continuationId",
+        "artifactManifestSha256",
+        "configSha256",
+        "runnerSha256",
+        "stage",
+        "operationVersionId",
+        "buildId",
+        "runId",
+        "transactionId",
+        "previousRecordHash",
+        "recordHash",
+        "observedJournalHeadHash",
+        "recordedAt",
+        "state",
+        "sequence",
+        "previousState"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
     },
     "SignedOperationRevocationDocument": {
       "$id": "SignedOperationRevocationDocument.json",
@@ -2707,6 +4668,21 @@
         },
         {
           "$ref": "AdvancedPreferenceEventDocument.json"
+        },
+        {
+          "$ref": "InstallationManifestDocument.json"
+        },
+        {
+          "$ref": "ArtifactManifestDocument.json"
+        },
+        {
+          "$ref": "FriendsRosterDocument.json"
+        },
+        {
+          "$ref": "PhysicalRunConfigDocument.json"
+        },
+        {
+          "$ref": "PhysicalContinuationDocument.json"
         }
       ]
     },

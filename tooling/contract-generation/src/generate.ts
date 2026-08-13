@@ -832,7 +832,10 @@ function normalizeForRustTransport(value: unknown): unknown {
 
   return Object.fromEntries(
     Object.entries(value)
-      .filter(([key]) => key !== 'uniqueItems' && key !== 'pattern')
+      .filter(
+        ([key]) =>
+          key !== 'uniqueItems' && key !== 'pattern' && key !== 'x-liiiraa-unique-roster-bindings',
+      )
       .map(([key, entry]) => [key, normalizeForRustTransport(entry)]),
   );
 }

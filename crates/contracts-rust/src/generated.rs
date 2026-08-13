@@ -10861,6 +10861,149 @@ impl ::std::convert::TryFrom<::std::string::String> for AdvancedPreferenceState 
         value.parse()
     }
 }
+#[doc = "`ArtifactManifestDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ArtifactManifestDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"buildId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"files\","]
+#[doc = "    \"inputTreeHash\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"manifestId\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceCommit\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"files\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableFileSet\""]
+#[doc = "    },"]
+#[doc = "    \"inputTreeHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"artifact-manifest\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"manifestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ArtifactManifestDocument {
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    pub files: PortableFileSet,
+    #[serde(rename = "inputTreeHash")]
+    pub input_tree_hash: TransactionHash,
+    pub kind: ArtifactManifestDocumentKind,
+    #[serde(rename = "manifestId")]
+    pub manifest_id: TransactionIdentifier,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+}
+#[doc = "`ArtifactManifestDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"artifact-manifest\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ArtifactManifestDocumentKind {
+    #[serde(rename = "artifact-manifest")]
+    ArtifactManifest,
+}
+impl ::std::fmt::Display for ArtifactManifestDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ArtifactManifest => f.write_str("artifact-manifest"),
+        }
+    }
+}
+impl ::std::str::FromStr for ArtifactManifestDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "artifact-manifest" => Ok(Self::ArtifactManifest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ArtifactManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ArtifactManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ArtifactManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`AuditEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -13234,6 +13377,345 @@ impl ::std::convert::TryFrom<::std::string::String> for CapabilityAvailability {
         value.parse()
     }
 }
+#[doc = "`CheckpointReadyContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CheckpointReadyContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"previousState\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"previousState\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installed-ready\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence1\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"checkpoint-ready\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CheckpointReadyContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: CheckpointReadyContinuationDocumentKind,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "previousState")]
+    pub previous_state: CheckpointReadyContinuationDocumentPreviousState,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence1,
+    pub stage: PhysicalStage,
+    pub state: CheckpointReadyContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`CheckpointReadyContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CheckpointReadyContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for CheckpointReadyContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for CheckpointReadyContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CheckpointReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CheckpointReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CheckpointReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CheckpointReadyContinuationDocumentPreviousState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installed-ready\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CheckpointReadyContinuationDocumentPreviousState {
+    #[serde(rename = "installed-ready")]
+    InstalledReady,
+}
+impl ::std::fmt::Display for CheckpointReadyContinuationDocumentPreviousState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstalledReady => f.write_str("installed-ready"),
+        }
+    }
+}
+impl ::std::str::FromStr for CheckpointReadyContinuationDocumentPreviousState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installed-ready" => Ok(Self::InstalledReady),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CheckpointReadyContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CheckpointReadyContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CheckpointReadyContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CheckpointReadyContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"checkpoint-ready\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CheckpointReadyContinuationDocumentState {
+    #[serde(rename = "checkpoint-ready")]
+    CheckpointReady,
+}
+impl ::std::fmt::Display for CheckpointReadyContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CheckpointReady => f.write_str("checkpoint-ready"),
+        }
+    }
+}
+impl ::std::str::FromStr for CheckpointReadyContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "checkpoint-ready" => Ok(Self::CheckpointReady),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CheckpointReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CheckpointReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CheckpointReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`ClaimAdmission`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -13515,6 +13997,902 @@ pub struct ClaimEvidence {
     pub unproven: bool,
     #[serde(rename = "validationState")]
     pub validation_state: ValidationState,
+}
+#[doc = "`CleanWindowsVmPhysicalPaths`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CleanWindowsVmPhysicalPaths.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"checkpointReadyRecordPath\","]
+#[doc = "    \"continuationPath\","]
+#[doc = "    \"installedReadyRecordPath\","]
+#[doc = "    \"rawEnvelopePath\","]
+#[doc = "    \"runRecordPath\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"checkpointReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/clean-windows-vm/checkpoint-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"continuationPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/clean-windows-vm/physical-continuation.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"installedReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/clean-windows-vm/installed-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"rawEnvelopePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"evidence/clean-windows-vm/raw-run-envelope.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"runRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/clean-windows-vm/run-record.json\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CleanWindowsVmPhysicalPaths {
+    #[serde(rename = "checkpointReadyRecordPath")]
+    pub checkpoint_ready_record_path: CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath,
+    #[serde(rename = "continuationPath")]
+    pub continuation_path: CleanWindowsVmPhysicalPathsContinuationPath,
+    #[serde(rename = "installedReadyRecordPath")]
+    pub installed_ready_record_path: CleanWindowsVmPhysicalPathsInstalledReadyRecordPath,
+    #[serde(rename = "rawEnvelopePath")]
+    pub raw_envelope_path: CleanWindowsVmPhysicalPathsRawEnvelopePath,
+    #[serde(rename = "runRecordPath")]
+    pub run_record_path: CleanWindowsVmPhysicalPathsRunRecordPath,
+}
+#[doc = "`CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/clean-windows-vm/checkpoint-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath {
+    #[serde(rename = "state/clean-windows-vm/checkpoint-ready.json")]
+    StateCleanWindowsVmCheckpointReadyJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateCleanWindowsVmCheckpointReadyJson => {
+                f.write_str("state/clean-windows-vm/checkpoint-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/clean-windows-vm/checkpoint-ready.json" => {
+                Ok(Self::StateCleanWindowsVmCheckpointReadyJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CleanWindowsVmPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmPhysicalPathsContinuationPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/clean-windows-vm/physical-continuation.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmPhysicalPathsContinuationPath {
+    #[serde(rename = "state/clean-windows-vm/physical-continuation.json")]
+    StateCleanWindowsVmPhysicalContinuationJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmPhysicalPathsContinuationPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateCleanWindowsVmPhysicalContinuationJson => {
+                f.write_str("state/clean-windows-vm/physical-continuation.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmPhysicalPathsContinuationPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/clean-windows-vm/physical-continuation.json" => {
+                Ok(Self::StateCleanWindowsVmPhysicalContinuationJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmPhysicalPathsContinuationPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CleanWindowsVmPhysicalPathsContinuationPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmPhysicalPathsInstalledReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/clean-windows-vm/installed-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmPhysicalPathsInstalledReadyRecordPath {
+    #[serde(rename = "state/clean-windows-vm/installed-ready.json")]
+    StateCleanWindowsVmInstalledReadyJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmPhysicalPathsInstalledReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateCleanWindowsVmInstalledReadyJson => {
+                f.write_str("state/clean-windows-vm/installed-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmPhysicalPathsInstalledReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/clean-windows-vm/installed-ready.json" => {
+                Ok(Self::StateCleanWindowsVmInstalledReadyJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmPhysicalPathsInstalledReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CleanWindowsVmPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmPhysicalPathsRawEnvelopePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"evidence/clean-windows-vm/raw-run-envelope.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmPhysicalPathsRawEnvelopePath {
+    #[serde(rename = "evidence/clean-windows-vm/raw-run-envelope.json")]
+    EvidenceCleanWindowsVmRawRunEnvelopeJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmPhysicalPathsRawEnvelopePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EvidenceCleanWindowsVmRawRunEnvelopeJson => {
+                f.write_str("evidence/clean-windows-vm/raw-run-envelope.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmPhysicalPathsRawEnvelopePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "evidence/clean-windows-vm/raw-run-envelope.json" => {
+                Ok(Self::EvidenceCleanWindowsVmRawRunEnvelopeJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmPhysicalPathsRawEnvelopePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmPhysicalPathsRunRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/clean-windows-vm/run-record.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmPhysicalPathsRunRecordPath {
+    #[serde(rename = "state/clean-windows-vm/run-record.json")]
+    StateCleanWindowsVmRunRecordJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmPhysicalPathsRunRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateCleanWindowsVmRunRecordJson => {
+                f.write_str("state/clean-windows-vm/run-record.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmPhysicalPathsRunRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/clean-windows-vm/run-record.json" => Ok(Self::StateCleanWindowsVmRunRecordJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CleanWindowsVmPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmRunConfigDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"CleanWindowsVmRunConfigDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestPath\","]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configId\","]
+#[doc = "    \"configPath\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"participantIdentityMode\","]
+#[doc = "    \"paths\","]
+#[doc = "    \"scenarios\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceCommit\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"tauriCommands\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"artifact-manifest.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/clean-windows-vm.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-run-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"participantIdentityMode\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"purpose-bound-local-hash\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"paths\": {"]
+#[doc = "      \"$ref\": \"#/definitions/CleanWindowsVmPhysicalPaths\""]
+#[doc = "    },"]
+#[doc = "    \"scenarios\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalScenarioSet\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"clean-windows-vm\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tauriCommands\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalTauriCommandAllowlist\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CleanWindowsVmRunConfigDocument {
+    #[serde(rename = "artifactManifestPath")]
+    pub artifact_manifest_path: CleanWindowsVmRunConfigDocumentArtifactManifestPath,
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configId")]
+    pub config_id: TransactionIdentifier,
+    #[serde(rename = "configPath")]
+    pub config_path: CleanWindowsVmRunConfigDocumentConfigPath,
+    pub kind: CleanWindowsVmRunConfigDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "participantIdentityMode")]
+    pub participant_identity_mode: CleanWindowsVmRunConfigDocumentParticipantIdentityMode,
+    pub paths: CleanWindowsVmPhysicalPaths,
+    pub scenarios: PhysicalScenarioSet,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+    pub stage: CleanWindowsVmRunConfigDocumentStage,
+    #[serde(rename = "tauriCommands")]
+    pub tauri_commands: PhysicalTauriCommandAllowlist,
+}
+#[doc = "`CleanWindowsVmRunConfigDocumentArtifactManifestPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"artifact-manifest.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmRunConfigDocumentArtifactManifestPath {
+    #[serde(rename = "artifact-manifest.json")]
+    ArtifactManifestJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmRunConfigDocumentArtifactManifestPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ArtifactManifestJson => f.write_str("artifact-manifest.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmRunConfigDocumentArtifactManifestPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "artifact-manifest.json" => Ok(Self::ArtifactManifestJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmRunConfigDocumentArtifactManifestPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CleanWindowsVmRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmRunConfigDocumentConfigPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/clean-windows-vm.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmRunConfigDocumentConfigPath {
+    #[serde(rename = "configs/clean-windows-vm.run-config.json")]
+    ConfigsCleanWindowsVmRunConfigJson,
+}
+impl ::std::fmt::Display for CleanWindowsVmRunConfigDocumentConfigPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsCleanWindowsVmRunConfigJson => {
+                f.write_str("configs/clean-windows-vm.run-config.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmRunConfigDocumentConfigPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/clean-windows-vm.run-config.json" => {
+                Ok(Self::ConfigsCleanWindowsVmRunConfigJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CleanWindowsVmRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmRunConfigDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-run-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmRunConfigDocumentKind {
+    #[serde(rename = "physical-run-config")]
+    PhysicalRunConfig,
+}
+impl ::std::fmt::Display for CleanWindowsVmRunConfigDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalRunConfig => f.write_str("physical-run-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmRunConfigDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-run-config" => Ok(Self::PhysicalRunConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CleanWindowsVmRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmRunConfigDocumentParticipantIdentityMode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"purpose-bound-local-hash\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmRunConfigDocumentParticipantIdentityMode {
+    #[serde(rename = "purpose-bound-local-hash")]
+    PurposeBoundLocalHash,
+}
+impl ::std::fmt::Display for CleanWindowsVmRunConfigDocumentParticipantIdentityMode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PurposeBoundLocalHash => f.write_str("purpose-bound-local-hash"),
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmRunConfigDocumentParticipantIdentityMode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "purpose-bound-local-hash" => Ok(Self::PurposeBoundLocalHash),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmRunConfigDocumentParticipantIdentityMode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for CleanWindowsVmRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for CleanWindowsVmRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`CleanWindowsVmRunConfigDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"clean-windows-vm\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CleanWindowsVmRunConfigDocumentStage {
+    #[serde(rename = "clean-windows-vm")]
+    CleanWindowsVm,
+}
+impl ::std::fmt::Display for CleanWindowsVmRunConfigDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
+        }
+    }
+}
+impl ::std::str::FromStr for CleanWindowsVmRunConfigDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CleanWindowsVmRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CleanWindowsVmRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
 }
 #[doc = "`CollectorExecutionContext`"]
 #[doc = r""]
@@ -20003,6 +21381,1048 @@ impl ::std::convert::TryFrom<::std::string::String> for FixtureDiagnosticValueKi
         value.parse()
     }
 }
+#[doc = "`FriendsPcPhysicalPaths`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FriendsPcPhysicalPaths.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"checkpointReadyRecordPath\","]
+#[doc = "    \"continuationPath\","]
+#[doc = "    \"installedReadyRecordPath\","]
+#[doc = "    \"rawEnvelopePath\","]
+#[doc = "    \"runRecordPath\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"checkpointReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/friends-pc/checkpoint-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"continuationPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/friends-pc/physical-continuation.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"installedReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/friends-pc/installed-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"rawEnvelopePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"evidence/friends-pc/raw-run-envelope.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"runRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/friends-pc/run-record.json\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FriendsPcPhysicalPaths {
+    #[serde(rename = "checkpointReadyRecordPath")]
+    pub checkpoint_ready_record_path: FriendsPcPhysicalPathsCheckpointReadyRecordPath,
+    #[serde(rename = "continuationPath")]
+    pub continuation_path: FriendsPcPhysicalPathsContinuationPath,
+    #[serde(rename = "installedReadyRecordPath")]
+    pub installed_ready_record_path: FriendsPcPhysicalPathsInstalledReadyRecordPath,
+    #[serde(rename = "rawEnvelopePath")]
+    pub raw_envelope_path: FriendsPcPhysicalPathsRawEnvelopePath,
+    #[serde(rename = "runRecordPath")]
+    pub run_record_path: FriendsPcPhysicalPathsRunRecordPath,
+}
+#[doc = "`FriendsPcPhysicalPathsCheckpointReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/friends-pc/checkpoint-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcPhysicalPathsCheckpointReadyRecordPath {
+    #[serde(rename = "state/friends-pc/checkpoint-ready.json")]
+    StateFriendsPcCheckpointReadyJson,
+}
+impl ::std::fmt::Display for FriendsPcPhysicalPathsCheckpointReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateFriendsPcCheckpointReadyJson => {
+                f.write_str("state/friends-pc/checkpoint-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcPhysicalPathsCheckpointReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/friends-pc/checkpoint-ready.json" => Ok(Self::StateFriendsPcCheckpointReadyJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcPhysicalPathsCheckpointReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcPhysicalPathsContinuationPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/friends-pc/physical-continuation.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcPhysicalPathsContinuationPath {
+    #[serde(rename = "state/friends-pc/physical-continuation.json")]
+    StateFriendsPcPhysicalContinuationJson,
+}
+impl ::std::fmt::Display for FriendsPcPhysicalPathsContinuationPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateFriendsPcPhysicalContinuationJson => {
+                f.write_str("state/friends-pc/physical-continuation.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcPhysicalPathsContinuationPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/friends-pc/physical-continuation.json" => {
+                Ok(Self::StateFriendsPcPhysicalContinuationJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcPhysicalPathsInstalledReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/friends-pc/installed-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcPhysicalPathsInstalledReadyRecordPath {
+    #[serde(rename = "state/friends-pc/installed-ready.json")]
+    StateFriendsPcInstalledReadyJson,
+}
+impl ::std::fmt::Display for FriendsPcPhysicalPathsInstalledReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateFriendsPcInstalledReadyJson => {
+                f.write_str("state/friends-pc/installed-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcPhysicalPathsInstalledReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/friends-pc/installed-ready.json" => Ok(Self::StateFriendsPcInstalledReadyJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcPhysicalPathsInstalledReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcPhysicalPathsRawEnvelopePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"evidence/friends-pc/raw-run-envelope.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcPhysicalPathsRawEnvelopePath {
+    #[serde(rename = "evidence/friends-pc/raw-run-envelope.json")]
+    EvidenceFriendsPcRawRunEnvelopeJson,
+}
+impl ::std::fmt::Display for FriendsPcPhysicalPathsRawEnvelopePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EvidenceFriendsPcRawRunEnvelopeJson => {
+                f.write_str("evidence/friends-pc/raw-run-envelope.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcPhysicalPathsRawEnvelopePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "evidence/friends-pc/raw-run-envelope.json" => {
+                Ok(Self::EvidenceFriendsPcRawRunEnvelopeJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcPhysicalPathsRunRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/friends-pc/run-record.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcPhysicalPathsRunRecordPath {
+    #[serde(rename = "state/friends-pc/run-record.json")]
+    StateFriendsPcRunRecordJson,
+}
+impl ::std::fmt::Display for FriendsPcPhysicalPathsRunRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateFriendsPcRunRecordJson => f.write_str("state/friends-pc/run-record.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcPhysicalPathsRunRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/friends-pc/run-record.json" => Ok(Self::StateFriendsPcRunRecordJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FriendsPcRunConfigDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestPath\","]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configId\","]
+#[doc = "    \"configPath\","]
+#[doc = "    \"friendsRosterPath\","]
+#[doc = "    \"friendsRosterSignaturePath\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"participantIdentityMode\","]
+#[doc = "    \"paths\","]
+#[doc = "    \"scenarios\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceCommit\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"tauriCommands\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"artifact-manifest.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/friends-pc.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"friendsRosterPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends/friends-roster.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"friendsRosterSignaturePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends/friends-roster.json.p7s\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-run-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"participantIdentityMode\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"purpose-bound-local-hash\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"paths\": {"]
+#[doc = "      \"$ref\": \"#/definitions/FriendsPcPhysicalPaths\""]
+#[doc = "    },"]
+#[doc = "    \"scenarios\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalScenarioSet\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends-pc\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tauriCommands\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalTauriCommandAllowlist\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FriendsPcRunConfigDocument {
+    #[serde(rename = "artifactManifestPath")]
+    pub artifact_manifest_path: FriendsPcRunConfigDocumentArtifactManifestPath,
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configId")]
+    pub config_id: TransactionIdentifier,
+    #[serde(rename = "configPath")]
+    pub config_path: FriendsPcRunConfigDocumentConfigPath,
+    #[serde(rename = "friendsRosterPath")]
+    pub friends_roster_path: FriendsPcRunConfigDocumentFriendsRosterPath,
+    #[serde(rename = "friendsRosterSignaturePath")]
+    pub friends_roster_signature_path: FriendsPcRunConfigDocumentFriendsRosterSignaturePath,
+    pub kind: FriendsPcRunConfigDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "participantIdentityMode")]
+    pub participant_identity_mode: FriendsPcRunConfigDocumentParticipantIdentityMode,
+    pub paths: FriendsPcPhysicalPaths,
+    pub scenarios: PhysicalScenarioSet,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+    pub stage: FriendsPcRunConfigDocumentStage,
+    #[serde(rename = "tauriCommands")]
+    pub tauri_commands: PhysicalTauriCommandAllowlist,
+}
+#[doc = "`FriendsPcRunConfigDocumentArtifactManifestPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"artifact-manifest.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentArtifactManifestPath {
+    #[serde(rename = "artifact-manifest.json")]
+    ArtifactManifestJson,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentArtifactManifestPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ArtifactManifestJson => f.write_str("artifact-manifest.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentArtifactManifestPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "artifact-manifest.json" => Ok(Self::ArtifactManifestJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentArtifactManifestPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentConfigPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/friends-pc.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentConfigPath {
+    #[serde(rename = "configs/friends-pc.run-config.json")]
+    ConfigsFriendsPcRunConfigJson,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentConfigPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsFriendsPcRunConfigJson => {
+                f.write_str("configs/friends-pc.run-config.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentConfigPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/friends-pc.run-config.json" => Ok(Self::ConfigsFriendsPcRunConfigJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentFriendsRosterPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends/friends-roster.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentFriendsRosterPath {
+    #[serde(rename = "friends/friends-roster.json")]
+    FriendsFriendsRosterJson,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentFriendsRosterPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsFriendsRosterJson => f.write_str("friends/friends-roster.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentFriendsRosterPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends/friends-roster.json" => Ok(Self::FriendsFriendsRosterJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentFriendsRosterPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcRunConfigDocumentFriendsRosterPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcRunConfigDocumentFriendsRosterPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentFriendsRosterSignaturePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends/friends-roster.json.p7s\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentFriendsRosterSignaturePath {
+    #[serde(rename = "friends/friends-roster.json.p7s")]
+    FriendsFriendsRosterJsonP7s,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentFriendsRosterSignaturePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsFriendsRosterJsonP7s => f.write_str("friends/friends-roster.json.p7s"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentFriendsRosterSignaturePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends/friends-roster.json.p7s" => Ok(Self::FriendsFriendsRosterJsonP7s),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentFriendsRosterSignaturePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcRunConfigDocumentFriendsRosterSignaturePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcRunConfigDocumentFriendsRosterSignaturePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-run-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentKind {
+    #[serde(rename = "physical-run-config")]
+    PhysicalRunConfig,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalRunConfig => f.write_str("physical-run-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-run-config" => Ok(Self::PhysicalRunConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentParticipantIdentityMode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"purpose-bound-local-hash\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentParticipantIdentityMode {
+    #[serde(rename = "purpose-bound-local-hash")]
+    PurposeBoundLocalHash,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentParticipantIdentityMode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PurposeBoundLocalHash => f.write_str("purpose-bound-local-hash"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentParticipantIdentityMode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "purpose-bound-local-hash" => Ok(Self::PurposeBoundLocalHash),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentParticipantIdentityMode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for FriendsPcRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for FriendsPcRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsPcRunConfigDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends-pc\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsPcRunConfigDocumentStage {
+    #[serde(rename = "friends-pc")]
+    FriendsPc,
+}
+impl ::std::fmt::Display for FriendsPcRunConfigDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsPc => f.write_str("friends-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsPcRunConfigDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends-pc" => Ok(Self::FriendsPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`FriendsPromotionDocument`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -20299,6 +22719,270 @@ impl ::std::convert::TryFrom<::std::string::String> for FriendsPromotionDocument
     ) -> ::std::result::Result<Self, self::error::ConversionError> {
         value.parse()
     }
+}
+#[doc = "`FriendsRosterDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FriendsRosterDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"friendsConfigSha256\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"participants\","]
+#[doc = "    \"purpose\","]
+#[doc = "    \"rosterId\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceCommit\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"friendsConfigSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends-roster\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"participants\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/definitions/FriendsRosterParticipant\""]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 32,"]
+#[doc = "      \"minItems\": 1"]
+#[doc = "    },"]
+#[doc = "    \"purpose\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"phase6-friends-physical-validation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"rosterId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FriendsRosterDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    #[serde(rename = "friendsConfigSha256")]
+    pub friends_config_sha256: TransactionHash,
+    pub kind: FriendsRosterDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    pub participants: ::std::vec::Vec<FriendsRosterParticipant>,
+    pub purpose: FriendsRosterDocumentPurpose,
+    #[serde(rename = "rosterId")]
+    pub roster_id: TransactionIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+}
+#[doc = "`FriendsRosterDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends-roster\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsRosterDocumentKind {
+    #[serde(rename = "friends-roster")]
+    FriendsRoster,
+}
+impl ::std::fmt::Display for FriendsRosterDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsRoster => f.write_str("friends-roster"),
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsRosterDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends-roster" => Ok(Self::FriendsRoster),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsRosterDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsRosterDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsRosterDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsRosterDocumentPurpose`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"phase6-friends-physical-validation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum FriendsRosterDocumentPurpose {
+    #[serde(rename = "phase6-friends-physical-validation")]
+    Phase6FriendsPhysicalValidation,
+}
+impl ::std::fmt::Display for FriendsRosterDocumentPurpose {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Phase6FriendsPhysicalValidation => {
+                f.write_str("phase6-friends-physical-validation")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for FriendsRosterDocumentPurpose {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "phase6-friends-physical-validation" => Ok(Self::Phase6FriendsPhysicalValidation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for FriendsRosterDocumentPurpose {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for FriendsRosterDocumentPurpose {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for FriendsRosterDocumentPurpose {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`FriendsRosterParticipant`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"FriendsRosterParticipant.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"machineSlot\","]
+#[doc = "    \"participantId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"machineSlot\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalMachineSlot\""]
+#[doc = "    },"]
+#[doc = "    \"participantId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct FriendsRosterParticipant {
+    #[serde(rename = "machineSlot")]
+    pub machine_slot: PhysicalMachineSlot,
+    #[serde(rename = "participantId")]
+    pub participant_id: TransactionHash,
 }
 #[doc = "`FutureAuthorityCommand`"]
 #[doc = r""]
@@ -21614,6 +24298,1290 @@ impl<'de> ::serde::Deserialize<'de> for InspectionId {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "`InstallationManifestDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstallationManifestDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"buildId\","]
+#[doc = "    \"createdAt\","]
+#[doc = "    \"files\","]
+#[doc = "    \"inputTreeHash\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"manifestId\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"packageVersion\","]
+#[doc = "    \"productCode\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"signerSpkiSha256\","]
+#[doc = "    \"sourceCommit\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"createdAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"files\": {"]
+#[doc = "      \"$ref\": \"#/definitions/InstalledFileSet\""]
+#[doc = "    },"]
+#[doc = "    \"inputTreeHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installation-manifest\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"manifestId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"packageVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"productCode\": {"]
+#[doc = "      \"$ref\": \"#/definitions/WindowsSchemeIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"signerSpkiSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstallationManifestDocument {
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "createdAt")]
+    pub created_at: ::std::string::String,
+    pub files: InstalledFileSet,
+    #[serde(rename = "inputTreeHash")]
+    pub input_tree_hash: TransactionHash,
+    pub kind: InstallationManifestDocumentKind,
+    #[serde(rename = "manifestId")]
+    pub manifest_id: TransactionIdentifier,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "packageVersion")]
+    pub package_version: PhysicalVersion,
+    #[serde(rename = "productCode")]
+    pub product_code: WindowsSchemeIdentifier,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "signerSpkiSha256")]
+    pub signer_spki_sha256: TransactionHash,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+}
+#[doc = "`InstallationManifestDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installation-manifest\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstallationManifestDocumentKind {
+    #[serde(rename = "installation-manifest")]
+    InstallationManifest,
+}
+impl ::std::fmt::Display for InstallationManifestDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstallationManifest => f.write_str("installation-manifest"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstallationManifestDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installation-manifest" => Ok(Self::InstallationManifest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstallationManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstallationManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstallationManifestDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledDesktopFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstalledDesktopFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"authenticodePublisher\","]
+#[doc = "    \"authenticodeThumbprint\","]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"authenticodePublisher\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"authenticodeThumbprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"liiiraa-desktop.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"desktop\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstalledDesktopFileIdentity {
+    #[serde(rename = "authenticodePublisher")]
+    pub authenticode_publisher: InstalledDesktopFileIdentityAuthenticodePublisher,
+    #[serde(rename = "authenticodeThumbprint")]
+    pub authenticode_thumbprint: TransactionHash,
+    #[serde(rename = "relativePath")]
+    pub relative_path: InstalledDesktopFileIdentityRelativePath,
+    pub role: InstalledDesktopFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+}
+#[doc = "`InstalledDesktopFileIdentityAuthenticodePublisher`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledDesktopFileIdentityAuthenticodePublisher {
+    #[serde(rename = "Liiiraa Boost Development")]
+    LiiiraaBoostDevelopment,
+}
+impl ::std::fmt::Display for InstalledDesktopFileIdentityAuthenticodePublisher {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledDesktopFileIdentityAuthenticodePublisher {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledDesktopFileIdentityAuthenticodePublisher {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for InstalledDesktopFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for InstalledDesktopFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledDesktopFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"liiiraa-desktop.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledDesktopFileIdentityRelativePath {
+    #[serde(rename = "liiiraa-desktop.exe")]
+    LiiiraaDesktopExe,
+}
+impl ::std::fmt::Display for InstalledDesktopFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaDesktopExe => f.write_str("liiiraa-desktop.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledDesktopFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "liiiraa-desktop.exe" => Ok(Self::LiiiraaDesktopExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledDesktopFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledDesktopFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledDesktopFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledDesktopFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"desktop\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledDesktopFileIdentityRole {
+    #[serde(rename = "desktop")]
+    Desktop,
+}
+impl ::std::fmt::Display for InstalledDesktopFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Desktop => f.write_str("desktop"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledDesktopFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "desktop" => Ok(Self::Desktop),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledDesktopFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledDesktopFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledDesktopFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledFileSet`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstalledFileSet.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"desktop\","]
+#[doc = "    \"runner\","]
+#[doc = "    \"service\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"desktop\": {"]
+#[doc = "      \"$ref\": \"#/definitions/InstalledDesktopFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"runner\": {"]
+#[doc = "      \"$ref\": \"#/definitions/InstalledRunnerFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"service\": {"]
+#[doc = "      \"$ref\": \"#/definitions/InstalledServiceFileIdentity\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstalledFileSet {
+    pub desktop: InstalledDesktopFileIdentity,
+    pub runner: InstalledRunnerFileIdentity,
+    pub service: InstalledServiceFileIdentity,
+}
+#[doc = "`InstalledReadyContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstalledReadyContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence0\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installed-ready\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstalledReadyContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: InstalledReadyContinuationDocumentKind,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence0,
+    pub stage: PhysicalStage,
+    pub state: InstalledReadyContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`InstalledReadyContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledReadyContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for InstalledReadyContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledReadyContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledReadyContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledReadyContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installed-ready\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledReadyContinuationDocumentState {
+    #[serde(rename = "installed-ready")]
+    InstalledReady,
+}
+impl ::std::fmt::Display for InstalledReadyContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstalledReady => f.write_str("installed-ready"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledReadyContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installed-ready" => Ok(Self::InstalledReady),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledReadyContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledRunnerFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstalledRunnerFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"authenticodePublisher\","]
+#[doc = "    \"authenticodeThumbprint\","]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"authenticodePublisher\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"authenticodeThumbprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"phase6-physical-runner.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"runner\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstalledRunnerFileIdentity {
+    #[serde(rename = "authenticodePublisher")]
+    pub authenticode_publisher: InstalledRunnerFileIdentityAuthenticodePublisher,
+    #[serde(rename = "authenticodeThumbprint")]
+    pub authenticode_thumbprint: TransactionHash,
+    #[serde(rename = "relativePath")]
+    pub relative_path: InstalledRunnerFileIdentityRelativePath,
+    pub role: InstalledRunnerFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+}
+#[doc = "`InstalledRunnerFileIdentityAuthenticodePublisher`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledRunnerFileIdentityAuthenticodePublisher {
+    #[serde(rename = "Liiiraa Boost Development")]
+    LiiiraaBoostDevelopment,
+}
+impl ::std::fmt::Display for InstalledRunnerFileIdentityAuthenticodePublisher {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledRunnerFileIdentityAuthenticodePublisher {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledRunnerFileIdentityAuthenticodePublisher {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for InstalledRunnerFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for InstalledRunnerFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledRunnerFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"phase6-physical-runner.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledRunnerFileIdentityRelativePath {
+    #[serde(rename = "phase6-physical-runner.exe")]
+    Phase6PhysicalRunnerExe,
+}
+impl ::std::fmt::Display for InstalledRunnerFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Phase6PhysicalRunnerExe => f.write_str("phase6-physical-runner.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledRunnerFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "phase6-physical-runner.exe" => Ok(Self::Phase6PhysicalRunnerExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledRunnerFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"runner\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledRunnerFileIdentityRole {
+    #[serde(rename = "runner")]
+    Runner,
+}
+impl ::std::fmt::Display for InstalledRunnerFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Runner => f.write_str("runner"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledRunnerFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "runner" => Ok(Self::Runner),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledServiceFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"InstalledServiceFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"authenticodePublisher\","]
+#[doc = "    \"authenticodeThumbprint\","]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"authenticodePublisher\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"authenticodeThumbprint\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"liiiraa-optimizer-service.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"service\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct InstalledServiceFileIdentity {
+    #[serde(rename = "authenticodePublisher")]
+    pub authenticode_publisher: InstalledServiceFileIdentityAuthenticodePublisher,
+    #[serde(rename = "authenticodeThumbprint")]
+    pub authenticode_thumbprint: TransactionHash,
+    #[serde(rename = "relativePath")]
+    pub relative_path: InstalledServiceFileIdentityRelativePath,
+    pub role: InstalledServiceFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+}
+#[doc = "`InstalledServiceFileIdentityAuthenticodePublisher`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledServiceFileIdentityAuthenticodePublisher {
+    #[serde(rename = "Liiiraa Boost Development")]
+    LiiiraaBoostDevelopment,
+}
+impl ::std::fmt::Display for InstalledServiceFileIdentityAuthenticodePublisher {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledServiceFileIdentityAuthenticodePublisher {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledServiceFileIdentityAuthenticodePublisher {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for InstalledServiceFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for InstalledServiceFileIdentityAuthenticodePublisher
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledServiceFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"liiiraa-optimizer-service.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledServiceFileIdentityRelativePath {
+    #[serde(rename = "liiiraa-optimizer-service.exe")]
+    LiiiraaOptimizerServiceExe,
+}
+impl ::std::fmt::Display for InstalledServiceFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaOptimizerServiceExe => f.write_str("liiiraa-optimizer-service.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledServiceFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "liiiraa-optimizer-service.exe" => Ok(Self::LiiiraaOptimizerServiceExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledServiceFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledServiceFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledServiceFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`InstalledServiceFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"service\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum InstalledServiceFileIdentityRole {
+    #[serde(rename = "service")]
+    Service,
+}
+impl ::std::fmt::Display for InstalledServiceFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Service => f.write_str("service"),
+        }
+    }
+}
+impl ::std::str::FromStr for InstalledServiceFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "service" => Ok(Self::Service),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for InstalledServiceFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for InstalledServiceFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for InstalledServiceFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "`InvalidMeasurementSession`"]
@@ -24704,6 +28672,886 @@ impl ::std::convert::From<FriendsPromotionDocument> for OperationPromotionDocume
         Self::FriendsPromotionDocument(value)
     }
 }
+#[doc = "`OwnerPcPhysicalPaths`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OwnerPcPhysicalPaths.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"checkpointReadyRecordPath\","]
+#[doc = "    \"continuationPath\","]
+#[doc = "    \"installedReadyRecordPath\","]
+#[doc = "    \"rawEnvelopePath\","]
+#[doc = "    \"runRecordPath\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"checkpointReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/owner-pc/checkpoint-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"continuationPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/owner-pc/physical-continuation.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"installedReadyRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/owner-pc/installed-ready.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"rawEnvelopePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"evidence/owner-pc/raw-run-envelope.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"runRecordPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"state/owner-pc/run-record.json\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OwnerPcPhysicalPaths {
+    #[serde(rename = "checkpointReadyRecordPath")]
+    pub checkpoint_ready_record_path: OwnerPcPhysicalPathsCheckpointReadyRecordPath,
+    #[serde(rename = "continuationPath")]
+    pub continuation_path: OwnerPcPhysicalPathsContinuationPath,
+    #[serde(rename = "installedReadyRecordPath")]
+    pub installed_ready_record_path: OwnerPcPhysicalPathsInstalledReadyRecordPath,
+    #[serde(rename = "rawEnvelopePath")]
+    pub raw_envelope_path: OwnerPcPhysicalPathsRawEnvelopePath,
+    #[serde(rename = "runRecordPath")]
+    pub run_record_path: OwnerPcPhysicalPathsRunRecordPath,
+}
+#[doc = "`OwnerPcPhysicalPathsCheckpointReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/owner-pc/checkpoint-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcPhysicalPathsCheckpointReadyRecordPath {
+    #[serde(rename = "state/owner-pc/checkpoint-ready.json")]
+    StateOwnerPcCheckpointReadyJson,
+}
+impl ::std::fmt::Display for OwnerPcPhysicalPathsCheckpointReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateOwnerPcCheckpointReadyJson => {
+                f.write_str("state/owner-pc/checkpoint-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcPhysicalPathsCheckpointReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/owner-pc/checkpoint-ready.json" => Ok(Self::StateOwnerPcCheckpointReadyJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcPhysicalPathsCheckpointReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for OwnerPcPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for OwnerPcPhysicalPathsCheckpointReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcPhysicalPathsContinuationPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/owner-pc/physical-continuation.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcPhysicalPathsContinuationPath {
+    #[serde(rename = "state/owner-pc/physical-continuation.json")]
+    StateOwnerPcPhysicalContinuationJson,
+}
+impl ::std::fmt::Display for OwnerPcPhysicalPathsContinuationPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateOwnerPcPhysicalContinuationJson => {
+                f.write_str("state/owner-pc/physical-continuation.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcPhysicalPathsContinuationPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/owner-pc/physical-continuation.json" => {
+                Ok(Self::StateOwnerPcPhysicalContinuationJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsContinuationPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcPhysicalPathsInstalledReadyRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/owner-pc/installed-ready.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcPhysicalPathsInstalledReadyRecordPath {
+    #[serde(rename = "state/owner-pc/installed-ready.json")]
+    StateOwnerPcInstalledReadyJson,
+}
+impl ::std::fmt::Display for OwnerPcPhysicalPathsInstalledReadyRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateOwnerPcInstalledReadyJson => {
+                f.write_str("state/owner-pc/installed-ready.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcPhysicalPathsInstalledReadyRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/owner-pc/installed-ready.json" => Ok(Self::StateOwnerPcInstalledReadyJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcPhysicalPathsInstalledReadyRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for OwnerPcPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for OwnerPcPhysicalPathsInstalledReadyRecordPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcPhysicalPathsRawEnvelopePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"evidence/owner-pc/raw-run-envelope.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcPhysicalPathsRawEnvelopePath {
+    #[serde(rename = "evidence/owner-pc/raw-run-envelope.json")]
+    EvidenceOwnerPcRawRunEnvelopeJson,
+}
+impl ::std::fmt::Display for OwnerPcPhysicalPathsRawEnvelopePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EvidenceOwnerPcRawRunEnvelopeJson => {
+                f.write_str("evidence/owner-pc/raw-run-envelope.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcPhysicalPathsRawEnvelopePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "evidence/owner-pc/raw-run-envelope.json" => {
+                Ok(Self::EvidenceOwnerPcRawRunEnvelopeJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsRawEnvelopePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcPhysicalPathsRunRecordPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"state/owner-pc/run-record.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcPhysicalPathsRunRecordPath {
+    #[serde(rename = "state/owner-pc/run-record.json")]
+    StateOwnerPcRunRecordJson,
+}
+impl ::std::fmt::Display for OwnerPcPhysicalPathsRunRecordPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::StateOwnerPcRunRecordJson => f.write_str("state/owner-pc/run-record.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcPhysicalPathsRunRecordPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "state/owner-pc/run-record.json" => Ok(Self::StateOwnerPcRunRecordJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsRunRecordPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcRunConfigDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"OwnerPcRunConfigDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestPath\","]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configId\","]
+#[doc = "    \"configPath\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"participantIdentityMode\","]
+#[doc = "    \"paths\","]
+#[doc = "    \"scenarios\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sourceCommit\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"tauriCommands\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"artifact-manifest.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configPath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/owner-pc.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-run-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"participantIdentityMode\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"purpose-bound-local-hash\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"paths\": {"]
+#[doc = "      \"$ref\": \"#/definitions/OwnerPcPhysicalPaths\""]
+#[doc = "    },"]
+#[doc = "    \"scenarios\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalScenarioSet\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sourceCommit\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSourceCommit\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"owner-pc\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tauriCommands\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalTauriCommandAllowlist\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OwnerPcRunConfigDocument {
+    #[serde(rename = "artifactManifestPath")]
+    pub artifact_manifest_path: OwnerPcRunConfigDocumentArtifactManifestPath,
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configId")]
+    pub config_id: TransactionIdentifier,
+    #[serde(rename = "configPath")]
+    pub config_path: OwnerPcRunConfigDocumentConfigPath,
+    pub kind: OwnerPcRunConfigDocumentKind,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "participantIdentityMode")]
+    pub participant_identity_mode: OwnerPcRunConfigDocumentParticipantIdentityMode,
+    pub paths: OwnerPcPhysicalPaths,
+    pub scenarios: PhysicalScenarioSet,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    #[serde(rename = "sourceCommit")]
+    pub source_commit: PhysicalSourceCommit,
+    pub stage: OwnerPcRunConfigDocumentStage,
+    #[serde(rename = "tauriCommands")]
+    pub tauri_commands: PhysicalTauriCommandAllowlist,
+}
+#[doc = "`OwnerPcRunConfigDocumentArtifactManifestPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"artifact-manifest.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcRunConfigDocumentArtifactManifestPath {
+    #[serde(rename = "artifact-manifest.json")]
+    ArtifactManifestJson,
+}
+impl ::std::fmt::Display for OwnerPcRunConfigDocumentArtifactManifestPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ArtifactManifestJson => f.write_str("artifact-manifest.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcRunConfigDocumentArtifactManifestPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "artifact-manifest.json" => Ok(Self::ArtifactManifestJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcRunConfigDocumentArtifactManifestPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for OwnerPcRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for OwnerPcRunConfigDocumentArtifactManifestPath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcRunConfigDocumentConfigPath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/owner-pc.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcRunConfigDocumentConfigPath {
+    #[serde(rename = "configs/owner-pc.run-config.json")]
+    ConfigsOwnerPcRunConfigJson,
+}
+impl ::std::fmt::Display for OwnerPcRunConfigDocumentConfigPath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsOwnerPcRunConfigJson => f.write_str("configs/owner-pc.run-config.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcRunConfigDocumentConfigPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/owner-pc.run-config.json" => Ok(Self::ConfigsOwnerPcRunConfigJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcRunConfigDocumentConfigPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcRunConfigDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-run-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcRunConfigDocumentKind {
+    #[serde(rename = "physical-run-config")]
+    PhysicalRunConfig,
+}
+impl ::std::fmt::Display for OwnerPcRunConfigDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalRunConfig => f.write_str("physical-run-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcRunConfigDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-run-config" => Ok(Self::PhysicalRunConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcRunConfigDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcRunConfigDocumentParticipantIdentityMode`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"purpose-bound-local-hash\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcRunConfigDocumentParticipantIdentityMode {
+    #[serde(rename = "purpose-bound-local-hash")]
+    PurposeBoundLocalHash,
+}
+impl ::std::fmt::Display for OwnerPcRunConfigDocumentParticipantIdentityMode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PurposeBoundLocalHash => f.write_str("purpose-bound-local-hash"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcRunConfigDocumentParticipantIdentityMode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "purpose-bound-local-hash" => Ok(Self::PurposeBoundLocalHash),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcRunConfigDocumentParticipantIdentityMode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for OwnerPcRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for OwnerPcRunConfigDocumentParticipantIdentityMode
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`OwnerPcRunConfigDocumentStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"owner-pc\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum OwnerPcRunConfigDocumentStage {
+    #[serde(rename = "owner-pc")]
+    OwnerPc,
+}
+impl ::std::fmt::Display for OwnerPcRunConfigDocumentStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OwnerPc => f.write_str("owner-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for OwnerPcRunConfigDocumentStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "owner-pc" => Ok(Self::OwnerPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for OwnerPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OwnerPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OwnerPcRunConfigDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`OwnerPromotionDocument`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -24994,6 +29842,2115 @@ impl ::std::convert::TryFrom<&::std::string::String> for OwnerPromotionDocumentS
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for OwnerPromotionDocumentStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalContinuationDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/InstalledReadyContinuationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/CheckpointReadyContinuationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RunningContinuationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RebootPendingContinuationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ResumedObservationContinuationDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/RestoredCompleteContinuationDocument\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum PhysicalContinuationDocument {
+    InstalledReadyContinuationDocument(InstalledReadyContinuationDocument),
+    CheckpointReadyContinuationDocument(CheckpointReadyContinuationDocument),
+    RunningContinuationDocument(RunningContinuationDocument),
+    RebootPendingContinuationDocument(RebootPendingContinuationDocument),
+    ResumedObservationContinuationDocument(ResumedObservationContinuationDocument),
+    RestoredCompleteContinuationDocument(RestoredCompleteContinuationDocument),
+}
+impl ::std::convert::From<InstalledReadyContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: InstalledReadyContinuationDocument) -> Self {
+        Self::InstalledReadyContinuationDocument(value)
+    }
+}
+impl ::std::convert::From<CheckpointReadyContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: CheckpointReadyContinuationDocument) -> Self {
+        Self::CheckpointReadyContinuationDocument(value)
+    }
+}
+impl ::std::convert::From<RunningContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: RunningContinuationDocument) -> Self {
+        Self::RunningContinuationDocument(value)
+    }
+}
+impl ::std::convert::From<RebootPendingContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: RebootPendingContinuationDocument) -> Self {
+        Self::RebootPendingContinuationDocument(value)
+    }
+}
+impl ::std::convert::From<ResumedObservationContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: ResumedObservationContinuationDocument) -> Self {
+        Self::ResumedObservationContinuationDocument(value)
+    }
+}
+impl ::std::convert::From<RestoredCompleteContinuationDocument> for PhysicalContinuationDocument {
+    fn from(value: RestoredCompleteContinuationDocument) -> Self {
+        Self::RestoredCompleteContinuationDocument(value)
+    }
+}
+#[doc = "`PhysicalMachineSlot`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalMachineSlot.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 9,"]
+#[doc = "  \"minLength\": 9,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct PhysicalMachineSlot(::std::string::String);
+impl ::std::ops::Deref for PhysicalMachineSlot {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalMachineSlot> for ::std::string::String {
+    fn from(value: PhysicalMachineSlot) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for PhysicalMachineSlot {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 9usize {
+            return Err("longer than 9 characters".into());
+        }
+        if value.chars().count() < 9usize {
+            return Err("shorter than 9 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalMachineSlot {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalMachineSlot {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalMachineSlot {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for PhysicalMachineSlot {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`PhysicalRunConfigDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalRunConfigDocument.json\","]
+#[doc = "  \"oneOf\": ["]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/CleanWindowsVmRunConfigDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/OwnerPcRunConfigDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/FriendsPcRunConfigDocument\""]
+#[doc = "    }"]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(untagged)]
+pub enum PhysicalRunConfigDocument {
+    CleanWindowsVmRunConfigDocument(CleanWindowsVmRunConfigDocument),
+    OwnerPcRunConfigDocument(OwnerPcRunConfigDocument),
+    FriendsPcRunConfigDocument(FriendsPcRunConfigDocument),
+}
+impl ::std::convert::From<CleanWindowsVmRunConfigDocument> for PhysicalRunConfigDocument {
+    fn from(value: CleanWindowsVmRunConfigDocument) -> Self {
+        Self::CleanWindowsVmRunConfigDocument(value)
+    }
+}
+impl ::std::convert::From<OwnerPcRunConfigDocument> for PhysicalRunConfigDocument {
+    fn from(value: OwnerPcRunConfigDocument) -> Self {
+        Self::OwnerPcRunConfigDocument(value)
+    }
+}
+impl ::std::convert::From<FriendsPcRunConfigDocument> for PhysicalRunConfigDocument {
+    fn from(value: FriendsPcRunConfigDocument) -> Self {
+        Self::FriendsPcRunConfigDocument(value)
+    }
+}
+#[doc = "`PhysicalScenarioSet`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalScenarioSet.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"apply\","]
+#[doc = "    \"prepareRecovery\","]
+#[doc = "    \"rebootWhenRequired\","]
+#[doc = "    \"restore\","]
+#[doc = "    \"verifyApplied\","]
+#[doc = "    \"verifyRestored\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"apply\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"prepareRecovery\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"rebootWhenRequired\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"restore\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verifyApplied\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"verifyRestored\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PhysicalScenarioSet {
+    pub apply: bool,
+    #[serde(rename = "prepareRecovery")]
+    pub prepare_recovery: bool,
+    #[serde(rename = "rebootWhenRequired")]
+    pub reboot_when_required: bool,
+    pub restore: bool,
+    #[serde(rename = "verifyApplied")]
+    pub verify_applied: bool,
+    #[serde(rename = "verifyRestored")]
+    pub verify_restored: bool,
+}
+#[doc = "`PhysicalSequence0`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence0.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 0.0,"]
+#[doc = "  \"minimum\": 0.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence0(pub i64);
+impl ::std::ops::Deref for PhysicalSequence0 {
+    type Target = i64;
+    fn deref(&self) -> &i64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence0> for i64 {
+    fn from(value: PhysicalSequence0) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<i64> for PhysicalSequence0 {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence0 {
+    type Err = <i64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence0 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence0 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence0 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSequence1`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence1.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 1.0,"]
+#[doc = "  \"minimum\": 1.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence1(pub ::std::num::NonZeroU64);
+impl ::std::ops::Deref for PhysicalSequence1 {
+    type Target = ::std::num::NonZeroU64;
+    fn deref(&self) -> &::std::num::NonZeroU64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence1> for ::std::num::NonZeroU64 {
+    fn from(value: PhysicalSequence1) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<::std::num::NonZeroU64> for PhysicalSequence1 {
+    fn from(value: ::std::num::NonZeroU64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence1 {
+    type Err = <::std::num::NonZeroU64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence1 {
+    type Error = <::std::num::NonZeroU64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence1 {
+    type Error = <::std::num::NonZeroU64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence1 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSequence2`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence2.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 2.0,"]
+#[doc = "  \"minimum\": 2.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence2(pub i64);
+impl ::std::ops::Deref for PhysicalSequence2 {
+    type Target = i64;
+    fn deref(&self) -> &i64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence2> for i64 {
+    fn from(value: PhysicalSequence2) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<i64> for PhysicalSequence2 {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence2 {
+    type Err = <i64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence2 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence2 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence2 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSequence3`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence3.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 3.0,"]
+#[doc = "  \"minimum\": 3.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence3(pub i64);
+impl ::std::ops::Deref for PhysicalSequence3 {
+    type Target = i64;
+    fn deref(&self) -> &i64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence3> for i64 {
+    fn from(value: PhysicalSequence3) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<i64> for PhysicalSequence3 {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence3 {
+    type Err = <i64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence3 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence3 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence3 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSequence4`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence4.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 4.0,"]
+#[doc = "  \"minimum\": 4.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence4(pub i64);
+impl ::std::ops::Deref for PhysicalSequence4 {
+    type Target = i64;
+    fn deref(&self) -> &i64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence4> for i64 {
+    fn from(value: PhysicalSequence4) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<i64> for PhysicalSequence4 {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence4 {
+    type Err = <i64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence4 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence4 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence4 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSequence5`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSequence5.json\","]
+#[doc = "  \"type\": \"integer\","]
+#[doc = "  \"maximum\": 5.0,"]
+#[doc = "  \"minimum\": 5.0,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct PhysicalSequence5(pub i64);
+impl ::std::ops::Deref for PhysicalSequence5 {
+    type Target = i64;
+    fn deref(&self) -> &i64 {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSequence5> for i64 {
+    fn from(value: PhysicalSequence5) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<i64> for PhysicalSequence5 {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for PhysicalSequence5 {
+    type Err = <i64 as ::std::str::FromStr>::Err;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.parse()?))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSequence5 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<String> for PhysicalSequence5 {
+    type Error = <i64 as ::std::str::FromStr>::Err;
+    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl ::std::fmt::Display for PhysicalSequence5 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`PhysicalSignaturePolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSignaturePolicy.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"authenticode-required\","]
+#[doc = "    \"detached-cms-required\","]
+#[doc = "    \"manifest-authenticated\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalSignaturePolicy {
+    #[serde(rename = "authenticode-required")]
+    AuthenticodeRequired,
+    #[serde(rename = "detached-cms-required")]
+    DetachedCmsRequired,
+    #[serde(rename = "manifest-authenticated")]
+    ManifestAuthenticated,
+}
+impl ::std::fmt::Display for PhysicalSignaturePolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::AuthenticodeRequired => f.write_str("authenticode-required"),
+            Self::DetachedCmsRequired => f.write_str("detached-cms-required"),
+            Self::ManifestAuthenticated => f.write_str("manifest-authenticated"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalSignaturePolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "authenticode-required" => Ok(Self::AuthenticodeRequired),
+            "detached-cms-required" => Ok(Self::DetachedCmsRequired),
+            "manifest-authenticated" => Ok(Self::ManifestAuthenticated),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSignaturePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalSignaturePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalSignaturePolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalSourceCommit`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalSourceCommit.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 40,"]
+#[doc = "  \"minLength\": 40,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct PhysicalSourceCommit(::std::string::String);
+impl ::std::ops::Deref for PhysicalSourceCommit {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalSourceCommit> for ::std::string::String {
+    fn from(value: PhysicalSourceCommit) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for PhysicalSourceCommit {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 40usize {
+            return Err("longer than 40 characters".into());
+        }
+        if value.chars().count() < 40usize {
+            return Err("shorter than 40 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalSourceCommit {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalSourceCommit {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalSourceCommit {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for PhysicalSourceCommit {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`PhysicalStage`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalStage.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"clean-windows-vm\","]
+#[doc = "    \"owner-pc\","]
+#[doc = "    \"friends-pc\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalStage {
+    #[serde(rename = "clean-windows-vm")]
+    CleanWindowsVm,
+    #[serde(rename = "owner-pc")]
+    OwnerPc,
+    #[serde(rename = "friends-pc")]
+    FriendsPc,
+}
+impl ::std::fmt::Display for PhysicalStage {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CleanWindowsVm => f.write_str("clean-windows-vm"),
+            Self::OwnerPc => f.write_str("owner-pc"),
+            Self::FriendsPc => f.write_str("friends-pc"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalStage {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clean-windows-vm" => Ok(Self::CleanWindowsVm),
+            "owner-pc" => Ok(Self::OwnerPc),
+            "friends-pc" => Ok(Self::FriendsPc),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalStage {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalStage {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlist`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalTauriCommandAllowlist.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"applyPlan\","]
+#[doc = "    \"approvePlan\","]
+#[doc = "    \"composePlan\","]
+#[doc = "    \"enableAdvancedPreference\","]
+#[doc = "    \"exportPlanDiagnostic\","]
+#[doc = "    \"previewPlanDiagnostic\","]
+#[doc = "    \"readAdvancedPreference\","]
+#[doc = "    \"readPlanExecution\","]
+#[doc = "    \"restorePlan\","]
+#[doc = "    \"restorePlanOperation\","]
+#[doc = "    \"restoreRecoveryCheckpoint\","]
+#[doc = "    \"revisePlan\","]
+#[doc = "    \"revokeAdvancedPreference\","]
+#[doc = "    \"subscribePlanExecution\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"applyPlan\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"apply_plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"approvePlan\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"approve_plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"composePlan\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"compose_plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"enableAdvancedPreference\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"enable_advanced_preference\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"exportPlanDiagnostic\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"export_plan_diagnostic\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"previewPlanDiagnostic\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"preview_plan_diagnostic\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"readAdvancedPreference\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"read_advanced_preference\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"readPlanExecution\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"read_plan_execution\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"restorePlan\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restore_plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"restorePlanOperation\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restore_plan_operation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"restoreRecoveryCheckpoint\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restore_recovery_checkpoint\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"revisePlan\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"revise_plan\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"revokeAdvancedPreference\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"revoke_advanced_preference\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"subscribePlanExecution\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"subscribe_plan_execution\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PhysicalTauriCommandAllowlist {
+    #[serde(rename = "applyPlan")]
+    pub apply_plan: PhysicalTauriCommandAllowlistApplyPlan,
+    #[serde(rename = "approvePlan")]
+    pub approve_plan: PhysicalTauriCommandAllowlistApprovePlan,
+    #[serde(rename = "composePlan")]
+    pub compose_plan: PhysicalTauriCommandAllowlistComposePlan,
+    #[serde(rename = "enableAdvancedPreference")]
+    pub enable_advanced_preference: PhysicalTauriCommandAllowlistEnableAdvancedPreference,
+    #[serde(rename = "exportPlanDiagnostic")]
+    pub export_plan_diagnostic: PhysicalTauriCommandAllowlistExportPlanDiagnostic,
+    #[serde(rename = "previewPlanDiagnostic")]
+    pub preview_plan_diagnostic: PhysicalTauriCommandAllowlistPreviewPlanDiagnostic,
+    #[serde(rename = "readAdvancedPreference")]
+    pub read_advanced_preference: PhysicalTauriCommandAllowlistReadAdvancedPreference,
+    #[serde(rename = "readPlanExecution")]
+    pub read_plan_execution: PhysicalTauriCommandAllowlistReadPlanExecution,
+    #[serde(rename = "restorePlan")]
+    pub restore_plan: PhysicalTauriCommandAllowlistRestorePlan,
+    #[serde(rename = "restorePlanOperation")]
+    pub restore_plan_operation: PhysicalTauriCommandAllowlistRestorePlanOperation,
+    #[serde(rename = "restoreRecoveryCheckpoint")]
+    pub restore_recovery_checkpoint: PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint,
+    #[serde(rename = "revisePlan")]
+    pub revise_plan: PhysicalTauriCommandAllowlistRevisePlan,
+    #[serde(rename = "revokeAdvancedPreference")]
+    pub revoke_advanced_preference: PhysicalTauriCommandAllowlistRevokeAdvancedPreference,
+    #[serde(rename = "subscribePlanExecution")]
+    pub subscribe_plan_execution: PhysicalTauriCommandAllowlistSubscribePlanExecution,
+}
+#[doc = "`PhysicalTauriCommandAllowlistApplyPlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"apply_plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistApplyPlan {
+    #[serde(rename = "apply_plan")]
+    ApplyPlan,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistApplyPlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ApplyPlan => f.write_str("apply_plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistApplyPlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "apply_plan" => Ok(Self::ApplyPlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistApplyPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalTauriCommandAllowlistApplyPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalTauriCommandAllowlistApplyPlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistApprovePlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"approve_plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistApprovePlan {
+    #[serde(rename = "approve_plan")]
+    ApprovePlan,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistApprovePlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ApprovePlan => f.write_str("approve_plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistApprovePlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "approve_plan" => Ok(Self::ApprovePlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistApprovePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalTauriCommandAllowlistApprovePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalTauriCommandAllowlistApprovePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistComposePlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"compose_plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistComposePlan {
+    #[serde(rename = "compose_plan")]
+    ComposePlan,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistComposePlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ComposePlan => f.write_str("compose_plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistComposePlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "compose_plan" => Ok(Self::ComposePlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistComposePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalTauriCommandAllowlistComposePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalTauriCommandAllowlistComposePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistEnableAdvancedPreference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"enable_advanced_preference\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistEnableAdvancedPreference {
+    #[serde(rename = "enable_advanced_preference")]
+    EnableAdvancedPreference,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistEnableAdvancedPreference {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EnableAdvancedPreference => f.write_str("enable_advanced_preference"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistEnableAdvancedPreference {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "enable_advanced_preference" => Ok(Self::EnableAdvancedPreference),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistEnableAdvancedPreference {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistEnableAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistEnableAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistExportPlanDiagnostic`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"export_plan_diagnostic\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistExportPlanDiagnostic {
+    #[serde(rename = "export_plan_diagnostic")]
+    ExportPlanDiagnostic,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistExportPlanDiagnostic {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ExportPlanDiagnostic => f.write_str("export_plan_diagnostic"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistExportPlanDiagnostic {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "export_plan_diagnostic" => Ok(Self::ExportPlanDiagnostic),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistExportPlanDiagnostic {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistExportPlanDiagnostic
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistExportPlanDiagnostic
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistPreviewPlanDiagnostic`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"preview_plan_diagnostic\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistPreviewPlanDiagnostic {
+    #[serde(rename = "preview_plan_diagnostic")]
+    PreviewPlanDiagnostic,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistPreviewPlanDiagnostic {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PreviewPlanDiagnostic => f.write_str("preview_plan_diagnostic"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistPreviewPlanDiagnostic {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "preview_plan_diagnostic" => Ok(Self::PreviewPlanDiagnostic),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistPreviewPlanDiagnostic {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistPreviewPlanDiagnostic
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistPreviewPlanDiagnostic
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistReadAdvancedPreference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"read_advanced_preference\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistReadAdvancedPreference {
+    #[serde(rename = "read_advanced_preference")]
+    ReadAdvancedPreference,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistReadAdvancedPreference {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ReadAdvancedPreference => f.write_str("read_advanced_preference"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistReadAdvancedPreference {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "read_advanced_preference" => Ok(Self::ReadAdvancedPreference),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistReadAdvancedPreference {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistReadAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistReadAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistReadPlanExecution`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"read_plan_execution\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistReadPlanExecution {
+    #[serde(rename = "read_plan_execution")]
+    ReadPlanExecution,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistReadPlanExecution {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ReadPlanExecution => f.write_str("read_plan_execution"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistReadPlanExecution {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "read_plan_execution" => Ok(Self::ReadPlanExecution),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistReadPlanExecution {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistReadPlanExecution
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistReadPlanExecution
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistRestorePlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restore_plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistRestorePlan {
+    #[serde(rename = "restore_plan")]
+    RestorePlan,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistRestorePlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RestorePlan => f.write_str("restore_plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistRestorePlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restore_plan" => Ok(Self::RestorePlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistRestorePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalTauriCommandAllowlistRestorePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalTauriCommandAllowlistRestorePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistRestorePlanOperation`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restore_plan_operation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistRestorePlanOperation {
+    #[serde(rename = "restore_plan_operation")]
+    RestorePlanOperation,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistRestorePlanOperation {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RestorePlanOperation => f.write_str("restore_plan_operation"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistRestorePlanOperation {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restore_plan_operation" => Ok(Self::RestorePlanOperation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistRestorePlanOperation {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistRestorePlanOperation
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistRestorePlanOperation
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restore_recovery_checkpoint\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint {
+    #[serde(rename = "restore_recovery_checkpoint")]
+    RestoreRecoveryCheckpoint,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RestoreRecoveryCheckpoint => f.write_str("restore_recovery_checkpoint"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restore_recovery_checkpoint" => Ok(Self::RestoreRecoveryCheckpoint),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistRestoreRecoveryCheckpoint
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistRevisePlan`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"revise_plan\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistRevisePlan {
+    #[serde(rename = "revise_plan")]
+    RevisePlan,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistRevisePlan {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RevisePlan => f.write_str("revise_plan"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistRevisePlan {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "revise_plan" => Ok(Self::RevisePlan),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistRevisePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalTauriCommandAllowlistRevisePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalTauriCommandAllowlistRevisePlan {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistRevokeAdvancedPreference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"revoke_advanced_preference\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistRevokeAdvancedPreference {
+    #[serde(rename = "revoke_advanced_preference")]
+    RevokeAdvancedPreference,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistRevokeAdvancedPreference {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RevokeAdvancedPreference => f.write_str("revoke_advanced_preference"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistRevokeAdvancedPreference {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "revoke_advanced_preference" => Ok(Self::RevokeAdvancedPreference),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistRevokeAdvancedPreference {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistRevokeAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistRevokeAdvancedPreference
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalTauriCommandAllowlistSubscribePlanExecution`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"subscribe_plan_execution\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalTauriCommandAllowlistSubscribePlanExecution {
+    #[serde(rename = "subscribe_plan_execution")]
+    SubscribePlanExecution,
+}
+impl ::std::fmt::Display for PhysicalTauriCommandAllowlistSubscribePlanExecution {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SubscribePlanExecution => f.write_str("subscribe_plan_execution"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalTauriCommandAllowlistSubscribePlanExecution {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "subscribe_plan_execution" => Ok(Self::SubscribePlanExecution),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalTauriCommandAllowlistSubscribePlanExecution {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PhysicalTauriCommandAllowlistSubscribePlanExecution
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PhysicalTauriCommandAllowlistSubscribePlanExecution
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PhysicalVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalVersion.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 64,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct PhysicalVersion(::std::string::String);
+impl ::std::ops::Deref for PhysicalVersion {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<PhysicalVersion> for ::std::string::String {
+    fn from(value: PhysicalVersion) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for PhysicalVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 64usize {
+            return Err("longer than 64 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for PhysicalVersion {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`PhysicalVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PhysicalVersionPolicy.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"package-version\","]
+#[doc = "    \"file-version\","]
+#[doc = "    \"schema-version\","]
+#[doc = "    \"not-applicable\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PhysicalVersionPolicy {
+    #[serde(rename = "package-version")]
+    PackageVersion,
+    #[serde(rename = "file-version")]
+    FileVersion,
+    #[serde(rename = "schema-version")]
+    SchemaVersion,
+    #[serde(rename = "not-applicable")]
+    NotApplicable,
+}
+impl ::std::fmt::Display for PhysicalVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PackageVersion => f.write_str("package-version"),
+            Self::FileVersion => f.write_str("file-version"),
+            Self::SchemaVersion => f.write_str("schema-version"),
+            Self::NotApplicable => f.write_str("not-applicable"),
+        }
+    }
+}
+impl ::std::str::FromStr for PhysicalVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "package-version" => Ok(Self::PackageVersion),
+            "file-version" => Ok(Self::FileVersion),
+            "schema-version" => Ok(Self::SchemaVersion),
+            "not-applicable" => Ok(Self::NotApplicable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PhysicalVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PhysicalVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PhysicalVersionPolicy {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -25619,6 +32576,1945 @@ impl ::std::convert::TryFrom<&::std::string::String> for PlanTransactionDocument
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for PlanTransactionDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableCleanWindowsVmConfigFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableCleanWindowsVmConfigFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/clean-windows-vm.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"clean-windows-vm-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableCleanWindowsVmConfigFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableCleanWindowsVmConfigFileIdentityRelativePath,
+    pub role: PortableCleanWindowsVmConfigFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableCleanWindowsVmConfigFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/clean-windows-vm.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableCleanWindowsVmConfigFileIdentityRelativePath {
+    #[serde(rename = "configs/clean-windows-vm.run-config.json")]
+    ConfigsCleanWindowsVmRunConfigJson,
+}
+impl ::std::fmt::Display for PortableCleanWindowsVmConfigFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsCleanWindowsVmRunConfigJson => {
+                f.write_str("configs/clean-windows-vm.run-config.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for PortableCleanWindowsVmConfigFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/clean-windows-vm.run-config.json" => {
+                Ok(Self::ConfigsCleanWindowsVmRunConfigJson)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableCleanWindowsVmConfigFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableCleanWindowsVmConfigFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"clean-windows-vm-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableCleanWindowsVmConfigFileIdentityRole {
+    #[serde(rename = "clean-windows-vm-config")]
+    CleanWindowsVmConfig,
+}
+impl ::std::fmt::Display for PortableCleanWindowsVmConfigFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CleanWindowsVmConfig => f.write_str("clean-windows-vm-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableCleanWindowsVmConfigFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clean-windows-vm-config" => Ok(Self::CleanWindowsVmConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableCleanWindowsVmConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableFileSet`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableFileSet.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"cleanWindowsVmConfig\","]
+#[doc = "    \"friendsPcConfig\","]
+#[doc = "    \"installationManifest\","]
+#[doc = "    \"installationManifestSignature\","]
+#[doc = "    \"msedgeDriver\","]
+#[doc = "    \"msi\","]
+#[doc = "    \"ownerPcConfig\","]
+#[doc = "    \"runner\","]
+#[doc = "    \"tauriDriver\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"cleanWindowsVmConfig\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableCleanWindowsVmConfigFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"friendsPcConfig\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableFriendsPcConfigFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"installationManifest\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableInstallationManifestFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"installationManifestSignature\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableInstallationManifestSignatureFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"msedgeDriver\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableMsedgeDriverFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"msi\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableMsiFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"ownerPcConfig\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableOwnerPcConfigFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"runner\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableRunnerFileIdentity\""]
+#[doc = "    },"]
+#[doc = "    \"tauriDriver\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PortableTauriDriverFileIdentity\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableFileSet {
+    #[serde(rename = "cleanWindowsVmConfig")]
+    pub clean_windows_vm_config: PortableCleanWindowsVmConfigFileIdentity,
+    #[serde(rename = "friendsPcConfig")]
+    pub friends_pc_config: PortableFriendsPcConfigFileIdentity,
+    #[serde(rename = "installationManifest")]
+    pub installation_manifest: PortableInstallationManifestFileIdentity,
+    #[serde(rename = "installationManifestSignature")]
+    pub installation_manifest_signature: PortableInstallationManifestSignatureFileIdentity,
+    #[serde(rename = "msedgeDriver")]
+    pub msedge_driver: PortableMsedgeDriverFileIdentity,
+    pub msi: PortableMsiFileIdentity,
+    #[serde(rename = "ownerPcConfig")]
+    pub owner_pc_config: PortableOwnerPcConfigFileIdentity,
+    pub runner: PortableRunnerFileIdentity,
+    #[serde(rename = "tauriDriver")]
+    pub tauri_driver: PortableTauriDriverFileIdentity,
+}
+#[doc = "`PortableFriendsPcConfigFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableFriendsPcConfigFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/friends-pc.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"friends-pc-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableFriendsPcConfigFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableFriendsPcConfigFileIdentityRelativePath,
+    pub role: PortableFriendsPcConfigFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableFriendsPcConfigFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/friends-pc.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableFriendsPcConfigFileIdentityRelativePath {
+    #[serde(rename = "configs/friends-pc.run-config.json")]
+    ConfigsFriendsPcRunConfigJson,
+}
+impl ::std::fmt::Display for PortableFriendsPcConfigFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsFriendsPcRunConfigJson => {
+                f.write_str("configs/friends-pc.run-config.json")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for PortableFriendsPcConfigFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/friends-pc.run-config.json" => Ok(Self::ConfigsFriendsPcRunConfigJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableFriendsPcConfigFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableFriendsPcConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableFriendsPcConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableFriendsPcConfigFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"friends-pc-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableFriendsPcConfigFileIdentityRole {
+    #[serde(rename = "friends-pc-config")]
+    FriendsPcConfig,
+}
+impl ::std::fmt::Display for PortableFriendsPcConfigFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FriendsPcConfig => f.write_str("friends-pc-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableFriendsPcConfigFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "friends-pc-config" => Ok(Self::FriendsPcConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableFriendsPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableFriendsPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableFriendsPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableInstallationManifestFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableInstallationManifestFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installation-manifest.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installation-manifest\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableInstallationManifestFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableInstallationManifestFileIdentityRelativePath,
+    pub role: PortableInstallationManifestFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableInstallationManifestFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installation-manifest.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestFileIdentityRelativePath {
+    #[serde(rename = "installation-manifest.json")]
+    InstallationManifestJson,
+}
+impl ::std::fmt::Display for PortableInstallationManifestFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstallationManifestJson => f.write_str("installation-manifest.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installation-manifest.json" => Ok(Self::InstallationManifestJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableInstallationManifestFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableInstallationManifestFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installation-manifest\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestFileIdentityRole {
+    #[serde(rename = "installation-manifest")]
+    InstallationManifest,
+}
+impl ::std::fmt::Display for PortableInstallationManifestFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstallationManifest => f.write_str("installation-manifest"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installation-manifest" => Ok(Self::InstallationManifest),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableInstallationManifestFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableInstallationManifestSignatureFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableInstallationManifestSignatureFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installation-manifest.json.p7s\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"installation-manifest-signature\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableInstallationManifestSignatureFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableInstallationManifestSignatureFileIdentityRelativePath,
+    pub role: PortableInstallationManifestSignatureFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableInstallationManifestSignatureFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installation-manifest.json.p7s\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestSignatureFileIdentityRelativePath {
+    #[serde(rename = "installation-manifest.json.p7s")]
+    InstallationManifestJsonP7s,
+}
+impl ::std::fmt::Display for PortableInstallationManifestSignatureFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstallationManifestJsonP7s => f.write_str("installation-manifest.json.p7s"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestSignatureFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installation-manifest.json.p7s" => Ok(Self::InstallationManifestJsonP7s),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str>
+    for PortableInstallationManifestSignatureFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableInstallationManifestSignatureFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"installation-manifest-signature\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestSignatureFileIdentityRole {
+    #[serde(rename = "installation-manifest-signature")]
+    InstallationManifestSignature,
+}
+impl ::std::fmt::Display for PortableInstallationManifestSignatureFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::InstallationManifestSignature => f.write_str("installation-manifest-signature"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestSignatureFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "installation-manifest-signature" => Ok(Self::InstallationManifestSignature),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableInstallationManifestSignatureFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityRole
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableMsedgeDriverFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableMsedgeDriverFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"msedgedriver.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"msedgedriver\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableMsedgeDriverFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableMsedgeDriverFileIdentityRelativePath,
+    pub role: PortableMsedgeDriverFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableMsedgeDriverFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"msedgedriver.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsedgeDriverFileIdentityRelativePath {
+    #[serde(rename = "msedgedriver.exe")]
+    MsedgedriverExe,
+}
+impl ::std::fmt::Display for PortableMsedgeDriverFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::MsedgedriverExe => f.write_str("msedgedriver.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsedgeDriverFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "msedgedriver.exe" => Ok(Self::MsedgedriverExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsedgeDriverFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableMsedgeDriverFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableMsedgeDriverFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableMsedgeDriverFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"msedgedriver\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsedgeDriverFileIdentityRole {
+    #[serde(rename = "msedgedriver")]
+    Msedgedriver,
+}
+impl ::std::fmt::Display for PortableMsedgeDriverFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Msedgedriver => f.write_str("msedgedriver"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsedgeDriverFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "msedgedriver" => Ok(Self::Msedgedriver),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsedgeDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableMsedgeDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableMsedgeDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableMsiFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableMsiFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"liiiraa-boost.msi\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"msi\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableMsiFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableMsiFileIdentityRelativePath,
+    pub role: PortableMsiFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableMsiFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"liiiraa-boost.msi\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsiFileIdentityRelativePath {
+    #[serde(rename = "liiiraa-boost.msi")]
+    LiiiraaBoostMsi,
+}
+impl ::std::fmt::Display for PortableMsiFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::LiiiraaBoostMsi => f.write_str("liiiraa-boost.msi"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsiFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "liiiraa-boost.msi" => Ok(Self::LiiiraaBoostMsi),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsiFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableMsiFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableMsiFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableMsiFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"msi\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsiFileIdentityRole {
+    #[serde(rename = "msi")]
+    Msi,
+}
+impl ::std::fmt::Display for PortableMsiFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Msi => f.write_str("msi"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsiFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "msi" => Ok(Self::Msi),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsiFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableMsiFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableMsiFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableOwnerPcConfigFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableOwnerPcConfigFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"configs/owner-pc.run-config.json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"owner-pc-config\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableOwnerPcConfigFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableOwnerPcConfigFileIdentityRelativePath,
+    pub role: PortableOwnerPcConfigFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableOwnerPcConfigFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"configs/owner-pc.run-config.json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableOwnerPcConfigFileIdentityRelativePath {
+    #[serde(rename = "configs/owner-pc.run-config.json")]
+    ConfigsOwnerPcRunConfigJson,
+}
+impl ::std::fmt::Display for PortableOwnerPcConfigFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ConfigsOwnerPcRunConfigJson => f.write_str("configs/owner-pc.run-config.json"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableOwnerPcConfigFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "configs/owner-pc.run-config.json" => Ok(Self::ConfigsOwnerPcRunConfigJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableOwnerPcConfigFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableOwnerPcConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableOwnerPcConfigFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableOwnerPcConfigFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"owner-pc-config\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableOwnerPcConfigFileIdentityRole {
+    #[serde(rename = "owner-pc-config")]
+    OwnerPcConfig,
+}
+impl ::std::fmt::Display for PortableOwnerPcConfigFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::OwnerPcConfig => f.write_str("owner-pc-config"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableOwnerPcConfigFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "owner-pc-config" => Ok(Self::OwnerPcConfig),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableOwnerPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableOwnerPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableOwnerPcConfigFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableRunnerFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableRunnerFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"phase6-physical-runner.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"runner\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableRunnerFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableRunnerFileIdentityRelativePath,
+    pub role: PortableRunnerFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableRunnerFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"phase6-physical-runner.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableRunnerFileIdentityRelativePath {
+    #[serde(rename = "phase6-physical-runner.exe")]
+    Phase6PhysicalRunnerExe,
+}
+impl ::std::fmt::Display for PortableRunnerFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Phase6PhysicalRunnerExe => f.write_str("phase6-physical-runner.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableRunnerFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "phase6-physical-runner.exe" => Ok(Self::Phase6PhysicalRunnerExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableRunnerFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"runner\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableRunnerFileIdentityRole {
+    #[serde(rename = "runner")]
+    Runner,
+}
+impl ::std::fmt::Display for PortableRunnerFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Runner => f.write_str("runner"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableRunnerFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "runner" => Ok(Self::Runner),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableTauriDriverFileIdentity`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"PortableTauriDriverFileIdentity.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relativePath\","]
+#[doc = "    \"role\","]
+#[doc = "    \"sha256\","]
+#[doc = "    \"signaturePolicy\","]
+#[doc = "    \"sizeBytes\","]
+#[doc = "    \"version\","]
+#[doc = "    \"versionPolicy\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relativePath\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"tauri-driver.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"role\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"tauri-driver\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"signaturePolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSignaturePolicy\""]
+#[doc = "    },"]
+#[doc = "    \"sizeBytes\": {"]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 4294967295.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"version\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "    },"]
+#[doc = "    \"versionPolicy\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PortableTauriDriverFileIdentity {
+    #[serde(rename = "relativePath")]
+    pub relative_path: PortableTauriDriverFileIdentityRelativePath,
+    pub role: PortableTauriDriverFileIdentityRole,
+    pub sha256: TransactionHash,
+    #[serde(rename = "signaturePolicy")]
+    pub signature_policy: PhysicalSignaturePolicy,
+    #[serde(rename = "sizeBytes")]
+    pub size_bytes: ::std::num::NonZeroU64,
+    pub version: PhysicalVersion,
+    #[serde(rename = "versionPolicy")]
+    pub version_policy: PhysicalVersionPolicy,
+}
+#[doc = "`PortableTauriDriverFileIdentityRelativePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"tauri-driver.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableTauriDriverFileIdentityRelativePath {
+    #[serde(rename = "tauri-driver.exe")]
+    TauriDriverExe,
+}
+impl ::std::fmt::Display for PortableTauriDriverFileIdentityRelativePath {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TauriDriverExe => f.write_str("tauri-driver.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableTauriDriverFileIdentityRelativePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "tauri-driver.exe" => Ok(Self::TauriDriverExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableTauriDriverFileIdentityRelativePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableTauriDriverFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableTauriDriverFileIdentityRelativePath
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableTauriDriverFileIdentityRole`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"tauri-driver\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableTauriDriverFileIdentityRole {
+    #[serde(rename = "tauri-driver")]
+    TauriDriver,
+}
+impl ::std::fmt::Display for PortableTauriDriverFileIdentityRole {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TauriDriver => f.write_str("tauri-driver"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableTauriDriverFileIdentityRole {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "tauri-driver" => Ok(Self::TauriDriver),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableTauriDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableTauriDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableTauriDriverFileIdentityRole {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -27222,6 +36118,345 @@ impl ::std::convert::TryFrom<::std::string::String> for ProviderIdentity {
         value.parse()
     }
 }
+#[doc = "`RebootPendingContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RebootPendingContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"previousState\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"previousState\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"running\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence3\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"reboot-pending\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RebootPendingContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: RebootPendingContinuationDocumentKind,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "previousState")]
+    pub previous_state: RebootPendingContinuationDocumentPreviousState,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence3,
+    pub stage: PhysicalStage,
+    pub state: RebootPendingContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RebootPendingContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RebootPendingContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for RebootPendingContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for RebootPendingContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RebootPendingContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RebootPendingContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RebootPendingContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RebootPendingContinuationDocumentPreviousState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"running\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RebootPendingContinuationDocumentPreviousState {
+    #[serde(rename = "running")]
+    Running,
+}
+impl ::std::fmt::Display for RebootPendingContinuationDocumentPreviousState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Running => f.write_str("running"),
+        }
+    }
+}
+impl ::std::str::FromStr for RebootPendingContinuationDocumentPreviousState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "running" => Ok(Self::Running),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RebootPendingContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for RebootPendingContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for RebootPendingContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RebootPendingContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"reboot-pending\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RebootPendingContinuationDocumentState {
+    #[serde(rename = "reboot-pending")]
+    RebootPending,
+}
+impl ::std::fmt::Display for RebootPendingContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RebootPending => f.write_str("reboot-pending"),
+        }
+    }
+}
+impl ::std::str::FromStr for RebootPendingContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "reboot-pending" => Ok(Self::RebootPending),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RebootPendingContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RebootPendingContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RebootPendingContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`RecoveryCheckpointDocument`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -28724,6 +37959,345 @@ impl ::std::convert::TryFrom<::std::string::String> for RestorePreparedJournalEv
         value.parse()
     }
 }
+#[doc = "`RestoredCompleteContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RestoredCompleteContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"previousState\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"previousState\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"resumed-observation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence5\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"restored-complete\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RestoredCompleteContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: RestoredCompleteContinuationDocumentKind,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "previousState")]
+    pub previous_state: RestoredCompleteContinuationDocumentPreviousState,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence5,
+    pub stage: PhysicalStage,
+    pub state: RestoredCompleteContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RestoredCompleteContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestoredCompleteContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for RestoredCompleteContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestoredCompleteContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestoredCompleteContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestoredCompleteContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestoredCompleteContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestoredCompleteContinuationDocumentPreviousState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"resumed-observation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestoredCompleteContinuationDocumentPreviousState {
+    #[serde(rename = "resumed-observation")]
+    ResumedObservation,
+}
+impl ::std::fmt::Display for RestoredCompleteContinuationDocumentPreviousState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ResumedObservation => f.write_str("resumed-observation"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestoredCompleteContinuationDocumentPreviousState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "resumed-observation" => Ok(Self::ResumedObservation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestoredCompleteContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for RestoredCompleteContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for RestoredCompleteContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RestoredCompleteContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"restored-complete\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RestoredCompleteContinuationDocumentState {
+    #[serde(rename = "restored-complete")]
+    RestoredComplete,
+}
+impl ::std::fmt::Display for RestoredCompleteContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RestoredComplete => f.write_str("restored-complete"),
+        }
+    }
+}
+impl ::std::str::FromStr for RestoredCompleteContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "restored-complete" => Ok(Self::RestoredComplete),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RestoredCompleteContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RestoredCompleteContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RestoredCompleteContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`RestoredJournalEvent`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -28967,6 +38541,369 @@ impl ::std::convert::TryFrom<::std::string::String> for RestoredJournalEventStat
         value.parse()
     }
 }
+#[doc = "`ResumedObservationContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"ResumedObservationContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"mutationAuthorized\","]
+#[doc = "    \"observationRequired\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"previousState\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"mutationAuthorized\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        false"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observationRequired\": {"]
+#[doc = "      \"type\": \"boolean\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        true"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"previousState\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"reboot-pending\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence4\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"resumed-observation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ResumedObservationContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: ResumedObservationContinuationDocumentKind,
+    #[serde(rename = "mutationAuthorized")]
+    pub mutation_authorized: bool,
+    #[serde(rename = "observationRequired")]
+    pub observation_required: bool,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "previousState")]
+    pub previous_state: ResumedObservationContinuationDocumentPreviousState,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence4,
+    pub stage: PhysicalStage,
+    pub state: ResumedObservationContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`ResumedObservationContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ResumedObservationContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for ResumedObservationContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for ResumedObservationContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ResumedObservationContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for ResumedObservationContinuationDocumentKind
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ResumedObservationContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ResumedObservationContinuationDocumentPreviousState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"reboot-pending\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ResumedObservationContinuationDocumentPreviousState {
+    #[serde(rename = "reboot-pending")]
+    RebootPending,
+}
+impl ::std::fmt::Display for ResumedObservationContinuationDocumentPreviousState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RebootPending => f.write_str("reboot-pending"),
+        }
+    }
+}
+impl ::std::str::FromStr for ResumedObservationContinuationDocumentPreviousState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "reboot-pending" => Ok(Self::RebootPending),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ResumedObservationContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for ResumedObservationContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for ResumedObservationContinuationDocumentPreviousState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`ResumedObservationContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"resumed-observation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ResumedObservationContinuationDocumentState {
+    #[serde(rename = "resumed-observation")]
+    ResumedObservation,
+}
+impl ::std::fmt::Display for ResumedObservationContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ResumedObservation => f.write_str("resumed-observation"),
+        }
+    }
+}
+impl ::std::str::FromStr for ResumedObservationContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "resumed-observation" => Ok(Self::ResumedObservation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ResumedObservationContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for ResumedObservationContinuationDocumentState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for ResumedObservationContinuationDocumentState
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`RiskClass`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -29044,6 +38981,341 @@ impl ::std::convert::TryFrom<&::std::string::String> for RiskClass {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for RiskClass {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RunningContinuationDocument`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"RunningContinuationDocument.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"configSha256\","]
+#[doc = "    \"continuationId\","]
+#[doc = "    \"kind\","]
+#[doc = "    \"observedJournalHeadHash\","]
+#[doc = "    \"operationVersionId\","]
+#[doc = "    \"previousRecordHash\","]
+#[doc = "    \"previousState\","]
+#[doc = "    \"recordHash\","]
+#[doc = "    \"recordedAt\","]
+#[doc = "    \"runId\","]
+#[doc = "    \"runnerSha256\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"sequence\","]
+#[doc = "    \"stage\","]
+#[doc = "    \"state\","]
+#[doc = "    \"transactionId\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"configSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"continuationId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"kind\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"physical-continuation\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"observedJournalHeadHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"operationVersionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"previousRecordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"previousState\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"checkpoint-ready\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"recordHash\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"recordedAt\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"runId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runnerSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionSchemaVersion\""]
+#[doc = "    },"]
+#[doc = "    \"sequence\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalSequence2\""]
+#[doc = "    },"]
+#[doc = "    \"stage\": {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalStage\""]
+#[doc = "    },"]
+#[doc = "    \"state\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"running\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"transactionId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RunningContinuationDocument {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: TransactionHash,
+    #[serde(rename = "buildId")]
+    pub build_id: TransactionIdentifier,
+    #[serde(rename = "configSha256")]
+    pub config_sha256: TransactionHash,
+    #[serde(rename = "continuationId")]
+    pub continuation_id: TransactionIdentifier,
+    pub kind: RunningContinuationDocumentKind,
+    #[serde(rename = "observedJournalHeadHash")]
+    pub observed_journal_head_hash: TransactionHash,
+    #[serde(rename = "operationVersionId")]
+    pub operation_version_id: TransactionIdentifier,
+    #[serde(rename = "previousRecordHash")]
+    pub previous_record_hash: TransactionHash,
+    #[serde(rename = "previousState")]
+    pub previous_state: RunningContinuationDocumentPreviousState,
+    #[serde(rename = "recordHash")]
+    pub record_hash: TransactionHash,
+    #[serde(rename = "recordedAt")]
+    pub recorded_at: ::std::string::String,
+    #[serde(rename = "runId")]
+    pub run_id: TransactionIdentifier,
+    #[serde(rename = "runnerSha256")]
+    pub runner_sha256: TransactionHash,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TransactionSchemaVersion,
+    pub sequence: PhysicalSequence2,
+    pub stage: PhysicalStage,
+    pub state: RunningContinuationDocumentState,
+    #[serde(rename = "transactionId")]
+    pub transaction_id: TransactionIdentifier,
+}
+#[doc = "`RunningContinuationDocumentKind`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"physical-continuation\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RunningContinuationDocumentKind {
+    #[serde(rename = "physical-continuation")]
+    PhysicalContinuation,
+}
+impl ::std::fmt::Display for RunningContinuationDocumentKind {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PhysicalContinuation => f.write_str("physical-continuation"),
+        }
+    }
+}
+impl ::std::str::FromStr for RunningContinuationDocumentKind {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "physical-continuation" => Ok(Self::PhysicalContinuation),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RunningContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RunningContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RunningContinuationDocumentKind {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RunningContinuationDocumentPreviousState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"checkpoint-ready\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RunningContinuationDocumentPreviousState {
+    #[serde(rename = "checkpoint-ready")]
+    CheckpointReady,
+}
+impl ::std::fmt::Display for RunningContinuationDocumentPreviousState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CheckpointReady => f.write_str("checkpoint-ready"),
+        }
+    }
+}
+impl ::std::str::FromStr for RunningContinuationDocumentPreviousState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "checkpoint-ready" => Ok(Self::CheckpointReady),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RunningContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RunningContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RunningContinuationDocumentPreviousState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`RunningContinuationDocumentState`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"running\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RunningContinuationDocumentState {
+    #[serde(rename = "running")]
+    Running,
+}
+impl ::std::fmt::Display for RunningContinuationDocumentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Running => f.write_str("running"),
+        }
+    }
+}
+impl ::std::str::FromStr for RunningContinuationDocumentState {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "running" => Ok(Self::Running),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RunningContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RunningContinuationDocumentState {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RunningContinuationDocumentState {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -39857,6 +50129,21 @@ impl ::std::convert::TryFrom<::std::string::String> for TransactionalPlanDocumen
 #[doc = "    },"]
 #[doc = "    {"]
 #[doc = "      \"$ref\": \"#/definitions/AdvancedPreferenceEventDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/InstallationManifestDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/ArtifactManifestDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/FriendsRosterDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalRunConfigDocument\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/definitions/PhysicalContinuationDocument\""]
 #[doc = "    }"]
 #[doc = "  ],"]
 #[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
@@ -39882,6 +50169,11 @@ pub enum TransactionalRecoveryDocument {
     AdvancedPreferenceProjectionDocument(AdvancedPreferenceProjectionDocument),
     AdvancedPreferenceIntentDocument(AdvancedPreferenceIntentDocument),
     AdvancedPreferenceEventDocument(AdvancedPreferenceEventDocument),
+    InstallationManifestDocument(InstallationManifestDocument),
+    ArtifactManifestDocument(ArtifactManifestDocument),
+    FriendsRosterDocument(FriendsRosterDocument),
+    PhysicalRunConfigDocument(PhysicalRunConfigDocument),
+    PhysicalContinuationDocument(PhysicalContinuationDocument),
 }
 impl ::std::convert::From<TransactionalPlanDocument> for TransactionalRecoveryDocument {
     fn from(value: TransactionalPlanDocument) -> Self {
@@ -39961,6 +50253,31 @@ impl ::std::convert::From<AdvancedPreferenceIntentDocument> for TransactionalRec
 impl ::std::convert::From<AdvancedPreferenceEventDocument> for TransactionalRecoveryDocument {
     fn from(value: AdvancedPreferenceEventDocument) -> Self {
         Self::AdvancedPreferenceEventDocument(value)
+    }
+}
+impl ::std::convert::From<InstallationManifestDocument> for TransactionalRecoveryDocument {
+    fn from(value: InstallationManifestDocument) -> Self {
+        Self::InstallationManifestDocument(value)
+    }
+}
+impl ::std::convert::From<ArtifactManifestDocument> for TransactionalRecoveryDocument {
+    fn from(value: ArtifactManifestDocument) -> Self {
+        Self::ArtifactManifestDocument(value)
+    }
+}
+impl ::std::convert::From<FriendsRosterDocument> for TransactionalRecoveryDocument {
+    fn from(value: FriendsRosterDocument) -> Self {
+        Self::FriendsRosterDocument(value)
+    }
+}
+impl ::std::convert::From<PhysicalRunConfigDocument> for TransactionalRecoveryDocument {
+    fn from(value: PhysicalRunConfigDocument) -> Self {
+        Self::PhysicalRunConfigDocument(value)
+    }
+}
+impl ::std::convert::From<PhysicalContinuationDocument> for TransactionalRecoveryDocument {
+    fn from(value: PhysicalContinuationDocument) -> Self {
+        Self::PhysicalContinuationDocument(value)
     }
 }
 #[doc = "`UnavailableDiagnosticValue`"]

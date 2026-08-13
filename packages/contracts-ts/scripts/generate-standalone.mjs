@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Ajv2020 } from 'ajv/dist/2020.js';
+import { _ } from 'ajv/dist/compile/codegen/index.js';
 import standaloneCode from 'ajv/dist/standalone/index.js';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -29,6 +30,19 @@ const ajv = new Ajv2020({
   code: { esm: true, source: true },
 });
 ajv.addKeyword('x-liiiraa-generated');
+ajv.addKeyword({
+  keyword: 'x-liiiraa-unique-roster-bindings',
+  schemaType: 'boolean',
+  type: 'array',
+  errors: false,
+  code(context) {
+    if (!context.schema) return;
+    const { data } = context;
+    context.fail(
+      _`${data}.some((participant, index, participants) => participants.findIndex((candidate) => candidate.participantId === participant.participantId) !== index || participants.findIndex((candidate) => candidate.machineSlot === participant.machineSlot) !== index)`,
+    );
+  },
+});
 const definitions = [
   ...Object.values(diagnostic.$defs),
   ...Object.values(hardwareEvidence.$defs),

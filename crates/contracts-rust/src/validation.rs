@@ -357,6 +357,36 @@ pub fn validate_transactional_recovery_document(
         }
     }
 
+    if input.get("kind").and_then(Value::as_str) == Some("friends-roster") {
+        let participants = input
+            .get("participants")
+            .and_then(Value::as_array)
+            .ok_or_else(|| {
+                invalid_semantic_payload(
+                    TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID,
+                    "$/participants",
+                    "uniqueRosterBindings",
+                )
+            })?;
+        let mut participant_ids = std::collections::BTreeSet::new();
+        let mut machine_slots = std::collections::BTreeSet::new();
+        for (index, participant) in participants.iter().enumerate() {
+            let participant_id = participant.get("participantId").and_then(Value::as_str);
+            let machine_slot = participant.get("machineSlot").and_then(Value::as_str);
+            if participant_id.is_none()
+                || machine_slot.is_none()
+                || !participant_ids.insert(participant_id.expect("checked participant id"))
+                || !machine_slots.insert(machine_slot.expect("checked machine slot"))
+            {
+                return Err(invalid_semantic_payload(
+                    TRANSACTIONAL_RECOVERY_DOCUMENT_SCHEMA_ID,
+                    &format!("$/participants/{index}"),
+                    "uniqueRosterBindings",
+                ));
+            }
+        }
+    }
+
     Ok(document)
 }
 

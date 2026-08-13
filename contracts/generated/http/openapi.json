@@ -3331,6 +3331,54 @@
           }
         ]
       },
+      "ArtifactManifestDocument": {
+        "properties": {
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "files": {
+            "$ref": "#/components/schemas/PortableFileSet"
+          },
+          "inputTreeHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "artifact-manifest",
+            "type": "string"
+          },
+          "manifestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "manifestId",
+          "sourceCommit",
+          "inputTreeHash",
+          "buildId",
+          "operationVersionId",
+          "createdAt",
+          "files"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "AuditEvent": {
         "properties": {
           "action": {
@@ -3889,6 +3937,92 @@
           }
         ]
       },
+      "CheckpointReadyContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "previousState": {
+            "const": "installed-ready",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence1"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "checkpoint-ready",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence",
+          "previousState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "ClaimAdmission": {
         "properties": {
           "claim": {
@@ -3993,6 +4127,112 @@
           "applicableVersion",
           "validationState",
           "unproven"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CleanWindowsVmPhysicalPaths": {
+        "properties": {
+          "checkpointReadyRecordPath": {
+            "const": "state/clean-windows-vm/checkpoint-ready.json",
+            "type": "string"
+          },
+          "continuationPath": {
+            "const": "state/clean-windows-vm/physical-continuation.json",
+            "type": "string"
+          },
+          "installedReadyRecordPath": {
+            "const": "state/clean-windows-vm/installed-ready.json",
+            "type": "string"
+          },
+          "rawEnvelopePath": {
+            "const": "evidence/clean-windows-vm/raw-run-envelope.json",
+            "type": "string"
+          },
+          "runRecordPath": {
+            "const": "state/clean-windows-vm/run-record.json",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runRecordPath",
+          "installedReadyRecordPath",
+          "checkpointReadyRecordPath",
+          "continuationPath",
+          "rawEnvelopePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "CleanWindowsVmRunConfigDocument": {
+        "properties": {
+          "artifactManifestPath": {
+            "const": "artifact-manifest.json",
+            "type": "string"
+          },
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configPath": {
+            "const": "configs/clean-windows-vm.run-config.json",
+            "type": "string"
+          },
+          "kind": {
+            "const": "physical-run-config",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "participantIdentityMode": {
+            "const": "purpose-bound-local-hash",
+            "type": "string"
+          },
+          "paths": {
+            "$ref": "#/components/schemas/CleanWindowsVmPhysicalPaths"
+          },
+          "scenarios": {
+            "$ref": "#/components/schemas/PhysicalScenarioSet"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          },
+          "stage": {
+            "const": "clean-windows-vm",
+            "type": "string"
+          },
+          "tauriCommands": {
+            "$ref": "#/components/schemas/PhysicalTauriCommandAllowlist"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "configId",
+          "artifactManifestPath",
+          "artifactManifestSha256",
+          "operationVersionId",
+          "buildId",
+          "sourceCommit",
+          "participantIdentityMode",
+          "scenarios",
+          "tauriCommands",
+          "stage",
+          "configPath",
+          "paths"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -5797,6 +6037,122 @@
           "not": {}
         }
       },
+      "FriendsPcPhysicalPaths": {
+        "properties": {
+          "checkpointReadyRecordPath": {
+            "const": "state/friends-pc/checkpoint-ready.json",
+            "type": "string"
+          },
+          "continuationPath": {
+            "const": "state/friends-pc/physical-continuation.json",
+            "type": "string"
+          },
+          "installedReadyRecordPath": {
+            "const": "state/friends-pc/installed-ready.json",
+            "type": "string"
+          },
+          "rawEnvelopePath": {
+            "const": "evidence/friends-pc/raw-run-envelope.json",
+            "type": "string"
+          },
+          "runRecordPath": {
+            "const": "state/friends-pc/run-record.json",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runRecordPath",
+          "installedReadyRecordPath",
+          "checkpointReadyRecordPath",
+          "continuationPath",
+          "rawEnvelopePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "FriendsPcRunConfigDocument": {
+        "properties": {
+          "artifactManifestPath": {
+            "const": "artifact-manifest.json",
+            "type": "string"
+          },
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configPath": {
+            "const": "configs/friends-pc.run-config.json",
+            "type": "string"
+          },
+          "friendsRosterPath": {
+            "const": "friends/friends-roster.json",
+            "type": "string"
+          },
+          "friendsRosterSignaturePath": {
+            "const": "friends/friends-roster.json.p7s",
+            "type": "string"
+          },
+          "kind": {
+            "const": "physical-run-config",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "participantIdentityMode": {
+            "const": "purpose-bound-local-hash",
+            "type": "string"
+          },
+          "paths": {
+            "$ref": "#/components/schemas/FriendsPcPhysicalPaths"
+          },
+          "scenarios": {
+            "$ref": "#/components/schemas/PhysicalScenarioSet"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          },
+          "stage": {
+            "const": "friends-pc",
+            "type": "string"
+          },
+          "tauriCommands": {
+            "$ref": "#/components/schemas/PhysicalTauriCommandAllowlist"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "configId",
+          "artifactManifestPath",
+          "artifactManifestSha256",
+          "operationVersionId",
+          "buildId",
+          "sourceCommit",
+          "participantIdentityMode",
+          "scenarios",
+          "tauriCommands",
+          "stage",
+          "configPath",
+          "paths",
+          "friendsRosterPath",
+          "friendsRosterSignaturePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "FriendsPromotionDocument": {
         "properties": {
           "audit": {
@@ -5854,6 +6210,88 @@
           "stage",
           "previousStage",
           "previousPromotionId"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "FriendsRosterDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "friendsConfigSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "friends-roster",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/FriendsRosterParticipant"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true,
+            "x-liiiraa-unique-roster-bindings": true
+          },
+          "purpose": {
+            "const": "phase6-friends-physical-validation",
+            "type": "string"
+          },
+          "rosterId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "rosterId",
+          "artifactManifestSha256",
+          "friendsConfigSha256",
+          "operationVersionId",
+          "buildId",
+          "sourceCommit",
+          "purpose",
+          "createdAt",
+          "participants"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "FriendsRosterParticipant": {
+        "properties": {
+          "machineSlot": {
+            "$ref": "#/components/schemas/PhysicalMachineSlot"
+          },
+          "participantId": {
+            "$ref": "#/components/schemas/TransactionHash"
+          }
+        },
+        "required": [
+          "participantId",
+          "machineSlot"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -6141,6 +6579,298 @@
           "deviceLabel",
           "logicalProcessorCount",
           "totalMemoryBytes"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstallationManifestDocument": {
+        "properties": {
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "files": {
+            "$ref": "#/components/schemas/InstalledFileSet"
+          },
+          "inputTreeHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "kind": {
+            "const": "installation-manifest",
+            "type": "string"
+          },
+          "manifestId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "packageVersion": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "productCode": {
+            "$ref": "#/components/schemas/WindowsSchemeIdentifier"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "signerSpkiSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "manifestId",
+          "productCode",
+          "packageVersion",
+          "sourceCommit",
+          "inputTreeHash",
+          "buildId",
+          "operationVersionId",
+          "createdAt",
+          "signerSpkiSha256",
+          "files"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstalledDesktopFileIdentity": {
+        "properties": {
+          "authenticodePublisher": {
+            "const": "Liiiraa Boost Development",
+            "type": "string"
+          },
+          "authenticodeThumbprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "relativePath": {
+            "const": "liiiraa-desktop.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "desktop",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "authenticodePublisher",
+          "authenticodeThumbprint",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstalledFileSet": {
+        "properties": {
+          "desktop": {
+            "$ref": "#/components/schemas/InstalledDesktopFileIdentity"
+          },
+          "runner": {
+            "$ref": "#/components/schemas/InstalledRunnerFileIdentity"
+          },
+          "service": {
+            "$ref": "#/components/schemas/InstalledServiceFileIdentity"
+          }
+        },
+        "required": [
+          "desktop",
+          "service",
+          "runner"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstalledReadyContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence0"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "installed-ready",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstalledRunnerFileIdentity": {
+        "properties": {
+          "authenticodePublisher": {
+            "const": "Liiiraa Boost Development",
+            "type": "string"
+          },
+          "authenticodeThumbprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "relativePath": {
+            "const": "phase6-physical-runner.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "runner",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "authenticodePublisher",
+          "authenticodeThumbprint",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InstalledServiceFileIdentity": {
+        "properties": {
+          "authenticodePublisher": {
+            "const": "Liiiraa Boost Development",
+            "type": "string"
+          },
+          "authenticodeThumbprint": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "relativePath": {
+            "const": "liiiraa-optimizer-service.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "service",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "authenticodePublisher",
+          "authenticodeThumbprint",
+          "role",
+          "relativePath"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -7018,6 +7748,112 @@
           }
         ]
       },
+      "OwnerPcPhysicalPaths": {
+        "properties": {
+          "checkpointReadyRecordPath": {
+            "const": "state/owner-pc/checkpoint-ready.json",
+            "type": "string"
+          },
+          "continuationPath": {
+            "const": "state/owner-pc/physical-continuation.json",
+            "type": "string"
+          },
+          "installedReadyRecordPath": {
+            "const": "state/owner-pc/installed-ready.json",
+            "type": "string"
+          },
+          "rawEnvelopePath": {
+            "const": "evidence/owner-pc/raw-run-envelope.json",
+            "type": "string"
+          },
+          "runRecordPath": {
+            "const": "state/owner-pc/run-record.json",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runRecordPath",
+          "installedReadyRecordPath",
+          "checkpointReadyRecordPath",
+          "continuationPath",
+          "rawEnvelopePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "OwnerPcRunConfigDocument": {
+        "properties": {
+          "artifactManifestPath": {
+            "const": "artifact-manifest.json",
+            "type": "string"
+          },
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configPath": {
+            "const": "configs/owner-pc.run-config.json",
+            "type": "string"
+          },
+          "kind": {
+            "const": "physical-run-config",
+            "type": "string"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "participantIdentityMode": {
+            "const": "purpose-bound-local-hash",
+            "type": "string"
+          },
+          "paths": {
+            "$ref": "#/components/schemas/OwnerPcPhysicalPaths"
+          },
+          "scenarios": {
+            "$ref": "#/components/schemas/PhysicalScenarioSet"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sourceCommit": {
+            "$ref": "#/components/schemas/PhysicalSourceCommit"
+          },
+          "stage": {
+            "const": "owner-pc",
+            "type": "string"
+          },
+          "tauriCommands": {
+            "$ref": "#/components/schemas/PhysicalTauriCommandAllowlist"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "configId",
+          "artifactManifestPath",
+          "artifactManifestSha256",
+          "operationVersionId",
+          "buildId",
+          "sourceCommit",
+          "participantIdentityMode",
+          "scenarios",
+          "tauriCommands",
+          "stage",
+          "configPath",
+          "paths"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "OwnerPromotionDocument": {
         "properties": {
           "audit": {
@@ -7080,6 +7916,261 @@
         "unevaluatedProperties": {
           "not": {}
         }
+      },
+      "PhysicalContinuationDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InstalledReadyContinuationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/CheckpointReadyContinuationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/RunningContinuationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/RebootPendingContinuationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/ResumedObservationContinuationDocument"
+          },
+          {
+            "$ref": "#/components/schemas/RestoredCompleteContinuationDocument"
+          }
+        ]
+      },
+      "PhysicalMachineSlot": {
+        "maxLength": 9,
+        "minLength": 9,
+        "pattern": "^friend-[0-9]{2}$",
+        "type": "string"
+      },
+      "PhysicalRunConfigDocument": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CleanWindowsVmRunConfigDocument"
+          },
+          {
+            "$ref": "#/components/schemas/OwnerPcRunConfigDocument"
+          },
+          {
+            "$ref": "#/components/schemas/FriendsPcRunConfigDocument"
+          }
+        ]
+      },
+      "PhysicalScenarioSet": {
+        "properties": {
+          "apply": {
+            "const": true,
+            "type": "boolean"
+          },
+          "prepareRecovery": {
+            "const": true,
+            "type": "boolean"
+          },
+          "rebootWhenRequired": {
+            "const": true,
+            "type": "boolean"
+          },
+          "restore": {
+            "const": true,
+            "type": "boolean"
+          },
+          "verifyApplied": {
+            "const": true,
+            "type": "boolean"
+          },
+          "verifyRestored": {
+            "const": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "prepareRecovery",
+          "apply",
+          "verifyApplied",
+          "rebootWhenRequired",
+          "restore",
+          "verifyRestored"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PhysicalSequence0": {
+        "maximum": 0,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "PhysicalSequence1": {
+        "maximum": 1,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "PhysicalSequence2": {
+        "maximum": 2,
+        "minimum": 2,
+        "type": "integer"
+      },
+      "PhysicalSequence3": {
+        "maximum": 3,
+        "minimum": 3,
+        "type": "integer"
+      },
+      "PhysicalSequence4": {
+        "maximum": 4,
+        "minimum": 4,
+        "type": "integer"
+      },
+      "PhysicalSequence5": {
+        "maximum": 5,
+        "minimum": 5,
+        "type": "integer"
+      },
+      "PhysicalSignaturePolicy": {
+        "anyOf": [
+          {
+            "const": "authenticode-required",
+            "type": "string"
+          },
+          {
+            "const": "detached-cms-required",
+            "type": "string"
+          },
+          {
+            "const": "manifest-authenticated",
+            "type": "string"
+          }
+        ]
+      },
+      "PhysicalSourceCommit": {
+        "maxLength": 40,
+        "minLength": 40,
+        "pattern": "^[0-9a-f]{40}$",
+        "type": "string"
+      },
+      "PhysicalStage": {
+        "anyOf": [
+          {
+            "const": "clean-windows-vm",
+            "type": "string"
+          },
+          {
+            "const": "owner-pc",
+            "type": "string"
+          },
+          {
+            "const": "friends-pc",
+            "type": "string"
+          }
+        ]
+      },
+      "PhysicalTauriCommandAllowlist": {
+        "properties": {
+          "applyPlan": {
+            "const": "apply_plan",
+            "type": "string"
+          },
+          "approvePlan": {
+            "const": "approve_plan",
+            "type": "string"
+          },
+          "composePlan": {
+            "const": "compose_plan",
+            "type": "string"
+          },
+          "enableAdvancedPreference": {
+            "const": "enable_advanced_preference",
+            "type": "string"
+          },
+          "exportPlanDiagnostic": {
+            "const": "export_plan_diagnostic",
+            "type": "string"
+          },
+          "previewPlanDiagnostic": {
+            "const": "preview_plan_diagnostic",
+            "type": "string"
+          },
+          "readAdvancedPreference": {
+            "const": "read_advanced_preference",
+            "type": "string"
+          },
+          "readPlanExecution": {
+            "const": "read_plan_execution",
+            "type": "string"
+          },
+          "restorePlan": {
+            "const": "restore_plan",
+            "type": "string"
+          },
+          "restorePlanOperation": {
+            "const": "restore_plan_operation",
+            "type": "string"
+          },
+          "restoreRecoveryCheckpoint": {
+            "const": "restore_recovery_checkpoint",
+            "type": "string"
+          },
+          "revisePlan": {
+            "const": "revise_plan",
+            "type": "string"
+          },
+          "revokeAdvancedPreference": {
+            "const": "revoke_advanced_preference",
+            "type": "string"
+          },
+          "subscribePlanExecution": {
+            "const": "subscribe_plan_execution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "composePlan",
+          "revisePlan",
+          "approvePlan",
+          "applyPlan",
+          "restorePlanOperation",
+          "restorePlan",
+          "restoreRecoveryCheckpoint",
+          "readPlanExecution",
+          "subscribePlanExecution",
+          "previewPlanDiagnostic",
+          "exportPlanDiagnostic",
+          "readAdvancedPreference",
+          "enableAdvancedPreference",
+          "revokeAdvancedPreference"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PhysicalVersion": {
+        "maxLength": 64,
+        "minLength": 1,
+        "pattern": "^[0-9A-Za-z][0-9A-Za-z.+-]*$",
+        "type": "string"
+      },
+      "PhysicalVersionPolicy": {
+        "anyOf": [
+          {
+            "const": "package-version",
+            "type": "string"
+          },
+          {
+            "const": "file-version",
+            "type": "string"
+          },
+          {
+            "const": "schema-version",
+            "type": "string"
+          },
+          {
+            "const": "not-applicable",
+            "type": "string"
+          }
+        ]
       },
       "PlanApprovalDocument": {
         "properties": {
@@ -7324,6 +8415,430 @@
           "intent",
           "startedAt",
           "audit"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableCleanWindowsVmConfigFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "configs/clean-windows-vm.run-config.json",
+            "type": "string"
+          },
+          "role": {
+            "const": "clean-windows-vm-config",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableFileSet": {
+        "properties": {
+          "cleanWindowsVmConfig": {
+            "$ref": "#/components/schemas/PortableCleanWindowsVmConfigFileIdentity"
+          },
+          "friendsPcConfig": {
+            "$ref": "#/components/schemas/PortableFriendsPcConfigFileIdentity"
+          },
+          "installationManifest": {
+            "$ref": "#/components/schemas/PortableInstallationManifestFileIdentity"
+          },
+          "installationManifestSignature": {
+            "$ref": "#/components/schemas/PortableInstallationManifestSignatureFileIdentity"
+          },
+          "msedgeDriver": {
+            "$ref": "#/components/schemas/PortableMsedgeDriverFileIdentity"
+          },
+          "msi": {
+            "$ref": "#/components/schemas/PortableMsiFileIdentity"
+          },
+          "ownerPcConfig": {
+            "$ref": "#/components/schemas/PortableOwnerPcConfigFileIdentity"
+          },
+          "runner": {
+            "$ref": "#/components/schemas/PortableRunnerFileIdentity"
+          },
+          "tauriDriver": {
+            "$ref": "#/components/schemas/PortableTauriDriverFileIdentity"
+          }
+        },
+        "required": [
+          "msi",
+          "installationManifest",
+          "installationManifestSignature",
+          "cleanWindowsVmConfig",
+          "ownerPcConfig",
+          "friendsPcConfig",
+          "runner",
+          "tauriDriver",
+          "msedgeDriver"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableFriendsPcConfigFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "configs/friends-pc.run-config.json",
+            "type": "string"
+          },
+          "role": {
+            "const": "friends-pc-config",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableInstallationManifestFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "installation-manifest.json",
+            "type": "string"
+          },
+          "role": {
+            "const": "installation-manifest",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableInstallationManifestSignatureFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "installation-manifest.json.p7s",
+            "type": "string"
+          },
+          "role": {
+            "const": "installation-manifest-signature",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableMsedgeDriverFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "msedgedriver.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "msedgedriver",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableMsiFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "liiiraa-boost.msi",
+            "type": "string"
+          },
+          "role": {
+            "const": "msi",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableOwnerPcConfigFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "configs/owner-pc.run-config.json",
+            "type": "string"
+          },
+          "role": {
+            "const": "owner-pc-config",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableRunnerFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "phase6-physical-runner.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "runner",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "PortableTauriDriverFileIdentity": {
+        "properties": {
+          "relativePath": {
+            "const": "tauri-driver.exe",
+            "type": "string"
+          },
+          "role": {
+            "const": "tauri-driver",
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "signaturePolicy": {
+            "$ref": "#/components/schemas/PhysicalSignaturePolicy"
+          },
+          "sizeBytes": {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PhysicalVersion"
+          },
+          "versionPolicy": {
+            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+          }
+        },
+        "required": [
+          "sizeBytes",
+          "sha256",
+          "version",
+          "versionPolicy",
+          "signaturePolicy",
+          "role",
+          "relativePath"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -7790,6 +9305,92 @@
           }
         ]
       },
+      "RebootPendingContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "previousState": {
+            "const": "running",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence3"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "reboot-pending",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence",
+          "previousState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "RecoveryCheckpointDocument": {
         "properties": {
           "audit": {
@@ -8137,6 +9738,92 @@
           }
         ]
       },
+      "RestoredCompleteContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "previousState": {
+            "const": "resumed-observation",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence5"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "restored-complete",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence",
+          "previousState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "RestoredJournalEvent": {
         "properties": {
           "audit": {
@@ -8279,6 +9966,102 @@
           "not": {}
         }
       },
+      "ResumedObservationContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "mutationAuthorized": {
+            "const": false,
+            "type": "boolean"
+          },
+          "observationRequired": {
+            "const": true,
+            "type": "boolean"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "previousState": {
+            "const": "reboot-pending",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence4"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "resumed-observation",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence",
+          "previousState",
+          "observationRequired",
+          "mutationAuthorized"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "RiskClass": {
         "anyOf": [
           {
@@ -8298,6 +10081,92 @@
             "type": "string"
           }
         ]
+      },
+      "RunningContinuationDocument": {
+        "properties": {
+          "artifactManifestSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "buildId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "configSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "continuationId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "kind": {
+            "const": "physical-continuation",
+            "type": "string"
+          },
+          "observedJournalHeadHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "operationVersionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "previousRecordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "previousState": {
+            "const": "checkpoint-ready",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordHash": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "runId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          },
+          "runnerSha256": {
+            "$ref": "#/components/schemas/TransactionHash"
+          },
+          "schemaVersion": {
+            "$ref": "#/components/schemas/TransactionSchemaVersion"
+          },
+          "sequence": {
+            "$ref": "#/components/schemas/PhysicalSequence2"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PhysicalStage"
+          },
+          "state": {
+            "const": "running",
+            "type": "string"
+          },
+          "transactionId": {
+            "$ref": "#/components/schemas/TransactionIdentifier"
+          }
+        },
+        "required": [
+          "kind",
+          "schemaVersion",
+          "continuationId",
+          "artifactManifestSha256",
+          "configSha256",
+          "runnerSha256",
+          "stage",
+          "operationVersionId",
+          "buildId",
+          "runId",
+          "transactionId",
+          "previousRecordHash",
+          "recordHash",
+          "observedJournalHeadHash",
+          "recordedAt",
+          "state",
+          "sequence",
+          "previousState"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "SafeContextKey": {
         "anyOf": [
@@ -9129,6 +10998,21 @@
           },
           {
             "$ref": "#/components/schemas/AdvancedPreferenceEventDocument"
+          },
+          {
+            "$ref": "#/components/schemas/InstallationManifestDocument"
+          },
+          {
+            "$ref": "#/components/schemas/ArtifactManifestDocument"
+          },
+          {
+            "$ref": "#/components/schemas/FriendsRosterDocument"
+          },
+          {
+            "$ref": "#/components/schemas/PhysicalRunConfigDocument"
+          },
+          {
+            "$ref": "#/components/schemas/PhysicalContinuationDocument"
           }
         ]
       },

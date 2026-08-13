@@ -748,6 +748,406 @@ model AdvancedPreferenceEventDocument {
   audit: AuditReference;
 }
 
+@minLength(40)
+@maxLength(40)
+@pattern("^[0-9a-f]{40}$")
+scalar PhysicalSourceCommit extends string;
+
+@minLength(1)
+@maxLength(64)
+@pattern("^[0-9A-Za-z][0-9A-Za-z.+-]*$")
+scalar PhysicalVersion extends string;
+
+@minLength(9)
+@maxLength(9)
+@pattern("^friend-[0-9]{2}$")
+scalar PhysicalMachineSlot extends string;
+
+@minValue(0)
+@maxValue(0)
+scalar PhysicalSequence0 extends uint32;
+
+@minValue(1)
+@maxValue(1)
+scalar PhysicalSequence1 extends uint32;
+
+@minValue(2)
+@maxValue(2)
+scalar PhysicalSequence2 extends uint32;
+
+@minValue(3)
+@maxValue(3)
+scalar PhysicalSequence3 extends uint32;
+
+@minValue(4)
+@maxValue(4)
+scalar PhysicalSequence4 extends uint32;
+
+@minValue(5)
+@maxValue(5)
+scalar PhysicalSequence5 extends uint32;
+
+union InstalledFileRole {
+  desktop: "desktop",
+  service: "service",
+  runner: "runner",
+}
+
+union PortableFileRole {
+  msi: "msi",
+  installationManifest: "installation-manifest",
+  installationManifestSignature: "installation-manifest-signature",
+  cleanWindowsVmConfig: "clean-windows-vm-config",
+  ownerPcConfig: "owner-pc-config",
+  friendsPcConfig: "friends-pc-config",
+  runner: "runner",
+  tauriDriver: "tauri-driver",
+  msedgeDriver: "msedgedriver",
+}
+
+union PhysicalVersionPolicy {
+  packageVersion: "package-version",
+  fileVersion: "file-version",
+  schemaVersion: "schema-version",
+  notApplicable: "not-applicable",
+}
+
+union PhysicalSignaturePolicy {
+  authenticodeRequired: "authenticode-required",
+  detachedCmsRequired: "detached-cms-required",
+  manifestAuthenticated: "manifest-authenticated",
+}
+
+union PhysicalStage {
+  cleanWindowsVm: "clean-windows-vm",
+  ownerPc: "owner-pc",
+  friendsPc: "friends-pc",
+}
+
+model InstalledFileIdentityBase {
+  @minValue(1)
+  sizeBytes: uint32;
+  sha256: TransactionHash;
+  version: PhysicalVersion;
+  authenticodePublisher: "Liiiraa Boost Development";
+  authenticodeThumbprint: TransactionHash;
+}
+
+model InstalledDesktopFileIdentity {
+  ...InstalledFileIdentityBase;
+  role: InstalledFileRole.desktop;
+  relativePath: "liiiraa-desktop.exe";
+}
+
+model InstalledServiceFileIdentity {
+  ...InstalledFileIdentityBase;
+  role: InstalledFileRole.service;
+  relativePath: "liiiraa-optimizer-service.exe";
+}
+
+model InstalledRunnerFileIdentity {
+  ...InstalledFileIdentityBase;
+  role: InstalledFileRole.runner;
+  relativePath: "phase6-physical-runner.exe";
+}
+
+model InstalledFileSet {
+  desktop: InstalledDesktopFileIdentity;
+  service: InstalledServiceFileIdentity;
+  runner: InstalledRunnerFileIdentity;
+}
+
+model InstallationManifestDocument {
+  kind: "installation-manifest";
+  schemaVersion: TransactionSchemaVersion;
+  manifestId: TransactionIdentifier;
+  productCode: WindowsSchemeIdentifier;
+  packageVersion: PhysicalVersion;
+  sourceCommit: PhysicalSourceCommit;
+  inputTreeHash: TransactionHash;
+  buildId: TransactionIdentifier;
+  operationVersionId: TransactionIdentifier;
+  createdAt: utcDateTime;
+  signerSpkiSha256: TransactionHash;
+  files: InstalledFileSet;
+}
+
+model PortableFileIdentityBase {
+  @minValue(1)
+  sizeBytes: uint32;
+  sha256: TransactionHash;
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy;
+  signaturePolicy: PhysicalSignaturePolicy;
+}
+
+model PortableMsiFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.msi;
+  relativePath: "liiiraa-boost.msi";
+}
+
+model PortableInstallationManifestFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.installationManifest;
+  relativePath: "installation-manifest.json";
+}
+
+model PortableInstallationManifestSignatureFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.installationManifestSignature;
+  relativePath: "installation-manifest.json.p7s";
+}
+
+model PortableCleanWindowsVmConfigFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.cleanWindowsVmConfig;
+  relativePath: "configs/clean-windows-vm.run-config.json";
+}
+
+model PortableOwnerPcConfigFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.ownerPcConfig;
+  relativePath: "configs/owner-pc.run-config.json";
+}
+
+model PortableFriendsPcConfigFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.friendsPcConfig;
+  relativePath: "configs/friends-pc.run-config.json";
+}
+
+model PortableRunnerFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.runner;
+  relativePath: "phase6-physical-runner.exe";
+}
+
+model PortableTauriDriverFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.tauriDriver;
+  relativePath: "tauri-driver.exe";
+}
+
+model PortableMsedgeDriverFileIdentity {
+  ...PortableFileIdentityBase;
+  role: PortableFileRole.msedgeDriver;
+  relativePath: "msedgedriver.exe";
+}
+
+model PortableFileSet {
+  msi: PortableMsiFileIdentity;
+  installationManifest: PortableInstallationManifestFileIdentity;
+  installationManifestSignature: PortableInstallationManifestSignatureFileIdentity;
+  cleanWindowsVmConfig: PortableCleanWindowsVmConfigFileIdentity;
+  ownerPcConfig: PortableOwnerPcConfigFileIdentity;
+  friendsPcConfig: PortableFriendsPcConfigFileIdentity;
+  runner: PortableRunnerFileIdentity;
+  tauriDriver: PortableTauriDriverFileIdentity;
+  msedgeDriver: PortableMsedgeDriverFileIdentity;
+}
+
+model ArtifactManifestDocument {
+  kind: "artifact-manifest";
+  schemaVersion: TransactionSchemaVersion;
+  manifestId: TransactionIdentifier;
+  sourceCommit: PhysicalSourceCommit;
+  inputTreeHash: TransactionHash;
+  buildId: TransactionIdentifier;
+  operationVersionId: TransactionIdentifier;
+  createdAt: utcDateTime;
+  files: PortableFileSet;
+}
+
+model FriendsRosterParticipant {
+  participantId: TransactionHash;
+  machineSlot: PhysicalMachineSlot;
+}
+
+model FriendsRosterDocument {
+  kind: "friends-roster";
+  schemaVersion: TransactionSchemaVersion;
+  rosterId: TransactionIdentifier;
+  artifactManifestSha256: TransactionHash;
+  friendsConfigSha256: TransactionHash;
+  operationVersionId: TransactionIdentifier;
+  buildId: TransactionIdentifier;
+  sourceCommit: PhysicalSourceCommit;
+  purpose: "phase6-friends-physical-validation";
+  createdAt: utcDateTime;
+
+  @minItems(1)
+  @maxItems(32)
+  @uniqueItems
+  @extension("x-liiiraa-unique-roster-bindings", true)
+  participants: FriendsRosterParticipant[];
+}
+
+model PhysicalScenarioSet {
+  prepareRecovery: true;
+  apply: true;
+  verifyApplied: true;
+  rebootWhenRequired: true;
+  restore: true;
+  verifyRestored: true;
+}
+
+model PhysicalTauriCommandAllowlist {
+  composePlan: "compose_plan";
+  revisePlan: "revise_plan";
+  approvePlan: "approve_plan";
+  applyPlan: "apply_plan";
+  restorePlanOperation: "restore_plan_operation";
+  restorePlan: "restore_plan";
+  restoreRecoveryCheckpoint: "restore_recovery_checkpoint";
+  readPlanExecution: "read_plan_execution";
+  subscribePlanExecution: "subscribe_plan_execution";
+  previewPlanDiagnostic: "preview_plan_diagnostic";
+  exportPlanDiagnostic: "export_plan_diagnostic";
+  readAdvancedPreference: "read_advanced_preference";
+  enableAdvancedPreference: "enable_advanced_preference";
+  revokeAdvancedPreference: "revoke_advanced_preference";
+}
+
+model CleanWindowsVmPhysicalPaths {
+  runRecordPath: "state/clean-windows-vm/run-record.json";
+  installedReadyRecordPath: "state/clean-windows-vm/installed-ready.json";
+  checkpointReadyRecordPath: "state/clean-windows-vm/checkpoint-ready.json";
+  continuationPath: "state/clean-windows-vm/physical-continuation.json";
+  rawEnvelopePath: "evidence/clean-windows-vm/raw-run-envelope.json";
+}
+
+model OwnerPcPhysicalPaths {
+  runRecordPath: "state/owner-pc/run-record.json";
+  installedReadyRecordPath: "state/owner-pc/installed-ready.json";
+  checkpointReadyRecordPath: "state/owner-pc/checkpoint-ready.json";
+  continuationPath: "state/owner-pc/physical-continuation.json";
+  rawEnvelopePath: "evidence/owner-pc/raw-run-envelope.json";
+}
+
+model FriendsPcPhysicalPaths {
+  runRecordPath: "state/friends-pc/run-record.json";
+  installedReadyRecordPath: "state/friends-pc/installed-ready.json";
+  checkpointReadyRecordPath: "state/friends-pc/checkpoint-ready.json";
+  continuationPath: "state/friends-pc/physical-continuation.json";
+  rawEnvelopePath: "evidence/friends-pc/raw-run-envelope.json";
+}
+
+model PhysicalRunConfigBase {
+  kind: "physical-run-config";
+  schemaVersion: TransactionSchemaVersion;
+  configId: TransactionIdentifier;
+  artifactManifestPath: "artifact-manifest.json";
+  artifactManifestSha256: TransactionHash;
+  operationVersionId: TransactionIdentifier;
+  buildId: TransactionIdentifier;
+  sourceCommit: PhysicalSourceCommit;
+  participantIdentityMode: "purpose-bound-local-hash";
+  scenarios: PhysicalScenarioSet;
+  tauriCommands: PhysicalTauriCommandAllowlist;
+}
+
+model CleanWindowsVmRunConfigDocument {
+  ...PhysicalRunConfigBase;
+  stage: "clean-windows-vm";
+  configPath: "configs/clean-windows-vm.run-config.json";
+  paths: CleanWindowsVmPhysicalPaths;
+}
+
+model OwnerPcRunConfigDocument {
+  ...PhysicalRunConfigBase;
+  stage: "owner-pc";
+  configPath: "configs/owner-pc.run-config.json";
+  paths: OwnerPcPhysicalPaths;
+}
+
+model FriendsPcRunConfigDocument {
+  ...PhysicalRunConfigBase;
+  stage: "friends-pc";
+  configPath: "configs/friends-pc.run-config.json";
+  paths: FriendsPcPhysicalPaths;
+  friendsRosterPath: "friends/friends-roster.json";
+  friendsRosterSignaturePath: "friends/friends-roster.json.p7s";
+}
+
+@oneOf
+union PhysicalRunConfigDocument {
+  cleanWindowsVm: CleanWindowsVmRunConfigDocument,
+  ownerPc: OwnerPcRunConfigDocument,
+  friendsPc: FriendsPcRunConfigDocument,
+}
+
+model PhysicalContinuationBase {
+  kind: "physical-continuation";
+  schemaVersion: TransactionSchemaVersion;
+  continuationId: TransactionIdentifier;
+  artifactManifestSha256: TransactionHash;
+  configSha256: TransactionHash;
+  runnerSha256: TransactionHash;
+  stage: PhysicalStage;
+  operationVersionId: TransactionIdentifier;
+  buildId: TransactionIdentifier;
+  runId: TransactionIdentifier;
+  transactionId: TransactionIdentifier;
+  previousRecordHash: TransactionHash;
+  recordHash: TransactionHash;
+  observedJournalHeadHash: TransactionHash;
+  recordedAt: utcDateTime;
+}
+
+model InstalledReadyContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "installed-ready";
+  sequence: PhysicalSequence0;
+}
+
+model CheckpointReadyContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "checkpoint-ready";
+  sequence: PhysicalSequence1;
+  previousState: "installed-ready";
+}
+
+model RunningContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "running";
+  sequence: PhysicalSequence2;
+  previousState: "checkpoint-ready";
+}
+
+model RebootPendingContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "reboot-pending";
+  sequence: PhysicalSequence3;
+  previousState: "running";
+}
+
+model ResumedObservationContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "resumed-observation";
+  sequence: PhysicalSequence4;
+  previousState: "reboot-pending";
+  observationRequired: true;
+  mutationAuthorized: false;
+}
+
+model RestoredCompleteContinuationDocument {
+  ...PhysicalContinuationBase;
+  state: "restored-complete";
+  sequence: PhysicalSequence5;
+  previousState: "resumed-observation";
+}
+
+@oneOf
+union PhysicalContinuationDocument {
+  installedReady: InstalledReadyContinuationDocument,
+  checkpointReady: CheckpointReadyContinuationDocument,
+  running: RunningContinuationDocument,
+  rebootPending: RebootPendingContinuationDocument,
+  resumedObservation: ResumedObservationContinuationDocument,
+  restoredComplete: RestoredCompleteContinuationDocument,
+}
+
 @jsonSchema
 @oneOf
 union TransactionalRecoveryDocument {
@@ -767,4 +1167,9 @@ union TransactionalRecoveryDocument {
   advancedPreference: AdvancedPreferenceProjectionDocument,
   advancedPreferenceIntent: AdvancedPreferenceIntentDocument,
   advancedPreferenceEvent: AdvancedPreferenceEventDocument,
+  installationManifest: InstallationManifestDocument,
+  artifactManifest: ArtifactManifestDocument,
+  friendsRoster: FriendsRosterDocument,
+  physicalRunConfig: PhysicalRunConfigDocument,
+  physicalContinuation: PhysicalContinuationDocument,
 }
