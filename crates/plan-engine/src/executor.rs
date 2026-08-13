@@ -21,10 +21,11 @@ pub struct JournalAppend<'a> {
 }
 
 /// Authority loaded on startup before any new mutation may be admitted.
+#[derive(Clone, Debug)]
 pub enum RecoveryLoad {
     Clear,
     Pending {
-        transaction: PreparedTransactionIdentity,
+        transaction: PlanTransactionDocument,
         latest_event: DurableJournalEvent,
     },
     CorruptOrUnavailable,
@@ -32,11 +33,11 @@ pub enum RecoveryLoad {
 
 /// Append-oriented journal and immutable receipt/checkpoint authority.
 pub trait DurableJournalPort {
-    fn prepare(
+    fn append_prepared(
         &mut self,
         transaction: &PlanTransactionDocument,
         prepared_event: &DurableJournalEvent,
-    ) -> PlanEngineResult<PreparedTransactionIdentity>;
+    ) -> PlanEngineResult<()>;
 
     fn append(&mut self, append: JournalAppend<'_>) -> PlanEngineResult<TransactionHash>;
 
@@ -202,4 +203,186 @@ pub trait ExecutorPolicy {
         expected_prior_state: &ExactOperationState,
         document: RecoveryCheckpointDocument,
     ) -> PlanEngineResult<RestartCheckpoint>;
+}
+
+/// Whether the prepared transaction applies or restores exact state.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ExecutionOperation {
+    Apply,
+    Restore,
+}
+
+/// Closed durable result of one executor turn. No result authorizes an
+/// automatic mutation retry.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ExecutionVerdict {
+    Verified,
+    Restored,
+    NotApplied,
+    NotRestored,
+    Unknown,
+    Drift,
+    Conflict,
+    CancelledAtSafeBoundary,
+    RecoveryPriority,
+    RestartVerificationRequired,
+    AdmissionBlocked,
+    JournalFailure,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NextSafeAction {
+    None,
+    StopBeforeNextStage,
+    ReconcilePendingTransaction,
+    VerifyAfterRestart,
+    ReviewDrift,
+    ReviewConflict,
+    GuidedRecovery,
+}
+
+/// Exact generated artifacts for a single operation. They are supplied by the
+/// native document builder and validated against the reducer decision before
+/// any append or receipt write.
+#[derive(Clone, Debug)]
+pub struct ExecutionArtifacts {
+    pub prepared: DurableJournalEvent,
+    pub dispatch_returned: Option<DurableJournalEvent>,
+    pub observed: DurableJournalEvent,
+    pub verified: DurableJournalEvent,
+    pub not_applied: DurableJournalEvent,
+    pub unknown: DurableJournalEvent,
+    pub drift: DurableJournalEvent,
+    pub conflict: DurableJournalEvent,
+    pub restored: DurableJournalEvent,
+    pub receipt: TransactionReceiptDocument,
+    pub restart_checkpoint: Option<RecoveryCheckpointDocument>,
+}
+
+#[derive(Clone, Debug)]
+pub struct ExecutionRequest {
+    pub transaction: PlanTransactionDocument,
+    pub operation_version_id: TransactionIdentifier,
+    pub exact_prior_state: ExactOperationState,
+    pub exact_requested_state: ExactOperationState,
+    pub observation_command: crate::domain::BrokerObservationCommand,
+    pub mutation_command: crate::domain::BrokerMutationCommand,
+    pub operation: ExecutionOperation,
+    pub expected_head_hash: TransactionHash,
+    pub read_retry_limit: u8,
+    pub cancel_before_dispatch: bool,
+    pub restart_required: bool,
+    pub artifacts: ExecutionArtifacts,
+}
+
+/// Native-owned admission is recomputed immediately before durable prepare.
+/// Implementations bind current plan/evidence/risk/proof/revocation authority;
+/// renderer state is not an input.
+pub trait ExecutionAdmissionPort {
+    fn recompute(&self, request: &ExecutionRequest) -> PlanEngineResult<()>;
+}
+
+/// Stable adapter errors without exposing a generic domain-error constructor.
+pub fn journal_unavailable_error() -> crate::domain::PlanEngineError {
+    crate::domain::PlanEngineError::new(
+        crate::domain::PlanEngineErrorCode::JournalUnavailable,
+        None,
+    )
+}
+
+pub fn broker_unavailable_error() -> crate::domain::PlanEngineError {
+    crate::domain::PlanEngineError::new(crate::domain::PlanEngineErrorCode::BrokerUnavailable, None)
+}
+
+pub fn admission_blocked_error(
+    code: crate::domain::PlanEngineErrorCode,
+) -> crate::domain::PlanEngineError {
+    crate::domain::PlanEngineError::new(code, None)
+}
+
+#[derive(Clone, Debug)]
+pub struct ExecutionOutcome {
+    verdict: ExecutionVerdict,
+    gate: MutationGateState,
+    next_safe_action: NextSafeAction,
+    durable_sequences: Vec<u32>,
+    dispatch_count: u32,
+    read_attempts: u32,
+    receipt_stored: bool,
+    observed_state: Option<ExactOperationState>,
+}
+
+impl ExecutionOutcome {
+    pub const fn verdict(&self) -> ExecutionVerdict {
+        self.verdict
+    }
+
+    pub const fn gate(&self) -> MutationGateState {
+        self.gate
+    }
+
+    pub const fn next_safe_action(&self) -> NextSafeAction {
+        self.next_safe_action
+    }
+
+    pub fn durable_sequences(&self) -> &[u32] {
+        &self.durable_sequences
+    }
+
+    pub const fn dispatch_count(&self) -> u32 {
+        self.dispatch_count
+    }
+
+    pub const fn read_attempts(&self) -> u32 {
+        self.read_attempts
+    }
+
+    pub const fn receipt_stored(&self) -> bool {
+        self.receipt_stored
+    }
+
+    pub const fn observed_state(&self) -> Option<&ExactOperationState> {
+        self.observed_state.as_ref()
+    }
+
+    pub const fn allows_automatic_mutation_retry(&self) -> bool {
+        false
+    }
+}
+
+/// Stateful only for the serialization guard; all verdicts derive from exact
+/// journal and observation inputs.
+#[derive(Debug, Default)]
+pub struct DeterministicTransactionExecutor {
+    mutation_in_flight: bool,
+}
+
+impl DeterministicTransactionExecutor {
+    pub const fn new() -> Self {
+        Self {
+            mutation_in_flight: false,
+        }
+    }
+
+    pub const fn mutation_in_flight(&self) -> bool {
+        self.mutation_in_flight
+    }
+
+    pub fn execute<J, B, A>(
+        &mut self,
+        _request: &ExecutionRequest,
+        _journal: &mut J,
+        _broker: &mut B,
+        _admission: &A,
+    ) -> PlanEngineResult<ExecutionOutcome>
+    where
+        J: DurableJournalPort,
+        B: PrivilegedBrokerPort,
+        A: ExecutionAdmissionPort,
+    {
+        Err(crate::domain::PlanEngineError::new(
+            crate::domain::PlanEngineErrorCode::JournalUnavailable,
+            None,
+        ))
+    }
 }
