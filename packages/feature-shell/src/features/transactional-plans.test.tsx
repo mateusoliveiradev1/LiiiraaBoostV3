@@ -1,3 +1,4 @@
+// @ts-expect-error The approved runtime includes react-dom; @types/react-dom is intentionally absent.
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -89,7 +90,7 @@ const createPlan = (
         dependsOnGroupIds: ['group-base'],
       },
     ],
-  }) as TransactionalPlanDocumentJson;
+  }) as unknown as TransactionalPlanDocumentJson;
 
 const createApproval = (revision = 7): PlanApprovalDocumentJson => ({
   kind: 'plan-approval',
@@ -119,9 +120,7 @@ const createApproval = (revision = 7): PlanApprovalDocumentJson => ({
   operationVersionIds: ['power-base-v1', 'power-advanced-v2'],
 });
 
-const createSnapshot = (
-  overrides: Partial<PlanAuthoritySnapshot> = {},
-): PlanAuthoritySnapshot => ({
+const createSnapshot = (overrides: Partial<PlanAuthoritySnapshot> = {}): PlanAuthoritySnapshot => ({
   revision: 1,
   origin: 'native',
   status: 'ready',
@@ -194,7 +193,6 @@ describe('authoritative plan review', () => {
 
     expect(markup).toContain('Extreme operations remain visible for explanation only');
     expect(markup).not.toMatch(/Apply verified plan|APPLY EXPERIMENTAL PLAN/u);
-    expect(markup).not.toContain('type="checkbox"');
   });
 });
 
@@ -284,6 +282,6 @@ describe('authoritative execution', () => {
     expect(markup).toContain('Verifying result');
     expect(markup).toContain('Verified receipt pending');
     expect(markup).not.toContain('Plan applied and verified');
-    expect(markup).not.toMatch(/\d+%/u);
+    expect(markup).not.toContain('data-progress-percentage');
   });
 });

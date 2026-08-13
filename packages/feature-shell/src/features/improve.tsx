@@ -1,12 +1,15 @@
 import {
   CapabilityReason,
   ChangeLedger,
+  ExecutionTimeline,
   LbButton,
+  LbPanel,
   LbRadioGroup,
   LbSwitch,
   OperationInspector,
   OperationRow,
   PlanDependencyList,
+  PlanRevisionSummary,
   ProductIcon,
   ProvenanceMark,
   QualityMark,
@@ -16,6 +19,7 @@ import {
   RouteHeader,
   ScenarioMarker,
   StatusSignal,
+  VerifiedReceiptDetails,
   VerificationReceipt,
   type CapabilityState,
   type EvidenceQuality,
@@ -23,11 +27,19 @@ import {
   type RiskLevel,
 } from '@liiiraa/design-system';
 import type {
+  PlanOperationJson,
+  RiskClassJson,
+  TransactionReceiptDocumentJson,
+  TransactionalRecoveryDocumentJson,
+} from '@liiiraa/contracts-ts';
+import type {
   DesktopScenarioId,
   PhaseBoundaryExplanation,
+  PlanAuthority,
+  PlanAuthoritySnapshot,
   RecommendationState,
 } from '@liiiraa/desktop-client';
-import { useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { ShellLocale } from './calibration.js';
 
@@ -99,13 +111,19 @@ export interface TechnicalOperation {
 }
 
 export interface ImproveSurfaceProps {
+  readonly approvalProofReference?: string;
+  readonly authority?: PlanAuthority;
+  readonly evidenceReferences?: readonly string[];
+  readonly goalReferences?: readonly string[];
   readonly locale: ShellLocale;
+  readonly onCancelSafely?: (transactionId: string) => void;
   readonly onNavigate?: (view: ImproveView, targetId?: string) => void;
   readonly onRiskPolicyChange?: (risk: OperationRisk) => void;
   readonly scenarioId: string;
   readonly selectedComponent?: ImproveComponent;
   readonly selectedGoal?: ImproveGoal;
   readonly selectedOperationId?: string;
+  readonly validatedDocuments?: readonly TransactionalRecoveryDocumentJson[];
   readonly view: ImproveView;
 }
 
@@ -1490,16 +1508,901 @@ const NoChangeReceiptView = ({
   </section>
 );
 
-export const ImproveSurface = ({
+const AUTHORITY_RISK_ORDER = Object.freeze([
+  'verified',
+  'advanced',
+  'experimental',
+  'extreme-locked',
+] as const satisfies readonly RiskClassJson[]);
+
+const authorityRiskLevel = (risk: RiskClassJson): RiskLevel =>
+  risk === 'extreme-locked' ? 'extreme' : risk;
+
+const authorityRiskLabel = (risk: RiskClassJson, locale: ShellLocale): string => {
+  const labels = {
+    advanced: { en: 'Advanced', 'pt-BR': 'Avançado' },
+    experimental: { en: 'Experimental', 'pt-BR': 'Experimental' },
+    'extreme-locked': { en: 'Extreme', 'pt-BR': 'Extremo' },
+    verified: { en: 'Verified', 'pt-BR': 'Verificado' },
+  } satisfies Record<RiskClassJson, LocalizedCopy>;
+  return localized(labels[risk], locale);
+};
+
+const exactStateText = (state: PlanOperationJson['previousValue']): string => {
+  if (state.state === 'observed') {
+    return `${state.schemeId} · ${state.canonicalStateHash}`;
+  }
+  return `${state.state}: ${state.reason}`;
+};
+
+const approvalMatchesPlan = (snapshot: PlanAuthoritySnapshot): boolean => {
+  const { approval, plan } = snapshot;
+  return (
+    plan !== null &&
+    approval !== null &&
+    approval.planId === plan.planId &&
+    approval.planRevision === plan.revision &&
+    approval.revisionFingerprint === plan.revisionFingerprint &&
+    approval.evidenceFingerprint === plan.evidenceFingerprint &&
+    approval.approvedRisk === plan.effectiveRisk &&
+    approval.operationVersionIds.length === plan.operations.length &&
+    approval.operationVersionIds.every(
+      (operationVersionId, index) =>
+        operationVersionId === plan.operations[index]?.operationVersionId,
+    )
+  );
+};
+
+const usePlanAuthoritySnapshot = (authority: PlanAuthority): PlanAuthoritySnapshot =>
+  useSyncExternalStore(authority.subscribe, authority.snapshot, authority.snapshot);
+
+const AuthorityStatus = ({
   locale,
+  snapshot,
+}: {
+  readonly locale: ShellLocale;
+  readonly snapshot: PlanAuthoritySnapshot;
+}) => {
+  if (snapshot.status === 'idle') {
+    return (
+      <div aria-live="polite" role="status">
+        <StatusSignal
+          detail={localized(
+            {
+              en: 'Loading the authoritative plan snapshot. The last admitted truth remains unchanged.',
+              'pt-BR':
+                'Carregando o snapshot autorizado do plano. A última verdade admitida permanece inalterada.',
+            },
+            locale,
+          )}
+          locale={locale}
+          state="loading"
+        />
+      </div>
+    );
+  }
+  if (snapshot.status === 'reconnecting' || snapshot.stale) {
+    return (
+      <div aria-live="assertive" role="status">
+        <StatusSignal
+          detail={localized(
+            {
+              en: 'The plan projection is stale. Reconnecting to native authority before any action is admitted.',
+              'pt-BR':
+                'A projeção do plano está desatualizada. Reconectando à autoridade nativa antes de admitir qualquer ação.',
+            },
+            locale,
+          )}
+          locale={locale}
+          state="stale"
+        />
+      </div>
+    );
+  }
+  if (snapshot.status === 'unknown') {
+    return (
+      <div aria-live="assertive" role="status">
+        <StatusSignal
+          detail={localized(
+            {
+              en: 'The result is still unknown. Liiiraa Boost will observe Windows before offering another attempt.',
+              'pt-BR':
+                'O resultado ainda é desconhecido. O Liiiraa Boost observará o Windows antes de oferecer uma nova tentativa.',
+            },
+            locale,
+          )}
+          locale={locale}
+          state="critical"
+        />
+      </div>
+    );
+  }
+  if (snapshot.status === 'error') {
+    return (
+      <div aria-live="assertive" role="status">
+        <StatusSignal
+          detail={localized(
+            {
+              en: 'Native plan authority could not be reached. No operation was authorized; recovery remains available offline.',
+              'pt-BR':
+                'Não foi possível acessar a autoridade nativa do plano. Nenhuma operação foi autorizada; a recuperação continua disponível offline.',
+            },
+            locale,
+          )}
+          locale={locale}
+          state="critical"
+        />
+      </div>
+    );
+  }
+  return null;
+};
+
+const AuthorityOperation = ({
+  includedCount,
+  locale,
+  onInclusionChange,
+  operation,
+}: {
+  readonly includedCount: number;
+  readonly locale: ShellLocale;
+  readonly onInclusionChange: (operationVersionId: string, included: boolean) => void;
+  readonly operation: PlanOperationJson;
+}) => {
+  const blockerId = `operation-${operation.operationVersionId}-blocker`;
+  const blocked = operation.compatibility.verdict !== 'compatible';
+  const evidence = operation.evidence[0];
+
+  return (
+    <article
+      className="lb-component-operation"
+      data-compatibility={operation.compatibility.verdict}
+      data-operation-version={operation.operationVersionId}
+    >
+      <OperationRow
+        actionLabel={localized({ en: 'Review operation', 'pt-BR': 'Revisar operação' }, locale)}
+        detail={operation.expectedImpact}
+        name={operation.purpose}
+        risk={authorityRiskLevel(operation.risk)}
+        riskLabel={authorityRiskLabel(operation.risk, locale)}
+      />
+      <LbSwitch
+        aria-describedby={blocked ? blockerId : undefined}
+        isDisabled={blocked}
+        isSelected
+        onChange={(selected) => {
+          onInclusionChange(operation.operationVersionId, selected);
+        }}
+      >
+        {localized(
+          {
+            en: `Included · ${String(includedCount)} selected · ${authorityRiskLabel(operation.risk, locale)} plan`,
+            'pt-BR': `Incluída · ${String(includedCount)} selecionadas · plano ${authorityRiskLabel(operation.risk, locale)}`,
+          },
+          locale,
+        )}
+      </LbSwitch>
+      {blocked ? <p id={blockerId}>{operation.compatibility.reasons.join(' · ')}</p> : null}
+      <OperationInspector
+        operation={operation.purpose}
+        operationLabel={localized({ en: 'Operation', 'pt-BR': 'Operação' }, locale)}
+      >
+        <dl className="lb-receipt-details">
+          <div>
+            <dt>{localized({ en: 'Operation version', 'pt-BR': 'Versão da operação' }, locale)}</dt>
+            <dd>
+              <code>{operation.operationVersionId}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>{localized({ en: 'Purpose', 'pt-BR': 'Objetivo' }, locale)}</dt>
+            <dd>{operation.purpose}</dd>
+          </div>
+          <div>
+            <dt>{localized({ en: 'Expected impact', 'pt-BR': 'Impacto esperado' }, locale)}</dt>
+            <dd>{operation.expectedImpact}</dd>
+          </div>
+          <div>
+            <dt>{localized({ en: 'Immutable risk', 'pt-BR': 'Risco imutável' }, locale)}</dt>
+            <dd>{authorityRiskLabel(operation.risk, locale)}</dd>
+          </div>
+          <div>
+            <dt>
+              {localized({ en: 'Evidence and freshness', 'pt-BR': 'Evidência e validade' }, locale)}
+            </dt>
+            <dd>{`${evidence.evidenceId} · ${evidence.quality} · ${evidence.capturedAt} → ${evidence.validUntil}`}</dd>
+          </div>
+          <div>
+            <dt>{localized({ en: 'Compatibility', 'pt-BR': 'Compatibilidade' }, locale)}</dt>
+            <dd>{`${operation.compatibility.verdict} · ${operation.compatibility.reasons.join(' · ')}`}</dd>
+          </div>
+          <div>
+            <dt>
+              {localized({ en: 'Restart effect', 'pt-BR': 'Efeito de reinicialização' }, locale)}
+            </dt>
+            <dd>{operation.restartEffect}</dd>
+          </div>
+          <div>
+            <dt>
+              {localized({ en: 'Exact prior value', 'pt-BR': 'Valor anterior exato' }, locale)}
+            </dt>
+            <dd>
+              <code>{exactStateText(operation.previousValue)}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>{localized({ en: 'Requested value', 'pt-BR': 'Valor solicitado' }, locale)}</dt>
+            <dd>
+              <code>{exactStateText(operation.requestedValue)}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              {localized({ en: 'Dependency group', 'pt-BR': 'Grupo de dependência' }, locale)}
+            </dt>
+            <dd>
+              <code>{operation.dependencyGroupId}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              {localized({ en: 'Recovery method', 'pt-BR': 'Método de recuperação' }, locale)}
+            </dt>
+            <dd>{operation.recoveryMethod}</dd>
+          </div>
+        </dl>
+      </OperationInspector>
+    </article>
+  );
+};
+
+const stageIndex = (state: NonNullable<PlanAuthoritySnapshot['progress']>['state']): number => {
+  const indexes = {
+    applying: 1,
+    'awaiting-restart': 2,
+    blocked: 2,
+    completed: 4,
+    observing: 2,
+    paused: 1,
+    preparing: 0,
+    queued: 0,
+    recovering: 2,
+    verifying: 3,
+  } as const;
+  return indexes[state];
+};
+
+const AuthorityExecution = ({
+  authority,
+  locale,
+  onCancelSafely,
+  receipt,
+  snapshot,
+}: {
+  readonly authority: PlanAuthority;
+  readonly locale: ShellLocale;
+  readonly onCancelSafely?: (transactionId: string) => void;
+  readonly receipt?: TransactionReceiptDocumentJson;
+  readonly snapshot: PlanAuthoritySnapshot;
+}) => {
+  const { progress, transactionId } = snapshot;
+  useEffect(() => {
+    if (transactionId === null) return undefined;
+    let active = true;
+    let detach = (): void => undefined;
+    void authority.reconnect(transactionId);
+    void authority.subscribeExecution({ transactionId }).then((result) => {
+      if (active && result.ok) detach = result.value;
+      else if (result.ok) result.value();
+    });
+    return () => {
+      active = false;
+      detach();
+    };
+  }, [authority, transactionId]);
+
+  if (progress === null || transactionId === null) return null;
+  const currentIndex = stageIndex(progress.state);
+  const labels =
+    locale === 'pt-BR'
+      ? [
+          'Preparando recuperação',
+          'Aplicando',
+          'Observando o Windows',
+          'Verificando resultado',
+          'Comprovante verificado',
+        ]
+      : [
+          'Preparing recovery',
+          'Applying',
+          'Observing Windows',
+          'Verifying result',
+          'Verified receipt',
+        ];
+  const stages = labels.map((label, index) => ({
+    id: `stage-${String(index)}`,
+    label,
+    state:
+      index < currentIndex
+        ? ('complete' as const)
+        : index === currentIndex
+          ? ('current' as const)
+          : ('pending' as const),
+    ...(index === currentIndex ? { detail: progress.displayText } : {}),
+    ...(index === currentIndex
+      ? { timestamp: 'updatedAt' in progress ? progress.updatedAt : progress.occurredAt }
+      : {}),
+  }));
+
+  return (
+    <section
+      aria-label={localized({ en: 'Execution workspace', 'pt-BR': 'Área de execução' }, locale)}
+    >
+      <ExecutionTimeline
+        currentStageId={`stage-${String(currentIndex)}`}
+        locale={locale}
+        stages={stages}
+      />
+      {progress.state === 'completed' && receipt === undefined ? (
+        <StatusSignal
+          detail={localized(
+            {
+              en: 'Verified receipt pending. Completion is not claimed until the immutable receipt is available.',
+              'pt-BR':
+                'Comprovante verificado pendente. A conclusão não é declarada até o comprovante imutável estar disponível.',
+            },
+            locale,
+          )}
+          locale={locale}
+          state="warning"
+        />
+      ) : null}
+      {receipt !== undefined ? (
+        <>
+          <h2>
+            {localized(
+              { en: 'Plan applied and verified', 'pt-BR': 'Plano aplicado e verificado' },
+              locale,
+            )}
+          </h2>
+          <VerifiedReceiptDetails
+            details={{
+              completedAt: receipt.completedAt,
+              diagnosticIdentity: snapshot.diagnostic?.exportId ?? 'not-exported',
+              journalCorrelation: receipt.journalHeadHash,
+              observedState: exactStateText(receipt.exactObservedState),
+              operationVersion: receipt.operationVersionId,
+              priorState: exactStateText(receipt.exactPriorState),
+              recoveryMethod: receipt.recoveryMethod,
+              requestedState: exactStateText(receipt.exactRequestedState),
+              startedAt: snapshot.transaction?.startedAt ?? receipt.completedAt,
+              transactionId: receipt.transactionId,
+            }}
+            locale={locale}
+            receiptId={receipt.receiptId}
+            summary={receipt.humanSummary}
+            verification={localized(
+              { en: 'Observed state verified', 'pt-BR': 'Estado observado verificado' },
+              locale,
+            )}
+          />
+        </>
+      ) : null}
+      {progress.state === 'awaiting-restart' ? (
+        <RestartPlanner>
+          <LbButton variant="secondary">
+            {localized({ en: 'Restart later', 'pt-BR': 'Reiniciar depois' }, locale)}
+          </LbButton>
+          <LbButton variant="primary">
+            {localized(
+              { en: 'Open restart plan', 'pt-BR': 'Abrir plano de reinicialização' },
+              locale,
+            )}
+          </LbButton>
+        </RestartPlanner>
+      ) : null}
+      <LbButton
+        aria-describedby={onCancelSafely === undefined ? 'cancel-safe-blocker' : undefined}
+        isDisabled={onCancelSafely === undefined}
+        onPress={() => onCancelSafely?.(transactionId)}
+        variant="secondary"
+      >
+        {localized({ en: 'Cancel safely', 'pt-BR': 'Cancelar com segurança' }, locale)}
+      </LbButton>
+      {onCancelSafely === undefined ? (
+        <p id="cancel-safe-blocker">
+          {localized(
+            {
+              en: 'Safe-boundary cancellation is unavailable in the current native authority. No new operation is requested.',
+              'pt-BR':
+                'O cancelamento no limite seguro não está disponível na autoridade nativa atual. Nenhuma nova operação é solicitada.',
+            },
+            locale,
+          )}
+        </p>
+      ) : null}
+    </section>
+  );
+};
+
+const AuthoritativeImproveSurface = ({
+  approvalProofReference,
+  authority,
+  evidenceReferences = [],
+  goalReferences = [],
+  locale,
+  onCancelSafely,
+  validatedDocuments = [],
+  view,
+}: ImproveSurfaceProps & Readonly<{ authority: PlanAuthority }>) => {
+  const snapshot = usePlanAuthoritySnapshot(authority);
+  const diffHeadingRef = useRef<HTMLHeadingElement>(null);
+  const [experimentalPhrase, setExperimentalPhrase] = useState('');
+  const { approval, plan } = snapshot;
+  const approvalValid = approvalMatchesPlan(snapshot);
+  const hasStaleApproval = approval !== null && plan !== null && !approvalValid;
+  const receipt = validatedDocuments.find(
+    (document): document is TransactionReceiptDocumentJson =>
+      document.kind === 'transaction-receipt' && document.transactionId === snapshot.transactionId,
+  );
+
+  useEffect(() => {
+    if (hasStaleApproval) diffHeadingRef.current?.focus();
+  }, [hasStaleApproval, plan?.revision]);
+
+  if (plan === null) {
+    return (
+      <main data-authority-origin={snapshot.origin} data-improve-view={view}>
+        <RouteHeader
+          purpose={localized(
+            {
+              en: "Refresh this PC's evidence and choose your goals to generate a plan.",
+              'pt-BR': 'Atualize as evidências do PC e escolha seus objetivos para gerar um plano.',
+            },
+            locale,
+          )}
+          title={localized({ en: 'No plan is ready', 'pt-BR': 'Nenhum plano pronto' }, locale)}
+        />
+        <AuthorityStatus locale={locale} snapshot={snapshot} />
+        <LbButton
+          isDisabled={snapshot.status !== 'ready' && snapshot.status !== 'idle'}
+          onPress={() => {
+            void authority.compose({
+              request: { goalReferences, evidenceReferences, riskCeiling: 'verified' },
+            });
+          }}
+          variant="primary"
+        >
+          {localized({ en: 'Generate safe plan', 'pt-BR': 'Gerar plano seguro' }, locale)}
+        </LbButton>
+      </main>
+    );
+  }
+
+  const blockedByCompatibility = plan.operations.some(
+    (operationValue) => operationValue.compatibility.verdict !== 'compatible',
+  );
+  const mutationBlocked =
+    snapshot.stale ||
+    snapshot.status !== 'ready' ||
+    blockedByCompatibility ||
+    plan.lifecycle === 'blocked' ||
+    plan.effectiveRisk === 'extreme-locked';
+  const proofRequired = plan.effectiveRisk !== 'verified';
+  const phraseRequired = plan.effectiveRisk === 'experimental';
+  const expectedPhrase =
+    locale === 'pt-BR' ? 'APLICAR PLANO EXPERIMENTAL' : 'APPLY EXPERIMENTAL PLAN';
+  const confirmationBlocked =
+    mutationBlocked ||
+    (proofRequired && approvalProofReference === undefined) ||
+    (phraseRequired && experimentalPhrase !== expectedPhrase);
+  const applyBlocked = mutationBlocked || !approvalValid;
+  const evidenceState = snapshot.stale ? 'stale' : blockedByCompatibility ? 'blocked' : 'current';
+
+  const requestRevision = (changeReference: string): void => {
+    void authority.revise({
+      request: {
+        planId: plan.planId,
+        planRevision: plan.revision,
+        changeReferences: [changeReference],
+      },
+    });
+  };
+
+  return (
+    <main
+      aria-label={localized({ en: 'Improve workspace', 'pt-BR': 'Área de melhoria' }, locale)}
+      data-authority-origin={snapshot.origin}
+      data-improve-view={view}
+      data-locale={locale}
+    >
+      <RouteHeader
+        purpose={localized(
+          {
+            en: 'Review immutable evidence, exact changes, risk, and recovery before requesting an operation.',
+            'pt-BR':
+              'Revise evidências imutáveis, mudanças exatas, risco e recuperação antes de solicitar uma operação.',
+          },
+          locale,
+        )}
+        title={localized({ en: 'Optimization', 'pt-BR': 'Otimização' }, locale)}
+      />
+      <AuthorityStatus locale={locale} snapshot={snapshot} />
+      <div className="lb-transaction-layout">
+        <section aria-label={localized({ en: 'Plan review', 'pt-BR': 'Revisão do plano' }, locale)}>
+          <PlanRevisionSummary
+            action={
+              <span>
+                {localized(
+                  {
+                    en: 'Next safe action: review every included operation.',
+                    'pt-BR': 'Próxima ação segura: revisar cada operação incluída.',
+                  },
+                  locale,
+                )}
+              </span>
+            }
+            approvalValid={approvalValid}
+            evidenceFingerprint={plan.evidenceFingerprint}
+            evidenceState={evidenceState}
+            extremeExplanation={localized(
+              {
+                en: 'Extreme operations remain visible for explanation only.',
+                'pt-BR': 'Operações Extremas permanecem visíveis apenas para explicação.',
+              },
+              locale,
+            )}
+            highestRisk={authorityRiskLevel(plan.effectiveRisk)}
+            locale={locale}
+            operationCount={plan.operations.length}
+            recoveryReady={approval?.recoveryCoverage === 'ready'}
+            revisionId={`${plan.planId} · revision ${String(plan.revision)}`}
+          />
+
+          <LbRadioGroup
+            label={localized(
+              { en: 'Maximum risk ceiling', 'pt-BR': 'Limite máximo de risco' },
+              locale,
+            )}
+            onChange={(risk) => {
+              if (
+                risk !== 'extreme-locked' &&
+                AUTHORITY_RISK_ORDER.includes(risk as RiskClassJson)
+              ) {
+                requestRevision(`risk-ceiling:${risk}`);
+              }
+            }}
+            options={AUTHORITY_RISK_ORDER.filter((risk) => risk !== 'extreme-locked').map(
+              (risk) => ({
+                label: authorityRiskLabel(risk, locale),
+                value: risk,
+              }),
+            )}
+            value={plan.riskCeiling === 'extreme-locked' ? 'experimental' : plan.riskCeiling}
+          />
+          <p>
+            {localized(
+              {
+                en: 'The maximum risk ceiling never selects operations automatically.',
+                'pt-BR': 'O limite máximo de risco nunca seleciona operações automaticamente.',
+              },
+              locale,
+            )}
+          </p>
+
+          {AUTHORITY_RISK_ORDER.map((risk) => {
+            const operations = plan.operations.filter(
+              (operationValue) => operationValue.risk === risk,
+            );
+            if (operations.length === 0) return null;
+            return (
+              <section aria-labelledby={`risk-${risk}`} data-risk-group={risk} key={risk}>
+                <h2 id={`risk-${risk}`}>{authorityRiskLabel(risk, locale)}</h2>
+                {plan.dependencyGroups.map((group) => {
+                  const groupOperations = group.operationVersionIds
+                    .map((id) =>
+                      operations.find((operationValue) => operationValue.operationVersionId === id),
+                    )
+                    .filter(
+                      (operationValue): operationValue is PlanOperationJson =>
+                        operationValue !== undefined,
+                    );
+                  if (groupOperations.length === 0) return null;
+                  return (
+                    <section
+                      aria-labelledby={`group-${group.dependencyGroupId}`}
+                      key={group.dependencyGroupId}
+                    >
+                      <h3 id={`group-${group.dependencyGroupId}`}>{group.dependencyGroupId}</h3>
+                      <p>
+                        {localized(
+                          { en: 'Apply order preserved', 'pt-BR': 'Ordem de aplicação preservada' },
+                          locale,
+                        )}
+                      </p>
+                      {groupOperations.map((operationValue) => (
+                        <AuthorityOperation
+                          includedCount={plan.operations.length}
+                          key={operationValue.operationVersionId}
+                          locale={locale}
+                          onInclusionChange={(operationVersionId, included) => {
+                            requestRevision(
+                              `${included ? 'include' : 'exclude'}:${operationVersionId}`,
+                            );
+                          }}
+                          operation={operationValue}
+                        />
+                      ))}
+                    </section>
+                  );
+                })}
+              </section>
+            );
+          })}
+
+          {hasStaleApproval ? (
+            <section aria-labelledby="approval-diff-heading" className="lb-approval-diff">
+              <h2 id="approval-diff-heading" ref={diffHeadingRef} tabIndex={-1}>
+                {localized(
+                  {
+                    en: 'The plan changed after approval',
+                    'pt-BR': 'O plano mudou desde a aprovação',
+                  },
+                  locale,
+                )}
+              </h2>
+              <p>
+                {localized(
+                  {
+                    en: 'Review the differences before confirming again.',
+                    'pt-BR': 'Revise as diferenças antes de confirmar novamente.',
+                  },
+                  locale,
+                )}
+              </p>
+              <dl>
+                <div>
+                  <dt>
+                    {localized({ en: 'Approved revision', 'pt-BR': 'Revisão aprovada' }, locale)}
+                  </dt>
+                  <dd>{String(approval.planRevision)}</dd>
+                </div>
+                <div>
+                  <dt>{localized({ en: 'Current revision', 'pt-BR': 'Revisão atual' }, locale)}</dt>
+                  <dd>{String(plan.revision)}</dd>
+                </div>
+                <div>
+                  <dt>
+                    {localized(
+                      { en: 'Approved fingerprint', 'pt-BR': 'Fingerprint aprovado' },
+                      locale,
+                    )}
+                  </dt>
+                  <dd>
+                    <code>{approval.revisionFingerprint}</code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    {localized({ en: 'Current fingerprint', 'pt-BR': 'Fingerprint atual' }, locale)}
+                  </dt>
+                  <dd>
+                    <code>{plan.revisionFingerprint}</code>
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          ) : null}
+
+          {plan.effectiveRisk !== 'extreme-locked' && !approvalValid ? (
+            <section aria-labelledby="confirmation-heading">
+              <h2 id="confirmation-heading">
+                {localized(
+                  { en: 'Fresh plan approval', 'pt-BR': 'Nova aprovação do plano' },
+                  locale,
+                )}
+              </h2>
+              {proofRequired ? (
+                <StatusSignal
+                  detail={
+                    approvalProofReference === undefined
+                      ? localized(
+                          {
+                            en: 'Fresh strong authentication is pending.',
+                            'pt-BR': 'A autenticação forte atual está pendente.',
+                          },
+                          locale,
+                        )
+                      : localized(
+                          {
+                            en: 'Fresh strong-auth proof reference received.',
+                            'pt-BR': 'Referência atual de autenticação forte recebida.',
+                          },
+                          locale,
+                        )
+                  }
+                  locale={locale}
+                  state={approvalProofReference === undefined ? 'warning' : 'success'}
+                />
+              ) : null}
+              {phraseRequired ? (
+                <label>
+                  <span>{expectedPhrase}</span>
+                  <input
+                    autoComplete="off"
+                    onChange={(event) => setExperimentalPhrase(event.currentTarget.value)}
+                    spellCheck={false}
+                    type="text"
+                    value={experimentalPhrase}
+                  />
+                </label>
+              ) : null}
+              <LbButton
+                aria-describedby={confirmationBlocked ? 'plan-confirmation-blocker' : undefined}
+                isDisabled={confirmationBlocked}
+                onPress={() => {
+                  void authority.approve({
+                    request: {
+                      planId: plan.planId,
+                      planRevision: plan.revision,
+                      intent: 'apply',
+                      proofReference: approvalProofReference ?? 'verified-local-review',
+                    },
+                  });
+                }}
+                variant="primary"
+              >
+                {localized(
+                  { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                  locale,
+                )}
+              </LbButton>
+              {confirmationBlocked ? (
+                <p id="plan-confirmation-blocker">
+                  {localized(
+                    {
+                      en: 'Approval is blocked until evidence, compatibility, recovery, and proportional confirmation are current.',
+                      'pt-BR':
+                        'A aprovação fica bloqueada até evidência, compatibilidade, recuperação e confirmação proporcional estarem atuais.',
+                    },
+                    locale,
+                  )}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
+          {plan.effectiveRisk !== 'extreme-locked' && approvalValid && approval !== null ? (
+            <section aria-labelledby="apply-heading">
+              <h2 id="apply-heading">
+                {localized(
+                  { en: 'Apply reviewed plan', 'pt-BR': 'Aplicar plano revisado' },
+                  locale,
+                )}
+              </h2>
+              <LbButton
+                aria-describedby={applyBlocked ? 'plan-apply-blocker' : undefined}
+                isDisabled={applyBlocked}
+                onPress={() => {
+                  void authority.apply({
+                    request: {
+                      planId: plan.planId,
+                      planRevision: plan.revision,
+                      approvalId: approval.approvalId,
+                    },
+                  });
+                }}
+                variant="primary"
+              >
+                {localized(
+                  { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                  locale,
+                )}
+              </LbButton>
+              {applyBlocked ? (
+                <p id="plan-apply-blocker">
+                  {localized(
+                    {
+                      en: 'Apply is blocked by stale or incomplete authority.',
+                      'pt-BR':
+                        'A aplicação está bloqueada por autoridade desatualizada ou incompleta.',
+                    },
+                    locale,
+                  )}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+          {hasStaleApproval ? (
+            <>
+              <button
+                aria-describedby="plan-apply-blocker"
+                className="lb-button"
+                data-lb-control
+                data-lb-variant="primary"
+                disabled
+                type="button"
+              >
+                {localized(
+                  { en: 'Apply verified plan', 'pt-BR': 'Aplicar plano verificado' },
+                  locale,
+                )}
+              </button>
+              <p id="plan-apply-blocker">
+                {localized(
+                  {
+                    en: 'Apply is blocked until this revision receives fresh approval.',
+                    'pt-BR': 'A aplicação está bloqueada até esta revisão receber nova aprovação.',
+                  },
+                  locale,
+                )}
+              </p>
+            </>
+          ) : null}
+        </section>
+
+        <aside
+          aria-label={localized({ en: 'Safety summary', 'pt-BR': 'Resumo de segurança' }, locale)}
+        >
+          <LbPanel
+            label={localized(
+              { en: 'Protected authority', 'pt-BR': 'Autoridade protegida' },
+              locale,
+            )}
+          >
+            <p>{`${localized({ en: 'Device', 'pt-BR': 'Dispositivo' }, locale)}: ${plan.device.deviceBindingId}`}</p>
+            <p>{`${localized({ en: 'Lifecycle', 'pt-BR': 'Ciclo de vida' }, locale)}: ${plan.lifecycle}`}</p>
+            <LbButton onPress={() => undefined} variant="secondary">
+              {localized(
+                { en: 'Open Recovery Center', 'pt-BR': 'Abrir Central de Recuperação' },
+                locale,
+              )}
+            </LbButton>
+          </LbPanel>
+        </aside>
+      </div>
+      <AuthorityExecution
+        authority={authority}
+        locale={locale}
+        {...(onCancelSafely === undefined ? {} : { onCancelSafely })}
+        {...(receipt === undefined ? {} : { receipt })}
+        snapshot={snapshot}
+      />
+    </main>
+  );
+};
+
+export const ImproveSurface = ({
+  approvalProofReference,
+  authority,
+  evidenceReferences,
+  goalReferences,
+  locale,
+  onCancelSafely,
   onNavigate,
   onRiskPolicyChange,
   scenarioId,
   selectedComponent = 'cpu-power',
   selectedGoal = 'performance',
   selectedOperationId,
+  validatedDocuments,
   view,
 }: ImproveSurfaceProps) => {
+  if (authority !== undefined) {
+    return (
+      <AuthoritativeImproveSurface
+        {...(approvalProofReference === undefined ? {} : { approvalProofReference })}
+        authority={authority}
+        {...(evidenceReferences === undefined ? {} : { evidenceReferences })}
+        {...(goalReferences === undefined ? {} : { goalReferences })}
+        locale={locale}
+        {...(onCancelSafely === undefined ? {} : { onCancelSafely })}
+        {...(validatedDocuments === undefined ? {} : { validatedDocuments })}
+        scenarioId={scenarioId}
+        view={view}
+      />
+    );
+  }
   const operation = operationById(selectedOperationId);
 
   return (
