@@ -3,7 +3,7 @@ phase: 6
 slug: transactional-plans-and-recovery
 status: approved
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-08-12
 ---
 
@@ -30,33 +30,49 @@ created: 2026-08-12
 - After every standard UI or integration task: run the owning Vitest/component test plus lint/typecheck for the touched package.
 - After every plan: run affected Rust and TypeScript packages, TypeSpec generation/drift checks, and deterministic adapter conformance.
 - After every wave: run `cargo test --workspace`, relevant package tests, and all Phase 6 fault-injection scenarios introduced so far.
-- Before phase verification: full repository suite and packaged desktop journey must be green; physical promotion evidence must explicitly record its highest completed stage.
+- Before phase verification: full repository suite and packaged desktop journey must be green; physical promotion must PASS simulation, clean VM, owner PC, and friends' PCs for one exact operation version. A missing/unavailable/failed stage leaves the phase blocked.
 - No task may rely on watch mode, and no three consecutive tasks may omit an automated check.
 
 ## Per-Plan Verification Map
 
 | Plan | Requirements | Threat refs | Secure behavior | Automated evidence |
 | --- | --- | --- | --- | --- |
-| 06-01 | PLAN-01, PLAN-02, PLAN-03 | T-06-03 | Immutable deterministic revisions, complete generated metadata, and invalidation when evidence changes | TypeSpec drift/corpus, Rust plan composition and revision properties, TS/Rust conformance |
-| 06-02 | PLAN-04, PLAN-05 | T-06-03, T-06-09 | Global policy is only a ceiling; mixed plans inherit maximum risk; Extremo has no execution transition; fresh action-bound approval gates mutation | Rust risk/approval properties, stale/wrong-action proof corpus, focused Vitest/browser interactions |
-| 06-03 | PLAN-06, PLAN-07 | T-06-04, T-06-07 | FULL-durable intent precedes side effects; hash-chain or drift failures block new mutation while preserving recovery | migrations, restart/disk-full/IOERR/BUSY tests, journal tamper corpus |
-| 06-04 | PLAN-06, PLAN-07, PLAN-08 | T-06-05, T-06-07, T-06-08 | Observation-first reconciliation never blindly retries; rollback is reverse dependency closure only; native state survives renderer loss | proptest dependency closure, failpoint matrix, reconnect snapshot/conformance tests |
-| 06-05 | PLAN-05, PLAN-06 | T-06-01, T-06-02, T-06-06 | Broker accepts only bounded allowlisted typed operations from authenticated local clients; replay and generic primitives are rejected | canonical protocol corpus, identity/replay/dedup adversarial tests, capability assertions |
-| 06-06 | PLAN-06, PLAN-07 | T-06-05, T-06-09 | `Liiiraa Verificado` uses exact GUID observation/apply/restore, detects external drift, and proves restored state | fake PowrProf port tests, packaged Windows journey, clean-VM reboot/crash drills |
-| 06-07 | PLAN-02, PLAN-03, PLAN-04, PLAN-05, PLAN-07, PLAN-08 | T-06-03, T-06-08 | Review, approval, progress, partial failure, receipts, and Recovery Center are projections of native authority and remain keyboard/screen-reader operable | Vitest, Playwright + axe, locale/visual/reduced-motion/reconnect fixtures |
-| 06-08 | PLAN-01..08 | all | Deterministic fixtures cannot masquerade as physical evidence; promotion is monotonic per exact operation version with no override | packaged harness, evidence-manifest audit, privacy scan, sequential promotion checklist |
+| 06-01 | PLAN-01–08 | T-06-01A/B | Closed generated contracts reject generic authority, secrets, invalid lifecycle, and stage skips | `pnpm test:contracts`; Rust transactional corpus |
+| 06-02 | PLAN-01,04,06,08 | T-06-02A | Plan engine is a compile-valid pure workspace member with enforced ownership | `pnpm test:architecture`; `cargo metadata --no-deps` |
+| 06-03 | PLAN-01–08 | T-06-03A/B | Shared interfaces deny renderer authority and keep recovery auth-independent | `cargo check -p liiiraa-plan-engine`; architecture gate |
+| 06-04 | PLAN-06 | T-06-04SC | Exact privileged dependency identity is human-approved and persisted before install | `cargo search`; blocking approval record |
+| 06-05 | PLAN-01–03 | T-06-05A | Immutable deterministic revisions bind exact evidence and operation versions | `cargo test -p liiiraa-plan-engine --test plan_revision` |
+| 06-06 | PLAN-04,05 | T-06-06A/B | Risk ceiling, proportional confirmation, recovery readiness, and exact proof fail closed | `cargo test -p liiiraa-plan-engine --test risk_policy` |
+| 06-07 | PLAN-07,08 | T-06-07A | Rollback is the reverse affected dependency closure only | `cargo test -p liiiraa-plan-engine --test dependency_rollback` |
+| 06-08 | PLAN-06–08 | T-06-08A | Observation-first reconciliation never blindly retries or invents success | `cargo test -p liiiraa-plan-engine --test reconcile` |
+| 06-09 | PLAN-06,07 | T-06-09A/B | FULL-durable intent uses HMAC + Windows-protected external anchor; whole-history recomputation fails | `cargo test -p liiiraa-desktop --test recovery_store` |
+| 06-10 | PLAN-01,07,08 | T-06-10A/B/C | Exact-version promotion, signed revocation, and redacted diagnostics cannot be bypassed | `cargo test -p liiiraa-plan-engine --test promotion` |
+| 06-11 | PLAN-01–05,07,08 | T-06-11A/B | Renderer consumes validated immutable projections and refetches once on sequence gaps | focused desktop-client Vitest |
+| 06-12 | PLAN-05 | T-06-12A/B | One-use action/device/session/fingerprint proof is consumed natively without secret leakage | focused API Vitest + native `plan_auth` test |
+| 06-13 | PLAN-05,06 | T-06-13A/B/C | Privileged IPC rejects spoofing, replay, remote clients, and generic operations | optimizer-service `ipc_protocol` test + architecture gate |
+| 06-14 | PLAN-05–08 | T-06-14A/B | Executor commits before effect, observes before verdict, and reconciles every failpoint | `cargo test -p liiiraa-plan-engine --test executor` |
+| 06-15 | PLAN-03,06,07 | T-06-15A/B | Exact PowrProf GUID lifecycle is user-context-bound, drift-safe, and reversible | optimizer-service `power_scheme` test |
+| 06-16 | PLAN-05,07 | T-06-16A/B | Restore-point states remain observed and explicit with no generic DLL/registry authority | optimizer-service `restore_point` test |
+| 06-17 | PLAN-03,05,07,08 | T-06-17A/B | Transactional primitives preserve semantic status, focus, scaling, and no Extreme control | design-system transactional component Vitest |
+| 06-18 | PLAN-01,02,05–08 | T-06-18A/B | Tauri recomputes authority, uses the broker only, and restores startup/tray truth | recovery-executor + broker-protocol tests; foundation gate |
+| 06-19 | PLAN-01–05,07,08 | T-06-19A/B | Improve/Recovery Center present authoritative state and proportional controls accessibly | focused feature-shell Vitest |
+| 06-20 | PLAN-01–08 | T-06-20A/B | Browser and packaged harnesses preserve provenance and disable physical hooks by default | focused smoke tests; full Playwright/desktop/workspace plan gate |
+| 06-21 | PLAN-01,05–08 | T-06-21A/B | Evaluator rejects omission, tamper, stage skip, version swap, and privacy violations | phase6-evidence Vitest; `phase6:verify --mode planned` |
+| 06-22 | PLAN-01–08 | T-06-22A/B/C | Same exact version must pass all four mandatory stages; any unavailable/failed stage blocks phase completion | `phase6:verify --mode final` plus blocking human confirmations/UAT |
 
 ## Wave 0 Requirements
 
-- [ ] `packages/contracts-source/src/transactional-plans.tsp` and valid/invalid cross-runtime corpus for PLAN-01 through PLAN-08.
-- [ ] `crates/plan-engine/tests/plan_revision.rs`, `risk_policy.rs`, `dependency_rollback.rs`, and `reconcile.rs` as pure RED witnesses.
-- [ ] `apps/desktop/src-tauri/tests/recovery_store.rs`, `recovery_executor.rs`, and `broker_protocol.rs` for migration, durability, crash, and IPC RED witnesses.
-- [ ] `packages/desktop-client/src/plans.test.ts` for deterministic/production conformance and fixture-provenance rejection.
-- [ ] `packages/feature-shell/src/features/transactional-plans.test.tsx` for required fields, plan editing, policy groups, approval, progress, and Recovery Center.
-- [ ] `apps/desktop/tests/browser/transactional-plans.spec.ts` for keyboard, screen-reader semantics, reduced motion, reconnect, drift, and recovery.
-- [ ] `apps/desktop/tests/packaged/transactional-plans.ts` for packaged command/schema checks and real-Windows journey hooks.
-- [ ] `architecture/module-boundaries.json` entries for the pure plan engine and privileged broker before adding source files.
-- [ ] Human package-legitimacy checkpoint for `windows-service` before installation or broker implementation.
+- [x] Contract source/corpus is owned by 06-01 Task 1/2 and runs before any consumer.
+- [x] Pure RED witnesses are owned by 06-05, 06-06, 06-07, and 06-08 Task 1 respectively.
+- [x] Recovery-store, recovery-executor, and broker-protocol RED witnesses are owned by 06-09 Task 1 and 06-18 Task 1; IPC adversarial RED is additionally owned by 06-13 Task 1.
+- [x] Desktop-client conformance/fixture RED witness is owned by 06-11 Task 1.
+- [x] Feature-shell plan/recovery behavior starts test-first in 06-19 Tasks 1 and 2.
+- [x] Browser E2E is created in 06-20 Task 1 with focused smoke feedback and a full plan gate.
+- [x] Packaged journey hooks and focused contract test are created in 06-20 Task 2.
+- [x] Plan-engine boundary/public-root registration is owned by 06-02; broker boundary registration is owned by 06-13 Task 1 before implementation.
+- [x] The non-auto-approvable `windows-service` legitimacy checkpoint and persisted approval evidence are owned by 06-04 and block 06-13.
+
+`wave_0_complete: true` means every missing test scaffold/gate has explicit pre-implementation ownership and an automated command in the 22-plan decomposition; it does not claim those future files have already been implemented.
 
 ## Required Fault Injection
 

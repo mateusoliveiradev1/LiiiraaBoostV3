@@ -1,7 +1,7 @@
 ---
 phase: 6
 slug: transactional-plans-and-recovery
-status: approved
+status: pending-review
 reviewed_at: 2026-08-12T23:58:47.6539196-03:00
 shadcn_initialized: false
 preset: none
@@ -273,6 +273,8 @@ Copy states what happened, what remains uncertain, and the next safe action. Pri
 - Viewports/preferences: standard and compact desktop, narrow route container, 150% app scale, 200% zoom, PT-BR and English, dark/light, reduced motion, forced colors, keyboard-only, and screen-reader semantics.
 
 ## Checker Sign-Off
+
+The contract remains `pending-review`; no unchecked dimension is treated as approved, and execution must not claim UI authority until the UI checker records all six PASS results.
 
 - [ ] Dimension 1 Copywriting: PASS
 - [ ] Dimension 2 Visuals: PASS

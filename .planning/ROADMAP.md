@@ -742,7 +742,7 @@ Plans:
 - [ ] 06-06-PLAN.md — Proportional risk and approval admission
 - [ ] 06-07-PLAN.md — Dependency-scoped rollback planning
 - [ ] 06-08-PLAN.md — Observation-first reconciliation
-- [ ] 06-09-PLAN.md — FULL-durable append-only recovery store
+- [ ] 06-09-PLAN.md — FULL-durable recovery store with Windows-protected keyed audit anchor
 - [ ] 06-10-PLAN.md — Exact-version promotion, revocation, and diagnostics
 - [ ] 06-11-PLAN.md — Runtime-validated renderer PlanAuthority
 - [ ] 06-12-PLAN.md — Native action-scoped strong-auth bridge
@@ -755,7 +755,7 @@ Plans:
 - [ ] 06-19-PLAN.md — Authoritative Improve and Recovery Center UI
 - [ ] 06-20-PLAN.md — Browser and packaged end-to-end journeys
 - [ ] 06-21-PLAN.md — Fail-closed Phase 6 evidence evaluator
-- [ ] 06-22-PLAN.md — Sequential VM, owner, and friends physical promotion
+- [ ] 06-22-PLAN.md — Completion-blocking sequential VM, owner, and friends physical promotion
 
 **UI hint**: yes
 

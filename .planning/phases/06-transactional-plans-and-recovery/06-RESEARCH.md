@@ -442,8 +442,8 @@ Open every recovery connection with `foreign_keys=ON`, `journal_mode=WAL`, `sync
 
 **What goes wrong:** Updates, migrations, or file tampering rewrite receipts or break the chain. [VERIFIED: D-29, D-30, D-32]  
 **Why it happens:** Mutable status rows are treated as history. [ASSUMED root cause]  
-**How to avoid:** Append events, reject update/delete through repository API and triggers, hash canonical event bytes with the previous hash, verify on open, and keep derived projections rebuildable. [ASSUMED implementation recommendation]  
-**Warning signs:** A receipt is updated from `pending` to `success`. [ASSUMED warning]
+**How to avoid:** Append events, reject update/delete through repository API and triggers, authenticate canonical event bytes and the previous MAC with HMAC-SHA-256, protect key epochs and the independent head anchor in Windows Credential Manager, verify chain + anchor on open, and keep derived projections rebuildable. Test an attacker rewriting the whole database and recomputing all unkeyed hashes. [RESOLVED by Plan 06-09]  
+**Warning signs:** A receipt is updated from `pending` to `success`, or an actor who can rewrite SQLite can recompute every integrity value without protected key custody. [ASSUMED warning]
 
 ### Pitfall 8: Strong Authentication Is Only Session Metadata
 
@@ -565,35 +565,30 @@ Source: PowrProf active-scheme APIs and D-28 conflict rule. [CITED: https://lear
 | A2  | The broker can safely execute user-scoped PowrProf calls under a verified impersonated client context.                                      | Architecture Pattern 6            | Wrong-user mutation or privilege confusion; mandatory VM spike must prove it.                                                    |
 | A3  | A per-install authenticated IPC handshake can be designed without exposing reusable mutation authority to the renderer/same-user processes. | Architecture Pattern 6 / Security | Replay/spoofing risk; mandatory threat-model spike must specify secret custody and process identity checks.                      |
 | A4  | The existing identity authority can issue a fresh action-scoped proof usable by the native plan executor.                                   | Pattern 1 / Pitfall 8             | High-risk confirmation would be only cosmetic; mandatory strong-auth spike must resolve the boundary.                            |
-| A5  | Append-only SHA-256 chaining plus an optional OS-protected keyed anchor is the appropriate local tamper-evidence design.                    | SQLite Authority                  | If key custody or recovery semantics are wrong, audit may block safe recovery; prototype and fault-test before locking.          |
+| A5  | Append-only HMAC-SHA-256 chaining with a required Windows Credential Manager key and externally stored head anchor is the local tamper-evidence design. | SQLite Authority | If key custody or recovery semantics fail, history remains readable for guided recovery but every new mutation fails closed; rotation and whole-history rewrite tests are mandatory. |
 | A6  | The dedicated Phase 6 power scheme initially proves isolation/reversibility without making setting-level performance claims.                | Pattern 5                         | Product copy could overpromise; user/product owner should confirm the expected-impact wording.                                   |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How is the privileged client identity authenticated beyond the pipe DACL?**
    - What we know: explicit pipe ACLs, client-token impersonation, process/session inspection, runtime schema validation, and replay resistance are required. [CITED: Microsoft named-pipe docs; VERIFIED: `.planning/STATE.md`]
-   - What's unclear: exact per-install secret custody and whether Authenticode publisher/process verification is required for Internal alpha. [ASSUMED gap]
-   - Recommendation: first security TDD/spike plan must produce a threat model, canonical byte protocol, nonce/counter/dedup behavior, and adversarial tests before the service accepts mutation. [ASSUMED recommendation]
+   - **RESOLVED by Plan 06-13:** use an explicit local-only pipe DACL plus impersonated token, logon SID, session, and process identity checks; authenticate canonical request bytes with per-install OS-protected material, a server nonce, monotonic counter, and one-time transaction/step ID; durably deduplicate before dispatch. Any identity, custody, replay, schema, or dedup failure blocks privileged mutation and downstream physical promotion. Authenticode publisher verification is additional packaged evidence, not a substitute for this protocol.
 
 2. **How does desktop strong reauthentication produce a fresh action-scoped native proof?**
    - What we know: the desktop currently exposes session authentication strength, while existing action-scoped step-up patterns live in control-plane/admin code. [VERIFIED: codebase grep]
-   - What's unclear: whether Phase 6 uses system-browser server step-up, passkey/TOTP, or a local Windows Hello gate. [VERIFIED: no locked choice in CONTEXT]
-   - Recommendation: reuse the Phase 4 cloud identity authority through a bounded system-browser flow; never accept a renderer Boolean. Keep recovery callable when offline or unauthenticated. [ASSUMED recommendation; VERIFIED: D-04]
+   - **RESOLVED by Plan 06-12:** reuse the Phase 4 cloud identity authority through the system browser and authenticated HTTPS. The server issues and atomically consumes a one-use proof bound to account, session, device, `apply-transactional-plan`, plan fingerprint, exact operation-version set, and a five-minute maximum lifetime. Native code reads the existing Windows Credential Manager session credential; React receives only state/next-action projections. New high-risk apply fails closed offline, while local recovery remains callable without proof per D-04.
 
 3. **What exact configuration does `Liiiraa Verificado` contain in Phase 6?**
    - What we know: it must be a separate duplicated plan and the broad optimization catalog is Phase 7. [VERIFIED: D-03; Deferred Ideas]
-   - What's unclear: whether any setting-level change is admitted now. [VERIFIED: CONTEXT does not specify one]
-   - Recommendation: clone/name/activate/restore only and describe the impact as managed isolation/recovery infrastructure; add no performance setting or gain claim without a separately versioned Phase 7 operation. [ASSUMED recommendation]
+   - **RESOLVED by Plan 06-15:** duplicate the exact active scheme into a deterministic owned GUID, name it `Liiiraa Verificado`, activate and re-observe it, then restore the exact prior GUID and delete only an unchanged owned target. Phase 6 changes no setting-level value and makes no performance-gain claim; such changes require separately versioned Phase 7 operations.
 
 4. **Which restore-point failure states block Avançado versus Experimental?**
    - What we know: Experimental requires proven recovery; restore point is complementary and may block according to risk. [VERIFIED: D-11, D-27]
-   - What's unclear: the exact Avançado policy when System Restore is disabled but exact operation rollback is proven. [VERIFIED: discretion remains]
-   - Recommendation: block Experimental when the complementary point is unavailable; allow Avançado only when the operation-specific manifest/rollback proof is complete and the user explicitly acknowledges the absent second layer. Confirm during planning. [ASSUMED recommendation]
+   - **RESOLVED by Plans 06-06 and 06-16:** Experimental blocks unless the operation manifest/rollback proof and an observed usable complementary restore point are both present. Avançado may proceed without the complementary point only when exact operation-manifest rollback is proven and the user explicitly acknowledges the unavailable second layer; disabled, safe-mode, frequency-skipped, begin/end failure, and unverified outcomes remain distinct evidence.
 
 5. **Can the broker finish safely during Windows preshutdown without widening shutdown delays?**
    - What we know: SCM requires timely control handling and accurate checkpoints/wait hints; shutdown should minimize unsaved work. [CITED: https://learn.microsoft.com/en-us/windows/win32/services/multithreaded-services]
-   - What's unclear: the bounded atomic-operation timeout and whether preshutdown handling is necessary for the first operation. [VERIFIED: agent discretion]
-   - Recommendation: make journal commits frequent, stop admitting new work on preshutdown, bound the current atomic call, and rely on next-boot reconciliation rather than extending shutdown indefinitely. [ASSUMED recommendation]
+   - **RESOLVED by Plan 06-13:** handle preshutdown by atomically closing admission, allowing only the already-dispatched bounded call to reach its configured deadline, persisting its exact in-flight identity/reconciliation marker, and returning control without extending shutdown indefinitely. Next boot observes and reconciles before any new mutation.
 
 ## Environment Availability
 
@@ -719,7 +714,7 @@ Promotion state must be per exact operation version and monotonic; there is no m
 | Spoofed same-machine pipe client                | Spoofing / Elevation    | Explicit service/logon SID DACL, reject remote clients, impersonate/check token and session/process, authenticated handshake; fail closed on any identity failure. [CITED: Microsoft named-pipe security/impersonation docs; ASSUMED full composition] |
 | Replayed mutation request                       | Spoofing / Tampering    | Server nonce, monotonic counter, exact canonical request MAC, one-time transaction/step ID, durable dedup, observation-first retry. [ASSUMED mitigation; VERIFIED: D-23 requires behavior]                                                             |
 | Renderer forges compatibility/risk/auth/success | Tampering / Elevation   | Native recomputation from registered operation version/evidence/proof; runtime contract validation; renderer only sends intent. [VERIFIED: project trust boundary; D-12, D-31–D-33]                                                                    |
-| Journal edited or latest intent lost            | Tampering / Repudiation | FULL-durable append, canonical hash chain/anchor, verify on open, block mutation and preserve recovery on mismatch. [CITED: SQLite WAL/pragma docs; ASSUMED chain mechanism]                                                                           |
+| Journal edited or latest intent lost            | Tampering / Repudiation | FULL-durable append, domain-separated HMAC chain, Windows Credential Manager key epochs plus independent head anchor, whole-history rewrite tests, verify on open, and fail-closed mutation with readable recovery evidence on custody mismatch. [CITED: SQLite WAL/pragma docs; RESOLVED by Plan 06-09] |
 | External Windows drift                          | Tampering               | Compare exact precondition immediately before apply/restore; pause and show requested/prior/observed diff. [VERIFIED: D-05, D-28]                                                                                                                      |
 | Generic operation becomes arbitrary execution   | Elevation               | No command line, script, file/registry/service primitive, or remote operation; closed typed enum compiled into broker. [VERIFIED: D-08, D-31]                                                                                                          |
 | Disk-full after OS effect                       | Denial / Repudiation    | Prepared intent already durable; mark executor unhealthy, block new mutation, reconcile by observation, export diagnostic. [VERIFIED: D-19–D-20; CITED: SQLite transaction errors]                                                                     |

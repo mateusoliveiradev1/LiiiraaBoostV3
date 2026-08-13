@@ -1,6 +1,6 @@
 # Phase 6 Multi-Source Coverage Audit
 
-All required source items are planned. Deferred items are excluded explicitly: executable Extremo, the broad Phase 7 optimizer catalog, Phase 8 game automation, and unresolved Phase 4 public-distribution evidence.
+All required source items are planned. Security and physical-promotion gates are completion-blocking: missing audit anchor/key custody, privileged IPC/strong-auth failure, or an unavailable/failed mandatory physical stage leaves Phase 6 incomplete. Deferred items are excluded explicitly: executable Extremo, the broad Phase 7 optimizer catalog, Phase 8 game automation, and unresolved Phase 4 public-distribution evidence.
 
 | SOURCE | ID | Feature / constraint | Plan(s) | Status |
 |---|---|---|---|---|
@@ -16,13 +16,13 @@ All required source items are planned. Deferred items are excluded explicitly: e
 | RESEARCH | R-01 | Pure contract-conformant authority before Windows effects | 01–14 | COVERED |
 | RESEARCH | R-02 | Durable prepare -> effect -> observe without open DB transaction | 08, 09, 14, 18 | COVERED |
 | RESEARCH | R-03 | IPC identity/user context/replay resistance/no generic authority | 01, 04, 13, 15, 18, 22 | COVERED |
-| RESEARCH | R-04 | Dedicated WAL + synchronous FULL append-only SQLite | 09 | COVERED |
+| RESEARCH | R-04 | Dedicated WAL + synchronous FULL append-only SQLite with HMAC chain, Windows Credential Manager key custody, external head anchor, rotation, and read-only recovery on anchor loss | 09 | COVERED |
 | RESEARCH | R-05 | Fresh action-scoped strong-auth proof | 06, 12, 18, 19 | COVERED |
 | RESEARCH | R-06 | One PowrProf operation plus complementary System Restore | 15, 16, 22 | COVERED |
 | RESEARCH | R-07 | Ordered native progress plus snapshot-on-reconnect | 11, 14, 18–20 | COVERED |
 | RESEARCH | R-08 | Fault matrix and exact-version four-stage promotion | 10, 14, 20–22 | COVERED |
 | RESEARCH | R-09 | `[ASSUMED]` windows-service legitimacy gate | 04, 13 | COVERED |
-| CONTEXT | D-01 | Sequential simulation -> clean VM -> owner -> friends | 10, 20–22 | COVERED |
+| CONTEXT | D-01 | Sequential simulation -> clean VM -> owner -> friends; every stage is required for phase completion | 10, 20–22 | COVERED |
 | CONTEXT | D-02 | Full prepare/apply/verify/restart/restore/verify each stage | 10, 14, 20–22 | COVERED |
 | CONTEXT | D-03 | Separate `Liiiraa Verificado` and exact prior identity | 15, 18, 22 | COVERED |
 | CONTEXT | D-04 | State persists; recovery never subscription-blocked | 03, 06, 11, 14, 18, 19 | COVERED |
