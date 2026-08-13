@@ -37,6 +37,7 @@ key-files:
     - packages/desktop-client/src/plans.ts
     - packages/desktop-client/src/plans.test.ts
     - packages/desktop-client/src/index.ts
+    - packages/feature-shell/src/features/transactional-plans.test.tsx
 key-decisions:
   - 'Expose exactly read, enable, and revoke preference commands; keep device posture, credentials, and consumed proof material native-only.'
   - 'Recompute device posture on startup, read, and immediately before apply; invalidated or unavailable preference authority blocks new Advanced apply work.'
@@ -61,7 +62,7 @@ status: complete
 - **Started:** 2026-08-13T17:25:20Z
 - **Completed:** 2026-08-13T17:43:00Z
 - **Tasks:** 2 TDD tasks
-- **Files modified:** 12
+- **Files modified:** 13
 
 ## Accomplishments
 
@@ -87,6 +88,7 @@ status: complete
 4. **Task 2 GREEN: Project Advanced preference through PlanAuthority** - `0a4acdb3` (feat)
 5. **Final gate fix: Keep proof consumption behind plan-auth** - `cd8a7860` (fix)
 6. **Final gate regression: Bound preference command registration** - `33e47964` (test)
+7. **Workspace gate regression: Align feature-shell authority fixture** - `bd134406` (test)
 
 ## Files Created/Modified
 
@@ -102,6 +104,7 @@ status: complete
 - `packages/desktop-client/src/plans.ts` - Closed projection validator and PlanAuthority lifecycle.
 - `packages/desktop-client/src/plans.test.ts` - Renderer boundary, non-optimistic, abort, and reopen evidence.
 - `packages/desktop-client/src/index.ts` - Public preference lifecycle type exports.
+- `packages/feature-shell/src/features/transactional-plans.test.tsx` - Explicit neutral preference projection in the downstream authoritative snapshot fixture.
 
 ## Decisions Made
 
@@ -149,14 +152,22 @@ status: complete
 - **Files modified:** `apps/desktop/src-tauri/tests/shell_contract.rs`
 - **Committed in:** `33e47964`
 
+**6. [Rule 1 - Bug] Aligned the downstream feature-shell authority fixture**
+- **Found during:** Wave 6 full workspace gate after plan completion
+- **Issue:** The transactional plan UI test factory constructed a `PlanAuthoritySnapshot` without the newly required `advancedPreference` field, causing TypeScript TS2322 in `@liiiraa/feature-shell:check`.
+- **Fix:** Added the explicit neutral `advancedPreference: null` projection to the fixture, preserving its intended no-preference-authority state.
+- **Files modified:** `packages/feature-shell/src/features/transactional-plans.test.tsx`
+- **Committed in:** `bd134406`
+
 ---
 
-**Total deviations:** 5 auto-fixed (2 missing critical integration seams, 1 lint blocker, 1 architecture bug, 1 regression blocker).
+**Total deviations:** 6 auto-fixed (2 missing critical integration seams, 1 lint blocker, 2 regression bugs, 1 regression blocker).
 **Impact on plan:** Every deviation closes an existing build, export, lint, or architecture gate around the planned surface; no generic setter, new dependency, cloud sync, localStorage, or renderer authority was added.
 
 ## Issues Encountered
 
 - The final full Rust suite exposed two exact architectural regressions that focused tests could not see: the proof consumer belonged behind `plan_auth`, and the shell command count needed to include the three explicitly approved commands. Both were fixed with narrow regression coverage.
+- The later Wave 6 workspace gate exposed one downstream typed fixture that needed to model the new required projection explicitly; no production feature-shell behavior changed.
 
 ## Verification
 
@@ -169,6 +180,9 @@ status: complete
 - `rtk pnpm --filter @liiiraa/desktop-client exec vitest --run src/plans.test.ts` - **PASS**, 25/25.
 - `rtk pnpm --filter @liiiraa/desktop-client test -- --run` - **PASS**, 46/46 across five files.
 - `rtk pnpm --filter @liiiraa/desktop-client check` - **PASS**.
+- `rtk pnpm --filter @liiiraa/feature-shell check` - **PASS**.
+- `rtk pnpm --filter @liiiraa/feature-shell test -- --run` - **PASS**, 101/101 across seven files.
+- `rtk pnpm test` - **PASS**, all 56 workspace tasks completed successfully.
 - Targeted ESLint - **PASS** for `plans.ts`, `plans.test.ts`, and `index.ts`.
 - `rtk pnpm test:architecture` - **PASS**, both adapters executed and 51/51 tests passed.
 - Capability/source scans - **PASS**, exactly three preference grants; no generic setter, localStorage, cloud-sync authority, renderer posture input, credential response, reusable proof response, placeholder, TODO, or FIXME surface.
@@ -197,8 +211,8 @@ None. The native IPC, credential-backed proof consumption, device posture, and r
 
 ## Self-Check: PASSED
 
-- All 12 modified implementation/test files exist.
-- RED `ce882fba`, GREEN `a0095f71`, RED `eb96e637`, GREEN `0a4acdb3`, fix `cd8a7860`, and regression `33e47964` exist in order.
+- All 13 modified implementation/test files exist.
+- RED `ce882fba`, GREEN `a0095f71`, RED `eb96e637`, GREEN `0a4acdb3`, fix `cd8a7860`, regressions `33e47964` and `bd134406` exist in order.
 - Focused/full Rust, focused/full TypeScript, typecheck, formatting, lint, clippy, and architecture gates pass.
 - No known stubs or undeclared threat surface remain.
 - The three user-owned `apps/*/.gitignore` modifications remain untouched and unstaged.
