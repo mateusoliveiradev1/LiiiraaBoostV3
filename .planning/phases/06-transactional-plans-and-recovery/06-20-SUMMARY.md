@@ -19,7 +19,13 @@ provides:
 affects: [06-21, 06-26, 06-27, 06-28, phase6-evidence, packaged-windows]
 tech-stack:
   added: []
-  patterns: [explicit-run-kind, disabled-by-default-physical-hooks, ordered-promotion-checkpoint, bounded-redacted-evidence]
+  patterns:
+    [
+      explicit-run-kind,
+      disabled-by-default-physical-hooks,
+      ordered-promotion-checkpoint,
+      bounded-redacted-evidence,
+    ]
 key-files:
   created:
     - apps/desktop/tests/browser/transactional-plans.spec.ts
@@ -75,6 +81,7 @@ status: complete
 - Browser evidence uses an isolated deterministic witness marked `NOT PHYSICAL WINDOWS EVIDENCE`; it never relabels fixture output as native or physical proof.
 - The physical hook accepts an effect callback only after the run kind is a physical stage, predecessors are exact and ordered, mutation is explicitly enabled, and the checkpoint matches that same stage.
 - Broker client identity is retained only as SHA-256; raw client identity, credentials, serials, machine GUID, and user SID are excluded from serialized evidence.
+- Packaged tests validate representative test-owned documents only through the public `@liiiraa/contracts-ts/generated` API; private contracts fixture paths are not test dependencies.
 
 ## Deviations from Plan
 
@@ -98,9 +105,18 @@ status: complete
 - **Verification:** Broker test records one accepted mutation followed by four pre-dispatch rejections.
 - **Committed in:** `a334a68f`
 
+**3. [Rule 1 - Bug] Removed a private contracts fixture deep import**
+
+- **Found during:** Post-plan workspace architecture gate
+- **Issue:** The packaged smoke test imported `packages/contracts-ts/src/fixtures/transactional-plans/valid.json` directly, violating the contracts package's public-boundary rule.
+- **Fix:** Replace the private corpus dependency with a frozen test-owned representative progress snapshot validated through `@liiiraa/contracts-ts/generated`, plus an adversarial additional-property rejection.
+- **Files modified:** `apps/desktop/tests/packaged/transactional-plans.test.ts`
+- **Verification:** Focused packaged tests pass 12/12, architecture tests pass 51/51, fixture-guard tests pass 13/13, and the full pnpm workspace test graph passes 56/56 tasks.
+- **Committed in:** `6f3a3eb`
+
 ---
 
-**Total deviations:** 2 auto-fixed correctness bugs. **Impact on plan:** Both fixes strengthen the intended spoofing/tampering boundary; no product authority, dependency, or physical evidence was widened.
+**Total deviations:** 3 auto-fixed correctness bugs. **Impact on plan:** The fixes strengthen spoofing/tampering and package-boundary enforcement; no product authority, dependency, or physical evidence was widened.
 
 ## Issues Encountered
 
@@ -111,7 +127,10 @@ status: complete
 - `rtk pnpm --filter @liiiraa/desktop exec playwright test tests/browser/transactional-plans.spec.ts --grep "@smoke" --workers=1` - **PASS**, 2/2.
 - `rtk pnpm --filter @liiiraa/desktop exec playwright test tests/browser/transactional-plans.spec.ts --workers=1` - **PASS**, 85/85; axe serious/critical checks and horizontal-scroll assertions passed across required presentations.
 - `rtk pnpm --filter @liiiraa/desktop exec vitest --run tests/packaged/transactional-plans.test.ts` - **PASS**, 12/12.
+- `rtk pnpm test:architecture` - **PASS**, 51/51; workspace and Cargo architecture adapters also passed.
+- `rtk pnpm --filter @liiiraa/fixture-guard test -- --run` - **PASS**, 13/13.
 - `rtk pnpm --filter @liiiraa/desktop test` - **PASS**, 170/170 across 20 files.
+- `rtk pnpm test` - **PASS**, 56/56 workspace tasks.
 - `rtk cargo test --workspace` - **PASS**, 346/346 across 41 suites.
 - `rtk pnpm --filter @liiiraa/desktop check` - **PASS**.
 - Exact Phase 06-22 UI authority validator - **PASS** with subject `aafe1e0e...` and report `6e9ae150...`.
