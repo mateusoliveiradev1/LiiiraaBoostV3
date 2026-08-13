@@ -9,6 +9,7 @@ use liiiraa_plan_engine::{
     },
     risk::RiskCeiling,
 };
+use proptest::prelude::*;
 use serde_json::{Value, json};
 
 fn parse<T: serde::de::DeserializeOwned>(value: Value) -> T {
@@ -317,4 +318,194 @@ fn incompatible_evidence_cannot_become_compatible_plan_truth() {
 #[test]
 fn revoked_evidence_cannot_become_compatible_plan_truth() {
     assert_evidence_disposition_is_rejected(RevisionEvidenceDisposition::Revoked);
+}
+
+#[test]
+fn cyclic_registry_is_rejected_before_any_plan_truth_is_created() {
+    let operations = registry().operations().to_vec();
+    let cyclic = CanonicalOperationRegistry::new(
+        operations,
+        vec![
+            group("group-base", &["op-verified-v1"], &["group-tuning"]),
+            group("group-tuning", &["op-advanced-v1"], &["group-base"]),
+        ],
+    );
+    let evidence = authorities();
+    let intent = RendererPlanIntent::new(
+        vec![
+            "op-verified-v1".parse().unwrap(),
+            "op-advanced-v1".parse().unwrap(),
+        ],
+        RiskCeiling::Advanced,
+    );
+    let device = device();
+    let error = DeterministicRevisionComposer
+        .compose(RevisionComposition::new(
+            &intent, &device, &cyclic, &evidence,
+        ))
+        .expect_err("cyclic registry must fail closed");
+
+    assert_eq!(error.code(), PlanEngineErrorCode::DependencyGraphInvalid);
+}
+
+#[test]
+fn evidence_hash_change_invalidates_both_evidence_and_revision_fingerprints() {
+    let original_registry = registry();
+    let original_evidence = authorities();
+    let original = compose(
+        &["op-advanced-v1", "op-verified-v1"],
+        &original_registry,
+        &original_evidence,
+    );
+
+    let changed_reference = evidence("evidence-verified", 'e');
+    let mut changed_operations = registry().operations().to_vec();
+    changed_operations
+        .iter_mut()
+        .find(|operation| operation.operation_version_id.as_str() == "op-verified-v1")
+        .unwrap()
+        .evidence = vec![changed_reference.clone()];
+    let changed_registry = CanonicalOperationRegistry::new(
+        changed_operations,
+        registry().dependency_groups().to_vec(),
+    );
+    let changed_evidence = vec![
+        admitted("op-advanced-v1", vec![evidence("evidence-advanced", 'd')]),
+        admitted("op-verified-v1", vec![changed_reference]),
+    ];
+    let changed = compose(
+        &["op-advanced-v1", "op-verified-v1"],
+        &changed_registry,
+        &changed_evidence,
+    );
+
+    assert_ne!(
+        original.current().evidence_fingerprint(),
+        changed.current().evidence_fingerprint()
+    );
+    assert_ne!(
+        original.current().revision_fingerprint(),
+        changed.current().revision_fingerprint()
+    );
+}
+
+#[test]
+fn registry_risk_and_recovery_changes_invalidate_the_revision_fingerprint() {
+    let original_registry = registry();
+    let evidence = authorities();
+    let original = compose(
+        &["op-advanced-v1", "op-verified-v1"],
+        &original_registry,
+        &evidence,
+    );
+
+    let mut risk_operations = registry().operations().to_vec();
+    risk_operations
+        .iter_mut()
+        .find(|operation| operation.operation_version_id.as_str() == "op-advanced-v1")
+        .unwrap()
+        .risk = parse(json!("verified"));
+    let risk_registry =
+        CanonicalOperationRegistry::new(risk_operations, registry().dependency_groups().to_vec());
+    let risk_changed = compose(
+        &["op-advanced-v1", "op-verified-v1"],
+        &risk_registry,
+        &evidence,
+    );
+
+    let mut recovery_operations = registry().operations().to_vec();
+    recovery_operations
+        .iter_mut()
+        .find(|operation| operation.operation_version_id.as_str() == "op-advanced-v1")
+        .unwrap()
+        .recovery_method = parse(json!("exact-prior-scheme"));
+    let recovery_registry = CanonicalOperationRegistry::new(
+        recovery_operations,
+        registry().dependency_groups().to_vec(),
+    );
+    let recovery_changed = compose(
+        &["op-advanced-v1", "op-verified-v1"],
+        &recovery_registry,
+        &evidence,
+    );
+
+    assert_ne!(
+        original.current().revision_fingerprint(),
+        risk_changed.current().revision_fingerprint()
+    );
+    assert_ne!(
+        original.current().revision_fingerprint(),
+        recovery_changed.current().revision_fingerprint()
+    );
+}
+
+proptest! {
+    #[test]
+    fn canonical_fingerprints_are_stable_for_every_input_permutation(
+        reverse_intent in any::<bool>(),
+        reverse_operations in any::<bool>(),
+        reverse_groups in any::<bool>(),
+        reverse_evidence in any::<bool>(),
+    ) {
+        let baseline_registry = registry();
+        let baseline_evidence = authorities();
+        let baseline = compose(
+            &["op-verified-v1", "op-advanced-v1"],
+            &baseline_registry,
+            &baseline_evidence,
+        );
+
+        let mut selected = vec!["op-verified-v1", "op-advanced-v1"];
+        if reverse_intent {
+            selected.reverse();
+        }
+        let mut operations = registry().operations().to_vec();
+        if reverse_operations {
+            operations.reverse();
+        }
+        let mut groups = registry().dependency_groups().to_vec();
+        if reverse_groups {
+            groups.reverse();
+        }
+        let permuted_registry = CanonicalOperationRegistry::new(operations, groups);
+        let mut permuted_evidence = authorities();
+        if reverse_evidence {
+            permuted_evidence.reverse();
+        }
+        let permuted = compose(&selected, &permuted_registry, &permuted_evidence);
+
+        prop_assert_eq!(
+            serde_json::to_vec(baseline.current().transport()).unwrap(),
+            serde_json::to_vec(permuted.current().transport()).unwrap(),
+        );
+    }
+
+    #[test]
+    fn duplicate_registry_membership_always_fails_closed(duplicate_count in 2usize..9) {
+        let operations = registry().operations().to_vec();
+        let duplicate_ids = vec!["op-verified-v1"; duplicate_count];
+        let malformed = CanonicalOperationRegistry::new(
+            operations,
+            vec![
+                group("group-base", &duplicate_ids, &[]),
+                group("group-tuning", &["op-advanced-v1"], &["group-base"]),
+            ],
+        );
+        let evidence = authorities();
+        let intent = RendererPlanIntent::new(
+            vec!["op-verified-v1".parse().unwrap()],
+            RiskCeiling::Verified,
+        );
+        let device = device();
+        let error = DeterministicRevisionComposer
+            .compose(RevisionComposition::new(
+                &intent,
+                &device,
+                &malformed,
+                &evidence,
+            ))
+            .expect_err("duplicate registry membership must fail closed");
+
+        prop_assert_eq!(error.code(), PlanEngineErrorCode::DependencyGraphInvalid);
+    }
 }

@@ -315,9 +315,9 @@ fn validate_registry(registry: &CanonicalOperationRegistry) -> PlanEngineResult<
     for group in &registry.dependency_groups {
         if group.operation_version_ids.is_empty()
             || group.operation_version_ids.len() > 64
-            || !groups
+            || groups
                 .insert(group.dependency_group_id.as_str(), group)
-                .is_none()
+                .is_some()
         {
             return Err(error(
                 PlanEngineErrorCode::DependencyGraphInvalid,
