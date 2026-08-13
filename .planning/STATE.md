@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-13T07:52:08.743Z"
+stopped_at: Completed 06-11-PLAN.md
+last_updated: "2026-08-13T08:04:34.245Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 220
+  completed_plans: 221
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 6 of 28
+Plan: 7 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -248,6 +248,7 @@ _Updated after plan completion_
 | Phase 06 P22 | 19 min | 3 tasks | 7 files |
 | Phase 06 P03 | 9min | 2 tasks | 8 files |
 | Phase 06 P09 | 15min | 3 tasks | 4 files |
+| Phase 06 P11 | 14 min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -780,6 +781,8 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Authenticate every authoritative recovery document through one global HMAC journal while retaining STRICT purpose-specific tables for query and foreign-key authority.
 - [Phase 06]: Recover only an exact single newest non-rotation anchor lag; rotation interruption, multi-event lag, rollback, ahead state, or database identity mismatch remains read-only.
 - [Phase 06]: Bind immutable receipts to the latest verified or restored contract event before append.
+- [Phase 06]: Treat cancellation after mutation dispatch as unknown and stale — The renderer cannot safely claim cancellation, invent a transaction identity, or retry a dispatched mutation.
+- [Phase 06]: Require generated-valid transactions to match the exact named apply or restore intent — Document-kind validity alone cannot prove command-to-result identity.
 
 ### Pending Todos
 
@@ -830,6 +833,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T07:52:08.736Z
-Stopped at: Completed 06-09-PLAN.md
+Last session: 2026-08-13T08:04:34.238Z
+Stopped at: Completed 06-11-PLAN.md
 Resume file: None
