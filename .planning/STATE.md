@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-14-PLAN.md
-last_updated: "2026-08-13T16:31:34.238Z"
+stopped_at: Completed 06-15-PLAN.md
+last_updated: "2026-08-13T16:44:13.320Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 245
-  completed_plans: 232
+  completed_plans: 233
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 18 of 28
+Plan: 19 of 28
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -260,6 +260,7 @@ _Updated after plan completion_
 | Phase 06 P17 | 8 min | 2 tasks | 3 files |
 | Phase 06 P23 | 14 min | 3 tasks | 6 files |
 | Phase 06 P14 | 16 min | 3 tasks | 2 files |
+| Phase 06 P15 | 8 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -827,6 +828,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Treat observation and independent verifier evidence as the sole basis for durable outcomes and receipts. — Ensures event publication cannot substitute for proof of execution.
 - [Phase 06]: Resolve prepared recovery by observation before allowing any new mutation. — Prevents restart-time blind redispatch and duplicate side effects.
 - [Phase 06]: Require rollback to restore only dependency-selected prior observations and stop after the first failed restore. — Preserves unrelated changes and keeps failed recovery diagnosable.
+- [Phase 06]: Treat a nonzero journaled GUID as the only managed destination identity; the friendly name is exact presentation metadata and never ownership authority.
+- [Phase 06]: Define canonical power-scheme state as exact GUID, friendly name, description, and a sorted SHA-256 fingerprint of every enumerated AC/DC setting value.
+- [Phase 06]: Restore and cleanup only after exact prior/target observation; third state, changed metadata/settings, or uncertain ownership returns conflict without delete authority.
 
 ### Pending Todos
 
@@ -877,6 +881,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T16:31:34.231Z
-Stopped at: Completed 06-14-PLAN.md
+Last session: 2026-08-13T16:44:13.313Z
+Stopped at: Completed 06-15-PLAN.md
 Resume file: None
