@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-35-PLAN.md
-last_updated: "2026-08-13T23:22:30.493Z"
+stopped_at: Completed 06-30-PLAN.md
+last_updated: "2026-08-13T23:40:12.904Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 242
+  completed_plans: 243
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 4 of 39
+Plan: 5 of 39
 Status: Ready to execute
 Last activity: 2026-08-13
 
@@ -270,6 +270,7 @@ _Updated after plan completion_
 | Phase 06 P29 | 15 min | 1 tasks | 7 files |
 | Phase 06 P39 | 15 min | 1 tasks | 13 files |
 | Phase 06 P35 | 19min | 1 tasks | 7 files |
+| Phase 06 P30 | 13 min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -869,6 +870,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Resolve installed and roster custody only from Windows known folders and generated literal paths. — Environment, renderer, and CLI path or trust overrides remain structurally unavailable.
 - [Phase 06]: Read monotonic installation admission only from the fixed ACL-protected ProgramData record. — Product drift, downgrade, and same-version manifest replay fail before service admission.
 - [Phase 06]: Keep desktop, service, and runner as installed roles while requiring both drivers only in portable custody. — Generated fixed-key role separation makes driver-as-installed and missing-driver artifacts schema-invalid.
+- [Phase 06]: Production broker sessions require an owned restricted primary token bound to the authenticated SID/session — Metadata-only authentication remains debug-test-only so public identity strings cannot authorize effects.
+- [Phase 06]: Keep install secrets under machine-DPAPI and service-only protected ACL custody — Atomic write-through monotonic admission records preserve restart and downgrade authority.
+- [Phase 06]: Expose one nonblocking local-only bounded pipe — Lifecycle controls close admission without a network, remote-pipe, or generic-command fallback.
 
 ### Pending Todos
 
@@ -920,6 +924,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T23:22:30.485Z
-Stopped at: Completed 06-35-PLAN.md
+Last session: 2026-08-13T23:40:12.895Z
+Stopped at: Completed 06-30-PLAN.md
 Resume file: None
