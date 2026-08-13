@@ -90,6 +90,15 @@
       "status": "reserved"
     },
     {
+      "id": "plan-engine",
+      "owner": "optimizer",
+      "layer": "domain",
+      "roots": ["crates/plan-engine"],
+      "publicRoots": ["crates/plan-engine/src/lib.rs"],
+      "runtimeClass": "production",
+      "status": "active"
+    },
+    {
       "id": "desktop-application",
       "owner": "desktop",
       "layer": "application",

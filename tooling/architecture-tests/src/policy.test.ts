@@ -706,6 +706,82 @@ describe('real graph adapters', () => {
     });
   });
 
+  it.each([
+    'liiiraa-desktop-simulator',
+    'tauri',
+    'windows',
+    'windows-service',
+    'liiiraa-feature-shell',
+  ])('rejects the forbidden plan-engine dependency mutation %s', (forbiddenDependency) => {
+    const metadata = {
+      packages: [
+        {
+          id: 'path+file:///repo/crates/contracts-rust#0.0.0',
+          name: 'liiiraa-contracts-rust',
+          dependencies: [],
+          targets: [{ src_path: 'C:/repo/crates/contracts-rust/src/lib.rs' }],
+        },
+        {
+          id: 'path+file:///repo/crates/plan-engine#0.0.0',
+          name: 'liiiraa-plan-engine',
+          dependencies: [
+            {
+              name: 'liiiraa-contracts-rust',
+              req: '*',
+              kind: null,
+            },
+            {
+              name: 'serde',
+              req: '=1.0.229',
+              kind: null,
+            },
+            {
+              name: 'serde_json',
+              req: '=1.0.151',
+              kind: null,
+            },
+            {
+              name: 'sha2',
+              req: '=0.10.9',
+              kind: null,
+            },
+            {
+              name: 'proptest',
+              req: '=1.11.0',
+              kind: 'dev',
+            },
+            {
+              name: forbiddenDependency,
+              req: '=0.0.0',
+              kind: null,
+            },
+          ],
+          targets: [{ src_path: 'C:/repo/crates/plan-engine/src/lib.rs' }],
+        },
+      ],
+      workspace_members: [
+        'path+file:///repo/crates/contracts-rust#0.0.0',
+        'path+file:///repo/crates/plan-engine#0.0.0',
+      ],
+      resolve: {
+        nodes: [
+          {
+            id: 'path+file:///repo/crates/contracts-rust#0.0.0',
+            dependencies: [],
+          },
+          {
+            id: 'path+file:///repo/crates/plan-engine#0.0.0',
+            dependencies: ['path+file:///repo/crates/contracts-rust#0.0.0'],
+          },
+        ],
+      },
+    };
+
+    expect(() => normalizeCargoMetadata(canonicalPolicy, metadata, 'C:/repo')).toThrowError(
+      `Cargo package "liiiraa-plan-engine" rejects dependency "${forbiddenDependency}".`,
+    );
+  });
+
   it('derives dependency-cruiser layer and public-export rules from canonical policy', () => {
     const rules = createDependencyCruiserRestrictions(canonicalPolicy);
     const generatedDirectionRule = rules.find(

@@ -35,6 +35,11 @@ interface CargoPackage {
   sourcePath: string;
 }
 
+interface ApprovedCargoDependency {
+  requirement: string;
+  kinds: ReadonlySet<null | string>;
+}
+
 declare const process: {
   cwd: () => string;
   getBuiltinModule: (specifier: string) => unknown;
@@ -52,6 +57,14 @@ type ExecFileSync = (
 ) => unknown;
 
 const ARCHITECTURE_COMMAND_MAX_BUFFER_BYTES = 32 * 1024 * 1024;
+
+const PLAN_ENGINE_DEPENDENCY_POLICY = new Map<string, ApprovedCargoDependency>([
+  ['liiiraa-contracts-rust', { requirement: '*', kinds: new Set([null]) }],
+  ['serde', { requirement: '=1.0.229', kinds: new Set([null]) }],
+  ['serde_json', { requirement: '=1.0.151', kinds: new Set([null]) }],
+  ['sha2', { requirement: '=0.10.9', kinds: new Set([null]) }],
+  ['proptest', { requirement: '=1.11.0', kinds: new Set(['dev']) }],
+]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +97,48 @@ const isRuntimeClass = (value: unknown): value is RuntimeClass =>
 
 const readStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+
+const assertPlanEngineDependencyPolicy = (metadata: Record<string, unknown>): void => {
+  if (!Array.isArray(metadata['packages'])) {
+    return;
+  }
+
+  const planEngine = metadata['packages'].find(
+    (packageInput) => isRecord(packageInput) && packageInput['name'] === 'liiiraa-plan-engine',
+  );
+  if (!isRecord(planEngine)) {
+    return;
+  }
+  if (!Array.isArray(planEngine['dependencies'])) {
+    throw new Error('Cargo package "liiiraa-plan-engine" must declare a dependency array.');
+  }
+
+  for (const dependencyInput of planEngine['dependencies']) {
+    if (!isRecord(dependencyInput) || typeof dependencyInput['name'] !== 'string') {
+      throw new Error('Cargo package "liiiraa-plan-engine" has an invalid dependency entry.');
+    }
+
+    const dependencyName = dependencyInput['name'];
+    const approved = PLAN_ENGINE_DEPENDENCY_POLICY.get(dependencyName);
+    if (approved === undefined) {
+      throw new Error(
+        `Cargo package "liiiraa-plan-engine" rejects dependency "${dependencyName}".`,
+      );
+    }
+
+    const dependencyKind = dependencyInput['kind'] ?? null;
+    if (
+      dependencyInput['req'] !== approved.requirement ||
+      (dependencyKind !== null && typeof dependencyKind !== 'string') ||
+      !approved.kinds.has(dependencyKind)
+    ) {
+      throw new Error(
+        `Cargo package "liiiraa-plan-engine" requires approved dependency ` +
+          `"${dependencyName}@${approved.requirement}" in its approved dependency class.`,
+      );
+    }
+  }
+};
 
 const readCanonicalModules = (policyInput: unknown): CanonicalModule[] => {
   if (!isRecord(policyInput) || !Array.isArray(policyInput['modules'])) {
@@ -191,6 +246,7 @@ export const normalizeCargoMetadata = (
   if (!isRecord(metadataInput)) {
     throw new Error('Cargo metadata must be an object.');
   }
+  assertPlanEngineDependencyPolicy(metadataInput);
   const packages = readCargoPackages(metadataInput, repositoryRoot);
   const nodes = [...packages.values()]
     .map(({ sourcePath }) => ({
