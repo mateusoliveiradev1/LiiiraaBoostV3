@@ -393,22 +393,7 @@ impl DependencyPolicy for DeterministicDependencyPolicy {
                     Some(failed_operation_version_id.clone()),
                 )
             })?;
-        let groups_by_id: BTreeMap<_, _> = graph
-            .groups
-            .iter()
-            .map(|group| (group.dependency_group_id.clone(), group))
-            .collect();
-        let mut affected_groups = BTreeSet::new();
-        let mut pending = vec![failed_group_id.clone()];
-        while let Some(group_id) = pending.pop() {
-            if !affected_groups.insert(group_id.clone()) {
-                continue;
-            }
-            let group = groups_by_id
-                .get(&group_id)
-                .expect("validated dependency group exists");
-            pending.extend(group.depends_on_group_ids.iter().cloned());
-        }
+        let affected_groups = dependency_closure(graph, failed_group_id);
 
         let applied_by_id = validate_applied(graph, applied)?;
         let restore_in_order = graph
@@ -467,6 +452,26 @@ fn operation_groups(
                 .map(|operation_id| (operation_id, group.dependency_group_id.clone()))
         })
         .collect()
+}
+
+fn dependency_closure(
+    graph: &DependencyDag,
+    failed_group_id: &TransactionIdentifier,
+) -> BTreeSet<TransactionIdentifier> {
+    let groups_by_id: BTreeMap<_, _> = graph
+        .groups
+        .iter()
+        .map(|group| (group.dependency_group_id.clone(), group))
+        .collect();
+    let mut closure = BTreeSet::new();
+    let mut pending = vec![failed_group_id.clone()];
+    while let Some(group_id) = pending.pop() {
+        if !closure.insert(group_id.clone()) {
+            continue;
+        }
+        pending.extend(groups_by_id[&group_id].depends_on_group_ids.iter().cloned());
+    }
+    closure
 }
 
 fn validate_applied<'a>(

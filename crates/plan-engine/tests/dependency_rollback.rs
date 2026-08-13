@@ -3,6 +3,7 @@ use liiiraa_plan_engine::dependency::{
     DependencyGraphError, DependencyPolicy, DeterministicDependencyPolicy, MutationBlockingVerdict,
     VerifiedAppliedOperation,
 };
+use liiiraa_plan_engine::domain::PlanEngineErrorCode;
 use proptest::prelude::*;
 use proptest::test_runner::RngSeed;
 use serde_json::{Value, json};
@@ -217,6 +218,105 @@ fn restore_failure_blocks_all_later_mutation_without_a_retry_decision() {
     );
 }
 
+#[test]
+fn disconnected_dependency_groups_remain_verified_and_active() {
+    let graph = DeterministicDependencyPolicy
+        .validate(vec![
+            group("group-a", &["op-a"], &[]),
+            group("group-b", &["op-b"], &["group-a"]),
+            group("group-c", &["op-c"], &[]),
+            group("group-d", &["op-d"], &["group-c"]),
+        ])
+        .expect("two disconnected components are a valid DAG");
+    let verified = vec![
+        applied("op-a", "group-a", 'a'),
+        applied("op-c", "group-c", 'c'),
+        applied("op-d", "group-d", 'd'),
+    ];
+    let decision = DeterministicDependencyPolicy
+        .rollback_after_failure(&graph, &id("op-b"), &verified)
+        .expect("failure remains within one connected component");
+
+    assert_eq!(
+        decision
+            .restore_in_order()
+            .iter()
+            .map(|target| target.operation_version_id().as_str())
+            .collect::<Vec<_>>(),
+        ["op-a"]
+    );
+    assert_eq!(
+        strings(decision.preserve_operation_version_ids()),
+        ["op-c", "op-d"]
+    );
+}
+
+#[test]
+fn unknown_or_misassigned_applied_truth_blocks_recovery_planning() {
+    let graph = DeterministicDependencyPolicy
+        .validate(graph_groups())
+        .expect("valid graph");
+    let unknown = [applied("op-unknown", "group-base", 'u')];
+    let error = DeterministicDependencyPolicy
+        .rollback_after_failure(&graph, &id("op-overlay"), &unknown)
+        .expect_err("unknown applied truth must fail closed");
+    assert_eq!(error.code(), PlanEngineErrorCode::UnknownOperationVersion);
+
+    let wrong_group = [applied("op-base", "group-independent", 'w')];
+    let error = DeterministicDependencyPolicy
+        .rollback_after_failure(&graph, &id("op-overlay"), &wrong_group)
+        .expect_err("misassigned applied truth must fail closed");
+    assert_eq!(error.code(), PlanEngineErrorCode::RecoveryBlocked);
+}
+
+#[test]
+fn cancellation_without_an_atomic_mutation_preserves_verified_truth() {
+    let graph = DeterministicDependencyPolicy
+        .validate(graph_groups())
+        .expect("valid graph");
+    let verified = vec![
+        applied("op-base", "group-base", 'a'),
+        applied("op-independent", "group-independent", 'i'),
+    ];
+    let cancellation = DeterministicDependencyPolicy
+        .safe_boundary_cancellation(&graph, None, &verified)
+        .expect("idle cancellation is already at a safe boundary");
+
+    assert!(cancellation.blocks_new_operations());
+    assert!(
+        cancellation
+            .finish_in_flight_operation_version_id()
+            .is_none()
+    );
+    assert_eq!(
+        strings(cancellation.preserve_operation_version_ids()),
+        ["op-base", "op-independent"]
+    );
+}
+
+fn generated_dag(group_count: usize, dense: bool) -> Vec<DependencyGroup> {
+    (0..group_count)
+        .map(|index| {
+            let group_id = format!("group-{index:02}");
+            let operation_id = format!("op-{index:02}");
+            let dependencies: Vec<_> = if index == 0 {
+                Vec::new()
+            } else if dense {
+                (0..index)
+                    .map(|dependency| format!("group-{dependency:02}"))
+                    .collect()
+            } else {
+                vec![format!("group-{:02}", index - 1)]
+            };
+            DependencyGroup {
+                dependency_group_id: id(&group_id),
+                depends_on_group_ids: dependencies.iter().map(|value| id(value)).collect(),
+                operation_version_ids: vec![id(&operation_id)],
+            }
+        })
+        .collect()
+}
+
 proptest! {
     #![proptest_config(ProptestConfig {
         cases: 32,
@@ -278,5 +378,59 @@ proptest! {
             strings(baseline.preserve_operation_version_ids()),
             "D-17 independent preservation drifted under input permutation"
         );
+    }
+
+
+    #[test]
+    fn sparse_and_dense_dags_restore_no_node_outside_the_failed_closure(
+        group_count in 2_usize..10,
+        dense in any::<bool>(),
+    ) {
+        let graph = DeterministicDependencyPolicy
+            .validate(generated_dag(group_count, dense))
+            .expect("generated forward-only graph is acyclic");
+        let applied_operations: Vec<_> = (0..group_count - 1)
+            .map(|index| {
+                applied(
+                    &format!("op-{index:02}"),
+                    &format!("group-{index:02}"),
+                    char::from(b'a' + u8::try_from(index).unwrap()),
+                )
+            })
+            .collect();
+        let failed_id = id(&format!("op-{:02}", group_count - 1));
+        let decision = DeterministicDependencyPolicy
+            .rollback_after_failure(&graph, &failed_id, &applied_operations)
+            .expect("generated failure has complete dependency truth");
+
+        let expected: Vec<_> = (0..group_count - 1)
+            .rev()
+            .map(|index| format!("op-{index:02}"))
+            .collect();
+        let restored: Vec<_> = decision
+            .restore_in_order()
+            .iter()
+            .map(|target| target.operation_version_id().as_str().to_owned())
+            .collect();
+        prop_assert_eq!(
+            restored,
+            expected,
+            "D-17 generated restore included an unrelated node or violated reverse topology"
+        );
+        prop_assert!(decision.preserve_operation_version_ids().is_empty());
+    }
+
+    #[test]
+    fn every_generated_back_edge_cycle_is_rejected(
+        group_count in 2_usize..10,
+    ) {
+        let mut groups = generated_dag(group_count, false);
+        groups[0]
+            .depends_on_group_ids
+            .push(id(&format!("group-{:02}", group_count - 1)));
+        prop_assert!(matches!(
+            DeterministicDependencyPolicy.validate(groups),
+            Err(DependencyGraphError::Cycle)
+        ));
     }
 }
