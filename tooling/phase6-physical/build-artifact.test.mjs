@@ -499,6 +499,23 @@ test('physical lifecycle proves the installed desktop owns a read-only broker le
   assert.match(executor, /observe-power-scheme-request/u);
 });
 
+test('physical lifecycle composes protected manifest custody without administrator read access', () => {
+  const lifecycle = readFileSync('tooling/phase6-physical/lifecycle-smoke.ps1', 'utf8');
+  const builder = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+
+  assert.match(lifecycle, /function Assert-InstalledManifestAdministratorReadDenied/u);
+  assert.match(lifecycle, /\[IO\.File\]::ReadAllBytes\(\$manifestPath\)/u);
+  assert.match(lifecycle, /administrator unexpectedly read protected installed manifest/u);
+  assert.match(lifecycle, /function Get-ExpectedInstallationManifestCustody/u);
+  assert.match(lifecycle, /Join-Path \$OutputRoot 'installation-manifest\.json'/u);
+  assert.match(lifecycle, /VersionInfo\.FileVersion/u);
+  assert.match(lifecycle, /Get-AuthenticodeSignature/u);
+  assert.match(lifecycle, /installedManifestAdministratorReadDenied\s*=\s*\$true/u);
+  assert.match(lifecycle, /serviceAcceptedProtectedManifest\s*=\s*\$true/u);
+  assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
+  assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
+});
+
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
   const programDataSddl =
     'O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
