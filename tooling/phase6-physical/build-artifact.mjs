@@ -172,6 +172,18 @@ const run = (command, args, options = {}) => {
 
 const git = (...args) => run('git', args, { capture: true });
 
+const locatePnpmCli = () => {
+  const candidates = [
+    join(process.env.APPDATA || '', 'npm', 'node_modules', 'pnpm', 'bin', 'pnpm.mjs'),
+    join(process.env.LOCALAPPDATA || '', 'pnpm', 'pnpm.mjs'),
+  ];
+  const path = candidates.find((candidate) => candidate && existsSync(candidate));
+  if (!path) fail('the installed pnpm JavaScript entrypoint is unavailable');
+  const version = run(process.execPath, [path, '--version'], { capture: true });
+  if (version !== '11.17.0') fail(`pnpm exact release mismatch: ${version}`);
+  return path;
+};
+
 const walkFiles = (absolutePath) => {
   if (!existsSync(absolutePath)) fail(`declared input is missing: ${relative(ROOT, absolutePath)}`);
   if (statSync(absolutePath).isFile()) return [absolutePath];
@@ -850,6 +862,7 @@ const buildAndSmoke = (options) => {
 
     const tauriDriverSource = locateTauriDriver();
     const msedgeDriverSource = locateMsEdgeDriver();
+    const pnpmCli = locatePnpmCli();
     run('cargo', [
       'build',
       '--release',
@@ -870,7 +883,8 @@ const buildAndSmoke = (options) => {
       '--features',
       'phase6-physical',
     ]);
-    run('pnpm.cmd', [
+    run(process.execPath, [
+      pnpmCli,
       '--filter',
       '@liiiraa/desktop',
       'exec',
@@ -952,7 +966,8 @@ const buildAndSmoke = (options) => {
       copyFileSync(built.runner, join(wixStaging, 'phase6-physical-runner.exe'));
       copyFileSync(installationPath, join(wixStaging, 'installation-manifest.json'));
       copyFileSync(`${installationPath}.p7s`, join(wixStaging, 'installation-manifest.json.p7s'));
-      run('pnpm.cmd', [
+      run(process.execPath, [
+        pnpmCli,
         '--filter',
         '@liiiraa/desktop',
         'exec',
