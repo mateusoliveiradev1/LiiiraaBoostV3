@@ -166,12 +166,16 @@ const summaryAuthority = (
   artifactManifestSha256: string;
 } => {
   const bytes = readFileSync(summaryPath, 'utf8');
-  const root = /- \*\*Root:\*\* `([^`]+)`/u.exec(bytes)?.[1];
-  const buildId = /- \*\*Build ID:\*\* `([^`]+)`/u.exec(bytes)?.[1];
-  const operationVersion = /- \*\*Operation version:\*\* `([^`]+)`/u.exec(bytes)?.[1];
-  const artifactManifestSha256 = /`artifact-manifest\.json`\s*\|\s*`([a-f0-9]{64})`/u.exec(
-    bytes,
-  )?.[1];
+  const blocks = [
+    ...bytes.matchAll(
+      /- \*\*Root:\*\* `([^`]+)`\r?\n- \*\*Build ID:\*\* `([^`]+)`\r?\n- \*\*Operation version:\*\* `([^`]+)`(?:(?!- \*\*Root:\*\*)[\s\S])*?`artifact-manifest\.json`\s*\|\s*`([a-f0-9]{64})`/gu,
+    ),
+  ];
+  const latest = blocks.at(-1);
+  const root = latest?.[1];
+  const buildId = latest?.[2];
+  const operationVersion = latest?.[3];
+  const artifactManifestSha256 = latest?.[4];
   if (
     root === undefined ||
     buildId === undefined ||

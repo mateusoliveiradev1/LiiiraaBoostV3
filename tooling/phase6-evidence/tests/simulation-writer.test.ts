@@ -212,7 +212,10 @@ describe('artifact-bound atomic admission', () => {
     const setup = fixture();
     const latest = readFileSync(setup.summaryPath, 'utf8');
     const historical = latest
-      .replace('target/phase6-physical/source-commit/build-v41', 'target/phase6-physical/old/build-v40')
+      .replace(
+        'target/phase6-physical/source-commit/build-v41',
+        'target/phase6-physical/old/build-v40',
+      )
       .replace('physical-build-managed-power-scheme-v41', 'physical-build-managed-power-scheme-v40')
       .replace('managed-power-scheme-v41', 'managed-power-scheme-v40')
       .replace(setup.artifactSha256, 'b'.repeat(64));
