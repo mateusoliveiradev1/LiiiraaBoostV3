@@ -808,6 +808,7 @@ union PortableFileRole {
 union PhysicalVersionPolicy {
   packageVersion: "package-version",
   fileVersion: "file-version",
+  cargoInstallReceipt: "cargo-install-receipt",
   schemaVersion: "schema-version",
   notApplicable: "not-applicable",
 }
@@ -876,8 +877,6 @@ model PortableFileIdentityBase {
   @minValue(1)
   sizeBytes: uint32;
   sha256: TransactionHash;
-  version: PhysicalVersion;
-  versionPolicy: PhysicalVersionPolicy;
   signaturePolicy: PhysicalSignaturePolicy;
 }
 
@@ -885,54 +884,82 @@ model PortableMsiFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.msi;
   relativePath: "liiiraa-boost.msi";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.packageVersion;
 }
 
 model PortableInstallationManifestFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.installationManifest;
   relativePath: "installation-manifest.json";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.schemaVersion;
 }
 
 model PortableInstallationManifestSignatureFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.installationManifestSignature;
   relativePath: "installation-manifest.json.p7s";
+  version: "not-applicable";
+  versionPolicy: PhysicalVersionPolicy.notApplicable;
 }
 
 model PortableCleanWindowsVmConfigFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.cleanWindowsVmConfig;
   relativePath: "configs/clean-windows-vm.run-config.json";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.schemaVersion;
 }
 
 model PortableOwnerPcConfigFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.ownerPcConfig;
   relativePath: "configs/owner-pc.run-config.json";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.schemaVersion;
 }
 
 model PortableFriendsPcConfigFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.friendsPcConfig;
   relativePath: "configs/friends-pc.run-config.json";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.schemaVersion;
 }
 
 model PortableRunnerFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.runner;
   relativePath: "phase6-physical-runner.exe";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.fileVersion;
+}
+
+model TauriDriverCargoInstallReceipt {
+  schemaVersion: "1.0";
+  packageName: "tauri-driver";
+  packageVersion: "2.0.6";
+  versionRequirement: "=2.0.6";
+  source: "registry+https://github.com/rust-lang/crates.io-index";
+  binaryName: "tauri-driver.exe";
 }
 
 model PortableTauriDriverFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.tauriDriver;
   relativePath: "tauri-driver.exe";
+  version: "2.0.6";
+  versionPolicy: PhysicalVersionPolicy.cargoInstallReceipt;
+  cargoInstallReceipt: TauriDriverCargoInstallReceipt;
 }
 
 model PortableMsedgeDriverFileIdentity {
   ...PortableFileIdentityBase;
   role: PortableFileRole.msedgeDriver;
   relativePath: "msedgedriver.exe";
+  version: PhysicalVersion;
+  versionPolicy: PhysicalVersionPolicy.fileVersion;
 }
 
 model PortableFileSet {

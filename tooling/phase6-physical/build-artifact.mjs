@@ -23,6 +23,14 @@ import { fileURLToPath } from 'node:url';
 
 export const TRUSTED_INSTALLER_SPKI_SHA256 =
   'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
+export const TAURI_DRIVER_CARGO_INSTALL_RECEIPT = Object.freeze({
+  schemaVersion: '1.0',
+  packageName: 'tauri-driver',
+  packageVersion: '2.0.6',
+  versionRequirement: '=2.0.6',
+  source: 'registry+https://github.com/rust-lang/crates.io-index',
+  binaryName: 'tauri-driver.exe',
+});
 export const PHYSICAL_PRODUCT_CODE = '72696290-c079-44db-9fdd-6e7cc11aa2c2';
 const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
@@ -107,11 +115,11 @@ export const PORTABLE_ROLES = Object.freeze([
     signaturePolicy: 'authenticode-required',
   },
   {
-    key: 'tauriDriver',
-    role: 'tauri-driver',
-    path: 'tauri-driver.exe',
-    versionPolicy: 'file-version',
-    signaturePolicy: 'authenticode-required',
+key: 'tauriDriver',
+role: 'tauri-driver',
+path: 'tauri-driver.exe',
+versionPolicy: 'cargo-install-receipt',
+signaturePolicy: 'authenticode-required',
   },
   {
     key: 'msedgeDriver',
@@ -515,6 +523,17 @@ export function validateArtifactManifest(document) {
   )
     fail('artifact manifest source identity is invalid');
   assertExactRoles(document.files, PORTABLE_ROLES, 'portable');
+  const tauri = document.files.tauriDriver;
+  if (
+    tauri.version !== TAURI_DRIVER_CARGO_INSTALL_RECEIPT.packageVersion ||
+    !deepEqual(tauri.cargoInstallReceipt, TAURI_DRIVER_CARGO_INSTALL_RECEIPT)
+  ) {
+    fail('tauri-driver Cargo install receipt or version is invalid');
+  }
+  for (const { key } of PORTABLE_ROLES) {
+    if (key !== 'tauriDriver' && 'cargoInstallReceipt' in document.files[key])
+      fail(`Cargo install receipt policy is forbidden for ${key}`);
+  }
   return true;
 }
 
@@ -805,15 +824,20 @@ const installedRoleIdentity = (role, relativePath, absolutePath, signature) => (
   authenticodeThumbprint: signature.thumbprint,
 });
 
-const portableRoleIdentity = (role, relativePath, absolutePath, metadata) => ({
-  role,
-  relativePath,
-  sizeBytes: statSync(absolutePath).size,
-  sha256: sha256(readFileSync(absolutePath)),
-  version: metadata.version,
-  versionPolicy: metadata.versionPolicy,
-  signaturePolicy: metadata.signaturePolicy,
-});
+const portableRoleIdentity = (role, relativePath, absolutePath, metadata) => {
+  const identity = {
+    role,
+    relativePath,
+    sizeBytes: statSync(absolutePath).size,
+    sha256: sha256(readFileSync(absolutePath)),
+    version: metadata.version,
+    versionPolicy: metadata.versionPolicy,
+    signaturePolicy: metadata.signaturePolicy,
+  };
+  if (metadata.cargoInstallReceipt)
+    identity.cargoInstallReceipt = metadata.cargoInstallReceipt;
+  return identity;
+};
 
 const writeCreateOnce = (path, bytes) => {
   const state = assertImmutableFile(path, bytes);
@@ -830,12 +854,15 @@ export function validateTauriDriverInstallReceipt(receipt, executableName = 'tau
   const installed = receipt?.installs?.[exactKey];
   if (
     installed?.version_req !== '=2.0.6' ||
-    !Array.isArray(installed.bins) ||
-    !installed.bins.includes(executableName)
+    executableName !== TAURI_DRIVER_CARGO_INSTALL_RECEIPT.binaryName ||
+    !deepEqual(installed.bins, [TAURI_DRIVER_CARGO_INSTALL_RECEIPT.binaryName])
   ) {
     fail('tauri-driver exact 2.0.6 crates.io install receipt is invalid');
   }
-  return { version: '2.0.6', source: 'registry+https://github.com/rust-lang/crates.io-index' };
+  return {
+    version: TAURI_DRIVER_CARGO_INSTALL_RECEIPT.packageVersion,
+    cargoInstallReceipt: { ...TAURI_DRIVER_CARGO_INSTALL_RECEIPT },
+  };
 }
 
 const locateTauriDriver = () => {
@@ -1519,8 +1546,9 @@ const buildAndSmoke = (options) => {
       },
       tauriDriver: {
         version: tauriDriverSource.version,
-        versionPolicy: 'file-version',
+        versionPolicy: 'cargo-install-receipt',
         signaturePolicy: 'authenticode-required',
+        cargoInstallReceipt: tauriDriverSource.cargoInstallReceipt,
       },
       msedgeDriver: {
         version: fileVersion(portableSources.msedgeDriver),

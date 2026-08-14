@@ -31856,90 +31856,6 @@ impl<'de> ::serde::Deserialize<'de> for PhysicalVersion {
             })
     }
 }
-#[doc = "`PhysicalVersionPolicy`"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"$id\": \"PhysicalVersionPolicy.json\","]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
-#[doc = "    \"package-version\","]
-#[doc = "    \"file-version\","]
-#[doc = "    \"schema-version\","]
-#[doc = "    \"not-applicable\""]
-#[doc = "  ],"]
-#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(
-    :: serde :: Deserialize,
-    :: serde :: Serialize,
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-)]
-pub enum PhysicalVersionPolicy {
-    #[serde(rename = "package-version")]
-    PackageVersion,
-    #[serde(rename = "file-version")]
-    FileVersion,
-    #[serde(rename = "schema-version")]
-    SchemaVersion,
-    #[serde(rename = "not-applicable")]
-    NotApplicable,
-}
-impl ::std::fmt::Display for PhysicalVersionPolicy {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match *self {
-            Self::PackageVersion => f.write_str("package-version"),
-            Self::FileVersion => f.write_str("file-version"),
-            Self::SchemaVersion => f.write_str("schema-version"),
-            Self::NotApplicable => f.write_str("not-applicable"),
-        }
-    }
-}
-impl ::std::str::FromStr for PhysicalVersionPolicy {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        match value {
-            "package-version" => Ok(Self::PackageVersion),
-            "file-version" => Ok(Self::FileVersion),
-            "schema-version" => Ok(Self::SchemaVersion),
-            "not-applicable" => Ok(Self::NotApplicable),
-            _ => Err("invalid value".into()),
-        }
-    }
-}
-impl ::std::convert::TryFrom<&str> for PhysicalVersionPolicy {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<&::std::string::String> for PhysicalVersionPolicy {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: &::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<::std::string::String> for PhysicalVersionPolicy {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: ::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
 #[doc = "`PlanApprovalDocument`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -32610,7 +32526,10 @@ impl ::std::convert::TryFrom<::std::string::String> for PlanTransactionDocumentK
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"schema-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -32631,7 +32550,7 @@ pub struct PortableCleanWindowsVmConfigFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableCleanWindowsVmConfigFileIdentityVersionPolicy,
 }
 #[doc = "`PortableCleanWindowsVmConfigFileIdentityRelativePath`"]
 #[doc = r""]
@@ -32779,6 +32698,77 @@ impl ::std::convert::TryFrom<::std::string::String>
         value.parse()
     }
 }
+#[doc = "`PortableCleanWindowsVmConfigFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"schema-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableCleanWindowsVmConfigFileIdentityVersionPolicy {
+    #[serde(rename = "schema-version")]
+    SchemaVersion,
+}
+impl ::std::fmt::Display for PortableCleanWindowsVmConfigFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SchemaVersion => f.write_str("schema-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableCleanWindowsVmConfigFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "schema-version" => Ok(Self::SchemaVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableCleanWindowsVmConfigFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableCleanWindowsVmConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableFileSet`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -32897,7 +32887,10 @@ pub struct PortableFileSet {
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"schema-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -32918,7 +32911,7 @@ pub struct PortableFriendsPcConfigFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableFriendsPcConfigFileIdentityVersionPolicy,
 }
 #[doc = "`PortableFriendsPcConfigFileIdentityRelativePath`"]
 #[doc = r""]
@@ -33060,6 +33053,77 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableFriendsPcConfigF
         value.parse()
     }
 }
+#[doc = "`PortableFriendsPcConfigFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"schema-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableFriendsPcConfigFileIdentityVersionPolicy {
+    #[serde(rename = "schema-version")]
+    SchemaVersion,
+}
+impl ::std::fmt::Display for PortableFriendsPcConfigFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SchemaVersion => f.write_str("schema-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableFriendsPcConfigFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "schema-version" => Ok(Self::SchemaVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableFriendsPcConfigFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableFriendsPcConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableFriendsPcConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableInstallationManifestFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -33105,7 +33169,10 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableFriendsPcConfigF
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"schema-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -33126,7 +33193,7 @@ pub struct PortableInstallationManifestFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableInstallationManifestFileIdentityVersionPolicy,
 }
 #[doc = "`PortableInstallationManifestFileIdentityRelativePath`"]
 #[doc = r""]
@@ -33270,6 +33337,77 @@ impl ::std::convert::TryFrom<::std::string::String>
         value.parse()
     }
 }
+#[doc = "`PortableInstallationManifestFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"schema-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestFileIdentityVersionPolicy {
+    #[serde(rename = "schema-version")]
+    SchemaVersion,
+}
+impl ::std::fmt::Display for PortableInstallationManifestFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SchemaVersion => f.write_str("schema-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "schema-version" => Ok(Self::SchemaVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableInstallationManifestFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableInstallationManifestSignatureFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -33312,10 +33450,16 @@ impl ::std::convert::TryFrom<::std::string::String>
 #[doc = "      \"minimum\": 1.0"]
 #[doc = "    },"]
 #[doc = "    \"version\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"not-applicable\""]
+#[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"not-applicable\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -33334,9 +33478,9 @@ pub struct PortableInstallationManifestSignatureFileIdentity {
     pub signature_policy: PhysicalSignaturePolicy,
     #[serde(rename = "sizeBytes")]
     pub size_bytes: ::std::num::NonZeroU64,
-    pub version: PhysicalVersion,
+    pub version: PortableInstallationManifestSignatureFileIdentityVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableInstallationManifestSignatureFileIdentityVersionPolicy,
 }
 #[doc = "`PortableInstallationManifestSignatureFileIdentityRelativePath`"]
 #[doc = r""]
@@ -33482,6 +33626,150 @@ impl ::std::convert::TryFrom<::std::string::String>
         value.parse()
     }
 }
+#[doc = "`PortableInstallationManifestSignatureFileIdentityVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"not-applicable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestSignatureFileIdentityVersion {
+    #[serde(rename = "not-applicable")]
+    NotApplicable,
+}
+impl ::std::fmt::Display for PortableInstallationManifestSignatureFileIdentityVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NotApplicable => f.write_str("not-applicable"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestSignatureFileIdentityVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "not-applicable" => Ok(Self::NotApplicable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableInstallationManifestSignatureFileIdentityVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableInstallationManifestSignatureFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"not-applicable\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableInstallationManifestSignatureFileIdentityVersionPolicy {
+    #[serde(rename = "not-applicable")]
+    NotApplicable,
+}
+impl ::std::fmt::Display for PortableInstallationManifestSignatureFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::NotApplicable => f.write_str("not-applicable"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableInstallationManifestSignatureFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "not-applicable" => Ok(Self::NotApplicable),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str>
+    for PortableInstallationManifestSignatureFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableInstallationManifestSignatureFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableMsedgeDriverFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -33527,7 +33815,10 @@ impl ::std::convert::TryFrom<::std::string::String>
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"file-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -33548,7 +33839,7 @@ pub struct PortableMsedgeDriverFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableMsedgeDriverFileIdentityVersionPolicy,
 }
 #[doc = "`PortableMsedgeDriverFileIdentityRelativePath`"]
 #[doc = r""]
@@ -33688,6 +33979,77 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableMsedgeDriverFile
         value.parse()
     }
 }
+#[doc = "`PortableMsedgeDriverFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"file-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsedgeDriverFileIdentityVersionPolicy {
+    #[serde(rename = "file-version")]
+    FileVersion,
+}
+impl ::std::fmt::Display for PortableMsedgeDriverFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FileVersion => f.write_str("file-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsedgeDriverFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "file-version" => Ok(Self::FileVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsedgeDriverFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableMsedgeDriverFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableMsedgeDriverFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableMsiFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -33733,7 +34095,10 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableMsedgeDriverFile
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"package-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -33754,7 +34119,7 @@ pub struct PortableMsiFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableMsiFileIdentityVersionPolicy,
 }
 #[doc = "`PortableMsiFileIdentityRelativePath`"]
 #[doc = r""]
@@ -33890,6 +34255,73 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableMsiFileIdentityR
         value.parse()
     }
 }
+#[doc = "`PortableMsiFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"package-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableMsiFileIdentityVersionPolicy {
+    #[serde(rename = "package-version")]
+    PackageVersion,
+}
+impl ::std::fmt::Display for PortableMsiFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::PackageVersion => f.write_str("package-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableMsiFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "package-version" => Ok(Self::PackageVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableMsiFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableMsiFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableMsiFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableOwnerPcConfigFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -33935,7 +34367,10 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableMsiFileIdentityR
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"schema-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -33956,7 +34391,7 @@ pub struct PortableOwnerPcConfigFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableOwnerPcConfigFileIdentityVersionPolicy,
 }
 #[doc = "`PortableOwnerPcConfigFileIdentityRelativePath`"]
 #[doc = r""]
@@ -34096,6 +34531,77 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableOwnerPcConfigFil
         value.parse()
     }
 }
+#[doc = "`PortableOwnerPcConfigFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"schema-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableOwnerPcConfigFileIdentityVersionPolicy {
+    #[serde(rename = "schema-version")]
+    SchemaVersion,
+}
+impl ::std::fmt::Display for PortableOwnerPcConfigFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SchemaVersion => f.write_str("schema-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableOwnerPcConfigFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "schema-version" => Ok(Self::SchemaVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableOwnerPcConfigFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableOwnerPcConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableOwnerPcConfigFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableRunnerFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -34141,7 +34647,10 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableOwnerPcConfigFil
 #[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"file-version\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -34162,7 +34671,7 @@ pub struct PortableRunnerFileIdentity {
     pub size_bytes: ::std::num::NonZeroU64,
     pub version: PhysicalVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableRunnerFileIdentityVersionPolicy,
 }
 #[doc = "`PortableRunnerFileIdentityRelativePath`"]
 #[doc = r""]
@@ -34298,6 +34807,73 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdenti
         value.parse()
     }
 }
+#[doc = "`PortableRunnerFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"file-version\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableRunnerFileIdentityVersionPolicy {
+    #[serde(rename = "file-version")]
+    FileVersion,
+}
+impl ::std::fmt::Display for PortableRunnerFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::FileVersion => f.write_str("file-version"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableRunnerFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "file-version" => Ok(Self::FileVersion),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableRunnerFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableRunnerFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "`PortableTauriDriverFileIdentity`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -34307,6 +34883,7 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdenti
 #[doc = "  \"$id\": \"PortableTauriDriverFileIdentity.json\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
+#[doc = "    \"cargoInstallReceipt\","]
 #[doc = "    \"relativePath\","]
 #[doc = "    \"role\","]
 #[doc = "    \"sha256\","]
@@ -34316,6 +34893,9 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdenti
 #[doc = "    \"versionPolicy\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
+#[doc = "    \"cargoInstallReceipt\": {"]
+#[doc = "      \"$ref\": \"#/definitions/TauriDriverCargoInstallReceipt\""]
+#[doc = "    },"]
 #[doc = "    \"relativePath\": {"]
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"enum\": ["]
@@ -34340,10 +34920,16 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdenti
 #[doc = "      \"minimum\": 1.0"]
 #[doc = "    },"]
 #[doc = "    \"version\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersion\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"2.0.6\""]
+#[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"versionPolicy\": {"]
-#[doc = "      \"$ref\": \"#/definitions/PhysicalVersionPolicy\""]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"cargo-install-receipt\""]
+#[doc = "      ]"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false,"]
@@ -34354,6 +34940,8 @@ impl ::std::convert::TryFrom<::std::string::String> for PortableRunnerFileIdenti
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct PortableTauriDriverFileIdentity {
+    #[serde(rename = "cargoInstallReceipt")]
+    pub cargo_install_receipt: TauriDriverCargoInstallReceipt,
     #[serde(rename = "relativePath")]
     pub relative_path: PortableTauriDriverFileIdentityRelativePath,
     pub role: PortableTauriDriverFileIdentityRole,
@@ -34362,9 +34950,9 @@ pub struct PortableTauriDriverFileIdentity {
     pub signature_policy: PhysicalSignaturePolicy,
     #[serde(rename = "sizeBytes")]
     pub size_bytes: ::std::num::NonZeroU64,
-    pub version: PhysicalVersion,
+    pub version: PortableTauriDriverFileIdentityVersion,
     #[serde(rename = "versionPolicy")]
-    pub version_policy: PhysicalVersionPolicy,
+    pub version_policy: PortableTauriDriverFileIdentityVersionPolicy,
 }
 #[doc = "`PortableTauriDriverFileIdentityRelativePath`"]
 #[doc = r""]
@@ -34497,6 +35085,144 @@ impl ::std::convert::TryFrom<&::std::string::String> for PortableTauriDriverFile
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for PortableTauriDriverFileIdentityRole {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableTauriDriverFileIdentityVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"2.0.6\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableTauriDriverFileIdentityVersion {
+    #[serde(rename = "2.0.6")]
+    X206,
+}
+impl ::std::fmt::Display for PortableTauriDriverFileIdentityVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X206 => f.write_str("2.0.6"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableTauriDriverFileIdentityVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "2.0.6" => Ok(Self::X206),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableTauriDriverFileIdentityVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for PortableTauriDriverFileIdentityVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for PortableTauriDriverFileIdentityVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`PortableTauriDriverFileIdentityVersionPolicy`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"cargo-install-receipt\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum PortableTauriDriverFileIdentityVersionPolicy {
+    #[serde(rename = "cargo-install-receipt")]
+    CargoInstallReceipt,
+}
+impl ::std::fmt::Display for PortableTauriDriverFileIdentityVersionPolicy {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::CargoInstallReceipt => f.write_str("cargo-install-receipt"),
+        }
+    }
+}
+impl ::std::str::FromStr for PortableTauriDriverFileIdentityVersionPolicy {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "cargo-install-receipt" => Ok(Self::CargoInstallReceipt),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for PortableTauriDriverFileIdentityVersionPolicy {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for PortableTauriDriverFileIdentityVersionPolicy
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for PortableTauriDriverFileIdentityVersionPolicy
+{
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -49309,6 +50035,498 @@ impl ::std::convert::TryFrom<&::std::string::String> for SupportCommandSchemaVer
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for SupportCommandSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceipt`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"TauriDriverCargoInstallReceipt.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"binaryName\","]
+#[doc = "    \"packageName\","]
+#[doc = "    \"packageVersion\","]
+#[doc = "    \"schemaVersion\","]
+#[doc = "    \"source\","]
+#[doc = "    \"versionRequirement\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"binaryName\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"tauri-driver.exe\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"packageName\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"tauri-driver\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"packageVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"2.0.6\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"schemaVersion\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"1.0\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"source\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"registry+https://github.com/rust-lang/crates.io-index\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"versionRequirement\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"=2.0.6\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct TauriDriverCargoInstallReceipt {
+    #[serde(rename = "binaryName")]
+    pub binary_name: TauriDriverCargoInstallReceiptBinaryName,
+    #[serde(rename = "packageName")]
+    pub package_name: TauriDriverCargoInstallReceiptPackageName,
+    #[serde(rename = "packageVersion")]
+    pub package_version: TauriDriverCargoInstallReceiptPackageVersion,
+    #[serde(rename = "schemaVersion")]
+    pub schema_version: TauriDriverCargoInstallReceiptSchemaVersion,
+    pub source: TauriDriverCargoInstallReceiptSource,
+    #[serde(rename = "versionRequirement")]
+    pub version_requirement: TauriDriverCargoInstallReceiptVersionRequirement,
+}
+#[doc = "`TauriDriverCargoInstallReceiptBinaryName`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"tauri-driver.exe\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptBinaryName {
+    #[serde(rename = "tauri-driver.exe")]
+    TauriDriverExe,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptBinaryName {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TauriDriverExe => f.write_str("tauri-driver.exe"),
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptBinaryName {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "tauri-driver.exe" => Ok(Self::TauriDriverExe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptBinaryName {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TauriDriverCargoInstallReceiptBinaryName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TauriDriverCargoInstallReceiptBinaryName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceiptPackageName`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"tauri-driver\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptPackageName {
+    #[serde(rename = "tauri-driver")]
+    TauriDriver,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptPackageName {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::TauriDriver => f.write_str("tauri-driver"),
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptPackageName {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "tauri-driver" => Ok(Self::TauriDriver),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptPackageName {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TauriDriverCargoInstallReceiptPackageName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TauriDriverCargoInstallReceiptPackageName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceiptPackageVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"2.0.6\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptPackageVersion {
+    #[serde(rename = "2.0.6")]
+    X206,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptPackageVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X206 => f.write_str("2.0.6"),
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptPackageVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "2.0.6" => Ok(Self::X206),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptPackageVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for TauriDriverCargoInstallReceiptPackageVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for TauriDriverCargoInstallReceiptPackageVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceiptSchemaVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"1.0\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptSchemaVersion {
+    #[serde(rename = "1.0")]
+    X10,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptSchemaVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X10 => f.write_str("1.0"),
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptSchemaVersion {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "1.0" => Ok(Self::X10),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptSchemaVersion {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for TauriDriverCargoInstallReceiptSchemaVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for TauriDriverCargoInstallReceiptSchemaVersion
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceiptSource`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"registry+https://github.com/rust-lang/crates.io-index\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptSource {
+    #[serde(rename = "registry+https://github.com/rust-lang/crates.io-index")]
+    RegistryHttpsGithubComRustLangCratesIoIndex,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptSource {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::RegistryHttpsGithubComRustLangCratesIoIndex => {
+                f.write_str("registry+https://github.com/rust-lang/crates.io-index")
+            }
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptSource {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "registry+https://github.com/rust-lang/crates.io-index" => {
+                Ok(Self::RegistryHttpsGithubComRustLangCratesIoIndex)
+            }
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptSource {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TauriDriverCargoInstallReceiptSource {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TauriDriverCargoInstallReceiptSource {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`TauriDriverCargoInstallReceiptVersionRequirement`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"=2.0.6\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum TauriDriverCargoInstallReceiptVersionRequirement {
+    #[serde(rename = "=2.0.6")]
+    X206,
+}
+impl ::std::fmt::Display for TauriDriverCargoInstallReceiptVersionRequirement {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::X206 => f.write_str("=2.0.6"),
+        }
+    }
+}
+impl ::std::str::FromStr for TauriDriverCargoInstallReceiptVersionRequirement {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "=2.0.6" => Ok(Self::X206),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for TauriDriverCargoInstallReceiptVersionRequirement {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String>
+    for TauriDriverCargoInstallReceiptVersionRequirement
+{
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String>
+    for TauriDriverCargoInstallReceiptVersionRequirement
+{
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,

@@ -304,7 +304,7 @@ fn fixture() -> FakeBackend {
         "files": {
             "msi": role("liiiraa-boost.msi", "1.2.0", "package-version", "authenticode-required", b"msi"),
             "installationManifest": role("installation-manifest.json", "1.0", "schema-version", "detached-cms-required", install_bytes),
-            "installationManifestSignature": role("installation-manifest.json.p7s", "1.0", "not-applicable", "manifest-authenticated", install_sig),
+            "installationManifestSignature": role("installation-manifest.json.p7s", "not-applicable", "not-applicable", "manifest-authenticated", install_sig),
             "cleanWindowsVmConfig": role("configs/clean-windows-vm.run-config.json", "1.0", "schema-version", "manifest-authenticated", clean),
             "ownerPcConfig": role("configs/owner-pc.run-config.json", "1.0", "schema-version", "manifest-authenticated", owner),
             "friendsPcConfig": role("configs/friends-pc.run-config.json", "1.0", "schema-version", "manifest-authenticated", friends),
@@ -479,7 +479,7 @@ fn cms_spki_hash_version_authenticode_reparse_and_root_custody_mutations_fail_cl
         Box::new(|backend| {
             backend
                 .versions
-                .insert(backend.path("tauri-driver.exe"), "1.0.0".to_owned());
+                .insert(backend.path("msedgedriver.exe"), "1.0.0".to_owned());
         }),
         Box::new(|backend| {
             backend

@@ -2565,28 +2565,6 @@
       "pattern": "^[0-9A-Za-z][0-9A-Za-z.+-]*$",
       "type": "string"
     },
-    "PhysicalVersionPolicy": {
-      "$id": "PhysicalVersionPolicy.json",
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "anyOf": [
-        {
-          "const": "package-version",
-          "type": "string"
-        },
-        {
-          "const": "file-version",
-          "type": "string"
-        },
-        {
-          "const": "schema-version",
-          "type": "string"
-        },
-        {
-          "const": "not-applicable",
-          "type": "string"
-        }
-      ]
-    },
     "PlanApprovalDocument": {
       "$id": "PlanApprovalDocument.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2871,17 +2849,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "schema-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -2963,17 +2942,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "schema-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3007,17 +2987,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "schema-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3048,20 +3029,22 @@
           "type": "integer"
         },
         "version": {
-          "$ref": "PhysicalVersion.json"
+          "const": "not-applicable",
+          "type": "string"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "not-applicable",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3095,17 +3078,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "file-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3139,17 +3123,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "package-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3183,17 +3168,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "schema-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3227,17 +3213,18 @@
           "$ref": "PhysicalVersion.json"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "file-version",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -3248,6 +3235,9 @@
       "$id": "PortableTauriDriverFileIdentity.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
+        "cargoInstallReceipt": {
+          "$ref": "TauriDriverCargoInstallReceipt.json"
+        },
         "relativePath": {
           "const": "tauri-driver.exe",
           "type": "string"
@@ -3268,20 +3258,23 @@
           "type": "integer"
         },
         "version": {
-          "$ref": "PhysicalVersion.json"
+          "const": "2.0.6",
+          "type": "string"
         },
         "versionPolicy": {
-          "$ref": "PhysicalVersionPolicy.json"
+          "const": "cargo-install-receipt",
+          "type": "string"
         }
       },
       "required": [
         "sizeBytes",
         "sha256",
-        "version",
-        "versionPolicy",
         "signaturePolicy",
         "role",
-        "relativePath"
+        "relativePath",
+        "version",
+        "versionPolicy",
+        "cargoInstallReceipt"
       ],
       "type": "object",
       "unevaluatedProperties": {
@@ -4521,6 +4514,48 @@
         "recordedAt",
         "audit",
         "stage"
+      ],
+      "type": "object",
+      "unevaluatedProperties": {
+        "not": {}
+      }
+    },
+    "TauriDriverCargoInstallReceipt": {
+      "$id": "TauriDriverCargoInstallReceipt.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "binaryName": {
+          "const": "tauri-driver.exe",
+          "type": "string"
+        },
+        "packageName": {
+          "const": "tauri-driver",
+          "type": "string"
+        },
+        "packageVersion": {
+          "const": "2.0.6",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "source": {
+          "const": "registry+https://github.com/rust-lang/crates.io-index",
+          "type": "string"
+        },
+        "versionRequirement": {
+          "const": "=2.0.6",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "packageName",
+        "packageVersion",
+        "versionRequirement",
+        "source",
+        "binaryName"
       ],
       "type": "object",
       "unevaluatedProperties": {

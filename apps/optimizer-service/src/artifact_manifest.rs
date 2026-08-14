@@ -230,9 +230,21 @@ pub(crate) fn verify_artifact_manifest_with_backend(
         let path = resolve_below_root(backend, &root, required_str(identity, "relativePath")?)?;
         let authenticode = backend.verify_authenticode(&path)?;
         verify_compiled_spki(&authenticode.spki_sha256)?;
-        let expected_version = required_str(identity, "version")?;
-        if backend.file_version(&path)? != expected_version {
-            return Err(CustodyError::version("portable-live-file-version"));
+        if role == "tauriDriver" {
+            verify_tauri_driver_cargo_receipt(identity)?;
+        } else {
+            let expected_policy = if role == "msi" {
+                "package-version"
+            } else {
+                "file-version"
+            };
+            if required_str(identity, "versionPolicy")? != expected_policy {
+                return Err(CustodyError::version("portable-native-version-policy"));
+            }
+            let expected_version = required_str(identity, "version")?;
+            if backend.file_version(&path)? != expected_version {
+                return Err(CustodyError::version("portable-live-file-version"));
+            }
         }
     }
 
@@ -243,6 +255,32 @@ pub(crate) fn verify_artifact_manifest_with_backend(
         files,
         friends_config,
     })
+}
+
+fn verify_tauri_driver_cargo_receipt(
+    identity: &Map<String, Value>,
+) -> Result<(), CustodyError> {
+    if required_str(identity, "version")? != "2.0.6"
+        || required_str(identity, "versionPolicy")? != "cargo-install-receipt"
+    {
+        return Err(CustodyError::version("portable-cargo-receipt-policy"));
+    }
+    let receipt = identity
+        .get("cargoInstallReceipt")
+        .and_then(Value::as_object)
+        .ok_or_else(|| CustodyError::version("portable-cargo-receipt-missing"))?;
+    if receipt.len() != 6
+        || required_str(receipt, "schemaVersion")? != "1.0"
+        || required_str(receipt, "packageName")? != "tauri-driver"
+        || required_str(receipt, "packageVersion")? != "2.0.6"
+        || required_str(receipt, "versionRequirement")? != "=2.0.6"
+        || required_str(receipt, "source")?
+            != "registry+https://github.com/rust-lang/crates.io-index"
+        || required_str(receipt, "binaryName")? != "tauri-driver.exe"
+    {
+        return Err(CustodyError::version("portable-cargo-receipt-identity"));
+    }
+    Ok(())
 }
 
 pub fn verify_friends_roster(

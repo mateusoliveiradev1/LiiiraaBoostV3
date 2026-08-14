@@ -8140,26 +8140,6 @@
         "pattern": "^[0-9A-Za-z][0-9A-Za-z.+-]*$",
         "type": "string"
       },
-      "PhysicalVersionPolicy": {
-        "anyOf": [
-          {
-            "const": "package-version",
-            "type": "string"
-          },
-          {
-            "const": "file-version",
-            "type": "string"
-          },
-          {
-            "const": "schema-version",
-            "type": "string"
-          },
-          {
-            "const": "not-applicable",
-            "type": "string"
-          }
-        ]
-      },
       "PlanApprovalDocument": {
         "properties": {
           "approvalId": {
@@ -8434,17 +8414,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "schema-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8522,17 +8503,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "schema-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8564,17 +8546,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "schema-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8603,20 +8586,22 @@
             "type": "integer"
           },
           "version": {
-            "$ref": "#/components/schemas/PhysicalVersion"
+            "const": "not-applicable",
+            "type": "string"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "not-applicable",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8648,17 +8633,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "file-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8690,17 +8676,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "package-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8732,17 +8719,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "schema-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8774,17 +8762,18 @@
             "$ref": "#/components/schemas/PhysicalVersion"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "file-version",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -8793,6 +8782,9 @@
       },
       "PortableTauriDriverFileIdentity": {
         "properties": {
+          "cargoInstallReceipt": {
+            "$ref": "#/components/schemas/TauriDriverCargoInstallReceipt"
+          },
           "relativePath": {
             "const": "tauri-driver.exe",
             "type": "string"
@@ -8813,20 +8805,23 @@
             "type": "integer"
           },
           "version": {
-            "$ref": "#/components/schemas/PhysicalVersion"
+            "const": "2.0.6",
+            "type": "string"
           },
           "versionPolicy": {
-            "$ref": "#/components/schemas/PhysicalVersionPolicy"
+            "const": "cargo-install-receipt",
+            "type": "string"
           }
         },
         "required": [
           "sizeBytes",
           "sha256",
-          "version",
-          "versionPolicy",
           "signaturePolicy",
           "role",
-          "relativePath"
+          "relativePath",
+          "version",
+          "versionPolicy",
+          "cargoInstallReceipt"
         ],
         "type": "object",
         "unevaluatedProperties": {
@@ -10860,6 +10855,46 @@
             "type": "string"
           }
         ]
+      },
+      "TauriDriverCargoInstallReceipt": {
+        "properties": {
+          "binaryName": {
+            "const": "tauri-driver.exe",
+            "type": "string"
+          },
+          "packageName": {
+            "const": "tauri-driver",
+            "type": "string"
+          },
+          "packageVersion": {
+            "const": "2.0.6",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0",
+            "type": "string"
+          },
+          "source": {
+            "const": "registry+https://github.com/rust-lang/crates.io-index",
+            "type": "string"
+          },
+          "versionRequirement": {
+            "const": "=2.0.6",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "packageName",
+          "packageVersion",
+          "versionRequirement",
+          "source",
+          "binaryName"
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "not": {}
+        }
       },
       "TransactionalPlanDocument": {
         "properties": {

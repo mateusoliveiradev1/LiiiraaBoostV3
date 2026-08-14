@@ -475,11 +475,6 @@ export type PhysicalVersionJson = string;
 export type PhysicalSourceCommitJson = string;
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
- * via the `definition` "PhysicalVersionPolicy".
- */
-export type PhysicalVersionPolicyJson = 'package-version' | 'file-version' | 'schema-version' | 'not-applicable';
-/**
- * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
  * via the `definition` "PhysicalSignaturePolicy".
  */
 export type PhysicalSignaturePolicyJson = 'authenticode-required' | 'detached-cms-required' | 'manifest-authenticated';
@@ -4045,11 +4040,11 @@ export interface PortableFileSetJson {
 export interface PortableMsiFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'msi';
   relativePath: 'liiiraa-boost.msi';
+  version: PhysicalVersionJson;
+  versionPolicy: 'package-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4058,11 +4053,11 @@ export interface PortableMsiFileIdentityJson {
 export interface PortableInstallationManifestFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'installation-manifest';
   relativePath: 'installation-manifest.json';
+  version: PhysicalVersionJson;
+  versionPolicy: 'schema-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4071,11 +4066,11 @@ export interface PortableInstallationManifestFileIdentityJson {
 export interface PortableInstallationManifestSignatureFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'installation-manifest-signature';
   relativePath: 'installation-manifest.json.p7s';
+  version: 'not-applicable';
+  versionPolicy: 'not-applicable';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4084,11 +4079,11 @@ export interface PortableInstallationManifestSignatureFileIdentityJson {
 export interface PortableCleanWindowsVmConfigFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'clean-windows-vm-config';
   relativePath: 'configs/clean-windows-vm.run-config.json';
+  version: PhysicalVersionJson;
+  versionPolicy: 'schema-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4097,11 +4092,11 @@ export interface PortableCleanWindowsVmConfigFileIdentityJson {
 export interface PortableOwnerPcConfigFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'owner-pc-config';
   relativePath: 'configs/owner-pc.run-config.json';
+  version: PhysicalVersionJson;
+  versionPolicy: 'schema-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4110,11 +4105,11 @@ export interface PortableOwnerPcConfigFileIdentityJson {
 export interface PortableFriendsPcConfigFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'friends-pc-config';
   relativePath: 'configs/friends-pc.run-config.json';
+  version: PhysicalVersionJson;
+  versionPolicy: 'schema-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4123,11 +4118,11 @@ export interface PortableFriendsPcConfigFileIdentityJson {
 export interface PortableRunnerFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'runner';
   relativePath: 'phase6-physical-runner.exe';
+  version: PhysicalVersionJson;
+  versionPolicy: 'file-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4136,11 +4131,24 @@ export interface PortableRunnerFileIdentityJson {
 export interface PortableTauriDriverFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'tauri-driver';
   relativePath: 'tauri-driver.exe';
+  version: '2.0.6';
+  versionPolicy: 'cargo-install-receipt';
+  cargoInstallReceipt: TauriDriverCargoInstallReceiptJson;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "TauriDriverCargoInstallReceipt".
+ */
+export interface TauriDriverCargoInstallReceiptJson {
+  schemaVersion: '1.0';
+  packageName: 'tauri-driver';
+  packageVersion: '2.0.6';
+  versionRequirement: '=2.0.6';
+  source: 'registry+https://github.com/rust-lang/crates.io-index';
+  binaryName: 'tauri-driver.exe';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
@@ -4149,11 +4157,11 @@ export interface PortableTauriDriverFileIdentityJson {
 export interface PortableMsedgeDriverFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
-  version: PhysicalVersionJson;
-  versionPolicy: PhysicalVersionPolicyJson;
   signaturePolicy: PhysicalSignaturePolicyJson;
   role: 'msedgedriver';
   relativePath: 'msedgedriver.exe';
+  version: PhysicalVersionJson;
+  versionPolicy: 'file-version';
 }
 /**
  * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
