@@ -522,6 +522,13 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(lifecycle, /function Assert-RollbackMsiProperties/u);
   assert.match(lifecycle, /rollback log did not preserve explicit MSI properties/u);
   assert.match(lifecycle, /Assert-RollbackMsiProperties/u);
+  assert.match(lifecycle, /\$rollbackCompletionPattern\s*=/u);
+  assert.match(lifecycle, /\[regex\]::Matches\(\$log, \$rollbackCompletionPattern\)\.Count -ne 1/u);
+  assert.match(lifecycle, /\$unexpectedReturnThree/u);
+  assert.match(lifecycle, /\$unexpected1603/u);
+  assert.match(lifecycle, /MainEngineThread is returning 1603/u);
+  assert.match(lifecycle, /\[DateTime\]::TryParseExact/u);
+  assert.doesNotMatch(lifecycle, /\$log -match 'Error in rollback skipped'/u);
   assert.match(lifecycle, /function Invoke-CoordinatedRollbackFailure/u);
   assert.match(lifecycle, /rollback-lock-ready/u);
   assert.match(lifecycle, /Error 1306/u);
@@ -540,6 +547,15 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.doesNotMatch(lifecycle, /schtasks|New-Service/u);
   assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
+
+  const rollbackVerification = lifecycle.slice(
+    lifecycle.indexOf('$rollbackExit = Invoke-CoordinatedRollbackFailure'),
+    lifecycle.indexOf('$downgradeExit = Invoke-MsiExpectedFailure'),
+  );
+  assert.match(
+    rollbackVerification,
+    /Assert-RollbackMsiProperties[\s\S]*Assert-ServiceRunning[\s\S]*Get-InstalledSetHash \$expectedCustody[\s\S]*Get-RecoveryCustodyHash/u,
+  );
 });
 
 test('Windows handle-growth proof runs in a dedicated subprocess', () => {
