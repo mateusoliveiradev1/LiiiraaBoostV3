@@ -501,6 +501,7 @@ mod windows_host {
                             let _ = CancelIoEx(pipe.handle(), None);
                             let _ = DisconnectNamedPipe(pipe.handle());
                         }
+                        drop(pipe);
                         if host.lifecycle.state() == super::HostState::Stopped {
                             return Ok(());
                         }
