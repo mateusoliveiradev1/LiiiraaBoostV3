@@ -514,6 +514,11 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(lifecycle, /Get-AuthenticodeSignature/u);
   assert.match(lifecycle, /installedManifestAdministratorReadDenied\s*=\s*\$true/u);
   assert.match(lifecycle, /serviceAcceptedProtectedManifest\s*=\s*\$true/u);
+  assert.match(
+    lifecycle,
+    /Invoke-MsiExpectedFailure @\('\/fa',[^\n]*'MSIRESTARTMANAGERCONTROL=Disable'[^\n]*'REINSTALLMODE=amus'[^\n]*'REINSTALL=ALL'\) 'rollback-failure'/u,
+  );
+  assert.equal((lifecycle.match(/MSIRESTARTMANAGERCONTROL=Disable/gu) ?? []).length, 1);
   assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
 });
