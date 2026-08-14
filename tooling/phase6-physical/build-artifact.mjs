@@ -23,6 +23,8 @@ import { fileURLToPath } from 'node:url';
 
 export const TRUSTED_INSTALLER_SPKI_SHA256 =
   'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
+const INSTALLATION_MANIFEST_SDDL =
+  'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -282,6 +284,29 @@ export function validatePhysicalProfile(profile) {
 }
 
 export function validateWixContract(xml) {
+  const componentGroupIndex = xml.indexOf('<ComponentGroup');
+  const containingDirectoryStart = xml.lastIndexOf('<DirectoryRef', componentGroupIndex);
+  const containingDirectoryEnd = xml.indexOf('</DirectoryRef>', containingDirectoryStart);
+  if (
+    componentGroupIndex >= 0 &&
+    containingDirectoryStart >= 0 &&
+    componentGroupIndex < containingDirectoryEnd
+  )
+    fail('WiX ComponentGroup must remain outside DirectoryRef');
+  const runtimeGroup = xml.match(
+    /<ComponentGroup\b[^>]*Id="Phase6PhysicalRuntime"[^>]*>([\s\S]*?)<\/ComponentGroup>/iu,
+  );
+  if (!runtimeGroup) fail('WiX contract requires the physical runtime component group');
+  if (/<Component\b/iu.test(runtimeGroup[1]))
+    fail('WiX ComponentGroup must reference DirectoryRef components');
+  const permissions = [...xml.matchAll(/<PermissionEx\b([^>]*)\/?\s*>/giu)];
+  if (
+    permissions.length === 0 ||
+    permissions.some(
+      (permission) => !permission[1].includes(`Sddl="${INSTALLATION_MANIFEST_SDDL}"`),
+    )
+  )
+    fail('WiX PermissionEx must use the protected installation-manifest SDDL');
   const required = [
     ['Name="LiiiraaBoostOptimizer"', 'named optimizer service'],
     ['Type="ownProcess"', 'ownProcess service'],
