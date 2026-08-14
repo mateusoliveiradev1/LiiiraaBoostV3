@@ -74,9 +74,14 @@ const assertSourcePolicy = (source) => {
     exactVm,
     cleanCheckpoint,
     installedCheckpoint,
+    'managed-power-scheme-v44',
+    'physical-68bb4f974e23ee26-managed-power-scheme-v44',
+    '5f29bb71d1eba1425be2c6b549c40f8dbef41cf1',
+    '71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f',
+    'a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e',
+    'da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026',
     'managed-power-scheme-v43',
     'physical-3eec8d7e3665a7f3-managed-power-scheme-v43',
-    '41e8c18e0318bdb1fbd317360e1f4e775c838a70',
     'a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa',
     'dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd',
     '89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48',
@@ -282,7 +287,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v43 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v44 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -291,7 +296,7 @@ test('dry-run audits the exact immutable v43 tuple without elevation or mutation
   assert.equal(report.vmName, exactVm);
   assert.equal(report.cleanCheckpoint, cleanCheckpoint);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v43');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v44');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -310,15 +315,15 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
     [
       'second active',
-      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[1] }),
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[2] }),
     ],
     [
       'missing predecessor',
-      (value) => (value.deterministicAdmissions[1].predecessorEvidenceSha256 = null),
+      (value) => (value.deterministicAdmissions[2].predecessorEvidenceSha256 = null),
     ],
     [
       'fork',
-      (value) => (value.deterministicAdmissions[0].successorEvidenceSha256 = 'f'.repeat(64)),
+      (value) => (value.deterministicAdmissions[1].successorEvidenceSha256 = 'f'.repeat(64)),
     ],
     [
       'v42 injection',
@@ -334,11 +339,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ],
     [
       'active tuple mismatch',
-      (value) => (value.deterministicAdmissions[1].buildId = 'mismatched-build'),
+      (value) => (value.deterministicAdmissions[2].buildId = 'mismatched-build'),
     ],
     [
       'active run hash mismatch',
-      (value) => (value.deterministicAdmissions[1].runEvidenceSha256 = '4'.repeat(64)),
+      (value) => (value.deterministicAdmissions[2].runEvidenceSha256 = '4'.repeat(64)),
     ],
   ];
   try {
