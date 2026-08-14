@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
@@ -14,6 +14,7 @@ const simulationSummary = resolve(
   root,
   '.planning/phases/06-transactional-plans-and-recovery/06-38-SUMMARY.md',
 );
+const evidenceManifest = resolve(root, 'tooling/phase6-evidence/evidence-manifest.json');
 const exactVm = 'LiiiraaBoost-W11-25H2-Clean';
 const cleanCheckpoint = 'Clean-Windows-Ready';
 const installedCheckpoint = 'LiiiraaBoost-Installed';
@@ -64,11 +65,18 @@ const assertSourcePolicy = (source) => {
     exactVm,
     cleanCheckpoint,
     installedCheckpoint,
+    'managed-power-scheme-v43',
+    'physical-3eec8d7e3665a7f3-managed-power-scheme-v43',
+    '41e8c18e0318bdb1fbd317360e1f4e775c838a70',
+    'a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa',
+    'dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd',
+    '89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48',
     'managed-power-scheme-v41',
     'physical-8d162575a964ec77-managed-power-scheme-v41',
-    '994994ec4e61b45013930a7f650aaf0b46918d68',
     '8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784',
     '626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7',
+    'ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a',
+    'deterministicAdmissions',
     'phase6-physical-runner.exe',
     'configs\\clean-windows-vm.run-config.json',
     'phase6-artifact-verifier',
@@ -142,7 +150,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v41 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v43 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -151,7 +159,7 @@ test('dry-run audits the exact immutable v41 tuple without elevation or mutation
   assert.equal(report.vmName, exactVm);
   assert.equal(report.cleanCheckpoint, cleanCheckpoint);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v41');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v43');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -161,6 +169,59 @@ test('dry-run audits the exact immutable v41 tuple without elevation or mutation
   assert.equal(report.artifactManifestSha256.length, 64);
   assert.equal(report.simulationRunSha256.length, 64);
   assert.doesNotMatch(result.stdout, /password|S-1-5-|serial(?:number)?|bearer|token/iu);
+});
+
+test('schema-v3 chain mutations fail closed before any bridge action', () => {
+  const original = readFileSync(evidenceManifest);
+  const mutations = [
+    ['schema downgrade', (value) => (value.schemaVersion = 2)],
+    ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
+    [
+      'second active',
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[1] }),
+    ],
+    [
+      'missing predecessor',
+      (value) => (value.deterministicAdmissions[1].predecessorEvidenceSha256 = null),
+    ],
+    [
+      'fork',
+      (value) => (value.deterministicAdmissions[0].successorEvidenceSha256 = 'f'.repeat(64)),
+    ],
+    [
+      'v42 injection',
+      (value) =>
+        value.deterministicAdmissions.splice(1, 0, {
+          ...value.deterministicAdmissions[0],
+          operationVersion: 'managed-power-scheme-v42',
+          buildId: 'forbidden-v42',
+          artifactManifestSha256: '2'.repeat(64),
+          runEvidenceId: 'forbidden-v42-run',
+          runEvidenceSha256: '3'.repeat(64),
+        }),
+    ],
+    [
+      'active tuple mismatch',
+      (value) => (value.deterministicAdmissions[1].buildId = 'mismatched-build'),
+    ],
+    [
+      'active run hash mismatch',
+      (value) => (value.deterministicAdmissions[1].runEvidenceSha256 = '4'.repeat(64)),
+    ],
+  ];
+  try {
+    for (const [label, mutate] of mutations) {
+      const value = JSON.parse(original.toString('utf8'));
+      mutate(value);
+      writeFileSync(evidenceManifest, `${JSON.stringify(value, null, 2)}\n`);
+      const result = runBridge();
+      assert.notEqual(result.status, 0, `${label} must be rejected`);
+      writeFileSync(evidenceManifest, original);
+    }
+  } finally {
+    writeFileSync(evidenceManifest, original);
+  }
+  assert.deepEqual(readFileSync(evidenceManifest), original);
 });
 
 test('wrong target, checkpoint, summaries, and generic authority fail closed', () => {
