@@ -483,8 +483,8 @@ pub(crate) mod windows_backend {
             },
             System::{
                 ApplicationInstallationAndServicing::{
-                    MSIHANDLE, MsiCloseHandle, MsiDatabaseOpenViewW, MsiOpenDatabaseW,
-                    MsiRecordGetStringW, MsiViewExecute, MsiViewFetch,
+                    MSIDBOPEN_READONLY, MSIHANDLE, MsiCloseHandle, MsiDatabaseOpenViewW,
+                    MsiOpenDatabaseW, MsiRecordGetStringW, MsiViewExecute, MsiViewFetch,
                 },
                 Com::CoTaskMemFree,
             },
@@ -911,7 +911,6 @@ pub(crate) mod windows_backend {
             return Err(CustodyError::path("msi-database-canonical-drift"));
         }
         let path_wide = wide_path(&database_path);
-        let read_only = [0_u16];
         let query = wide("SELECT `Value` FROM `Property` WHERE `Property`='ProductVersion'");
         let mut database = MSIHANDLE::default();
         let mut view = MSIHANDLE::default();
@@ -919,7 +918,7 @@ pub(crate) mod windows_backend {
         let result = unsafe {
             if MsiOpenDatabaseW(
                 PCWSTR(path_wide.as_ptr()),
-                PCWSTR(read_only.as_ptr()),
+                MSIDBOPEN_READONLY,
                 &mut database,
             ) != ERROR_SUCCESS.0
             {
