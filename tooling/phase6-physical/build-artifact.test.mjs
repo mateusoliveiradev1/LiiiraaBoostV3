@@ -461,7 +461,10 @@ test('WiX provisions the protected ProgramData root before restricted service st
   const serviceSid = 'S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564';
   const storageSddl = `O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;${serviceSid})`;
 
-  assert.match(source, /<DirectoryRef\b[^>]*Id="CommonAppDataFolder"/u);
+  assert.match(
+    source,
+    /<DirectoryRef\b[^>]*Id="TARGETDIR"[\s\S]*?<Directory\b[^>]*Id="CommonAppDataFolder"/u,
+  );
   assert.match(source, /<Directory\b[^>]*Id="LiiiraaBoostProgramData"[^>]*Name="Liiiraa Boost"/u);
   assert.match(
     source,
