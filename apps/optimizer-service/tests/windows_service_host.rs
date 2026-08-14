@@ -13,6 +13,7 @@ use std::{
 };
 
 use service::ipc::{Broker, BrokerConfig, ClientIdentity};
+use service::installation_manifest::CustodyErrorCode;
 use service::windows_pipe::{
     AuthenticatedClientToken, FrameError, HostError, HostErrorCode, HostLifecycle, HostState,
     PipeHostConfig, decode_frame, encode_frame,
@@ -83,6 +84,10 @@ fn startup_failures_reach_scm_as_stable_bounded_service_specific_codes() {
         (HostErrorCode::RestrictedToken, 63_103_u32),
         (HostErrorCode::StorageAdmission, 63_104_u32),
         (HostErrorCode::PipeAdmission, 63_105_u32),
+        (HostErrorCode::InstalledManifest, 63_106_u32),
+        (HostErrorCode::InstalledCms, 63_107_u32),
+        (HostErrorCode::InstalledIdentity, 63_108_u32),
+        (HostErrorCode::InstalledAcl, 63_109_u32),
     ];
 
     let mut observed = Vec::new();
@@ -103,7 +108,28 @@ fn startup_failures_reach_scm_as_stable_bounded_service_specific_codes() {
     observed.sort_unstable();
     observed.dedup();
     assert_eq!(observed.len(), cases.len(), "startup codes must be unique");
-    assert!(observed.iter().all(|code| (63_101..=63_105).contains(code)));
+    assert!(observed.iter().all(|code| (63_101..=63_109).contains(code)));
+}
+
+#[cfg(windows)]
+#[test]
+fn installed_custody_errors_are_redacted_to_bounded_scm_substages() {
+    let cases = [
+        (CustodyErrorCode::Missing, 63_101),
+        (CustodyErrorCode::Path, 63_101),
+        (CustodyErrorCode::Schema, 63_106),
+        (CustodyErrorCode::Signature, 63_107),
+        (CustodyErrorCode::Authenticode, 63_108),
+        (CustodyErrorCode::Hash, 63_108),
+        (CustodyErrorCode::Version, 63_108),
+        (CustodyErrorCode::Acl, 63_109),
+    ];
+    for (kind, expected) in cases {
+        assert_eq!(
+            HostError::for_custody_test(kind).service_specific_exit_code(),
+            expected
+        );
+    }
 }
 
 #[cfg(windows)]
