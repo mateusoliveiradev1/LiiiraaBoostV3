@@ -99,9 +99,55 @@ function Invoke-MsiExpectedFailure([string[]]$Arguments, [string]$LogName) {
 function Assert-RollbackMsiProperties {
   $logPath = Join-Path $OutputRoot 'rollback-failure.msiexec.log'
   $log = [IO.File]::ReadAllText($logPath)
-  if ($log -notmatch 'MSIRESTARTMANAGERCONTROL=Disable' -or $log -notmatch 'REINSTALLMODE=amus') {
+  $releasedPath = Join-Path $OutputRoot 'rollback-lock-released'
+  if ($log -notmatch 'MSIRESTARTMANAGERCONTROL=Disable' -or $log -notmatch 'REINSTALLMODE=amus' -or $log -notmatch 'Error 1306' -or -not (Test-Path -LiteralPath $releasedPath)) {
     throw 'rollback log did not preserve explicit MSI properties'
   }
+  if ($log -match 'Error in rollback skipped' -or $log -match 'failed to start') {
+    throw 'rollback did not complete after the coordinated lock release'
+  }
+}
+
+function Invoke-CoordinatedRollbackFailure([string]$DesktopPath) {
+  $logPath = Join-Path $OutputRoot 'rollback-failure.msiexec.log'
+  $readyPath = Join-Path $OutputRoot 'rollback-lock-ready'
+  $releasedPath = Join-Path $OutputRoot 'rollback-lock-released'
+  foreach ($marker in @($readyPath, $releasedPath)) {
+    if (Test-Path -LiteralPath $marker) { Remove-Item -LiteralPath $marker -Force }
+  }
+  $escape = { param([string]$Value) $Value.Replace("'", "''") }
+  $holderSource = @"
+`$ErrorActionPreference = 'Stop'
+`$lock = [IO.File]::Open('$(& $escape $DesktopPath)', [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
+try {
+  [IO.File]::WriteAllText('$(& $escape $readyPath)', 'ready', [Text.UTF8Encoding]::new(`$false))
+  `$deadline = [DateTime]::UtcNow.AddSeconds(30)
+  while ([DateTime]::UtcNow -lt `$deadline) {
+    try { `$log = [IO.File]::ReadAllText('$(& $escape $logPath)') } catch { `$log = '' }
+    if (`$log -match 'Error 1306') {
+      [IO.File]::WriteAllText('$(& $escape $releasedPath)', [DateTime]::UtcNow.ToString('o'), [Text.UTF8Encoding]::new(`$false))
+      exit 0
+    }
+    [Threading.Thread]::SpinWait(5000)
+  }
+  exit 41
+} finally { `$lock.Dispose() }
+"@
+  $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($holderSource))
+  $holder = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-NonInteractive', '-EncodedCommand', $encoded) -WindowStyle Hidden -PassThru
+  $readyDeadline = [DateTime]::UtcNow.AddSeconds(5)
+  while (-not (Test-Path -LiteralPath $readyPath)) {
+    if ($holder.HasExited) { throw 'rollback lock-holder exited before readiness' }
+    if ([DateTime]::UtcNow -ge $readyDeadline) { $holder.Kill(); throw 'rollback lock readiness timed out' }
+    Start-Sleep -Milliseconds 10
+  }
+  try {
+    $exitCode = Invoke-MsiExpectedFailure @('/i', ('"' + $MsiPath + '"'), 'REINSTALL=ALL', 'REINSTALLMODE=amus', 'MSIRESTARTMANAGERCONTROL=Disable') 'rollback-failure'
+  } finally {
+    if (-not $holder.WaitForExit(5000)) { $holder.Kill(); throw 'rollback lock release timed out' }
+  }
+  if ($holder.ExitCode -ne 0) { throw 'rollback lock-holder did not exit cleanly' }
+  return $exitCode
 }
 
 function Assert-ServiceRunning {
@@ -273,13 +319,8 @@ try {
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'repair changed recovery custody' }
 
   $desktopPath = Join-Path $installedRoot 'liiiraa-desktop.exe'
-  $lock = [IO.File]::Open($desktopPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
-  try {
-    $rollbackExit = Invoke-MsiExpectedFailure @('/i', ('"' + $MsiPath + '"'), 'REINSTALL=ALL', 'REINSTALLMODE=amus', 'MSIRESTARTMANAGERCONTROL=Disable') 'rollback-failure'
-    Assert-RollbackMsiProperties
-  } finally {
-    $lock.Dispose()
-  }
+  $rollbackExit = Invoke-CoordinatedRollbackFailure $desktopPath
+  Assert-RollbackMsiProperties
   Assert-ServiceRunning
   if ((Get-InstalledSetHash $expectedCustody) -ne $installedSet) { throw 'failed repair did not restore the coherent installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'failed repair changed recovery custody' }
