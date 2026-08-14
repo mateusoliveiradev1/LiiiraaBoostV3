@@ -261,6 +261,10 @@ fn all_five_generated_variants_preserve_exact_fields_and_dispatch_one_closed_eff
         assert_eq!(audit.operation_version_id, POWER_SCHEME_OPERATION_VERSION);
         assert!(!format!("{audit:?}").contains(SID));
     }
+    assert_eq!(
+        power.calls, 1,
+        "read-only observation must not execute the mutation preflight"
+    );
     assert!(power.mutations.is_empty(), "observation cannot mutate");
 
     let mut duplicate = request("duplicate-managed-power-scheme-request", "step-duplicate");

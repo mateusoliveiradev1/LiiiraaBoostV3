@@ -1357,6 +1357,7 @@ mod windows_host {
             io::Write,
             os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
             sync::mpsc,
+            time::Duration,
         };
 
         use windows::Win32::{
@@ -1369,7 +1370,10 @@ mod windows_host {
         };
         use windows::core::PCWSTR;
 
-        use super::{PIPE_REJECT_REMOTE_CLIENTS, authenticate_pipe_client, wide};
+        use super::super::super::operations::power_scheme::{
+            PowerSchemePort, VerifiedClientContext,
+        };
+        use super::{PIPE_REJECT_REMOTE_CLIENTS, WindowsPowrProf, authenticate_pipe_client, wide};
 
         #[test]
         fn real_named_pipe_impersonation_yields_client_bound_token() {
@@ -1428,6 +1432,23 @@ mod windows_host {
             assert_ne!(identity.session_id, 0);
             assert!(token.is_interactive_client());
             assert!(token.is_bound_to(identity.session_id, &identity.logon_sid));
+            let verified = VerifiedClientContext::establish(
+                identity.session_id,
+                identity.logon_sid.clone(),
+                true,
+                true,
+            )
+            .expect("verified client context");
+            let lease = token.effect_lease();
+            let mut power = WindowsPowrProf;
+            let observation =
+                lease.with_interactive_user(Duration::from_secs(5), &verified, |client| {
+                    power.observe_active(client)
+                });
+            assert!(
+                observation.is_ok(),
+                "real client-bound read-only observation failed: {observation:?}"
+            );
 
             drop(client_handle);
             unsafe {

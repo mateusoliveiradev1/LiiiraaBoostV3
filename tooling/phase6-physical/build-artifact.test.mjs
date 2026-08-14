@@ -489,6 +489,8 @@ test('physical lifecycle proves the installed desktop owns a read-only broker le
   assert.match(lifecycle, /liiiraa-desktop\.exe/u);
   assert.match(lifecycle, /--phase6-lifecycle-broker-probe/u);
   assert.match(lifecycle, /brokerClientBinding\s*=\s*'passed'/u);
+  assert.match(lifecycle, /RedirectStandardError/u);
+  assert.match(lifecycle, /broker-probe-.*\.stderr\.log/u);
   assert.equal((lifecycle.match(/Assert-BrokerClientBinding/gu) ?? []).length, 3);
   assert.match(desktop, /--phase6-lifecycle-broker-probe/u);
   assert.match(executor, /probe_installed_broker_observation/u);
