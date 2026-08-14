@@ -27,6 +27,8 @@ const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 const INSTALLATION_DIRECTORY_SDDL =
   'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
+const INSTALLATION_DIRECTORY_COMPONENT_GUID =
+  '{3BA41754-6199-4B96-BD9A-613FDBBD270A}';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -360,6 +362,12 @@ export function validateWixContract(xml) {
     !/<ComponentRef\b[^>]*Id="PhysicalInstallDirectoryAclComponent"/iu.test(runtimeGroup[1])
   )
     fail('WiX contract requires the protected inherited runtime directory ACL');
+  if (
+    !xml.includes(
+      `Id="PhysicalInstallDirectoryAclComponent" Guid="${INSTALLATION_DIRECTORY_COMPONENT_GUID}"`,
+    )
+  )
+    fail('WiX runtime directory ACL requires a stable component GUID');
   const manifestPermissions = permissions.filter((permission) =>
     permission.includes(`Sddl="${INSTALLATION_MANIFEST_SDDL}"`),
   );
