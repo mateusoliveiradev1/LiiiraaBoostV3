@@ -144,3 +144,39 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 - **Hyper-V/physical mutation:** not run
 
 The create-once v42 bytes and CMS evidence remain historical and unchanged. The 06-35 verifier rejected the published root because its owner was the interactive user and its DACL inherited writable entries instead of being protected with the minimal portable-root policy. Lifecycle PASS is not relabeled as artifact custody PASS, deterministic admission, or physical evidence. This version is permanently excluded from simulation and promotion; the approved correction starts from a new monotonic operation version after the publisher proves native ACL custody before final rename.
+
+---
+
+## Operation `managed-power-scheme-v43` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v43`
+- **Artifact manifest SHA-256:** `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`
+- **Run evidence SHA-256:** `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd`
+- **Evidence manifest SHA-256:** `89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v43",
+  "buildId": "physical-3eec8d7e3665a7f3-managed-power-scheme-v43",
+  "artifactManifestSha256": "a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa",
+  "runEvidenceSha256": "dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd",
+  "evidenceManifestSha256": "89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```

@@ -180,3 +180,11 @@ None.
 
 _Phase: 06-transactional-plans-and-recovery_
 _Completed: 2026-08-14_
+
+## Append-Only Deterministic Supersession Addendum — 2026-08-14
+
+- `managed-power-scheme-v43` is the sole current deterministic admission for build `physical-3eec8d7e3665a7f3-managed-power-scheme-v43` and artifact manifest SHA-256 `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`.
+- Its deterministic run SHA-256 is `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd`; the resulting schema-v3 evidence manifest SHA-256 is `89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48`.
+- The exact former v41 schema-v2 authority is preserved byte-for-byte at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json`, SHA-256 `ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a`, and remains a valid historical predecessor with run SHA-256 `626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7`; it is `superseded`, never `BLOCKED` or rewritten.
+- v42 remains excluded because portable custody rejected it before simulation. It is not a chain member and cannot be reactivated.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, admitted exactly ordered PLAN-01 through PLAN-08 at `deterministic-simulation`, and left `clean-windows-vm`, `owner-pc`, and `friends-pc` pending. No physical provenance, consent, review, or physical PASS was created.

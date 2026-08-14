@@ -171,3 +171,9 @@ None - no external service configuration or private signing material is required
 
 *Phase: 06-transactional-plans-and-recovery*
 *Completed: 2026-08-13*
+
+## Append-Only Revalidation Addendum — 2026-08-14
+
+- The immutable `managed-power-scheme-v43` artifact was revalidated by the real inspection-only `phase6-artifact-verifier` after the portable-root ACL, native-version normalization, canonical MSI path view, and typed `MSIDBOPEN_READONLY` corrections.
+- Exact verified authority: build `physical-3eec8d7e3665a7f3-managed-power-scheme-v43`, artifact manifest SHA-256 `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`, operation `managed-power-scheme-v43`.
+- The verifier returned `verified` without installing, launching, ingesting, or mutating any artifact byte. v41 and rejected v42 bytes remain unchanged historical records.

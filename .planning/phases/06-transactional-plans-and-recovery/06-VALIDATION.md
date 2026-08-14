@@ -141,3 +141,10 @@ Manual gates cannot be converted into automated PASS by deterministic fixtures. 
 - Exact rejected authority: source `db45babed3f8887f8d0848df765d19de1c6c9511`, build `physical-9c4fe0de5a7a01c9-managed-power-scheme-v42`, artifact manifest SHA-256 `a11f177f84f41ec8e3043422a632072365178510b88699e3d917a2a46153713a`.
 - The rejection happened before deterministic simulation, admission, Hyper-V audit, or guest mutation. v42 cannot be repaired, relabeled, or promoted.
 - Publisher regression coverage now requires owner Administrators, protected non-inherited DACL, SYSTEM/Administrators full control, explicit current-user read/execute only, no extra ACE, native verification in the exact staging root, and failure before the create-once final rename.
+
+## Append-Only Deterministic Authority Addendum — 2026-08-14
+
+- The immutable v43 artifact passed the real 06-35 compiled-pin/CMS/SPKI/live-byte/ACL/version verifier with artifact manifest SHA-256 `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`.
+- The deterministic writer admitted v43 exactly once under schema v3 with run SHA-256 `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd` and exact PLAN-01 through PLAN-08 coverage.
+- The prior v41 evidence manifest remains byte-identical at SHA-256 `ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a` as the sole historical `superseded` predecessor; the active record points back to its exact deterministic run hash. v42 remains permanently rejected and outside the chain.
+- Planned evaluation passes with v43 current and all physical stages pending. No clean-VM, owner-PC, friends-PC, consent, review, or physical PASS is inferred from deterministic supersession.
