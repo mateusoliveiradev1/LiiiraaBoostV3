@@ -531,7 +531,7 @@ const authenticodeIdentity = (path) => {
   return powershellJson(`
 $signature = Get-AuthenticodeSignature -LiteralPath '${escaped}'
 if (-not $signature.SignerCertificate) { throw 'missing Authenticode signer: ${escaped}' }
-$certificateSha256 = 'sha256:' + [Convert]::ToHexString($signature.SignerCertificate.GetCertHash([Security.Cryptography.HashAlgorithmName]::SHA256)).ToLowerInvariant()
+$certificateSha256 = 'sha256:' + [BitConverter]::ToString($signature.SignerCertificate.GetCertHash([Security.Cryptography.HashAlgorithmName]::SHA256)).Replace('-', '').ToLowerInvariant()
 [pscustomobject]@{ status = $signature.Status.ToString(); publisher = $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false); thumbprint = $certificateSha256 } | ConvertTo-Json -Compress
 `);
 };

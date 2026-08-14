@@ -96,7 +96,7 @@ function Get-InstalledSetHash {
     roles = @($entries)
   }
   $bytes = [Text.Encoding]::UTF8.GetBytes(($document | ConvertTo-Json -Depth 6 -Compress))
-  return 'sha256:' + [Convert]::ToHexString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).ToLowerInvariant()
+  return 'sha256:' + [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace('-', '').ToLowerInvariant()
 }
 
 function Get-RecoveryCustodyHash {
@@ -116,7 +116,7 @@ function Get-RecoveryCustodyHash {
     }
   }
   $bytes = [Text.Encoding]::UTF8.GetBytes((@($entries) | ConvertTo-Json -Depth 5 -Compress))
-  return 'sha256:' + [Convert]::ToHexString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).ToLowerInvariant()
+  return 'sha256:' + [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace('-', '').ToLowerInvariant()
 }
 
 try {
