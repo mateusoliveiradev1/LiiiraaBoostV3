@@ -1229,6 +1229,16 @@ test('optimizer service embeds the physical package version in Windows VERSIONIN
   assert.match(buildScript, /rustc-link-arg-bin=liiiraa-optimizer-service/u);
 });
 
+test('MSI ProductVersion inspection is fixed to the typed read-only persistence sentinel', () => {
+  const source = readFileSync('apps/optimizer-service/src/installation_manifest.rs', 'utf8');
+  assert.match(source, /MsiOpenDatabaseW\([\s\S]*MSIDBOPEN_READONLY/u);
+  assert.doesNotMatch(source, /let\s+read_only\s*=\s*\[0_u16\]/u);
+  assert.doesNotMatch(
+    source,
+    /MSIDBOPEN_(?:DIRECT|TRANSACT|CREATE|CREATEDIRECT|PATCHFILE)/u,
+  );
+});
+
 test('builder alone emits the three closed canonical run configs', () => {
   const configs = buildCanonicalRunConfigs({
     artifactManifestSha256: sha('a'),
