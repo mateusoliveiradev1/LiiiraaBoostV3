@@ -288,7 +288,7 @@ pub(crate) fn verify_live_identity(
             return Err(CustodyError::authenticode("publisher-or-certificate"));
         }
         let expected_version = required_str(identity, "version")?;
-        if backend.file_version(&path)? != expected_version {
+        if !equivalent_numeric_version(expected_version, &backend.file_version(&path)?) {
             return Err(CustodyError::version("live-file-version"));
         }
     }
@@ -400,6 +400,22 @@ fn parse_numeric_version(value: &str) -> Result<Vec<u64>, CustodyError> {
         return Err(CustodyError::version("package-version-shape"));
     }
     Ok(parts)
+}
+
+fn equivalent_numeric_version(expected: &str, actual: &str) -> bool {
+    let (Ok(mut expected), Ok(mut actual)) = (
+        parse_numeric_version(expected),
+        parse_numeric_version(actual),
+    ) else {
+        return false;
+    };
+    while expected.len() > 1 && expected.last() == Some(&0) {
+        expected.pop();
+    }
+    while actual.len() > 1 && actual.last() == Some(&0) {
+        actual.pop();
+    }
+    expected == actual
 }
 
 fn required_str<'a>(

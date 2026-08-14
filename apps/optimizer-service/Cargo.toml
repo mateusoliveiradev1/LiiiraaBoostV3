@@ -5,6 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish = false
+build = "build.rs"
 
 [dependencies]
 liiiraa-contracts-rust = { path = "../../crates/contracts-rust" }

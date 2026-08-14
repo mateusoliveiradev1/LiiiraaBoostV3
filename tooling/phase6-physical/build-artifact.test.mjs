@@ -98,7 +98,7 @@ const installedRole = (name, relativePath, character = 'a') => ({
   relativePath,
   sizeBytes: 10,
   sha256: sha(character),
-  version: '1.0',
+  version: '1.0.0',
   authenticodePublisher: 'Liiiraa Boost Local Development',
   authenticodeThumbprint: sha('c'),
 });

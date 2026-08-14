@@ -129,6 +129,7 @@ const DECLARED_INPUTS = Object.freeze([
   'apps/desktop/src-tauri/Cargo.toml',
   'apps/desktop/src-tauri/src',
   'apps/optimizer-service/Cargo.toml',
+  'apps/optimizer-service/build.rs',
   'apps/optimizer-service/src',
   'crates/contracts-rust',
   'crates/plan-engine',
@@ -435,6 +436,8 @@ export function validateInstallationManifest(document) {
     fail('installation manifest operation version is below v3');
   assertExactRoles(document.files, INSTALLED_ROLES, 'installed');
   for (const { key } of INSTALLED_ROLES) {
+    if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?$/u.test(document.files[key].version || ''))
+      fail(`installed file version missing for ${key}`);
     if (
       document.files[key].authenticodePublisher !== 'Liiiraa Boost Local Development' ||
       !SHA_PATTERN.test(document.files[key].authenticodeThumbprint || '')
@@ -1070,7 +1073,8 @@ const buildAndSmoke = (options) => {
       porcelain: git('status', '--porcelain'),
       declaredPaths: DECLARED_INPUTS,
     });
-    validatePhysicalProfile(JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8')));
+    const physicalProfile = JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8'));
+    validatePhysicalProfile(physicalProfile);
     validateWixContract(readFileSync(join(ROOT, WIX_FRAGMENT), 'utf8'));
 
     const sourceCommit = git('rev-parse', 'HEAD');
@@ -1096,14 +1100,23 @@ const buildAndSmoke = (options) => {
     const tauriDriverSource = locateTauriDriver();
     const msedgeDriverSource = locateMsEdgeDriver();
     const pnpmCli = locatePnpmCli();
-    run('cargo', [
-      'build',
-      '--release',
-      '--target',
-      'x86_64-pc-windows-msvc',
-      '-p',
-      'liiiraa-optimizer-service',
-    ]);
+    run(
+      'cargo',
+      [
+        'build',
+        '--release',
+        '--target',
+        'x86_64-pc-windows-msvc',
+        '-p',
+        'liiiraa-optimizer-service',
+      ],
+      {
+        env: {
+          ...process.env,
+          LIIIRAA_PHYSICAL_PACKAGE_VERSION: physicalProfile.version,
+        },
+      },
+    );
     run('cargo', [
       'build',
       '--release',
@@ -1162,7 +1175,7 @@ const buildAndSmoke = (options) => {
     );
     copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
 
-    const packageVersion = JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8')).version;
+    const packageVersion = physicalProfile.version;
     const productCode = randomUUID();
     const createdAt = new Date().toISOString();
     const installationManifest = {
