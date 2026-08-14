@@ -214,6 +214,18 @@ fn verifies_fixed_program_files_manifest_before_live_installed_bytes() {
 }
 
 #[test]
+fn accepts_equivalent_windows_four_part_file_versions() {
+    let mut backend = fixture();
+    for version in backend.versions.values_mut() {
+        *version = "1.2.0.0".to_owned();
+    }
+
+    let verified = verify_installed_manifest_with_backend(&mut backend).unwrap();
+
+    assert_eq!(verified.package_version(), "1.2.0");
+}
+
+#[test]
 fn cms_absence_content_swap_wrong_spki_and_self_asserted_pin_fail_before_authenticode() {
     let mut cases: Vec<(&str, Box<dyn FnOnce(&mut FakeBackend)>)> = vec![
         (

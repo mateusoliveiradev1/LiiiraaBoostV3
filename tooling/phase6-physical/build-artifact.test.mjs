@@ -548,6 +548,14 @@ test('installation manifest contains exactly desktop, service, and runner roles'
   rejectsMutation(
     installationManifest(),
     (value) => {
+      value.files.service.version = 'unversioned';
+    },
+    validateInstallationManifest,
+    /version/u,
+  );
+  rejectsMutation(
+    installationManifest(),
+    (value) => {
       value.files.tauriDriver = role('tauri-driver', 'tauri-driver.exe');
     },
     validateInstallationManifest,
@@ -577,6 +585,13 @@ test('installation manifest contains exactly desktop, service, and runner roles'
     validateInstallationManifest,
     /canonical installed path/u,
   );
+});
+
+test('optimizer service embeds the physical package version in Windows VERSIONINFO', () => {
+  const buildScript = readFileSync('apps/optimizer-service/build.rs', 'utf8');
+  assert.match(buildScript, /LIIIRAA_PHYSICAL_PACKAGE_VERSION/u);
+  assert.match(buildScript, /VERSIONINFO/u);
+  assert.match(buildScript, /rustc-link-arg-bin=liiiraa-optimizer-service/u);
 });
 
 test('builder alone emits the three closed canonical run configs', () => {
