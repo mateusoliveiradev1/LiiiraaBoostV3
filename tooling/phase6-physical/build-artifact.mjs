@@ -553,6 +553,7 @@ const signDetachedCms = (thumbprint, contentPath, signaturePath) => {
     '-Command',
     `
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Security
 $cert = Get-ChildItem Cert:\\CurrentUser\\My, Cert:\\LocalMachine\\My | Where-Object { $_.Thumbprint -eq '${thumbprint}' -and $_.HasPrivateKey } | Select-Object -First 1
 if (-not $cert) { throw 'CMS signing certificate disappeared' }
 $cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new([IO.File]::ReadAllBytes('${content}')), $true)
@@ -567,6 +568,7 @@ const verifyDetachedCms = (contentPath, signaturePath, expectedSpki) => {
   const signature = signaturePath.replaceAll("'", "''");
   const evidence = powershellJson(`
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Security
 $content = [IO.File]::ReadAllBytes('${content}')
 $cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new($content), $true)
 $cms.Decode([IO.File]::ReadAllBytes('${signature}'))
