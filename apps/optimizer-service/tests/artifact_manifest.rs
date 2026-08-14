@@ -367,6 +367,39 @@ fn authenticates_exact_portable_roles_live_bytes_configs_and_both_drivers() {
 }
 
 #[test]
+fn native_portable_versions_accept_only_equivalent_trailing_zero_segments() {
+    let runner = PathBuf::from(ROOT).join("phase6-physical-runner.exe");
+
+    let mut equivalent = fixture();
+    equivalent
+        .versions
+        .insert(runner.clone(), "1.2.0.0".to_owned());
+    let path = equivalent.path("artifact-manifest.json");
+    verify_artifact_manifest_with_backend(&path, &mut equivalent).unwrap();
+
+    for rejected in [
+        "1.2.1",
+        "1.0.2",
+        "01.2.0",
+        "v1.2.0",
+        "1.2.0-beta",
+        "1.2.x",
+        "1.2.0.0.0",
+        "1.2.",
+    ] {
+        let mut backend = fixture();
+        backend
+            .versions
+            .insert(runner.clone(), rejected.to_owned());
+        let path = backend.path("artifact-manifest.json");
+        assert!(
+            verify_artifact_manifest_with_backend(&path, &mut backend).is_err(),
+            "native version {rejected:?} must fail closed"
+        );
+    }
+}
+
+#[test]
 fn cargo_receipt_policy_is_closed_to_exact_portable_tauri_driver_identity() {
     for mutation in [
         "missing-receipt",
