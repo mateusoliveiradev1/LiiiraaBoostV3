@@ -49,13 +49,21 @@ test('development signing trust is pinned atomically to the rotated CNG identity
 
 test('tauri-driver provenance requires the exact Cargo 2.0.6 crates.io receipt', () => {
   const exactKey = 'tauri-driver 2.0.6 (registry+https://github.com/rust-lang/crates.io-index)';
+  const cargoInstallReceipt = {
+    schemaVersion: '1.0',
+    packageName: 'tauri-driver',
+    packageVersion: '2.0.6',
+    versionRequirement: '=2.0.6',
+    source: 'registry+https://github.com/rust-lang/crates.io-index',
+    binaryName: 'tauri-driver.exe',
+  };
   assert.deepEqual(
     validateTauriDriverInstallReceipt({
       installs: {
         [exactKey]: { version_req: '=2.0.6', bins: ['tauri-driver.exe'] },
       },
     }),
-    { version: '2.0.6', source: 'registry+https://github.com/rust-lang/crates.io-index' },
+    { version: '2.0.6', cargoInstallReceipt },
   );
   assert.throws(
     () =>
@@ -89,7 +97,7 @@ const role = (name, relativePath, character = 'a') => {
   const expected = PORTABLE_ROLES.find(
     (candidate) => candidate.role === name && candidate.path === relativePath,
   );
-  return {
+  const identity = {
     role: name,
     relativePath,
     sizeBytes: 10,
@@ -98,6 +106,19 @@ const role = (name, relativePath, character = 'a') => {
     versionPolicy: expected?.versionPolicy ?? 'file-version',
     signaturePolicy: expected?.signaturePolicy ?? 'authenticode-required',
   };
+  if (name === 'tauri-driver') {
+    identity.version = '2.0.6';
+    identity.versionPolicy = 'cargo-install-receipt';
+    identity.cargoInstallReceipt = {
+      schemaVersion: '1.0',
+      packageName: 'tauri-driver',
+      packageVersion: '2.0.6',
+      versionRequirement: '=2.0.6',
+      source: 'registry+https://github.com/rust-lang/crates.io-index',
+      binaryName: 'tauri-driver.exe',
+    };
+  }
+  return identity;
 };
 const installedRole = (name, relativePath, character = 'a') => ({
   role: name,
@@ -1173,6 +1194,24 @@ test('artifact manifest requires every portable role and authenticates CMS conte
     validateArtifactManifest,
     /size/u,
   );
+  for (const mutate of [
+    (value) => delete value.files.tauriDriver.cargoInstallReceipt,
+    (value) => {
+      value.files.tauriDriver.cargoInstallReceipt.packageVersion = '2.0.5';
+    },
+    (value) => {
+      value.files.tauriDriver.version = '2.0.5';
+    },
+    (value) => {
+      value.files.msedgeDriver.versionPolicy = 'cargo-install-receipt';
+    },
+  ]) {
+    assert.throws(() => {
+      const value = artifactManifest();
+      mutate(value);
+      validateArtifactManifest(value);
+    }, /policy|receipt|version/u);
+  }
   assert.doesNotThrow(() =>
     verifyDetachedCmsEvidence({
       contentMatched: true,
