@@ -864,7 +864,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   const mutateIndex = probeFlow.indexOf('setMsiIdentity(downgradeMsiPath');
   const reopenIndex = probeFlow.indexOf('inspectMsi(downgradeMsiPath)');
   const validateIndex = probeFlow.indexOf(
-    'validateDowngradeProbeIdentity(msiInspection, downgradeInspection)',
+    'validateDowngradeProbeIdentity(msiInspection, downgradeInspection, downgradeIdentity)',
   );
   const signIndex = probeFlow.indexOf('signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath)');
   assert.ok(mutateIndex >= 0 && mutateIndex < reopenIndex);

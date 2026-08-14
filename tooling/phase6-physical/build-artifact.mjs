@@ -1044,20 +1044,38 @@ export function validateMsiInspection(inspection, expected) {
 
 const normalizedMsiGuid = (value) => String(value || '').replace(/[{}]/gu, '').toLowerCase();
 
-export function validateDowngradeProbeIdentity(main, probe) {
+const MSI_GUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+
+export function formatMsiGuid(value, label = 'MSI GUID') {
+  if (typeof value !== 'string' || !MSI_GUID_PATTERN.test(value))
+    fail(`${label} must be an exact UUID`);
+  return `{${value.toUpperCase()}}`;
+}
+
+export function validateDowngradeProbeIdentity(main, probe, expected) {
   const mainProductCode = normalizedMsiGuid(main?.productCode);
   const probeProductCode = normalizedMsiGuid(probe?.productCode);
   if (!mainProductCode || !probeProductCode || mainProductCode === probeProductCode)
     fail('downgrade probe ProductCode must be distinct from the installed package');
+  const expectedProductCode = normalizedMsiGuid(
+    formatMsiGuid(expected?.productCode, 'expected downgrade ProductCode'),
+  );
+  if (probeProductCode !== expectedProductCode)
+    fail('downgrade probe did not preserve the expected ProductCode in final MSI bytes');
   const mainPackageCode = normalizedMsiGuid(main?.packageCode);
   const probePackageCode = normalizedMsiGuid(probe?.packageCode);
   if (!mainPackageCode || !probePackageCode || mainPackageCode === probePackageCode)
     fail('downgrade probe PackageCode must be fresh and distinct from the installed package');
+  const expectedPackageCode = normalizedMsiGuid(
+    formatMsiGuid(expected?.packageCode, 'expected downgrade PackageCode'),
+  );
+  if (probePackageCode !== expectedPackageCode)
+    fail('downgrade probe did not preserve the expected PackageCode in final MSI bytes');
   const mainUpgradeCode = normalizedMsiGuid(main?.upgradeCode);
   const probeUpgradeCode = normalizedMsiGuid(probe?.upgradeCode);
   if (!mainUpgradeCode || mainUpgradeCode !== probeUpgradeCode)
     fail('downgrade probe UpgradeCode must remain in the installed upgrade family');
-  if (probe?.packageVersion !== '0.0.1')
+  if (expected?.packageVersion !== '0.0.1' || probe?.packageVersion !== expected.packageVersion)
     fail('downgrade probe ProductVersion must be exactly 0.0.1');
   return true;
 }
@@ -1081,14 +1099,16 @@ $view.Execute(); $view.Close(); $database.Commit()
 
 const setMsiIdentity = (path, { productCode, packageCode, packageVersion }) => {
   const escaped = path.replaceAll("'", "''");
-  const msiProductCode = `{${productCode.toUpperCase()}}`;
-  const msiPackageCode = `{${packageCode.toUpperCase()}}`;
+  const msiProductCode = formatMsiGuid(productCode, 'downgrade ProductCode');
+  const msiPackageCode = formatMsiGuid(packageCode, 'downgrade PackageCode');
   run('powershell', [
     '-NoProfile',
     '-NonInteractive',
     '-Command',
     `
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$msiPackageCode = '${msiPackageCode}'
 $installer = New-Object -ComObject WindowsInstaller.Installer
 $database = $installer.OpenDatabase('${escaped}', 1)
 $product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHERE Property='ProductCode'")
@@ -1482,13 +1502,14 @@ const buildAndSmoke = (options) => {
     verifyDetachedCmsEvidence(cmsEvidence);
     const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi');
     copyFileSync(msiPath, downgradeMsiPath);
-    setMsiIdentity(downgradeMsiPath, {
+    const downgradeIdentity = {
       productCode: randomUUID(),
       packageCode: randomUUID(),
       packageVersion: '0.0.1',
-    });
+    };
+    setMsiIdentity(downgradeMsiPath, downgradeIdentity);
     const downgradeInspection = inspectMsi(downgradeMsiPath);
-    validateDowngradeProbeIdentity(msiInspection, downgradeInspection);
+    validateDowngradeProbeIdentity(msiInspection, downgradeInspection, downgradeIdentity);
     signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath);
     const lifecycle = runLifecycleSmoke({
       msiPath,
