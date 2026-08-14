@@ -164,6 +164,11 @@ const wix = () => `<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
+      <Component Id="PhysicalInstallDirectoryAclComponent" Guid="*">
+        <CreateFolder>
+          <PermissionEx Sddl="D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
+        </CreateFolder>
+      </Component>
       <Component Id="InstallationManifestComponent" Guid="*">
         <File Id="InstallationManifestFile" Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json" KeyPath="yes">
           <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
@@ -178,6 +183,7 @@ const wix = () => `<?xml version="1.0"?>
       </Component>
     </DirectoryRef>
     <ComponentGroup Id="Phase6PhysicalRuntime">
+      <ComponentRef Id="PhysicalInstallDirectoryAclComponent" />
       <ComponentRef Id="InstallationManifestComponent" />
       <ComponentRef Id="OptimizerServiceComponent" />
       <ComponentRef Id="phase6_physical_runner" />
@@ -348,6 +354,26 @@ test('WiX uses installer tables for coherent service custody and contains no dri
         ),
       ),
     /SDDL/u,
+  );
+  assert.throws(
+    () =>
+      validateWixContract(
+        wix().replace(
+          /\s*<Component Id="PhysicalInstallDirectoryAclComponent"[\s\S]*?<\/Component>/u,
+          '',
+        ),
+      ),
+    /runtime directory ACL/u,
+  );
+  assert.throws(
+    () =>
+      validateWixContract(
+        wix().replace(
+          'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)',
+          'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)',
+        ),
+      ),
+    /runtime directory ACL/u,
   );
   assert.throws(
     () =>
