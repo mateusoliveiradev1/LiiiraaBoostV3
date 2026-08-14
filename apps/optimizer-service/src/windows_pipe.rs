@@ -372,6 +372,11 @@ mod windows_host {
 
     #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     pub enum HostErrorCode {
+        InstalledCustody,
+        InteractiveSession,
+        RestrictedToken,
+        StorageAdmission,
+        PipeAdmission,
         Authentication,
         Custody,
         Framing,
@@ -385,30 +390,57 @@ mod windows_host {
         pub code: HostErrorCode,
     }
 
+    impl HostError {
+        pub const fn service_specific_exit_code(self) -> u32 {
+            match self.code {
+                HostErrorCode::InstalledCustody => 63_101,
+                HostErrorCode::InteractiveSession => 63_102,
+                HostErrorCode::RestrictedToken => 63_103,
+                HostErrorCode::StorageAdmission => 63_104,
+                HostErrorCode::PipeAdmission => 63_105,
+                HostErrorCode::Authentication => 63_201,
+                HostErrorCode::Custody => 63_202,
+                HostErrorCode::Framing => 63_203,
+                HostErrorCode::Io => 63_204,
+                HostErrorCode::Protocol => 63_205,
+                HostErrorCode::Stopping => 63_206,
+            }
+        }
+
+        #[cfg(debug_assertions)]
+        pub const fn for_test(code: HostErrorCode) -> Self {
+            Self { code }
+        }
+    }
+
     impl WindowsPipeHost {
         pub fn prepare(config: PipeHostConfig) -> Result<PreparedHost, HostError> {
             if config.pipe_name != super::OPTIMIZER_PIPE_NAME
                 || config.max_frame_bytes != super::MAX_FRAME_BYTES
                 || !config.reject_remote_clients
             {
-                return Err(host_error(HostErrorCode::Custody));
+                return Err(host_error(HostErrorCode::PipeAdmission));
             }
             // Key-link witness: 'verify_installed_manifest'
-            let manifest =
-                verify_installed_manifest().map_err(|_| host_error(HostErrorCode::Custody))?;
+            let manifest = verify_installed_manifest()
+                .map_err(|_| host_error(HostErrorCode::InstalledCustody))?;
             let active_session = unsafe { WTSGetActiveConsoleSessionId() };
             if active_session == u32::MAX {
-                return Err(host_error(HostErrorCode::Authentication));
+                return Err(host_error(HostErrorCode::InteractiveSession));
             }
-            let active_token = query_active_user_token(active_session)?;
-            let interactive_logon_sid = logon_sid(active_token.raw())?;
-            let service_sid = current_service_sid()?;
-            let storage = prepare_storage(&service_sid, &manifest)?;
+            let active_token = query_active_user_token(active_session)
+                .map_err(|_| host_error(HostErrorCode::InteractiveSession))?;
+            let interactive_logon_sid = logon_sid(active_token.raw())
+                .map_err(|_| host_error(HostErrorCode::RestrictedToken))?;
+            let service_sid =
+                current_service_sid().map_err(|_| host_error(HostErrorCode::RestrictedToken))?;
+            let storage = prepare_storage(&service_sid, &manifest)
+                .map_err(|_| host_error(HostErrorCode::StorageAdmission))?;
             let expected_process_hash =
                 manifest.document().files.desktop.sha256.as_str().to_owned();
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .map_err(|_| host_error(HostErrorCode::Custody))?
+                .map_err(|_| host_error(HostErrorCode::StorageAdmission))?
                 .as_secs() as i64;
             let broker = Broker::open(
                 &storage.database_path,
@@ -424,11 +456,13 @@ mod windows_host {
                 },
                 &storage.install_secret,
             )
-            .map_err(|_| host_error(HostErrorCode::Custody))?;
+            .map_err(|_| host_error(HostErrorCode::StorageAdmission))?;
             let security = SecurityDescriptor::new(
                 &PipeSecurityPolicy::service_only(&interactive_logon_sid, &service_sid).sddl,
-            )?;
-            let listener = NativePipe::create(&config, &security)?;
+            )
+            .map_err(|_| host_error(HostErrorCode::PipeAdmission))?;
+            let listener = NativePipe::create(&config, &security)
+                .map_err(|_| host_error(HostErrorCode::PipeAdmission))?;
             Ok(PreparedHost {
                 config,
                 broker,

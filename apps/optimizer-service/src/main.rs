@@ -20,7 +20,7 @@ fn main() {
 }
 
 #[cfg(windows)]
-mod windows_service_host {
+pub(crate) mod windows_service_host {
     use std::{ffi::OsString, sync::mpsc, time::Duration};
 
     use super::windows_pipe::{PipeHostConfig, WindowsPipeHost};
@@ -75,16 +75,8 @@ mod windows_service_host {
         // is created before SCM can observe this service as Running.
         let mut pipe_host = match WindowsPipeHost::prepare(PipeHostConfig::installed_defaults()) {
             Ok(host) => host,
-            Err(_) => {
-                status.set_service_status(ServiceStatus {
-                    service_type: SERVICE_TYPE,
-                    current_state: ServiceState::Stopped,
-                    controls_accepted: ServiceControlAccept::empty(),
-                    exit_code: ServiceExitCode::ServiceSpecific(1),
-                    checkpoint: 0,
-                    wait_hint: Duration::default(),
-                    process_id: None,
-                })?;
+            Err(error) => {
+                status.set_service_status(startup_failure_status(error))?;
                 return Ok(());
             }
         };
@@ -115,15 +107,26 @@ mod windows_service_host {
             service_type: SERVICE_TYPE,
             current_state: ServiceState::Stopped,
             controls_accepted: ServiceControlAccept::empty(),
-            exit_code: if host_result.is_ok() {
-                ServiceExitCode::Win32(0)
-            } else {
-                ServiceExitCode::ServiceSpecific(2)
-            },
+            exit_code: host_result.map_or_else(
+                |error| ServiceExitCode::ServiceSpecific(error.service_specific_exit_code()),
+                |_| ServiceExitCode::Win32(0),
+            ),
             checkpoint: 0,
             wait_hint: Duration::default(),
             process_id: None,
         })?;
         Ok(())
+    }
+
+    pub(crate) fn startup_failure_status(error: super::windows_pipe::HostError) -> ServiceStatus {
+        ServiceStatus {
+            service_type: SERVICE_TYPE,
+            current_state: ServiceState::Stopped,
+            controls_accepted: ServiceControlAccept::empty(),
+            exit_code: ServiceExitCode::ServiceSpecific(error.service_specific_exit_code()),
+            checkpoint: 0,
+            wait_hint: Duration::default(),
+            process_id: None,
+        }
     }
 }
