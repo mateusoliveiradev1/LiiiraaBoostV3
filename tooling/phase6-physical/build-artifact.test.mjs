@@ -26,6 +26,7 @@ import {
   validateInstallationManifest,
   validateMsiInspection,
   validatePhysicalProfile,
+  validatePortableRootAclSnapshot,
   validateWebView2RuntimeEvidence,
   validateWixContract,
   verifyDetachedCmsEvidence,
@@ -45,6 +46,41 @@ test('development signing trust is pinned atomically to the rotated CNG identity
     const source = readFileSync(path, 'utf8');
     assert.match(source, new RegExp(ROTATED_DEVELOPMENT_SPKI_SHA256, 'u'));
   }
+});
+
+test('portable artifact publication requires exact protected native ACL before rename', () => {
+  const userSid = 'S-1-5-21-111111111-222222222-333333333-1001';
+  const exact = {
+    ownerSid: 'S-1-5-32-544',
+    protected: true,
+    rules: [
+      { sid: 'S-1-5-18', rights: 2032127, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
+      { sid: 'S-1-5-32-544', rights: 2032127, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
+      { sid: userSid, rights: 1179817, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
+    ],
+  };
+  assert.doesNotThrow(() => validatePortableRootAclSnapshot(exact, userSid));
+  for (const mutate of [
+    (value) => (value.ownerSid = userSid),
+    (value) => (value.protected = false),
+    (value) => (value.rules[0].rights = 131241),
+    (value) => (value.rules[2].rights = 2032127),
+    (value) => (value.rules[2].inherited = true),
+    (value) => value.rules.push({ ...value.rules[2], sid: 'S-1-5-11' }),
+  ]) {
+    const value = structuredClone(exact);
+    mutate(value);
+    assert.throws(() => validatePortableRootAclSnapshot(value, userSid), /portable root ACL/u);
+  }
+
+  const builder = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  const helper = readFileSync('tooling/phase6-physical/protect-artifact-root.ps1', 'utf8');
+  assert.ok(builder.indexOf('protectPortableArtifactRoot(workRoot)') < builder.indexOf('renameSync(workRoot, finalRoot)'));
+  assert.doesNotMatch(builder, /chmodSync\(workRoot/u);
+  assert.match(helper, /target[\\/]phase6-physical[\\/]_work/u);
+  assert.match(helper, /SetSecurityDescriptorSddlForm/u);
+  assert.match(helper, /S-1-5-18[\s\S]*S-1-5-32-544/u);
+  assert.doesNotMatch(helper, /icacls|takeown|Remove-Item|Start-Process/u);
 });
 
 test('tauri-driver provenance requires the exact Cargo 2.0.6 crates.io receipt', () => {
