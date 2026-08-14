@@ -644,9 +644,11 @@ test(
     const probeProduct = '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}';
     const probePackage = '{EEEEEEEE-EEEE-4EEE-8EEE-EEEEEEEEEEEE}';
     const installedProduct = '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}';
+    const productIdentityLine =
+      `MSI (s) (10:20) [00:00:00:001]: Product Code from property table after transforms:  '${probeProduct}'`;
     const exactLog = [
       `PROPERTY CHANGE: Adding PackageCode property. Its value is '${probePackage}'.`,
-      `Product Code from property table after transforms:  '${probeProduct}'`,
+      productIdentityLine,
       'Doing action: FindRelatedProducts',
       `PROPERTY CHANGE: Adding WIX_DOWNGRADE_DETECTED property. Its value is '${installedProduct}'.`,
       'Action ended 00:00:00: FindRelatedProducts. Return value 1.',
@@ -682,13 +684,20 @@ Assert-DowngradeRejected ${exitCode} ${quote(probeProduct)} ${quote(probePackage
 
     try {
       assert.doesNotThrow(() => runParser(exactLog));
+      assert.doesNotThrow(() => runParser(exactLog.replace('MSI (s) (10:20)', 'MSI (c) (A0:BF)')));
       assert.throws(() => runParser(exactLog, 0));
       assert.throws(() => runParser(exactLog.replace(probePackage, installedProduct)));
+      assert.throws(() => runParser(exactLog.replace(probeProduct, installedProduct)));
       assert.throws(() => runParser(exactLog.replace('ProductVersion = 0.0.1', 'ProductVersion = 0.1.36')));
       assert.throws(() => runParser(exactLog.replace('WIX_DOWNGRADE_DETECTED', 'UNRELATED_PRODUCT')));
       assert.throws(() => runParser(exactLog.replace('Doing action: FindRelatedProducts', 'Skipping FindRelatedProducts action: not run in maintenance mode')));
       assert.throws(() => runParser(exactLog.replace('LaunchConditions. Return value 3', 'LaunchConditions. Return value 1')));
       assert.throws(() => runParser(`${exactLog}\r\nProduct registered: entering maintenance mode`));
+      assert.throws(() => runParser(exactLog.replace(productIdentityLine, productIdentityLine.replace(/^MSI \(s\) \(10:20\) \[00:00:00:001\]: /u, ''))));
+      assert.throws(() => runParser(`${exactLog}\r\n${productIdentityLine}`));
+      assert.throws(() => runParser(exactLog.replace(productIdentityLine, `Error payload: ${productIdentityLine}`)));
+      assert.throws(() => runParser(exactLog.replace('MSI (s) (10:20)', 'MSI (x) (10:20)')));
+      assert.throws(() => runParser(exactLog.replace('MSI (s) (10:20) [00:00:00:001]:', 'MSI (s) malformed:')));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
