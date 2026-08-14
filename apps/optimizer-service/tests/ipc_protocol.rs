@@ -77,8 +77,6 @@ fn config() -> BrokerConfig {
 
 fn config_at(now_unix_seconds: i64) -> BrokerConfig {
     BrokerConfig {
-        interactive_session_id: 7,
-        interactive_logon_sid: "S-1-5-5-7-42".into(),
         expected_process_hash: "sha256:trusted-native-host".into(),
         service_sid: "S-1-5-80-424242".into(),
         database_custody_verified: true,
@@ -132,7 +130,7 @@ fn accepted_envelope(
 
 #[test]
 fn ipc_pipe_policy_is_local_only_and_has_an_explicit_service_dacl() {
-    let policy = PipeSecurityPolicy::service_only("S-1-5-5-7-42", "S-1-5-80-424242");
+    let policy = PipeSecurityPolicy::service_only("S-1-5-80-424242");
     assert_eq!(policy.pipe_name, r"\\.\pipe\LiiiraaBoost\optimizer-v1");
     assert_ne!(policy.open_mode_flags & PIPE_REJECT_REMOTE_CLIENTS, 0);
     assert!(policy.sddl.starts_with("D:P"));
@@ -182,7 +180,7 @@ fn ipc_legitimate_request_dispatches_once_and_terminal_replay_survives_reopen() 
 }
 
 #[test]
-fn ipc_identity_spoof_remote_and_wrong_session_fail_before_dispatch() {
+fn ipc_transport_and_process_spoof_fail_before_dispatch() {
     let path = database_path("identity");
     let mut broker = Broker::open(&path, config(), SECRET).expect("open broker");
     let baseline = legitimate_identity();
@@ -199,12 +197,6 @@ fn ipc_identity_spoof_remote_and_wrong_session_fail_before_dispatch() {
     let mut no_token = baseline.clone();
     no_token.token_query_succeeded = false;
     cases.push(no_token);
-    let mut wrong_session = baseline.clone();
-    wrong_session.session_id = 8;
-    cases.push(wrong_session);
-    let mut wrong_logon = baseline.clone();
-    wrong_logon.logon_sid = "S-1-5-5-8-99".into();
-    cases.push(wrong_logon);
     let mut spoofed_process = baseline;
     spoofed_process.process_image_hash = "sha256:same-user-spoof".into();
     cases.push(spoofed_process);

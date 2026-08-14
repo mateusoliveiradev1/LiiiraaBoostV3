@@ -40,8 +40,6 @@ fn database_path(label: &str) -> PathBuf {
 
 fn broker_config() -> BrokerConfig {
     BrokerConfig {
-        interactive_session_id: 7,
-        interactive_logon_sid: "S-1-5-5-7-42".into(),
         expected_process_hash: "sha256:trusted-native-host".into(),
         service_sid: "S-1-5-80-424242".into(),
         database_custody_verified: true,
@@ -71,7 +69,7 @@ fn installed_startup_is_session_independent_and_client_identity_is_connection_bo
         "the connected named-pipe peer must remain the token authority"
     );
     assert!(
-        host_source.contains("(A;;GRGW;;;IU)"),
+        broker_source.contains("(A;;GRGW;;;IU)"),
         "the protected pipe DACL must admit interactive clients before exact peer authentication"
     );
     assert!(
@@ -383,6 +381,7 @@ fn windows_host_uses_reject_remote_pipe_mode_and_restores_impersonation() {
     let source = include_str!("../src/windows_pipe.rs");
     assert!(source.contains("PIPE_REJECT_REMOTE_CLIENTS"));
     assert!(source.contains("RevertGuard"));
+    assert!(source.contains("revert.finish()?"));
     assert!(source.contains("DisconnectNamedPipe"));
     assert!(source.contains("CancelIoEx"));
 }

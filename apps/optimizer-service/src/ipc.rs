@@ -29,12 +29,10 @@ pub struct PipeSecurityPolicy {
 }
 
 impl PipeSecurityPolicy {
-    pub fn service_only(interactive_logon_sid: &str, service_sid: &str) -> Self {
+    pub fn service_only(service_sid: &str) -> Self {
         Self {
             pipe_name: r"\\.\pipe\LiiiraaBoost\optimizer-v1".to_owned(),
-            sddl: format!(
-                "D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GRGW;;;{service_sid})(A;;GRGW;;;{interactive_logon_sid})"
-            ),
+            sddl: format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GRGW;;;{service_sid})(A;;GRGW;;;IU)"),
             open_mode_flags: PIPE_REJECT_REMOTE_CLIENTS,
         }
     }
@@ -46,8 +44,6 @@ impl PipeSecurityPolicy {
 
 #[derive(Clone, Debug)]
 pub struct BrokerConfig {
-    pub interactive_session_id: u32,
-    pub interactive_logon_sid: String,
     pub expected_process_hash: String,
     pub service_sid: String,
     pub database_custody_verified: bool,
@@ -184,7 +180,9 @@ impl Broker {
         client_nonce: &str,
         token: AuthenticatedClientToken,
     ) -> Result<SessionTicket, BrokerError> {
-        if !token.is_bound_to(identity.session_id, &identity.logon_sid) {
+        if !token.is_bound_to(identity.session_id, &identity.logon_sid)
+            || !token.is_interactive_client()
+        {
             return Err(error(BrokerErrorCode::AuthenticationFailed));
         }
         self.authenticate_client_inner(identity, client_nonce, Some(token))
@@ -201,8 +199,8 @@ impl Broker {
             || identity.remote_transport
             || !identity.impersonation_succeeded
             || !identity.token_query_succeeded
-            || identity.session_id != self.config.interactive_session_id
-            || identity.logon_sid != self.config.interactive_logon_sid
+            || identity.session_id == 0
+            || !identity.logon_sid.starts_with("S-1-5-5-")
             || identity.process_id == 0
             || identity.process_image_hash != self.config.expected_process_hash
             || client_nonce.trim().is_empty()

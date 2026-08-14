@@ -197,6 +197,12 @@ impl AuthenticatedClientToken {
         self.session_id == session_id && self.logon_sid == logon_sid
     }
 
+    pub(crate) fn is_interactive_client(&self) -> bool {
+        self.session_id != 0
+            && self.logon_sid.starts_with("S-1-5-5-")
+            && self.token_user_sid != "S-1-5-18"
+    }
+
     pub(crate) fn effect_lease(&self) -> InteractiveUserEffectLease<'_> {
         #[cfg(windows)]
         if let TokenCustody::Native { handle } = &self.custody {
@@ -332,9 +338,7 @@ mod windows_host {
                     GetNamedPipeClientProcessId, ImpersonateNamedPipeClient, NAMED_PIPE_MODE,
                     PIPE_NOWAIT, PIPE_READMODE_BYTE, PIPE_TYPE_BYTE,
                 },
-                RemoteDesktop::{
-                    ProcessIdToSessionId, WTSGetActiveConsoleSessionId, WTSQueryUserToken,
-                },
+                RemoteDesktop::ProcessIdToSessionId,
                 Threading::{
                     GetCurrentProcess, GetCurrentThread, OpenProcess, OpenProcessToken,
                     OpenThreadToken, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
@@ -440,14 +444,6 @@ mod windows_host {
             }
             // Key-link witness: 'verify_installed_manifest'
             let manifest = verify_installed_manifest().map_err(installed_custody_error)?;
-            let active_session = unsafe { WTSGetActiveConsoleSessionId() };
-            if active_session == u32::MAX {
-                return Err(host_error(HostErrorCode::InteractiveSession));
-            }
-            let active_token = query_active_user_token(active_session)
-                .map_err(|_| host_error(HostErrorCode::InteractiveSession))?;
-            let interactive_logon_sid = logon_sid(active_token.raw())
-                .map_err(|_| host_error(HostErrorCode::RestrictedToken))?;
             let service_sid =
                 current_service_sid().map_err(|_| host_error(HostErrorCode::RestrictedToken))?;
             let storage = prepare_storage(&service_sid, &manifest)
@@ -461,8 +457,6 @@ mod windows_host {
             let broker = Broker::open(
                 &storage.database_path,
                 BrokerConfig {
-                    interactive_session_id: active_session,
-                    interactive_logon_sid: interactive_logon_sid.clone(),
                     expected_process_hash,
                     service_sid: service_sid.clone(),
                     database_custody_verified: true,
@@ -473,10 +467,9 @@ mod windows_host {
                 &storage.install_secret,
             )
             .map_err(|_| host_error(HostErrorCode::StorageAdmission))?;
-            let security = SecurityDescriptor::new(
-                &PipeSecurityPolicy::service_only(&interactive_logon_sid, &service_sid).sddl,
-            )
-            .map_err(|_| host_error(HostErrorCode::PipeAdmission))?;
+            let security =
+                SecurityDescriptor::new(&PipeSecurityPolicy::service_only(&service_sid).sddl)
+                    .map_err(|_| host_error(HostErrorCode::PipeAdmission))?;
             let listener = NativePipe::create(&config, &security)
                 .map_err(|_| host_error(HostErrorCode::PipeAdmission))?;
             Ok(PreparedHost {
@@ -852,12 +845,28 @@ mod windows_host {
         }
     }
 
-    struct RevertGuard;
+    struct RevertGuard {
+        active: bool,
+    }
+
+    impl RevertGuard {
+        const fn new() -> Self {
+            Self { active: true }
+        }
+
+        fn finish(mut self) -> Result<(), HostError> {
+            unsafe { RevertToSelf() }.map_err(|_| host_error(HostErrorCode::Authentication))?;
+            self.active = false;
+            Ok(())
+        }
+    }
 
     impl Drop for RevertGuard {
         fn drop(&mut self) {
-            unsafe {
-                let _ = RevertToSelf();
+            if self.active {
+                unsafe {
+                    let _ = RevertToSelf();
+                }
             }
         }
     }
@@ -893,7 +902,7 @@ mod windows_host {
 
         unsafe { ImpersonateNamedPipeClient(pipe) }
             .map_err(|_| host_error(HostErrorCode::Authentication))?;
-        let revert = RevertGuard;
+        let revert = RevertGuard::new();
         let mut impersonation = HANDLE::default();
         unsafe {
             OpenThreadToken(
@@ -925,7 +934,7 @@ mod windows_host {
         .map_err(|_| host_error(HostErrorCode::Authentication))?;
         let primary = NativeHandle::new(primary)?;
         drop(impersonation);
-        drop(revert);
+        revert.finish()?;
 
         let identity = ClientIdentity {
             local_machine: true,
@@ -979,13 +988,6 @@ mod windows_host {
             token_user_sid,
             primary,
         ))
-    }
-
-    fn query_active_user_token(session_id: u32) -> Result<NativeHandle, HostError> {
-        let mut token = HANDLE::default();
-        unsafe { WTSQueryUserToken(session_id, &mut token) }
-            .map_err(|_| host_error(HostErrorCode::Authentication))?;
-        NativeHandle::new(token)
     }
 
     fn current_service_sid() -> Result<String, HostError> {
