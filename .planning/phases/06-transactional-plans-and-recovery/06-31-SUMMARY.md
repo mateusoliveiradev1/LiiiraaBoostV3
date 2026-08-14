@@ -197,3 +197,31 @@ deterministic admission; all earlier bytes and audit history remain preserved ab
 | File | SHA-256 | Bytes |
 |---|---|---:|
 | `artifact-manifest.json` | `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa` | 3241 |
+
+## Append-only authority update: v44
+
+The v43 artifact and deterministic admission remain immutable history. Its clean-VM attempt is
+BLOCKED by the recorded PowerShell Direct environment timeout and must never be relaunched. The
+prepared `LiiiraaLab` account and replacement `Clean-Windows-Ready` checkpoint authorize only a
+new monotonic chain beginning again at deterministic simulation; the backup checkpoint remains
+`Clean-Windows-Ready-PreLabAccount-v43`.
+
+The single v44 `build-and-smoke` publication passed signed five-role assembly, protected ACL
+custody, install, downgrade rejection, rollback-failure drill, repair/update, broker client
+binding, uninstall, and residual cleanup. The real 06-35 verifier then returned `verified` for
+the same live bytes. This is the latest complete artifact authority for deterministic admission.
+
+- **Root:** `target/phase6-physical/5f29bb71d1eba1425be2c6b549c40f8dbef41cf1/physical-68bb4f974e23ee26-managed-power-scheme-v44`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v44`
+- **Operation version:** `managed-power-scheme-v44`
+- **Source commit:** `5f29bb71d1eba1425be2c6b549c40f8dbef41cf1`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f` | 3241 |
+| `artifact-manifest.json.p7s` | `d193b89117d10004308bf9456bc97b39ada6d4966d9724e901de6f58cff10020` | 1609 |
+| `liiiraa-boost.msi` | `933a04af345224833f25eea8bddbbfcf8141762d44bcf510a1289ef66f4a11bf` | 15675392 |
+| `phase6-physical-runner.exe` | `d166cb941f78563be76ed6582e27ff7e4696c85b61864dcf7703d2060b4f62a3` | 6992168 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
+| `elevated-lifecycle-result.json` | `8edb951ef0c2b6446dad8243c7bb72a5c12381236f5d6b2e63449928d540d601` | 1324 |
