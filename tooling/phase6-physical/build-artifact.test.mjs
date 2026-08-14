@@ -475,6 +475,21 @@ test('WiX provisions the protected ProgramData root before restricted service st
   assert.ok(directoryIndex >= 0 && directoryIndex < serviceStartIndex);
 });
 
+test('physical lifecycle proves the installed desktop owns a read-only broker lease across reconnect', () => {
+  const lifecycle = readFileSync('tooling/phase6-physical/lifecycle-smoke.ps1', 'utf8');
+  const desktop = readFileSync('apps/desktop/src-tauri/src/main.rs', 'utf8');
+  const executor = readFileSync('apps/desktop/src-tauri/src/plan_executor.rs', 'utf8');
+
+  assert.match(lifecycle, /function Assert-BrokerClientBinding/u);
+  assert.match(lifecycle, /liiiraa-desktop\.exe/u);
+  assert.match(lifecycle, /--phase6-lifecycle-broker-probe/u);
+  assert.match(lifecycle, /brokerClientBinding\s*=\s*'passed'/u);
+  assert.equal((lifecycle.match(/Assert-BrokerClientBinding/u) ?? []).length, 3);
+  assert.match(desktop, /--phase6-lifecycle-broker-probe/u);
+  assert.match(executor, /probe_installed_broker_observation/u);
+  assert.match(executor, /observe-power-scheme-request/u);
+});
+
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
   const expected = {
     productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
