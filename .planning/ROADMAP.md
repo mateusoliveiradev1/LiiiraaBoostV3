@@ -822,7 +822,7 @@ Plans:
 
 **Wave 18** *(blocked on 06-31, 06-33, and 06-38)*
 
-- [ ] 06-34-PLAN.md — Exact-target CMS-verified installed-ready/checkpoint/reboot Hyper-V bridge
+- [x] 06-34-PLAN.md — Exact-target CMS-verified installed-ready/checkpoint/reboot Hyper-V bridge
 
 **Wave 19** *(blocked on Wave 18 completion)*
 
@@ -926,7 +926,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 35/39 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 36/39 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

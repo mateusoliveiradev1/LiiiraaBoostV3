@@ -1,0 +1,185 @@
+---
+phase: 06-transactional-plans-and-recovery
+plan: '34'
+subsystem: windows-hyperv-physical-evidence
+tags: [hyper-v, powershell, cms, artifact-custody, deterministic-simulation, tdd]
+requires:
+  - phase: 06-31
+    provides: immutable CMS-signed physical artifact authority
+  - phase: 06-33
+    provides: exact physical runner lifecycle and bounded evidence contract
+  - phase: 06-38
+    provides: deterministic simulation admission and physical-writer boundary
+provides:
+  - exact-target elevated Audit/RunCleanVm bridge for the active v43 authority
+  - append-only v41 to v43 deterministic admission supersession
+  - real read-only Hyper-V Audit PASS with exact VM restored to Off
+affects: [06-26, 06-35, 06-38, clean-windows-vm, physical-promotion]
+tech-stack:
+  added: []
+  patterns: [closed-action Hyper-V orchestration, authenticated Cargo receipt policy, append-only evidence supersession, cleanup-only VM authority]
+key-files:
+  created:
+    - tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json
+    - .planning/phases/06-transactional-plans-and-recovery/06-34-SUMMARY.md
+  modified:
+    - tooling/hyperv-lab/Invoke-Phase6Physical.ps1
+    - tooling/hyperv-lab/Run-LabElevated.ps1
+    - tooling/hyperv-lab/phase6-physical.test.mjs
+    - tooling/phase6-evidence/evidence-manifest.json
+    - tooling/phase6-evidence/src/simulation-writer.ts
+    - tooling/phase6-physical/build-artifact.mjs
+    - apps/optimizer-service/src/artifact_manifest.rs
+key-decisions:
+  - "v43 is the single active deterministic authority; v41 remains immutable and superseded, while blocked v42 stays outside the chain."
+  - "Portable tauri-driver version authority is its CMS-authenticated Cargo receipt; native installed roles retain native file-version policies."
+  - "Audit observation may start only the exact VM and must return it to Off; cleanup is a separate closed action and cannot run Audit or guest code."
+patterns-established:
+  - "Physical bridge authority is literal and manifest-bound: no caller executable, config, command, script, argument, target, or trust override."
+  - "Deterministic admissions advance through a linear append-only predecessor hash chain with exactly one active record."
+requirements-completed: [PLAN-01, PLAN-05, PLAN-06, PLAN-07, PLAN-08]
+duration: 7h48m
+completed: 2026-08-14
+---
+
+# Phase 06 Plan 34: Exact Hyper-V Physical Bridge Summary
+
+**A closed CMS/SPKI/live-byte verified bridge now audits the exact v43 artifact and clean Hyper-V target, with v41 preserved as immutable predecessor and the VM returned to its original Off state.**
+
+## Performance
+
+- **Duration:** 7h48m
+- **Started:** 2026-08-14T14:12:53Z
+- **Completed:** 2026-08-14T22:00:00Z
+- **Tasks:** 1 TDD task with Rule 4 repairs
+- **Files modified:** 36
+
+## Accomplishments
+
+- Added a dedicated bridge exposing only `Audit` and `RunCleanVm`, bound to VM `LiiiraaBoost-W11-25H2-Clean`, clean checkpoint `Clean-Windows-Ready`, installed checkpoint `LiiiraaBoost-Installed`, signed runner/config roles, v43 artifact identity, and the active deterministic admission.
+- Revalidated CMS/SPKI, live artifact bytes, physical artifact verifier output, simulation predecessor chain, fixed guest runner/config, and physical-writer ingestion before any physical mutation authority.
+- Preserved v41 bytes as the immutable superseded predecessor, left rejected v42 outside the evidence chain, and admitted v43 as the sole active deterministic simulation authority.
+- Completed a real elevated read-only Audit: six integration services were `OK`, artifact/simulation/Hyper-V boundaries passed, and the exact VM returned to `Off` with the same clean checkpoint ID.
+- Kept `RunCleanVm`, guest runner, PowerShell Direct, checkpoint restore/create/delete, host power mutation, and guest staging unexecuted.
+
+## Authority and Evidence
+
+- Active operation: `managed-power-scheme-v43`
+- Active build: `physical-3eec8d7e3665a7f3-managed-power-scheme-v43`
+- Artifact manifest SHA-256: `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`
+- Simulation run SHA-256: `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd`
+- Evidence manifest SHA-256: `89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48`
+- Real Audit log: `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-185519-phase6audit-console.log`
+- Real Audit log SHA-256: `413685b1138c3d94894dd80b3e727c3eb8f64def3e11001af86580a41a09b396`
+- Observation log SHA-256: `36fcea1ff9cf480da2501e070214e8bc398bc0d374387a20f8fba5e9cc233d80`
+- Cleanup log SHA-256: `f2191bbdc3d01e02a08b6393cde432a8cedb6ac3190ad4bd9a99afccf9c8c25e`
+- Audit boundaries: `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-audit-pass`
+- VM before/after: `Off` -> bounded observation -> `Off`
+- Clean checkpoint before/after: `Clean-Windows-Ready`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+
+## Task Commits
+
+The task was committed through atomic RED/GREEN/REFACTOR and evidence steps:
+
+1. **Exact bridge RED/GREEN/REFACTOR:** `77d031c0`, `36534be0`, `c650579a`, `14fc7e3a`
+2. **Authenticated tauri-driver Cargo receipt:** `7eab2eb4`, `db45babe`
+3. **Protected artifact publication ACL:** `442448eb`, `bfbd95ea`, `41e8c18e`
+4. **Closed native-version and MSI inspection repairs:** `7c46f8b3`, `a57a9d26`, `e1fafc30`, `742ed5fb`, `26e2c940`, `38356fae`
+5. **Latest artifact authority and v43 lifecycle:** `d7c2f686`, `2705c318`, `9bfed581`
+6. **Linear deterministic supersession:** `5b3f4e49`, `7f2224e4`, `a0ca4314`
+7. **Bridge bound to active v43:** `f2d73273`, `ae6dd905`
+8. **Durable elevated Audit verdict:** `c9de2dad`, `98770397`, `9b81cf85`, `331f0875`
+9. **Bounded observed Audit:** `4d931fbe`, `27edc1bd`
+10. **Safe observation cleanup:** `a417d497`, `ea5bd045`
+
+## Files Created/Modified
+
+- `tooling/hyperv-lab/Invoke-Phase6Physical.ps1` - closed v43 bridge with exact artifact/admission/VM/checkpoint authority.
+- `tooling/hyperv-lab/Run-LabElevated.ps1` - durable Audit logger plus fixed observed-Audit and cleanup-only actions.
+- `tooling/hyperv-lab/phase6-physical.test.mjs` - target, custody, chain, generic-authority, observation, and cleanup mutation tests.
+- `tooling/phase6-evidence/evidence-manifest.json` - schema-v3 linear history with v43 active.
+- `tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json` - immutable v41 predecessor snapshot.
+- `tooling/phase6-physical/build-artifact.mjs` and `protect-artifact-root.ps1` - Cargo receipt policy and protected create-once ACL custody.
+- `apps/optimizer-service/src/artifact_manifest.rs` - exact portable receipt, numeric native version, canonical MSI view, and typed read-only MSI verification.
+- Generated TypeSpec/TypeScript/Rust schemas - closed receipt and evidence supersession shapes.
+
+## Decisions Made
+
+- The third-party portable `tauri-driver.exe` is authenticated through the exact Cargo package receipt (`tauri-driver` `2.0.6`) embedded in the CMS-authenticated artifact manifest, not by executing or patching the binary.
+- Native version equality permits only numeric segments with insignificant trailing zero equivalence; the Cargo receipt path remains separate.
+- Artifact publication applies and verifies protected Administrators/SYSTEM custody in staging before the create-once rename.
+- Simulation history uses a schema-v3 linear chain: unique identities, exact predecessor evidence hash, one active record, no fork/reactivation/downgrade.
+- Starting the VM for Audit observation is explicit temporary authority. Cleanup is independently closed and returns only the exact VM to `Off` without guest execution.
+
+## Deviations from Plan
+
+### Auto-fixed Issues
+
+**1. [Rule 4 - Architectural] Portable driver lacked trustworthy native file-version metadata**
+- Added a bounded CMS-authenticated Cargo receipt policy limited to portable `tauri-driver` 2.0.6.
+- Rejected installed-role use, msedgedriver use, missing/mutated receipts, version mismatch, and live-byte drift.
+
+**2. [Rule 4 - Blocking] Published artifact custody was not verifier-compatible**
+- Applied protected owner/DACL custody in staging and verified it before create-once publication; recorded v42 as blocked without mutating history.
+
+**3. [Rule 4 - Blocking] Windows version/MSI APIs exposed representation mismatches**
+- Centralized closed trailing-zero numeric equivalence, derived a strictly local canonical-to-DOS view only for MSI API input, and used typed `MSIDBOPEN_READONLY`.
+
+**4. [Rule 4 - Architectural] Evidence writer supported only one admission**
+- Introduced append-only linear supersession, preserving v41 and making v43 the sole active record.
+
+**5. [Rule 3 - Blocking] Elevated process verdict was not observable by the parent shell**
+- Added a fixed logger that persists exact stdout/stderr and child exit code without generic command authority.
+
+**6. [Rule 3 - Blocking] Hyper-V reports integration health only while the VM runs**
+- Added bounded exact-VM observation: start, wait for six `OK` services, Audit, and cleanup in `finally`.
+
+**7. [Rule 1 - Bug] Installed `Stop-VM` does not support `-Shutdown`**
+- The first cleanup failed closed after Audit PASS. A TDD repair selected the installed graceful syntax `Stop-VM -Name <exact> -Force`, added cleanup-only authority, and restored the VM to `Off` while preserving the checkpoint.
+
+---
+
+**Total deviations:** 7 auto-fixed (5 blocking/bug, 2 architectural).
+**Impact on plan:** Every repair tightened trust, custody, append-only history, or lifecycle cleanup; no generic execution authority or new physical run was introduced.
+
+## Verification
+
+- Hyper-V bridge/mutation suite: 9/9 PASS.
+- DryRun exact v43 tuple and schema-v3 mutation corpus: PASS.
+- Real artifact verifier 06-35 for v43: PASS.
+- Real elevated Audit v43: PASS, read-only, exact three boundaries.
+- Planned evidence evaluation: `ok: true`, v43 at `deterministic-simulation`, physical stages pending, no diagnostics.
+- Key-links: 2/2 verified.
+- Builder, verifier, contracts drift/compat, evidence, desktop, architecture, Cargo, and Windows gates: PASS during the committed TDD sequence.
+- Final VM state: `Off`; exact clean checkpoint remains present once.
+
+## Issues Encountered
+
+- v41 failed the portable driver policy and remains immutable historical evidence.
+- v42 passed lifecycle build but failed published ACL custody and remains append-only blocked outside the active evidence chain.
+- v43 required narrowly scoped verifier/API repairs but its artifact bytes, CMS, manifest, and identity were never changed.
+- The initial real Audit while the VM was `Off` failed closed because integration status was unavailable. Explicit observation authority produced a PASS without running guest workloads.
+
+## User Setup Required
+
+None for Audit. Any physical clean-VM run remains a separate operator-authorized action requiring an in-memory `PSCredential`.
+
+## RunCleanVm Authority (Not Executed)
+
+The exact future command is intentionally documented but was **not executed** by this plan:
+
+```powershell
+rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "$credential = Get-Credential; & '.\tooling\hyperv-lab\Invoke-Phase6Physical.ps1' -Action RunCleanVm -VmName 'LiiiraaBoost-W11-25H2-Clean' -CheckpointName 'Clean-Windows-Ready' -ArtifactManifestFromSummary '.planning\phases\06-transactional-plans-and-recovery\06-31-SUMMARY.md' -SimulationAdmissionFromSummary '.planning\phases\06-transactional-plans-and-recovery\06-38-SUMMARY.md' -GuestCredential $credential"
+```
+
+It still requires new explicit physical-run authority and must not be inferred from the Audit PASS.
+
+## Next Phase Readiness
+
+- The exact v43 bridge is ready for a separately authorized 06-26 clean-VM physical run.
+- Physical stages remain pending; no clean-VM, owner-PC, friends-PC, review, or release-ready PASS was fabricated.
+- v41/v42 remain immutable historical records and v43 remains the active deterministic authority.
+
+---
+*Phase: 06-transactional-plans-and-recovery*
+*Completed: 2026-08-14*

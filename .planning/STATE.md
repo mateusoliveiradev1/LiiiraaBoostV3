@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-38-PLAN.md
-last_updated: "2026-08-14T13:55:54.415Z"
+stopped_at: Completed 06-34-PLAN.md
+last_updated: "2026-08-14T22:01:57.418Z"
 last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 249
+  completed_plans: 250
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 11 of 39
+Plan: 12 of 39
 Status: Ready to execute
 Last activity: 2026-08-14
 
-Progress: [██████████] 97%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
@@ -277,6 +277,7 @@ _Updated after plan completion_
 | Phase 06 P33 | 21min | 1 tasks | 6 files |
 | Phase 06 P31 | 11h25m | 2 tasks | 38 files |
 | Phase 06 P38 | 18min | 2 tasks | 11 files |
+| Phase 06 P34 | 7h48m | 1 tasks | 36 files |
 
 ## Accumulated Context
 
@@ -897,6 +898,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Use evaluator-exported PLAN-01..08 and D-01..35 as the only deterministic simulation coverage authorities. — Prevents drift to legacy five-ID coverage.
 - [Phase 06]: Derive deterministic evidence timestamps from immutable artifact authority and prohibit human review, owner/friends consent, Narrator comprehension, or physical PASS claims. — Keeps simulation truthful and non-physical.
 - [Phase 06]: Preserve the full v1/v2 UAT prefix and snapshot exact superseded v2 manifest bytes before replacing current evidence authority. — Maintains append-only blocked history while advancing current authority.
+- [Phase 06]: Use v43 as the sole active deterministic authority, preserve v41 as immutable superseded history, and keep blocked v42 outside the linear chain. — The bridge and physical writer need one exact append-only authority without rewriting predecessor bytes, admitting a blocked artifact, or allowing forks and reactivation.
 
 ### Pending Todos
 
@@ -948,6 +950,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T13:55:54.408Z
-Stopped at: Completed 06-38-PLAN.md
+Last session: 2026-08-14T22:01:37.011Z
+Stopped at: Completed 06-34-PLAN.md
 Resume file: None
