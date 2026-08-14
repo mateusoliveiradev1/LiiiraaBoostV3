@@ -15,6 +15,7 @@ import {
   assertImmutableFile,
   buildCanonicalRunConfigs,
   canonicalBytes,
+  physicalPackageVersion,
   patchTauriBundleTypeForMsi,
   selectUnusedOperationVersion,
   validateTauriDriverInstallReceipt,
@@ -607,6 +608,20 @@ test('declared input dirt and reused operation identities are rejected', () => {
       }),
     /already used/u,
   );
+});
+
+test('each reserved operation version advances the MSI package version monotonically', () => {
+  assert.equal(physicalPackageVersion('managed-power-scheme-v21'), '0.1.21');
+  assert.equal(physicalPackageVersion('managed-power-scheme-v22'), '0.1.22');
+  assert.equal(physicalPackageVersion('managed-power-scheme-v65535'), '0.1.65535');
+  assert.throws(() => physicalPackageVersion('managed-power-scheme-v0'), /operation version/u);
+  assert.throws(() => physicalPackageVersion('managed-power-scheme-v65536'), /MSI range/u);
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  assert.match(source, /const packageVersion = physicalPackageVersion\(operationVersionId\)/u);
+  assert.match(source, /LIIIRAA_PHYSICAL_PACKAGE_VERSION: packageVersion/u);
+  assert.match(source, /effectivePhysicalProfile/u);
+  assert.match(source, /JSON\.stringify\(effectivePhysicalProfile\)/u);
 });
 
 test('installation manifest contains exactly desktop, service, and runner roles', () => {
