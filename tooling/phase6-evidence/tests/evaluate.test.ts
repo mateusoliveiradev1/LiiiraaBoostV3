@@ -80,10 +80,10 @@ const runEvidence = (
   },
   continuation: [
     'installed-ready',
-    'checkpoint-created',
-    'reboot-requested',
+    'checkpoint-ready',
+    'running',
+    'reboot-pending',
     'resumed-observation',
-    'restore-requested',
     'restored-complete',
   ],
   journalSha256: sha256(`journal-${stage}-${participantId}`),

@@ -201,10 +201,10 @@ const HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const CONTINUATION = [
   'installed-ready',
-  'checkpoint-created',
-  'reboot-requested',
+  'checkpoint-ready',
+  'running',
+  'reboot-pending',
   'resumed-observation',
-  'restore-requested',
   'restored-complete',
 ] as const;
 

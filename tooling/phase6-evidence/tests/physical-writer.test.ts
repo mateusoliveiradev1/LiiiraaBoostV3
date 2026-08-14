@@ -14,7 +14,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { phase6EvidenceSha256 } from '../src/evaluate.js';
+import { phase6EvidenceSha256, type Phase6RunEvidence } from '../src/evaluate.js';
 import {
   appendPhysicalReview,
   freezeFriendsRoster,
@@ -28,8 +28,10 @@ const hash = (value: string | Uint8Array): string =>
   createHash('sha256').update(value).digest('hex');
 const prefixed = (value: string | Uint8Array): string => `sha256:${hash(value)}`;
 const ARTIFACT_HASH = prefixed('artifact-manifest');
-const CONFIG_HASH = prefixed('clean-config');
+let CONFIG_HASH = '';
+let FRIENDS_CONFIG_HASH = '';
 const RUNNER_HASH = prefixed('runner');
+const REDACTED_OUTPUT = 'bounded-safe-output';
 const CONTINUATION = [
   'installed-ready',
   'checkpoint-ready',
@@ -46,7 +48,9 @@ const manifestPath = () => join(sandbox, 'artifact-manifest.json');
 const envelopePath = () => join(sandbox, 'evidence', 'clean-windows-vm', 'raw-run-envelope.json');
 const evidencePath = () => resolve('tooling/phase6-evidence/evidence-manifest.json');
 
-const physicalRun = (stage = 'clean-windows-vm') => {
+const physicalRun = (
+  stage: Phase6RunEvidence['stage'] = 'clean-windows-vm',
+): Phase6RunEvidence => {
   const initial = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
     stages: { runs: unknown[] }[];
   };
@@ -69,6 +73,7 @@ const physicalRun = (stage = 'clean-windows-vm') => {
     exportedAt: null,
     expiresAt: '2031-01-15T18:00:00.000Z',
     artifacts: [
+      { path: 'liiiraa-boost.msi', sha256: hash('msi') },
       { path: 'phase6-physical-runner.exe', sha256: RUNNER_HASH.slice(7) },
       { path: 'configs/clean-windows-vm.run-config.json', sha256: CONFIG_HASH.slice(7) },
     ],
@@ -95,10 +100,10 @@ const physicalRun = (stage = 'clean-windows-vm') => {
     diagnostics: {
       redacted: true,
       previewed: true,
-      consentBound: false,
+      consentBound: true,
       autoUpload: false,
       rawFieldsFound: [],
-      byteLength: 1024,
+      byteLength: Buffer.byteLength(REDACTED_OUTPUT),
     },
     revocation: {
       signed: true,
@@ -190,7 +195,27 @@ const setupFixture = (): void => {
     },
     tauriCommands: {},
   };
+  CONFIG_HASH = prefixed(`${JSON.stringify(config, null, 2)}\n`);
   writeJson(join(sandbox, config.configPath), config);
+  const friendsConfig = {
+    ...config,
+    configId: 'friends-config-0001',
+    stage: 'friends-pc',
+    configPath: 'configs/friends-pc.run-config.json',
+    paths: {
+      runRecordPath: 'state/friends-pc/run-record.json',
+      installedReadyRecordPath: 'state/friends-pc/installed-ready.json',
+      checkpointReadyRecordPath: 'state/friends-pc/checkpoint-ready.json',
+      continuationPath: 'state/friends-pc/physical-continuation.json',
+      rawEnvelopePath: 'evidence/friends-pc/raw-run-envelope.json',
+    },
+    friendsRosterPath: 'friends/friends-roster.json',
+    friendsRosterSignaturePath: 'friends/friends-roster.json.p7s',
+  };
+  FRIENDS_CONFIG_HASH = prefixed(`${JSON.stringify(friendsConfig, null, 2)}\n`);
+  writeJson(join(sandbox, friendsConfig.configPath), friendsConfig);
+  writeFileSync(join(sandbox, 'liiiraa-boost.msi'), 'msi', { flag: 'wx' });
+  writeFileSync(join(sandbox, 'phase6-physical-runner.exe'), 'runner', { flag: 'wx' });
   const artifact = {
     kind: 'artifact-manifest',
     schemaVersion: '1.0',
@@ -217,7 +242,7 @@ const setupFixture = (): void => {
       },
       friendsPcConfig: {
         relativePath: 'configs/friends-pc.run-config.json',
-        sha256: prefixed('friends-config'),
+        sha256: FRIENDS_CONFIG_HASH,
       },
       runner: { relativePath: 'phase6-physical-runner.exe', sha256: RUNNER_HASH },
       tauriDriver: { relativePath: 'tauri-driver.exe', sha256: prefixed('tauri') },
@@ -228,8 +253,73 @@ const setupFixture = (): void => {
   writeJson(envelopePath(), {
     run: physicalRun(),
     consent: null,
-    redactedOutput: 'bounded-safe-output',
+    redactedOutput: REDACTED_OUTPUT,
   });
+};
+
+const prepareFriendsEnvelope = (): { path: string; run: Phase6RunEvidence } => {
+  const candidate = join(sandbox, 'candidate.json');
+  writeJson(candidate, {
+    kind: 'friends-roster',
+    schemaVersion: '1.0',
+    rosterId: 'friends-roster-0001',
+    artifactManifestSha256: ARTIFACT_HASH,
+    friendsConfigSha256: FRIENDS_CONFIG_HASH,
+    operationVersionId: 'managed-power-scheme-v3',
+    buildId: 'physical-build-0001',
+    sourceCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    purpose: 'phase6-friends-physical-validation',
+    createdAt: '2030-01-15T17:30:00.000Z',
+    participants: [
+      { participantId: prefixed('friend-a'), machineSlot: 'friends-slot-01' },
+      { participantId: prefixed('friend-b'), machineSlot: 'friends-slot-02' },
+    ],
+  });
+  freezeFriendsRoster({ artifactManifestPath: manifestPath(), rosterCandidatePath: candidate });
+  const manifest = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
+    stages: { friendsRoster: { rosterSha256: string } | null; runs: unknown[] }[];
+  };
+  const ownerPredecessor = { ...physicalRunWithoutManifest(), id: 'run-owner-001', stage: 'owner-pc' };
+  manifest.stages[2]!.runs.push(ownerPredecessor);
+  writeFileSync(evidencePath(), `${JSON.stringify(manifest, null, 2)}\n`);
+  const run = {
+    ...physicalRun('friends-pc'),
+    id: 'run-friends-001',
+    participantId: prefixed('friend-a'),
+    machineSlot: 'friends-slot-01',
+    configSha256: FRIENDS_CONFIG_HASH.slice(7),
+    friendsRosterSha256: manifest.stages[3]!.friendsRoster!.rosterSha256,
+    predecessorRunEvidenceSha256: phase6EvidenceSha256(ownerPredecessor),
+    exportedAt: '2030-01-15T18:30:00.000Z',
+    artifacts: [
+      { path: 'liiiraa-boost.msi', sha256: hash('msi') },
+      { path: 'phase6-physical-runner.exe', sha256: RUNNER_HASH.slice(7) },
+      {
+        path: 'configs/friends-pc.run-config.json',
+        sha256: FRIENDS_CONFIG_HASH.slice(7),
+      },
+    ],
+  };
+  const path = join(sandbox, 'evidence', 'friends-pc', 'raw-run-envelope.json');
+  writeJson(path, {
+    run,
+    consent: {
+      id: 'consent-friends-001',
+      participantId: run.participantId,
+      machineSlot: run.machineSlot,
+      recordedAt: '2030-01-15T18:15:00.000Z',
+      artifactManifestSha256: run.artifactManifestSha256,
+      configSha256: run.configSha256,
+      friendsRosterSha256: run.friendsRosterSha256,
+      runEvidenceId: run.id,
+      runEvidenceSha256: phase6EvidenceSha256(run),
+      previewSha256: hash(REDACTED_OUTPUT),
+      redactedBytesSha256: hash(REDACTED_OUTPUT),
+      intent: 'export',
+    },
+    redactedOutput: REDACTED_OUTPUT,
+  });
+  return { path, run };
 };
 
 const physicalRunWithoutManifest = () => ({
@@ -305,15 +395,29 @@ const snapshot = (root = sandbox): Record<string, string> => {
 };
 
 const verified = (): void => {
-  vi.mocked(spawnSync).mockReturnValue({
-    status: 0,
-    stdout: Buffer.from(
-      `${JSON.stringify({ verdict: 'verified', manifestSha256: ARTIFACT_HASH, operationVersionId: 'managed-power-scheme-v3', friendsRosterVerified: true })}\n`,
-    ),
-    stderr: Buffer.alloc(0),
-    pid: 1,
-    output: [],
-    signal: null,
+  vi.mocked(spawnSync).mockImplementation((command, args) => {
+    if (command === 'powershell.exe' && Array.isArray(args)) {
+      const signaturePath = String(args.at(-1));
+      if (!existsSync(signaturePath)) writeFileSync(signaturePath, 'same-spki-cms', { flag: 'wx' });
+      return {
+        status: 0,
+        stdout: Buffer.alloc(0),
+        stderr: Buffer.alloc(0),
+        pid: 1,
+        output: [],
+        signal: null,
+      };
+    }
+    return {
+      status: 0,
+      stdout: Buffer.from(
+        `${JSON.stringify({ verdict: 'verified', manifestSha256: ARTIFACT_HASH, operationVersionId: 'managed-power-scheme-v3', friendsRosterVerified: true })}\n`,
+      ),
+      stderr: Buffer.alloc(0),
+      pid: 1,
+      output: [],
+      signal: null,
+    };
   });
 };
 
@@ -332,24 +436,20 @@ afterEach(() => {
 });
 
 describe('closed physical writer CLI', () => {
-  it.each([
-    [
-      'ingest',
-      [
-        '--artifact-manifest',
-        manifestPath(),
-        '--run-envelope',
-        envelopePath(),
-        '--stage',
-        'clean-windows-vm',
-      ],
-    ],
-    [
-      'freeze-roster',
-      ['--artifact-manifest', manifestPath(), '--roster', join(sandbox, 'candidate.json')],
-    ],
-    ['review', ['--stage', 'clean-windows-vm', '--review', join(sandbox, 'review.json')]],
-  ])('accepts the canonical %s grammar', (command, args) => {
+  it.each(['ingest', 'freeze-roster', 'review'])('accepts the canonical %s grammar', (command) => {
+    const args =
+      command === 'ingest'
+        ? [
+            '--artifact-manifest',
+            manifestPath(),
+            '--run-envelope',
+            envelopePath(),
+            '--stage',
+            'clean-windows-vm',
+          ]
+        : command === 'freeze-roster'
+          ? ['--artifact-manifest', manifestPath(), '--roster', join(sandbox, 'candidate.json')]
+          : ['--stage', 'clean-windows-vm', '--review', join(sandbox, 'review.json')];
     expect(parsePhysicalWriterCli(command, args)).toBeTruthy();
   });
 
@@ -430,49 +530,63 @@ describe('artifact-verifier-first physical ingestion', () => {
     [
       'deterministic relabel',
       (run: Record<string, unknown>) => {
-        run.source = 'phase6-deterministic-rust-1';
+        run['source'] = 'phase6-deterministic-rust-1';
       },
     ],
     [
       'browser callback',
       (run: Record<string, unknown>) => {
-        run.source = 'apps/desktop/tests/packaged/transactional-plans.ts';
+        run['source'] = 'apps/desktop/tests/packaged/transactional-plans.ts';
       },
     ],
     [
       'stage mismatch',
       (run: Record<string, unknown>) => {
-        run.stage = 'owner-pc';
+        run['stage'] = 'owner-pc';
       },
     ],
     [
       'config mismatch',
       (run: Record<string, unknown>) => {
-        run.configSha256 = hash('forged');
+        run['configSha256'] = hash('forged');
       },
     ],
     [
       'predecessor mismatch',
       (run: Record<string, unknown>) => {
-        run.predecessorRunEvidenceSha256 = hash('forged');
+        run['predecessorRunEvidenceSha256'] = hash('forged');
       },
     ],
     [
       'continuation mismatch',
       (run: Record<string, unknown>) => {
-        run.continuation = ['installed-ready'];
+        run['continuation'] = ['installed-ready'];
+      },
+    ],
+    [
+      'missing authenticated config artifact',
+      (run: Record<string, unknown>) => {
+        run['artifacts'] = (run['artifacts'] as { path: string }[]).filter(
+          ({ path }) => !path.includes('run-config'),
+        );
+      },
+    ],
+    [
+      'self-declared diagnostic byte length',
+      (run: Record<string, unknown>) => {
+        (run['diagnostics'] as Record<string, unknown>)['byteLength'] = 1024;
       },
     ],
     [
       'raw secret',
       (_run: Record<string, unknown>, envelope: Record<string, unknown>) => {
-        envelope.redactedOutput = 'Authorization: Bearer secret-token';
+        envelope['redactedOutput'] = 'Authorization: Bearer secret-token';
       },
     ],
     [
       'oversize',
       (_run: Record<string, unknown>, envelope: Record<string, unknown>) => {
-        envelope.redactedOutput = 'x'.repeat(65_537);
+        envelope['redactedOutput'] = 'x'.repeat(65_537);
       },
     ],
   ])('rejects %s atomically', (_name, mutate) => {
@@ -524,7 +638,7 @@ describe('frozen friends roster and later review', () => {
       schemaVersion: '1.0',
       rosterId: 'friends-roster-0001',
       artifactManifestSha256: ARTIFACT_HASH,
-      friendsConfigSha256: prefixed('friends-config'),
+      friendsConfigSha256: FRIENDS_CONFIG_HASH,
       operationVersionId: 'managed-power-scheme-v3',
       buildId: 'physical-build-0001',
       sourceCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -552,26 +666,26 @@ describe('frozen friends roster and later review', () => {
     [
       'artifact binding',
       (roster: Record<string, unknown>) => {
-        roster.artifactManifestSha256 = prefixed('wrong');
+        roster['artifactManifestSha256'] = prefixed('wrong');
       },
     ],
     [
       'config binding',
       (roster: Record<string, unknown>) => {
-        roster.friendsConfigSha256 = prefixed('wrong');
+        roster['friendsConfigSha256'] = prefixed('wrong');
       },
     ],
     [
       'duplicate slot',
       (roster: Record<string, unknown>) => {
-        const participants = roster.participants as { machineSlot: string }[];
+        const participants = roster['participants'] as { machineSlot: string }[];
         participants[1]!.machineSlot = participants[0]!.machineSlot;
       },
     ],
     [
       'reordered slot',
       (roster: Record<string, unknown>) => {
-        (roster.participants as unknown[]).reverse();
+        (roster['participants'] as unknown[]).reverse();
       },
     ],
   ])('rejects invalid roster %s without creating a half pair', (_name, mutate) => {
@@ -581,7 +695,7 @@ describe('frozen friends roster and later review', () => {
       schemaVersion: '1.0',
       rosterId: 'friends-roster-0001',
       artifactManifestSha256: ARTIFACT_HASH,
-      friendsConfigSha256: prefixed('friends-config'),
+      friendsConfigSha256: FRIENDS_CONFIG_HASH,
       operationVersionId: 'managed-power-scheme-v3',
       buildId: 'physical-build-0001',
       sourceCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -638,6 +752,44 @@ describe('frozen friends roster and later review', () => {
     expect(() => appendPhysicalReview({ stage: 'clean-windows-vm', reviewPath })).toThrow(
       /duplicate|exists/u,
     );
+    expect(snapshot()).toEqual(before);
+  });
+
+  it('re-verifies signed roster custody and binds local pre-export consent bytes', () => {
+    const prepared = prepareFriendsEnvelope();
+    const result = writePhysicalRunEvidence({
+      artifactManifestPath: manifestPath(),
+      runEnvelopePath: prepared.path,
+      stage: 'friends-pc',
+    });
+    expect(result.consentRecordPath).not.toBeNull();
+    expect(vi.mocked(spawnSync)).toHaveBeenCalledWith(
+      'powershell.exe',
+      expect.any(Array),
+      expect.objectContaining({ encoding: 'utf8' }),
+    );
+  });
+
+  it.each([
+    ['mismatched local preview bytes', (envelope: Record<string, unknown>) => {
+      (envelope['consent'] as Record<string, unknown>)['previewSha256'] = hash('other-preview');
+    }],
+    ['participant outside signed roster', (envelope: Record<string, unknown>) => {
+      (envelope['run'] as Record<string, unknown>)['participantId'] = prefixed('intruder');
+    }],
+  ])('rejects %s without appending friends evidence', (_name, mutate) => {
+    const prepared = prepareFriendsEnvelope();
+    const envelope = JSON.parse(readFileSync(prepared.path, 'utf8')) as Record<string, unknown>;
+    mutate(envelope);
+    writeFileSync(prepared.path, `${JSON.stringify(envelope, null, 2)}\n`);
+    const before = snapshot();
+    expect(() =>
+      writePhysicalRunEvidence({
+        artifactManifestPath: manifestPath(),
+        runEnvelopePath: prepared.path,
+        stage: 'friends-pc',
+      }),
+    ).toThrow();
     expect(snapshot()).toEqual(before);
   });
 });
