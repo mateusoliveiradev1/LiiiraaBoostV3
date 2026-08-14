@@ -891,21 +891,17 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.ok(summaryPropertyIndex >= 0);
   assert.ok(summaryPropertyIndex < persistIndex);
   assert.ok(persistIndex < finalCommitIndex, 'SummaryInformation must persist before final commit');
-  assert.ok(
-    identityWriter.includes(
-      "UPDATE \\`Upgrade\\` SET \\`VersionMax\\`='${packageVersion}' WHERE \\`ActionProperty\\`='WIX_UPGRADE_DETECTED'",
-    ),
-  );
-  assert.ok(
-    identityWriter.includes(
-      "UPDATE \\`Upgrade\\` SET \\`VersionMin\\`='${packageVersion}' WHERE \\`ActionProperty\\`='WIX_DOWNGRADE_DETECTED'",
-    ),
-  );
+  assert.doesNotMatch(identityWriter, /UPDATE \\`Upgrade\\` SET/u);
+  assert.match(identityWriter, /DELETE FROM \\`Upgrade\\` WHERE/u);
+  assert.match(identityWriter, /INSERT INTO \\`Upgrade\\`/u);
+  assert.match(identityWriter, /CreateRecord\(7\)/u);
+  assert.match(identityWriter, /original Upgrade rows must be exact/u);
 
   const probeFlow = source.slice(
     source.indexOf("const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi')"),
     source.indexOf('const lifecycle = runLifecycleSmoke'),
   );
+  assert.match(source, /setMsiIdentity\(downgradeMsiPath, downgradeIdentity, msiInspection\)/u);
   const mutateIndex = probeFlow.indexOf('setMsiIdentity(downgradeMsiPath');
   const reopenIndex = probeFlow.indexOf('inspectMsi(downgradeMsiPath)');
   const validateIndex = probeFlow.indexOf(
