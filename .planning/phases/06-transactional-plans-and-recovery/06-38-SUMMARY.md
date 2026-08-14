@@ -188,3 +188,11 @@ _Completed: 2026-08-14_
 - The exact former v41 schema-v2 authority is preserved byte-for-byte at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json`, SHA-256 `ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a`, and remains a valid historical predecessor with run SHA-256 `626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7`; it is `superseded`, never `BLOCKED` or rewritten.
 - v42 remains excluded because portable custody rejected it before simulation. It is not a chain member and cannot be reactivated.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, admitted exactly ordered PLAN-01 through PLAN-08 at `deterministic-simulation`, and left `clean-windows-vm`, `owner-pc`, and `friends-pc` pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v44
+
+- The physically BLOCKED v43 attempt was not relaunched. Its deterministic admission is now the immutable superseded predecessor record at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v43-evidence-manifest.json`, SHA-256 `89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48`.
+- `managed-power-scheme-v44` is the sole active deterministic admission for build `physical-68bb4f974e23ee26-managed-power-scheme-v44`, artifact manifest SHA-256 `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f`, and run evidence SHA-256 `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e`.
+- The active v44 run binds predecessor evidence SHA-256 `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd` from v43. v41 remains the earlier immutable superseded prefix and rejected v42 remains outside the chain.
+- Current evidence manifest SHA-256: `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending.
