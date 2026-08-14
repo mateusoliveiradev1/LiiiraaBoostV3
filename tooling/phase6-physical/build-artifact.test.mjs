@@ -776,6 +776,18 @@ test('final MSI inspection requires exact runtime files and zero CustomAction au
 
 test('downgrade probe has a fresh package identity in the same upgrade family', () => {
   assert.equal(typeof artifactBuilder.validateDowngradeProbeIdentity, 'function');
+  assert.equal(typeof artifactBuilder.formatMsiGuid, 'function');
+  assert.equal(
+    artifactBuilder.formatMsiGuid('dddddddd-dddd-4ddd-8ddd-dddddddddddd', 'ProductCode'),
+    '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}',
+  );
+  for (const unsafeGuid of [
+    '',
+    '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}',
+    "dddddddd-dddd-4ddd-8ddd-dddddddddddd'; Remove-Item C:\\",
+  ]) {
+    assert.throws(() => artifactBuilder.formatMsiGuid(unsafeGuid, 'ProductCode'), /exact UUID/u);
+  }
   const main = {
     productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
     packageCode: '{BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB}',
@@ -788,22 +800,49 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
     upgradeCode: main.upgradeCode,
     packageVersion: '0.0.1',
   };
+  const expectedProbeIdentity = {
+    productCode: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    packageCode: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    packageVersion: '0.0.1',
+  };
   const validate = artifactBuilder.validateDowngradeProbeIdentity;
-  assert.doesNotThrow(() => validate(main, probe));
+  assert.doesNotThrow(() => validate(main, probe, expectedProbeIdentity));
   for (const [property, value, pattern] of [
     ['productCode', main.productCode, /ProductCode/u],
     ['packageCode', main.packageCode, /PackageCode/u],
     ['upgradeCode', '{FFFFFFFF-FFFF-4FFF-8FFF-FFFFFFFFFFFF}', /UpgradeCode/u],
     ['packageVersion', '0.1.36', /0\.0\.1/u],
   ]) {
-    assert.throws(() => validate(main, { ...probe, [property]: value }), pattern);
+    assert.throws(() => validate(main, { ...probe, [property]: value }, expectedProbeIdentity), pattern);
   }
+  assert.throws(
+    () =>
+      validate(main, probe, {
+        ...expectedProbeIdentity,
+        productCode: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      }),
+    /expected ProductCode/u,
+  );
+  assert.throws(
+    () =>
+      validate(main, probe, {
+        ...expectedProbeIdentity,
+        packageCode: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      }),
+    /expected PackageCode/u,
+  );
 
   const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   assert.match(source, /SummaryInformation\(1\)/u);
+  assert.match(source, /Set-StrictMode -Version Latest/u);
+  assert.match(source, /\$msiPackageCode\s*=\s*'\$\{msiPackageCode\}'/u);
   assert.match(source, /\.Property\(9\)\s*=\s*\$msiPackageCode/u);
-  assert.match(source, /packageCode:\s*randomUUID\(\)/u);
-  assert.match(source, /validateDowngradeProbeIdentity\(msiInspection, downgradeInspection\)/u);
+  assert.match(source, /const downgradeIdentity\s*=\s*\{/u);
+  assert.match(source, /setMsiIdentity\(downgradeMsiPath, downgradeIdentity\)/u);
+  assert.match(
+    source,
+    /validateDowngradeProbeIdentity\(msiInspection, downgradeInspection, downgradeIdentity\)/u,
+  );
   assert.match(source, /packageCode\s*=\s*\$database\.SummaryInformation\(0\)\.Property\(9\)/u);
   assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
 
