@@ -180,14 +180,7 @@ impl<'token> InteractiveUserEffectLease<'token> {
                 return Err(InteractiveUserEffectError::IdentityMismatch);
             }
             let result = panic::catch_unwind(AssertUnwindSafe(|| effect(client)));
-            guard
-                .revert()
-                .map_err(InteractiveUserEffectError::CleanupFailed)?;
-            return match result {
-                Ok(Ok(value)) => Ok(value),
-                Ok(Err(error)) => Err(InteractiveUserEffectError::Effect(error)),
-                Err(_) => Err(InteractiveUserEffectError::Panicked),
-            };
+            return guard.finish_effect(result);
         }
 
         #[cfg(debug_assertions)]
@@ -234,6 +227,20 @@ impl InteractiveUserEffectGuard {
         }
         self.active = false;
         windows_adapter::revert_and_verify_service_identity()
+    }
+
+    #[cfg(windows)]
+    fn finish_effect<T, E>(
+        &mut self,
+        result: thread::Result<Result<T, E>>,
+    ) -> Result<T, InteractiveUserEffectError<E>> {
+        self.revert()
+            .map_err(InteractiveUserEffectError::CleanupFailed)?;
+        match result {
+            Ok(Ok(value)) => Ok(value),
+            Ok(Err(error)) => Err(InteractiveUserEffectError::Effect(error)),
+            Err(_) => Err(InteractiveUserEffectError::Panicked),
+        }
     }
 }
 
