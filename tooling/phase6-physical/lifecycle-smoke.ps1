@@ -100,6 +100,20 @@ function Assert-ServiceRunning {
   }
 }
 
+function Assert-BrokerClientBinding {
+  $desktopPath = Join-Path $installedRoot 'liiiraa-desktop.exe'
+  if (-not (Test-Path -LiteralPath $desktopPath -PathType Leaf)) {
+    throw 'installed desktop broker client is missing'
+  }
+  foreach ($attempt in 1..2) {
+    $process = Start-Process -FilePath $desktopPath -ArgumentList @('--phase6-lifecycle-broker-probe') -Wait -PassThru
+    if ($process.ExitCode -ne 0) {
+      throw "installed desktop broker probe $attempt exited $($process.ExitCode)"
+    }
+    Assert-ServiceRunning
+  }
+}
+
 function Get-InstalledSetHash {
   $manifestPath = Join-Path $installedRoot 'installation-manifest.json'
   $signaturePath = "$manifestPath.p7s"
@@ -178,11 +192,13 @@ try {
   Invoke-Msi @('/i', ('"' + $MsiPath + '"')) 'install' | Out-Null
   $installed = $true
   Assert-ServiceRunning
+  Assert-BrokerClientBinding
   $installedSet = Get-InstalledSetHash
   $recoveryCustody = Get-RecoveryCustodyHash
 
   Invoke-Msi @('/fa', ('"' + $MsiPath + '"')) 'repair-update' | Out-Null
   Assert-ServiceRunning
+  Assert-BrokerClientBinding
   if ((Get-InstalledSetHash) -ne $installedSet) { throw 'repair changed the coherent installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'repair changed recovery custody' }
 
@@ -215,6 +231,8 @@ try {
     schemaVersion = '1.0'
     status = 'PASSED'
     install = 'passed'
+    brokerClientBinding = 'passed'
+    brokerClientConnections = 4
     repairUpdate = 'passed'
     rollbackFailureDrill = 'passed'
     rollbackFailureExitCode = $rollbackExit

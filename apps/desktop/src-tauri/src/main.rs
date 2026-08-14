@@ -1692,6 +1692,17 @@ fn run() -> Result<(), String> {
 }
 
 fn main() {
+    #[cfg(all(windows, feature = "phase6-physical"))]
+    if std::env::args()
+        .skip(1)
+        .eq(["--phase6-lifecycle-broker-probe"])
+    {
+        if let Err(error) = plan_executor::probe_installed_broker_observation() {
+            eprintln!("broker lifecycle probe failed: {error:?}");
+            std::process::exit(1);
+        }
+        return;
+    }
     match phase5_probe::try_run() {
         Ok(true) => return,
         Ok(false) => {}

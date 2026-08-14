@@ -1117,6 +1117,32 @@ impl WindowsNamedPipeBrokerTransport<NativeWindowsPipeWire> {
     }
 }
 
+#[cfg(all(windows, feature = "phase6-physical"))]
+pub fn probe_installed_broker_observation() -> Result<(), BrokerClientError> {
+    let client = AuthenticatedBrokerClient::connect(WindowsNamedPipeBrokerTransport::new())?;
+    let entropy = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| BrokerClientError::AuthenticationFailed)?
+        .as_nanos();
+    let transaction_id = format!("lifecycle-probe-{}-{entropy}", std::process::id());
+    let step_id = format!("lifecycle-observe-{}", std::process::id());
+    client.exchange_validated(
+        &transaction_id,
+        &step_id,
+        "power-scheme-v1",
+        json!({
+            "kind": "observe-power-scheme-request",
+            "schemaVersion": "1.0",
+            "requestId": step_id,
+            "deviceBindingId": "installed-lifecycle-probe",
+            "issuedAt": "2026-08-14T00:00:00Z",
+            "nonce": "replaced-by-authenticated-client",
+            "counter": 1
+        }),
+    )?;
+    Ok(())
+}
+
 pub struct AuthenticatedBrokerClient<T> {
     transport: RefCell<T>,
     session: BrokerSessionMaterial,
