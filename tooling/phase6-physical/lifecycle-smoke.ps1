@@ -3,6 +3,8 @@ param(
   [Parameter(Mandatory = $true)][string]$MsiPath,
   [Parameter(Mandatory = $true)][string]$DowngradeMsiPath,
   [Parameter(Mandatory = $true)][string]$ProductCode,
+  [Parameter(Mandatory = $true)][string]$ExpectedDowngradeProductCode,
+  [Parameter(Mandatory = $true)][string]$ExpectedDowngradePackageCode,
   [Parameter(Mandatory = $true)][string]$OutputRoot,
   [Parameter(Mandatory = $true)][string]$ExpectedWebView2Version,
   [Parameter(Mandatory = $true)][string]$ExpectedWebView2Sha256,
@@ -159,6 +161,77 @@ function Assert-RollbackMsiProperties {
     $log -match 'Error 1920'
   ) {
     throw 'rollback did not complete after the coordinated lock release'
+  }
+}
+
+function Assert-DowngradeRejected(
+  [int]$ExitCode,
+  [string]$ProbeProductCode,
+  [string]$ProbePackageCode,
+  [string]$InstalledProductCode
+) {
+  if ($ExitCode -ne 1603) { throw "downgrade probe returned unexpected exit code $ExitCode" }
+  $logPath = Join-Path $OutputRoot 'downgrade-rejection.msiexec.log'
+  $log = [IO.File]::ReadAllText($logPath)
+  if (
+    $log -match 'Product registered: entering maintenance mode' -or
+    $log -match 'Skipping FindRelatedProducts action: not run in maintenance mode'
+  ) {
+    throw 'downgrade probe entered maintenance mode'
+  }
+
+  $probeProductPattern = [regex]::Escape($ProbeProductCode)
+  $probePackagePattern = [regex]::Escape($ProbePackageCode)
+  $installedProductPattern = [regex]::Escape($InstalledProductCode)
+  $packageMatches = [regex]::Matches(
+    $log,
+    "(?m)^.*Adding PackageCode property\. Its value is '$probePackagePattern'\.\r?$"
+  )
+  $productMatches = [regex]::Matches(
+    $log,
+    "(?m)^Product Code from property table after transforms:\s+'$probeProductPattern'\r?$"
+  )
+  $versionMatches = [regex]::Matches($log, '(?m)^Property\(S\): ProductVersion = 0\.0\.1\r?$')
+  if ($packageMatches.Count -ne 1 -or $productMatches.Count -ne 1 -or $versionMatches.Count -ne 1) {
+    throw 'downgrade log did not prove the exact probe identity'
+  }
+
+  $findMatches = [regex]::Matches($log, '(?m)^.*Doing action: FindRelatedProducts\r?$')
+  $detectedMatches = [regex]::Matches(
+    $log,
+    "(?m)^.*Adding WIX_DOWNGRADE_DETECTED property\. Its value is '$installedProductPattern'\.\r?$"
+  )
+  $findEndedMatches = [regex]::Matches(
+    $log,
+    '(?m)^Action ended [^\r\n]*: FindRelatedProducts\. Return value 1\.\r?$'
+  )
+  $launchFailedMatches = [regex]::Matches(
+    $log,
+    '(?m)^Action ended [^\r\n]*: LaunchConditions\. Return value 3\.\r?$'
+  )
+  $installFailedMatches = [regex]::Matches(
+    $log,
+    '(?m)^Action ended [^\r\n]*: INSTALL\. Return value 3\.\r?$'
+  )
+  if (
+    $findMatches.Count -ne 1 -or
+    $detectedMatches.Count -ne 1 -or
+    $findEndedMatches.Count -ne 1 -or
+    $launchFailedMatches.Count -ne 1 -or
+    $installFailedMatches.Count -ne 1 -or
+    [regex]::Matches($log, 'MainEngineThread is returning 1603').Count -ne 2
+  ) {
+    throw 'downgrade log did not prove MajorUpgrade launch-condition refusal'
+  }
+  if (
+    $packageMatches[0].Index -ge $findMatches[0].Index -or
+    $productMatches[0].Index -ge $findMatches[0].Index -or
+    $findMatches[0].Index -ge $detectedMatches[0].Index -or
+    $detectedMatches[0].Index -ge $findEndedMatches[0].Index -or
+    $findEndedMatches[0].Index -ge $launchFailedMatches[0].Index -or
+    $launchFailedMatches[0].Index -ge $installFailedMatches[0].Index
+  ) {
+    throw 'downgrade refusal evidence occurred out of order'
   }
 }
 
@@ -405,6 +478,7 @@ try {
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'failed repair changed recovery custody' }
 
   $downgradeExit = Invoke-MsiExpectedFailure @('/i', ('"' + $DowngradeMsiPath + '"')) 'downgrade-rejection'
+  Assert-DowngradeRejected $downgradeExit $ExpectedDowngradeProductCode $ExpectedDowngradePackageCode $ProductCode
   Assert-ServiceRunning
   if ((Get-InstalledSetHash $expectedCustody) -ne $installedSet) { throw 'downgrade attempt changed the installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'downgrade attempt changed recovery custody' }
@@ -433,6 +507,9 @@ try {
     rollbackFailureExitCode = $rollbackExit
     downgradeRejected = $true
     downgradeExitCode = $downgradeExit
+    downgradeProductCode = $ExpectedDowngradeProductCode
+    downgradePackageCode = $ExpectedDowngradePackageCode
+    downgradePackageVersion = '0.0.1'
     uninstall = 'passed'
     recoveryCustodyPreserved = $true
     forcedReboot = $false

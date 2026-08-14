@@ -931,6 +931,7 @@ function Read-Property([string]$name) {
   if ($record) { return $record.StringData(1) }
   return $null
 }
+$packageCode = $database.SummaryInformation(0).Property(9)
 $files = $database.OpenView('SELECT FileName FROM File')
 $null = $files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $null = $files.Close()
 $custom = $database.OpenView('SELECT Action, Type, Source, Target FROM CustomAction'); $null = $custom.Execute(); $customActions = @(); while ($record = $custom.Fetch()) { $customActions += [pscustomobject]@{ action = $record.StringData(1); type = $record.IntegerData(2); source = $record.StringData(3); target = $record.StringData(4) } }; $null = $custom.Close()
@@ -953,7 +954,7 @@ if ($storageComponent -and $storageDirectory -and $storageCreate -and $storagePe
     sddl = $storagePermission.StringData(1)
   }
 }
-[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions); programDataStorage = $programDataStorage } | ConvertTo-Json -Depth 5 -Compress
+[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageCode = $packageCode; upgradeCode = Read-Property 'UpgradeCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions); programDataStorage = $programDataStorage } | ConvertTo-Json -Depth 5 -Compress
 `);
 };
 
@@ -1041,6 +1042,26 @@ export function validateMsiInspection(inspection, expected) {
   return true;
 }
 
+const normalizedMsiGuid = (value) => String(value || '').replace(/[{}]/gu, '').toLowerCase();
+
+export function validateDowngradeProbeIdentity(main, probe) {
+  const mainProductCode = normalizedMsiGuid(main?.productCode);
+  const probeProductCode = normalizedMsiGuid(probe?.productCode);
+  if (!mainProductCode || !probeProductCode || mainProductCode === probeProductCode)
+    fail('downgrade probe ProductCode must be distinct from the installed package');
+  const mainPackageCode = normalizedMsiGuid(main?.packageCode);
+  const probePackageCode = normalizedMsiGuid(probe?.packageCode);
+  if (!mainPackageCode || !probePackageCode || mainPackageCode === probePackageCode)
+    fail('downgrade probe PackageCode must be fresh and distinct from the installed package');
+  const mainUpgradeCode = normalizedMsiGuid(main?.upgradeCode);
+  const probeUpgradeCode = normalizedMsiGuid(probe?.upgradeCode);
+  if (!mainUpgradeCode || mainUpgradeCode !== probeUpgradeCode)
+    fail('downgrade probe UpgradeCode must remain in the installed upgrade family');
+  if (probe?.packageVersion !== '0.0.1')
+    fail('downgrade probe ProductVersion must be exactly 0.0.1');
+  return true;
+}
+
 const setMsiProductCode = (path, productCode) => {
   const escaped = path.replaceAll("'", "''");
   const msiProductCode = `{${productCode.toUpperCase()}}`;
@@ -1058,9 +1079,10 @@ $view.Execute(); $view.Close(); $database.Commit()
   ]);
 };
 
-const setMsiIdentity = (path, { productCode, packageVersion }) => {
+const setMsiIdentity = (path, { productCode, packageCode, packageVersion }) => {
   const escaped = path.replaceAll("'", "''");
   const msiProductCode = `{${productCode.toUpperCase()}}`;
+  const msiPackageCode = `{${packageCode.toUpperCase()}}`;
   run('powershell', [
     '-NoProfile',
     '-NonInteractive',
@@ -1073,6 +1095,9 @@ $product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHE
 $product.Execute(); $product.Close()
 $version = $database.OpenView("UPDATE Property SET Value='${packageVersion}' WHERE Property='ProductVersion'")
 $version.Execute(); $version.Close(); $database.Commit()
+$summary = $database.SummaryInformation(1)
+$summary.Property(9) = $msiPackageCode
+$summary.Persist()
 `,
   ]);
 };
@@ -1081,6 +1106,8 @@ const runLifecycleSmoke = ({
   msiPath,
   downgradeMsiPath,
   productCode,
+  downgradeProductCode,
+  downgradePackageCode,
   outputRoot,
   webView2Runtime,
   installationManifestSha256,
@@ -1096,6 +1123,8 @@ $arguments = @(
   '-MsiPath', '"${msiPath.replaceAll("'", "''")}"',
   '-DowngradeMsiPath', '"${downgradeMsiPath.replaceAll("'", "''")}"',
   '-ProductCode', '${productCode.replaceAll("'", "''")}',
+  '-ExpectedDowngradeProductCode', '${downgradeProductCode.replaceAll("'", "''")}',
+  '-ExpectedDowngradePackageCode', '${downgradePackageCode.replaceAll("'", "''")}',
   '-OutputRoot', '"${outputRoot.replaceAll("'", "''")}"',
   '-ExpectedWebView2Version', '${webView2Runtime.version.replaceAll("'", "''")}',
   '-ExpectedWebView2Sha256', '${webView2Runtime.executableSha256.replaceAll("'", "''")}',
@@ -1454,13 +1483,18 @@ const buildAndSmoke = (options) => {
     copyFileSync(msiPath, downgradeMsiPath);
     setMsiIdentity(downgradeMsiPath, {
       productCode: randomUUID(),
+      packageCode: randomUUID(),
       packageVersion: '0.0.1',
     });
+    const downgradeInspection = inspectMsi(downgradeMsiPath);
+    validateDowngradeProbeIdentity(msiInspection, downgradeInspection);
     signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath);
     const lifecycle = runLifecycleSmoke({
       msiPath,
       downgradeMsiPath,
       productCode: msiInspection.productCode,
+      downgradeProductCode: downgradeInspection.productCode,
+      downgradePackageCode: downgradeInspection.packageCode,
       outputRoot: workRoot,
       webView2Runtime,
       installationManifestSha256: sha256(readFileSync(installationPath)),
