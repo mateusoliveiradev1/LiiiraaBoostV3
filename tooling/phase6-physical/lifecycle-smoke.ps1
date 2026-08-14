@@ -96,6 +96,14 @@ function Invoke-MsiExpectedFailure([string[]]$Arguments, [string]$LogName) {
   return $process.ExitCode
 }
 
+function Assert-RollbackMsiProperties {
+  $logPath = Join-Path $OutputRoot 'rollback-failure.msiexec.log'
+  $log = [IO.File]::ReadAllText($logPath)
+  if ($log -notmatch 'MSIRESTARTMANAGERCONTROL=Disable' -or $log -notmatch 'REINSTALLMODE=amus') {
+    throw 'rollback log did not preserve explicit MSI properties'
+  }
+}
+
 function Assert-ServiceRunning {
   $service = Get-Service -Name $serviceName -ErrorAction Stop
   if ($service.Status -ne [ServiceProcess.ServiceControllerStatus]::Running) {
@@ -267,7 +275,8 @@ try {
   $desktopPath = Join-Path $installedRoot 'liiiraa-desktop.exe'
   $lock = [IO.File]::Open($desktopPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
   try {
-    $rollbackExit = Invoke-MsiExpectedFailure @('/fa', ('"' + $MsiPath + '"'), 'MSIRESTARTMANAGERCONTROL=Disable', 'REINSTALLMODE=amus', 'REINSTALL=ALL') 'rollback-failure'
+    $rollbackExit = Invoke-MsiExpectedFailure @('/i', ('"' + $MsiPath + '"'), 'REINSTALL=ALL', 'REINSTALLMODE=amus', 'MSIRESTARTMANAGERCONTROL=Disable') 'rollback-failure'
+    Assert-RollbackMsiProperties
   } finally {
     $lock.Dispose()
   }

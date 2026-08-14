@@ -518,7 +518,7 @@ test('physical lifecycle composes protected manifest custody without administrat
     lifecycle,
     /Invoke-MsiExpectedFailure @\('\/i',[^\n]*'REINSTALL=ALL'[^\n]*'REINSTALLMODE=amus'[^\n]*'MSIRESTARTMANAGERCONTROL=Disable'\) 'rollback-failure'/u,
   );
-  assert.equal((lifecycle.match(/MSIRESTARTMANAGERCONTROL=Disable/gu) ?? []).length, 1);
+  assert.equal((lifecycle.match(/MSIRESTARTMANAGERCONTROL=Disable/gu) ?? []).length, 2);
   assert.match(lifecycle, /function Assert-RollbackMsiProperties/u);
   assert.match(lifecycle, /rollback log did not preserve explicit MSI properties/u);
   assert.match(lifecycle, /Assert-RollbackMsiProperties/u);
