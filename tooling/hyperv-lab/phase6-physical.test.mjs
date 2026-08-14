@@ -6,6 +6,7 @@ import test from 'node:test';
 
 const root = resolve(import.meta.dirname, '..', '..');
 const bridgePath = resolve(import.meta.dirname, 'Invoke-Phase6Physical.ps1');
+const elevatedLoggerPath = resolve(import.meta.dirname, 'Run-LabElevated.ps1');
 const artifactSummary = resolve(
   root,
   '.planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md',
@@ -125,6 +126,16 @@ const assertSourcePolicy = (source) => {
 
 test('RED: dedicated bridge exposes only exact Audit and RunCleanVm authority', () => {
   assertSourcePolicy(bridgeSource());
+});
+
+test('elevated logger records only the fixed Phase 6 Audit action', () => {
+  const source = readFileSync(elevatedLoggerPath, 'utf8');
+  assert.match(source, /'Phase6Audit'/u);
+  assert.match(source, /Invoke-Phase6Physical\.ps1/u);
+  assert.match(source, /'Audit'/u);
+  assert.match(source, /06-31-SUMMARY\.md/u);
+  assert.match(source, /06-38-SUMMARY\.md/u);
+  assert.doesNotMatch(source, /RunCleanVm/u);
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
