@@ -14,6 +14,7 @@ import {
   assertDeclaredInputState,
   assertImmutableFile,
   buildCanonicalRunConfigs,
+  canonicalBytes,
   patchTauriBundleTypeForMsi,
   selectUnusedOperationVersion,
   validateTauriDriverInstallReceipt,
@@ -607,6 +608,13 @@ test('desktop bundle type is patched to MSI before signing and manifest custody'
   assert.ok(patchCall >= 0, 'builder must patch the final MSI bundle marker');
   assert.ok(patchCall < signingLoop, 'bundle patch must happen before Authenticode signing');
   assert.ok(signingLoop < manifestIdentity, 'signing must happen before manifest identity capture');
+});
+
+test('detached CMS input matches the Rust compact canonical JSON representation', () => {
+  assert.deepEqual(
+    canonicalBytes({ z: 1, a: { y: 2, x: 3 } }),
+    Buffer.from('{"a":{"x":3,"y":2},"z":1}', 'utf8'),
+  );
 });
 
 test('optimizer service embeds the physical package version in Windows VERSIONINFO', () => {
