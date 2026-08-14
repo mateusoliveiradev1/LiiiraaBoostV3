@@ -810,7 +810,7 @@ Plans:
 
 **Wave 15** *(blocked on 06-32, 06-35, and 06-37)*
 
-- [ ] 06-33-PLAN.md — Self-contained signed Rust runner with closed install/reboot continuation
+- [x] 06-33-PLAN.md — Self-contained signed Rust runner with closed install/reboot continuation
 
 **Wave 16** *(blocked on 06-33, 06-35, and 06-37)*
 
@@ -926,7 +926,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 32/39 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 33/39 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

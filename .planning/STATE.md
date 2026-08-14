@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-37-PLAN.md
-last_updated: "2026-08-14T01:08:33.047Z"
+stopped_at: Completed 06-33-PLAN.md
+last_updated: "2026-08-14T01:49:18.378Z"
 last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 246
+  completed_plans: 247
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 8 of 39
+Plan: 9 of 39
 Status: Ready to execute
 Last activity: 2026-08-14
 
@@ -274,6 +274,7 @@ _Updated after plan completion_
 | Phase 06 P32 | 25 min | 2 tasks | 7 files |
 | Phase 06 P36 | 14 min | 1 tasks | 6 files |
 | Phase 06 P37 | 29 min | 1 tasks | 7 files |
+| Phase 06 P33 | 21min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -886,6 +887,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Compile and construct the real broker authority only for phase6-physical; ordinary builds retain explicit BrokerUnavailable mutation behavior. — This keeps development and fixture builds fail-closed and prevents a physical broker failure from selecting a lower-authority adapter.
 - [Phase 06]: Treat every post-dispatch transport failure as observation-required unknown until a new authenticated session observes Windows state; never redispatch automatically. — Durable prepare proves the mutation may have occurred, so only independent observation can safely resolve the outcome.
 - [Phase 06]: Derive observed journal and receipt state from the validated broker observation rather than from the requested target. — Requested state is intent, not evidence; dynamic binding prevents fabricated success and keeps recovery verdicts observation-authoritative.
+- [Phase 06]: Guest runner emits only directly measured observations — The 06-32 host writer derives predecessor and custody metadata; unmeasured gates cannot become PASS evidence.
+- [Phase 06]: Incomplete physical observations are isolated FAIL attempts — Coverage gaps remain visible without contaminating the promotion manifest or fabricating security, fault, or accessibility success.
+- [Phase 06]: Physical apply and friends export require exact local confirmation phrases — The runner cannot auto-approve plan mutation or fabricate participant consent.
 
 ### Pending Todos
 
@@ -937,6 +941,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T01:08:04.017Z
-Stopped at: Completed 06-37-PLAN.md
+Last session: 2026-08-14T01:49:18.369Z
+Stopped at: Completed 06-33-PLAN.md
 Resume file: None
