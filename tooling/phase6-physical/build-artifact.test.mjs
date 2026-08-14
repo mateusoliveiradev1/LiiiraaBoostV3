@@ -522,6 +522,12 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(lifecycle, /function Assert-RollbackMsiProperties/u);
   assert.match(lifecycle, /rollback log did not preserve explicit MSI properties/u);
   assert.match(lifecycle, /Assert-RollbackMsiProperties/u);
+  assert.match(lifecycle, /function Invoke-CoordinatedRollbackFailure/u);
+  assert.match(lifecycle, /rollback-lock-ready/u);
+  assert.match(lifecycle, /Error 1306/u);
+  assert.match(lifecycle, /rollback lock-holder did not exit cleanly/u);
+  assert.match(lifecycle, /rollback lock release timed out/u);
+  assert.doesNotMatch(lifecycle, /schtasks|New-Service/u);
   assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
 });
