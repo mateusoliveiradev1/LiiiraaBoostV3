@@ -33,6 +33,7 @@ import {
 } from './build-artifact.mjs';
 
 const sha = (character) => `sha256:${character.repeat(64)}`;
+const clone = (value) => JSON.parse(JSON.stringify(value));
 const ROTATED_DEVELOPMENT_SPKI_SHA256 =
   'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
 
@@ -54,9 +55,30 @@ test('portable artifact publication requires exact protected native ACL before r
     ownerSid: 'S-1-5-32-544',
     protected: true,
     rules: [
-      { sid: 'S-1-5-18', rights: 2032127, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
-      { sid: 'S-1-5-32-544', rights: 2032127, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
-      { sid: userSid, rights: 1179817, accessType: 'Allow', inherited: false, inheritanceFlags: 3, propagationFlags: 0 },
+      {
+        sid: 'S-1-5-18',
+        rights: 2032127,
+        accessType: 'Allow',
+        inherited: false,
+        inheritanceFlags: 3,
+        propagationFlags: 0,
+      },
+      {
+        sid: 'S-1-5-32-544',
+        rights: 2032127,
+        accessType: 'Allow',
+        inherited: false,
+        inheritanceFlags: 3,
+        propagationFlags: 0,
+      },
+      {
+        sid: userSid,
+        rights: 1179817,
+        accessType: 'Allow',
+        inherited: false,
+        inheritanceFlags: 3,
+        propagationFlags: 0,
+      },
     ],
   };
   assert.doesNotThrow(() => validatePortableRootAclSnapshot(exact, userSid));
@@ -68,14 +90,17 @@ test('portable artifact publication requires exact protected native ACL before r
     (value) => (value.rules[2].inherited = true),
     (value) => value.rules.push({ ...value.rules[2], sid: 'S-1-5-11' }),
   ]) {
-    const value = structuredClone(exact);
+    const value = clone(exact);
     mutate(value);
     assert.throws(() => validatePortableRootAclSnapshot(value, userSid), /portable root ACL/u);
   }
 
   const builder = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   const helper = readFileSync('tooling/phase6-physical/protect-artifact-root.ps1', 'utf8');
-  assert.ok(builder.indexOf('protectPortableArtifactRoot(workRoot)') < builder.indexOf('renameSync(workRoot, finalRoot)'));
+  assert.ok(
+    builder.indexOf('protectPortableArtifactRoot(workRoot)') <
+      builder.indexOf('renameSync(workRoot, finalRoot)'),
+  );
   assert.doesNotMatch(builder, /chmodSync\(workRoot/u);
   assert.match(helper, /target[\\/]phase6-physical[\\/]_work/u);
   assert.match(helper, /SetSecurityDescriptorSddlForm/u);
@@ -273,7 +298,7 @@ const wix = () => `<?xml version="1.0"?>
 </Wix>`;
 
 const rejectsMutation = (base, mutate, validate, pattern) => {
-  const value = structuredClone(base);
+  const value = clone(base);
   mutate(value);
   assert.throws(() => validate(value), pattern);
 };
@@ -604,7 +629,10 @@ test('physical lifecycle composes protected manifest custody without administrat
   );
   assert.doesNotMatch(rollbackHolder, /ReadAllText/u);
   assert.doesNotMatch(lifecycle, /schtasks|New-Service/u);
-  assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
+  assert.match(
+    builder,
+    /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u,
+  );
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
   assert.match(lifecycle, /function Assert-DowngradeRejected/u);
   assert.match(lifecycle, /WIX_DOWNGRADE_DETECTED/u);
@@ -650,7 +678,10 @@ test(
     ].join('\r\n');
 
     const runParser = (log, includeReleased = true) => {
-      writeFileSync(logPath, Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]));
+      writeFileSync(
+        logPath,
+        Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]),
+      );
       writeFileSync(join(root, 'rollback-lock-ready'), 'ready');
       if (includeReleased) {
         writeFileSync(join(root, 'rollback-lock-released'), '2026-08-14T11:57:43.5567509Z');
@@ -680,9 +711,21 @@ Assert-RollbackMsiProperties
     try {
       assert.doesNotThrow(() => runParser(exactLog));
       assert.throws(() => runParser(exactLog.replace('Return: 5', 'Return: 3')));
-      assert.throws(() => runParser(exactLog.replace('Executing op: End', 'Service failed to start\r\nExecuting op: End')));
-      assert.throws(() => runParser(exactLog.replace('Executing op: End', 'Unexpected failure 1603\r\nExecuting op: End')));
-      assert.throws(() => runParser(exactLog.replace('InstallFinalize. Return value 3', 'StartServices. Return value 3')));
+      assert.throws(() =>
+        runParser(
+          exactLog.replace('Executing op: End', 'Service failed to start\r\nExecuting op: End'),
+        ),
+      );
+      assert.throws(() =>
+        runParser(
+          exactLog.replace('Executing op: End', 'Unexpected failure 1603\r\nExecuting op: End'),
+        ),
+      );
+      assert.throws(() =>
+        runParser(
+          exactLog.replace('InstallFinalize. Return value 3', 'StartServices. Return value 3'),
+        ),
+      );
       assert.throws(() => runParser(exactLog, false));
     } finally {
       rmSync(root, { recursive: true, force: true });
@@ -701,8 +744,7 @@ test(
     const probeProduct = '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}';
     const probePackage = '{EEEEEEEE-EEEE-4EEE-8EEE-EEEEEEEEEEEE}';
     const installedProduct = '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}';
-    const productIdentityLine =
-      `MSI (s) (10:20) [00:00:00:001]: Product Code from property table after transforms:  '${probeProduct}'`;
+    const productIdentityLine = `MSI (s) (10:20) [00:00:00:001]: Product Code from property table after transforms:  '${probeProduct}'`;
     const exactLog = [
       `PROPERTY CHANGE: Adding PackageCode property. Its value is '${probePackage}'.`,
       productIdentityLine,
@@ -719,7 +761,10 @@ test(
     ].join('\r\n');
 
     const runParser = (log, exitCode = 1603) => {
-      writeFileSync(logPath, Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]));
+      writeFileSync(
+        logPath,
+        Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]),
+      );
       const script = `
 $ErrorActionPreference = 'Stop'
 $tokens = $null
@@ -745,16 +790,44 @@ Assert-DowngradeRejected ${exitCode} ${quote(probeProduct)} ${quote(probePackage
       assert.throws(() => runParser(exactLog, 0));
       assert.throws(() => runParser(exactLog.replace(probePackage, installedProduct)));
       assert.throws(() => runParser(exactLog.replace(probeProduct, installedProduct)));
-      assert.throws(() => runParser(exactLog.replace('ProductVersion = 0.0.1', 'ProductVersion = 0.1.36')));
-      assert.throws(() => runParser(exactLog.replace('WIX_DOWNGRADE_DETECTED', 'UNRELATED_PRODUCT')));
-      assert.throws(() => runParser(exactLog.replace('Doing action: FindRelatedProducts', 'Skipping FindRelatedProducts action: not run in maintenance mode')));
-      assert.throws(() => runParser(exactLog.replace('LaunchConditions. Return value 3', 'LaunchConditions. Return value 1')));
-      assert.throws(() => runParser(`${exactLog}\r\nProduct registered: entering maintenance mode`));
-      assert.throws(() => runParser(exactLog.replace(productIdentityLine, productIdentityLine.replace(/^MSI \(s\) \(10:20\) \[00:00:00:001\]: /u, ''))));
+      assert.throws(() =>
+        runParser(exactLog.replace('ProductVersion = 0.0.1', 'ProductVersion = 0.1.36')),
+      );
+      assert.throws(() =>
+        runParser(exactLog.replace('WIX_DOWNGRADE_DETECTED', 'UNRELATED_PRODUCT')),
+      );
+      assert.throws(() =>
+        runParser(
+          exactLog.replace(
+            'Doing action: FindRelatedProducts',
+            'Skipping FindRelatedProducts action: not run in maintenance mode',
+          ),
+        ),
+      );
+      assert.throws(() =>
+        runParser(
+          exactLog.replace('LaunchConditions. Return value 3', 'LaunchConditions. Return value 1'),
+        ),
+      );
+      assert.throws(() =>
+        runParser(`${exactLog}\r\nProduct registered: entering maintenance mode`),
+      );
+      assert.throws(() =>
+        runParser(
+          exactLog.replace(
+            productIdentityLine,
+            productIdentityLine.replace(/^MSI \(s\) \(10:20\) \[00:00:00:001\]: /u, ''),
+          ),
+        ),
+      );
       assert.throws(() => runParser(`${exactLog}\r\n${productIdentityLine}`));
-      assert.throws(() => runParser(exactLog.replace(productIdentityLine, `Error payload: ${productIdentityLine}`)));
+      assert.throws(() =>
+        runParser(exactLog.replace(productIdentityLine, `Error payload: ${productIdentityLine}`)),
+      );
       assert.throws(() => runParser(exactLog.replace('MSI (s) (10:20)', 'MSI (x) (10:20)')));
-      assert.throws(() => runParser(exactLog.replace('MSI (s) (10:20) [00:00:00:001]:', 'MSI (s) malformed:')));
+      assert.throws(() =>
+        runParser(exactLog.replace('MSI (s) (10:20) [00:00:00:001]:', 'MSI (s) malformed:')),
+      );
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -899,7 +972,10 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
     ['upgradeCode', '{FFFFFFFF-FFFF-4FFF-8FFF-FFFFFFFFFFFF}', /UpgradeCode/u],
     ['packageVersion', '0.1.36', /0\.0\.1/u],
   ]) {
-    assert.throws(() => validate(main, { ...probe, [property]: value }, expectedProbeIdentity), pattern);
+    assert.throws(
+      () => validate(main, { ...probe, [property]: value }, expectedProbeIdentity),
+      pattern,
+    );
   }
   assert.throws(
     () =>
@@ -918,7 +994,12 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
     /expected PackageCode/u,
   );
   assert.throws(
-    () => validate(main, { ...probe, upgradeRows: [...probe.upgradeRows, probe.upgradeRows[0]] }, expectedProbeIdentity),
+    () =>
+      validate(
+        main,
+        { ...probe, upgradeRows: [...probe.upgradeRows, probe.upgradeRows[0]] },
+        expectedProbeIdentity,
+      ),
     /exactly two Upgrade rows/u,
   );
   for (const [index, property, value, pattern] of [
@@ -927,7 +1008,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
     [0, 'attributes', 1, /attributes/u],
     [1, 'actionProperty', 'WIX_UPGRADE_DETECTED', /exact Upgrade actions/u],
   ]) {
-    const upgradeRows = structuredClone(probe.upgradeRows);
+    const upgradeRows = clone(probe.upgradeRows);
     upgradeRows[index][property] = value;
     assert.throws(() => validate(main, { ...probe, upgradeRows }, expectedProbeIdentity), pattern);
   }
@@ -977,7 +1058,9 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   const validateIndex = probeFlow.indexOf(
     'validateDowngradeProbeIdentity(msiInspection, downgradeInspection, downgradeIdentity)',
   );
-  const signIndex = probeFlow.indexOf('signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath)');
+  const signIndex = probeFlow.indexOf(
+    'signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath)',
+  );
   assert.ok(mutateIndex >= 0 && mutateIndex < reopenIndex);
   assert.ok(reopenIndex < validateIndex);
   assert.ok(validateIndex < signIndex, 'final reopened MSI identity must pass before signing');

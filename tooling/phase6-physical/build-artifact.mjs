@@ -2,7 +2,6 @@
 
 import { X509Certificate, createHash, randomUUID } from 'node:crypto';
 import {
-  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -115,11 +114,11 @@ export const PORTABLE_ROLES = Object.freeze([
     signaturePolicy: 'authenticode-required',
   },
   {
-key: 'tauriDriver',
-role: 'tauri-driver',
-path: 'tauri-driver.exe',
-versionPolicy: 'cargo-install-receipt',
-signaturePolicy: 'authenticode-required',
+    key: 'tauriDriver',
+    role: 'tauri-driver',
+    path: 'tauri-driver.exe',
+    versionPolicy: 'cargo-install-receipt',
+    signaturePolicy: 'authenticode-required',
   },
   {
     key: 'msedgeDriver',
@@ -134,6 +133,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PHYSICAL_CONFIG = 'apps/desktop/src-tauri/tauri.phase6-physical.conf.json';
 const WIX_FRAGMENT = 'apps/desktop/src-tauri/installer/optimizer-service.wxs';
 const LIFECYCLE_HELPER = 'tooling/phase6-physical/lifecycle-smoke.ps1';
+const ARTIFACT_ACL_HELPER = 'tooling/phase6-physical/protect-artifact-root.ps1';
 const DECLARED_INPUTS = Object.freeze([
   PHYSICAL_CONFIG,
   WIX_FRAGMENT,
@@ -148,6 +148,7 @@ const DECLARED_INPUTS = Object.freeze([
   'pnpm-lock.yaml',
   'tooling/phase6-physical/build-artifact.mjs',
   LIFECYCLE_HELPER,
+  ARTIFACT_ACL_HELPER,
 ]);
 const SHA_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
@@ -177,6 +178,38 @@ const canonicalValue = (value) => {
   return value;
 };
 export const canonicalBytes = (value) => Buffer.from(JSON.stringify(canonicalValue(value)), 'utf8');
+
+export function validatePortableRootAclSnapshot(snapshot, expectedUserSid) {
+  const sidPattern = /^S-1-5-21-(?:[0-9]+-){3}[0-9]+$/u;
+  if (!sidPattern.test(expectedUserSid || '')) fail('portable root ACL user SID is invalid');
+  if (
+    snapshot?.ownerSid !== 'S-1-5-32-544' ||
+    snapshot.protected !== true ||
+    !Array.isArray(snapshot.rules) ||
+    snapshot.rules.length !== 3
+  )
+    fail('portable root ACL owner, protection, or rule count is invalid');
+  const expected = new Map([
+    ['S-1-5-18', 2032127],
+    ['S-1-5-32-544', 2032127],
+    [expectedUserSid, 1179817],
+  ]);
+  for (const rule of snapshot.rules) {
+    const rights = expected.get(rule.sid);
+    if (
+      rights === undefined ||
+      rule.rights !== rights ||
+      rule.accessType !== 'Allow' ||
+      rule.inherited !== false ||
+      rule.inheritanceFlags !== 3 ||
+      rule.propagationFlags !== 0
+    )
+      fail('portable root ACL contains a widened or inherited rule');
+    expected.delete(rule.sid);
+  }
+  if (expected.size !== 0) fail('portable root ACL is missing a required rule');
+  return true;
+}
 
 const TAURI_BUNDLE_TYPE_UNKNOWN = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK', 'ascii');
 const TAURI_BUNDLE_TYPE_MSI = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_MSI', 'ascii');
@@ -663,6 +696,47 @@ const powershellJson = (script) => {
   return JSON.parse(output);
 };
 
+const currentWindowsUserSid = () =>
+  powershellJson(`
+[pscustomobject]@{ sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value } | ConvertTo-Json -Compress
+`).sid;
+
+const readPortableRootAcl = (path) => {
+  const escaped = path.replaceAll("'", "''");
+  return powershellJson(`
+$acl = Get-Acl -LiteralPath '${escaped}'
+$ownerSid = ([Security.Principal.NTAccount]::new($acl.Owner)).Translate([Security.Principal.SecurityIdentifier]).Value
+$rules = @($acl.Access | ForEach-Object {
+  [pscustomobject]@{
+    sid = $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value
+    rights = [int]$_.FileSystemRights
+    accessType = $_.AccessControlType.ToString()
+    inherited = [bool]$_.IsInherited
+    inheritanceFlags = [int]$_.InheritanceFlags
+    propagationFlags = [int]$_.PropagationFlags
+  }
+})
+[pscustomobject]@{ ownerSid = $ownerSid; protected = [bool]$acl.AreAccessRulesProtected; rules = $rules } | ConvertTo-Json -Depth 5 -Compress
+`);
+};
+
+const protectPortableArtifactRoot = (workRoot) => {
+  const expectedUserSid = currentWindowsUserSid();
+  const helper = join(ROOT, ARTIFACT_ACL_HELPER);
+  const escapedHelper = helper.replaceAll("'", "''");
+  const escapedRoot = workRoot.replaceAll("'", "''");
+  const script = `
+$arguments = @(
+  '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', '"${escapedHelper}"',
+  '-ArtifactRoot', '"${escapedRoot}"', '-ExpectedUserSid', '${expectedUserSid}'
+)
+$process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
+if ($process.ExitCode -ne 0) { throw "artifact ACL helper exited $($process.ExitCode)" }
+`;
+  run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script]);
+  validatePortableRootAclSnapshot(readPortableRootAcl(workRoot), expectedUserSid);
+};
+
 export const detectWebView2Runtime = () => {
   const evidence = powershellJson(`
 $ErrorActionPreference = 'Stop'
@@ -737,7 +811,8 @@ $certificates | ConvertTo-Json -Compress
     fail(
       `expected exactly one CurrentUser development signer matching the compiled SPKI, found ${matches.length}`,
     );
-  const [{ certificateBase64: _publicCertificate, ...signer }] = matches;
+  const signer = { ...matches[0] };
+  delete signer.certificateBase64;
   return signer;
 };
 
@@ -834,8 +909,7 @@ const portableRoleIdentity = (role, relativePath, absolutePath, metadata) => {
     versionPolicy: metadata.versionPolicy,
     signaturePolicy: metadata.signaturePolicy,
   };
-  if (metadata.cargoInstallReceipt)
-    identity.cargoInstallReceipt = metadata.cargoInstallReceipt;
+  if (metadata.cargoInstallReceipt) identity.cargoInstallReceipt = metadata.cargoInstallReceipt;
   return identity;
 };
 
@@ -1071,7 +1145,10 @@ export function validateMsiInspection(inspection, expected) {
   return true;
 }
 
-const normalizedMsiGuid = (value) => String(value || '').replace(/[{}]/gu, '').toLowerCase();
+const normalizedMsiGuid = (value) =>
+  String(value || '')
+    .replace(/[{}]/gu, '')
+    .toLowerCase();
 
 const MSI_GUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
@@ -1128,7 +1205,12 @@ export function validateDowngradeProbeIdentity(main, probe, expected) {
     fail('WIX_DOWNGRADE_DETECTED VersionMin must be exactly 0.0.1');
   if (upgradeRow?.attributes !== 513 || downgradeRow?.attributes !== 2)
     fail('downgrade probe Upgrade row attributes must remain exact');
-  if (upgradeRow?.language !== '' || downgradeRow?.language !== '' || upgradeRow?.remove !== '' || downgradeRow?.remove !== '')
+  if (
+    upgradeRow?.language !== '' ||
+    downgradeRow?.language !== '' ||
+    upgradeRow?.remove !== '' ||
+    downgradeRow?.remove !== ''
+  )
     fail('downgrade probe Upgrade nullable fields must remain empty');
   return true;
 }
@@ -1145,11 +1227,18 @@ const validateOriginalUpgradeRows = (inspection) => {
   if (
     normalizedMsiGuid(upgrade.upgradeCode) !== family ||
     normalizedMsiGuid(downgrade.upgradeCode) !== family ||
-    upgrade.versionMin !== '' || upgrade.versionMax !== version || upgrade.language !== '' ||
-    upgrade.attributes !== 513 || upgrade.remove !== '' ||
-    downgrade.versionMin !== version || downgrade.versionMax !== '' || downgrade.language !== '' ||
-    downgrade.attributes !== 2 || downgrade.remove !== ''
-  ) fail('original Upgrade rows must be exact');
+    upgrade.versionMin !== '' ||
+    upgrade.versionMax !== version ||
+    upgrade.language !== '' ||
+    upgrade.attributes !== 513 ||
+    upgrade.remove !== '' ||
+    downgrade.versionMin !== version ||
+    downgrade.versionMax !== '' ||
+    downgrade.language !== '' ||
+    downgrade.attributes !== 2 ||
+    downgrade.remove !== ''
+  )
+    fail('original Upgrade rows must be exact');
 };
 
 const setMsiProductCode = (path, productCode) => {
@@ -1175,7 +1264,10 @@ const setMsiIdentity = (path, { productCode, packageCode, packageVersion }, orig
   const msiPackageCode = formatMsiGuid(packageCode, 'downgrade PackageCode');
   if (packageVersion !== '0.0.1') fail('downgrade ProductVersion must be exactly 0.0.1');
   validateOriginalUpgradeRows(originalInspection);
-  const upgradeCode = formatMsiGuid(normalizedMsiGuid(originalInspection.upgradeCode), 'UpgradeCode');
+  const upgradeCode = formatMsiGuid(
+    normalizedMsiGuid(originalInspection.upgradeCode),
+    'UpgradeCode',
+  );
   run('powershell', [
     '-NoProfile',
     '-NonInteractive',
@@ -1615,7 +1707,7 @@ const buildAndSmoke = (options) => {
         msiInspection,
       }),
     );
-    chmodSync(workRoot, 0o555);
+    protectPortableArtifactRoot(workRoot);
     mkdirSync(dirname(finalRoot), { recursive: true });
     renameSync(workRoot, finalRoot);
     process.stdout.write(
