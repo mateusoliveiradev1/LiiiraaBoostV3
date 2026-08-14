@@ -19,6 +19,7 @@ import {
   validateArtifactManifest,
   validateInstallationManifest,
   validatePhysicalProfile,
+  validateWebView2RuntimeEvidence,
   validateWixContract,
   verifyDetachedCmsEvidence,
 } from './build-artifact.mjs';
@@ -148,6 +149,7 @@ const physicalProfile = () => ({
     createUpdaterArtifacts: false,
     windows: {
       allowDowngrades: false,
+      webviewInstallMode: { type: 'skip' },
       wix: {
         fragmentPaths: ['./installer/optimizer-service.wxs'],
         componentGroupRefs: ['Phase6PhysicalRuntime'],
@@ -211,6 +213,18 @@ test('physical Tauri profile is MSI-only, non-elevated, downgrade-safe, updater-
     ],
     [
       (value) => {
+        delete value.bundle.windows.webviewInstallMode;
+      },
+      /WebView2.*skip/u,
+    ],
+    [
+      (value) => {
+        value.bundle.windows.webviewInstallMode = { type: 'downloadBootstrapper' };
+      },
+      /WebView2.*skip/u,
+    ],
+    [
+      (value) => {
         value.bundle.windows.wix.fragmentPaths = [];
       },
       /fragment/u,
@@ -235,6 +249,80 @@ test('physical Tauri profile is MSI-only, non-elevated, downgrade-safe, updater-
     ],
   ])
     rejectsMutation(physicalProfile(), mutate, validatePhysicalProfile, pattern);
+
+  const physical = JSON.parse(
+    readFileSync('apps/desktop/src-tauri/tauri.phase6-physical.conf.json', 'utf8'),
+  );
+  assert.deepEqual(physical.bundle.windows.webviewInstallMode, { type: 'skip' });
+  for (const path of [
+    'apps/desktop/src-tauri/tauri.conf.json',
+    'apps/desktop/src-tauri/tauri.staging.conf.json',
+  ]) {
+    const profile = JSON.parse(readFileSync(path, 'utf8'));
+    assert.notDeepEqual(
+      profile.bundle?.windows?.webviewInstallMode,
+      { type: 'skip' },
+      `${path} must retain its distribution WebView2 policy`,
+    );
+  }
+});
+
+const validWebView2RuntimeEvidence = () => ({
+  registryHive: 'HKEY_LOCAL_MACHINE',
+  registryKey:
+    'HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+  registryVersion: '151.0.4129.78',
+  executablePath:
+    'C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\151.0.4129.78\\msedgewebview2.exe',
+  fileVersion: '151.0.4129.78',
+  productName: 'Microsoft Edge WebView2',
+  signatureStatus: 'Valid',
+  publisher: 'Microsoft Corporation',
+  executableSha256: sha('d'),
+});
+
+test('WebView2 preflight accepts only the official runtime registry identity and signed matching runtime binary', () => {
+  assert.deepEqual(validateWebView2RuntimeEvidence(validWebView2RuntimeEvidence()), {
+    version: '151.0.4129.78',
+    executablePath:
+      'C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\151.0.4129.78\\msedgewebview2.exe',
+    executableSha256: sha('d'),
+  });
+
+  for (const [mutate, pattern] of [
+    [(value) => delete value.registryVersion, /version/u],
+    [(value) => (value.registryVersion = '0.0.0.0'), /version/u],
+    [(value) => (value.fileVersion = '150.0.0.0'), /version/u],
+    [
+      (value) =>
+        (value.registryKey =
+          'HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\{NOT-WEBVIEW2}'),
+      /registry/u,
+    ],
+    [
+      (value) =>
+        (value.executablePath =
+          'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\151.0.4129.78\\msedge.exe'),
+      /runtime executable/u,
+    ],
+    [(value) => (value.productName = 'Microsoft Edge'), /WebView2 product/u],
+    [(value) => (value.signatureStatus = 'UnknownError'), /signature/u],
+    [(value) => (value.publisher = 'Example Publisher'), /Microsoft publisher/u],
+    [(value) => (value.executableSha256 = ''), /SHA-256/u],
+  ])
+    rejectsMutation(
+      validWebView2RuntimeEvidence(),
+      mutate,
+      validateWebView2RuntimeEvidence,
+      pattern,
+    );
+
+  const lifecycle = readFileSync('tooling/phase6-physical/lifecycle-smoke.ps1', 'utf8');
+  assert.match(lifecycle, /F3017226-FE2A-4295-8BDF-00C3A9A7E4C5/u);
+  assert.match(lifecycle, /msedgewebview2\.exe/u);
+  assert.match(lifecycle, /Microsoft Edge WebView2/u);
+  assert.match(lifecycle, /Microsoft Corporation/u);
+  assert.doesNotMatch(lifecycle, /Microsoft\\Edge\\Application|msedge\.exe/u);
 });
 
 test('WiX uses installer tables for coherent service custody and contains no driver, shell, reboot, or recovery deletion authority', () => {
