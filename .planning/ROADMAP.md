@@ -798,7 +798,7 @@ Plans:
 **Wave 12** *(blocked on 06-29/06-35 as declared by each plan; parallel)*
 
 - [x] 06-30-PLAN.md — Authenticated local named-pipe Windows service host
-- [ ] 06-32-PLAN.md — Signed-artifact physical writer, explicit stage gates, and friends roster
+- [x] 06-32-PLAN.md — Signed-artifact physical writer, explicit stage gates, and friends roster
 
 **Wave 13** *(blocked on 06-30)*
 
@@ -926,7 +926,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 29/39 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 30/39 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

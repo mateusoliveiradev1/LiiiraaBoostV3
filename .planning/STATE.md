@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-30-PLAN.md
-last_updated: "2026-08-13T23:40:12.904Z"
-last_activity: 2026-08-13
+stopped_at: Completed 06-32-PLAN.md
+last_updated: "2026-08-14T00:11:39.933Z"
+last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 243
+  completed_plans: 244
   percent: 40
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 5 of 39
+Plan: 6 of 39
 Status: Ready to execute
-Last activity: 2026-08-13
+Last activity: 2026-08-14
 
 Progress: [██████████] 95%
 
@@ -271,6 +271,7 @@ _Updated after plan completion_
 | Phase 06 P39 | 15 min | 1 tasks | 13 files |
 | Phase 06 P35 | 19min | 1 tasks | 7 files |
 | Phase 06 P30 | 13 min | 1 tasks | 6 files |
+| Phase 06 P32 | 25 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -873,6 +874,10 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Production broker sessions require an owned restricted primary token bound to the authenticated SID/session — Metadata-only authentication remains debug-test-only so public identity strings cannot authorize effects.
 - [Phase 06]: Keep install secrets under machine-DPAPI and service-only protected ACL custody — Atomic write-through monotonic admission records preserve restart and downgrade authority.
 - [Phase 06]: Expose one nonblocking local-only bounded pipe — Lifecycle controls close admission without a network, remote-pipe, or generic-command fallback.
+- [Phase 06]: Accept physical evidence only after the fixed 06-35 verifier returns a literal verified verdict; envelope labels and hashes never establish artifact authority. — Preserves compiled-pin custody before untrusted envelope parsing.
+- [Phase 06]: Keep planned run and admitted-stage checks mutually exclusive and scoped to the exact predecessor chain; only final mode evaluates all four stages. — Supports safe stage-by-stage promotion without weakening final readiness.
+- [Phase 06]: Bind friends consent to exact locally previewed redacted bytes before export and require a strictly later immutable review. — Prevents consent from authorizing different or unreviewed diagnostics.
+- [Phase 06]: Revalidate canonical fixed-path roster CMS custody against the compiled SPKI on every friends ingestion. — Prevents a roster freeze from becoming stale trust after byte or signature substitution.
 
 ### Pending Todos
 
@@ -924,6 +929,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T23:40:12.895Z
-Stopped at: Completed 06-30-PLAN.md
+Last session: 2026-08-14T00:11:39.926Z
+Stopped at: Completed 06-32-PLAN.md
 Resume file: None
