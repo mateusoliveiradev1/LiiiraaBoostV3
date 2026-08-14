@@ -230,3 +230,39 @@ The completed boundaries are exactly `artifact-verifier-pass`, `simulation-admis
 - **Evidence SHA-256:** `f4de5d2d73ae9f28a04f14db7cf9b1d4d93a19d61d90ea14795f674c1e223b63`
 
 The prior clean checkpoint was renamed create-once and was not deleted. A distinct clean checkpoint was then created after the owner manually validated the local `LiiiraaLab` account. This is environment preparation only: it is not physical run evidence, does not unblock `managed-power-scheme-v43`, and does not authorize `RunCleanVm`. The next physical attempt requires a new monotonic operation version beginning again at deterministic simulation.
+
+---
+
+## Operation `managed-power-scheme-v44` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v44`
+- **Artifact manifest SHA-256:** `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f`
+- **Run evidence SHA-256:** `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e`
+- **Evidence manifest SHA-256:** `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v44",
+  "buildId": "physical-68bb4f974e23ee26-managed-power-scheme-v44",
+  "artifactManifestSha256": "71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f",
+  "runEvidenceSha256": "a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e",
+  "evidenceManifestSha256": "da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
