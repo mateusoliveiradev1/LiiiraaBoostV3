@@ -143,7 +143,7 @@ function Get-ExpectedInstallationManifestCustody {
     throw 'artifact installation manifest custody changed after canonical CMS verification'
   }
   $manifest = [Text.Encoding]::UTF8.GetString($manifestBytes) | ConvertFrom-Json
-  if ($manifest.kind -ne 'installation-manifest' -or $manifest.schemaVersion -ne '1.0' -or $manifest.files.PSObject.Properties.Count -ne 3) {
+  if ($manifest.kind -ne 'installation-manifest' -or $manifest.schemaVersion -ne '1.0' -or @($manifest.files.PSObject.Properties).Count -ne 3) {
     throw 'artifact installation manifest shape is invalid'
   }
   return [pscustomobject]@{
