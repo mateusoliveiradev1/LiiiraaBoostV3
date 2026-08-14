@@ -164,8 +164,7 @@ const canonicalValue = (value) => {
   }
   return value;
 };
-const canonicalBytes = (value) =>
-  Buffer.from(`${JSON.stringify(canonicalValue(value), null, 2)}\n`, 'utf8');
+export const canonicalBytes = (value) => Buffer.from(JSON.stringify(canonicalValue(value)), 'utf8');
 
 const TAURI_BUNDLE_TYPE_UNKNOWN = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK', 'ascii');
 const TAURI_BUNDLE_TYPE_MSI = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_MSI', 'ascii');
