@@ -31,7 +31,7 @@ const evidenceManifestPath = (): string => {
 };
 const MAX_REDACTED_BYTES = 65_536;
 const TRUSTED_INSTALLER_SPKI_SHA256 =
-  'sha256:e94302afbf0433f90fe4fd7dcf7433d65fea3b65d721fd37d9ec5848fc098890';
+  'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
 const HASH = /^(?:sha256:)?([a-f0-9]{64})$/u;
 const SECRET =
   /(?:authorization\s*:|bearer\s+|password\s*[=:]|secret\s*[=:]|token\s*[=:]|S-1-5-\d|serial(?:number)?\s*[=:])/iu;

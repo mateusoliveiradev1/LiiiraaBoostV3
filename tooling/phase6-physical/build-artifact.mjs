@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createHash, randomUUID } from 'node:crypto';
+import { X509Certificate, createHash, randomUUID } from 'node:crypto';
 import {
   chmodSync,
   copyFileSync,
@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 // 'clean-windows-vm.run-config.json owner-pc.run-config.json friends-pc.run-config.json artifact-manifest.json.p7s'
 
 export const TRUSTED_INSTALLER_SPKI_SHA256 =
-  'sha256:e94302afbf0433f90fe4fd7dcf7433d65fea3b65d721fd37d9ec5848fc098890';
+  'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -463,17 +463,38 @@ const powershellJson = (script) => {
   return JSON.parse(output);
 };
 
-const signerIdentity = () =>
-  powershellJson(`
+const certificateSpkiSha256 = (certificateBase64) => {
+  const certificate = new X509Certificate(Buffer.from(certificateBase64, 'base64'));
+  return sha256(certificate.publicKey.export({ type: 'spki', format: 'der' }));
+};
+
+const signerIdentity = (expectedSpki) => {
+  const candidates = powershellJson(`
 $ErrorActionPreference = 'Stop'
-$cert = Get-ChildItem Cert:\\CurrentUser\\My, Cert:\\LocalMachine\\My |
+$certificates = @(Get-ChildItem Cert:\\CurrentUser\\My |
   Where-Object { $_.Subject -eq 'CN=Liiiraa Boost Local Development' -and $_.HasPrivateKey } |
-  Select-Object -First 1
-if (-not $cert) { throw 'required non-exportable development certificate with private key was not found' }
-$spki = $cert.PublicKey.ExportSubjectPublicKeyInfo()
-$hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($spki)).ToLowerInvariant()
-[pscustomobject]@{ thumbprint = $cert.Thumbprint; subject = $cert.Subject; spkiSha256 = 'sha256:' + $hash; store = $cert.PSParentPath } | ConvertTo-Json -Compress
+  ForEach-Object {
+    [pscustomobject]@{
+      thumbprint = $_.Thumbprint
+      subject = $_.Subject
+      certificateBase64 = [Convert]::ToBase64String($_.RawData)
+      store = $_.PSParentPath
+    }
+  })
+$certificates | ConvertTo-Json -Compress
 `);
+  const matches = (Array.isArray(candidates) ? candidates : [candidates])
+    .filter(Boolean)
+    .map((candidate) => ({
+      ...candidate,
+      spkiSha256: certificateSpkiSha256(candidate.certificateBase64),
+    }))
+    .filter((candidate) => candidate.spkiSha256 === expectedSpki);
+  if (matches.length !== 1)
+    fail(`expected exactly one CurrentUser development signer matching the compiled SPKI, found ${matches.length}`);
+  const [{ certificateBase64: _publicCertificate, ...signer }] = matches;
+  return signer;
+};
 
 const assertElevated = () => {
   const elevated = run(
@@ -554,9 +575,10 @@ $cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.C
 $cms.Decode([IO.File]::ReadAllBytes('${signature}'))
 $cms.CheckSignature($true)
 $cert = $cms.SignerInfos[0].Certificate
-$spki = 'sha256:' + [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($cert.PublicKey.ExportSubjectPublicKeyInfo())).ToLowerInvariant()
-[pscustomobject]@{ contentMatched = $true; signatureValid = $true; signerSpkiSha256 = $spki; liveHashesMatched = $true; authenticodeValid = $true } | ConvertTo-Json -Compress
+[pscustomobject]@{ contentMatched = $true; signatureValid = $true; signerCertificateBase64 = [Convert]::ToBase64String($cert.RawData); liveHashesMatched = $true; authenticodeValid = $true } | ConvertTo-Json -Compress
 `);
+  evidence.signerSpkiSha256 = certificateSpkiSha256(evidence.signerCertificateBase64);
+  delete evidence.signerCertificateBase64;
   if (evidence.signerSpkiSha256 !== expectedSpki)
     fail('CMS signer SPKI does not match compiled trust pin');
   return evidence;
@@ -793,7 +815,7 @@ const buildAndSmoke = (options) => {
     assertElevated();
     const signtool = findSignTool();
     if (!signtool) fail('Windows SDK signtool.exe is unavailable');
-    const signer = signerIdentity();
+    const signer = signerIdentity(TRUSTED_INSTALLER_SPKI_SHA256);
     if (signer.spkiSha256 !== TRUSTED_INSTALLER_SPKI_SHA256)
       fail(`certificate SPKI mismatch: ${signer.spkiSha256}`);
     assertDeclaredInputState({

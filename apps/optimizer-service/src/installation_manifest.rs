@@ -14,7 +14,7 @@ use sha2::{Digest, Sha256};
 /// signing certificate embedded in `quality/evidence/phase-02/staged/liiiraa-desktop.exe`.
 /// The private key is not present in the repository and no runtime input can replace this pin.
 pub const TRUSTED_INSTALLER_SPKI_SHA256: &str =
-    "sha256:e94302afbf0433f90fe4fd7dcf7433d65fea3b65d721fd37d9ec5848fc098890";
+    "sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2";
 
 // Key-link witness: 'WinVerifyTrust authenticates verify_installed_manifest'
 

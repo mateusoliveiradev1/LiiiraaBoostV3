@@ -65,8 +65,8 @@ completed: 2026-08-13
 
 ## Compiled Pin Provenance
 
-- `TRUSTED_INSTALLER_SPKI_SHA256` is `sha256:e94302afbf0433f90fe4fd7dcf7433d65fea3b65d721fd37d9ec5848fc098890`.
-- The value is the SHA-256 digest of the DER SubjectPublicKeyInfo extracted from the reviewed Authenticode certificate embedded in `quality/evidence/phase-02/staged/liiiraa-desktop.exe` (`CN=Liiiraa Boost Local Development`).
+- `TRUSTED_INSTALLER_SPKI_SHA256` was rotated during Plan 06-31 local-environment preparation to `sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2`.
+- The value is the SHA-256 digest of the DER SubjectPublicKeyInfo from the new CurrentUser CNG code-signing certificate (`CN=Liiiraa Boost Local Development`), whose private key is non-exportable and development-only. The earlier Phase 2 public certificate remains historical evidence and is no longer a trust anchor.
 - No private key, raw certificate, thumbprint override, environment variable, document field, CLI flag, or renderer input can replace this compiled authority.
 
 ## TDD Execution
