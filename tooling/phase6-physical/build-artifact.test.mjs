@@ -177,6 +177,7 @@ const wix = () => `<?xml version="1.0"?>
     <ComponentGroup Id="Phase6PhysicalRuntime">
       <ComponentRef Id="InstallationManifestComponent" />
       <ComponentRef Id="OptimizerServiceComponent" />
+      <ComponentRef Id="phase6_physical_runner" />
     </ComponentGroup>
   </Fragment>
 </Wix>`;
@@ -268,6 +269,13 @@ test('WiX uses installer tables for coherent service custody and contains no dri
         ),
       ),
     /repository-root.*staging/u,
+  );
+  assert.throws(
+    () =>
+      validateWixContract(
+        wix().replace('Id="phase6_physical_runner"', 'Id="Phase6RunnerComponent"'),
+      ),
+    /generated runner component/u,
   );
   for (const [target, replacement, pattern] of [
     ['Account="LocalSystem"', 'Account="LocalService"', /LocalSystem/u],
