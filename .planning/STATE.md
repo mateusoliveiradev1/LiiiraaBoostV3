@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-31-PLAN.md
-last_updated: "2026-08-14T13:29:51.662Z"
+stopped_at: Completed 06-38-PLAN.md
+last_updated: "2026-08-14T13:55:54.415Z"
 last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 248
+  completed_plans: 249
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 10 of 39
+Plan: 11 of 39
 Status: Ready to execute
 Last activity: 2026-08-14
 
@@ -276,6 +276,7 @@ _Updated after plan completion_
 | Phase 06 P37 | 29 min | 1 tasks | 7 files |
 | Phase 06 P33 | 21min | 1 tasks | 6 files |
 | Phase 06 P31 | 11h25m | 2 tasks | 38 files |
+| Phase 06 P38 | 18min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -893,6 +894,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Physical apply and friends export require exact local confirmation phrases — The runner cannot auto-approve plan mutation or fabricate participant consent.
 - [Phase 06]: Preserve the restricted service SID and protected ACL custody while removing WTS from optimizer startup. — Installed startup validates custody/storage and opens the local pipe without selecting a user; only the authenticated connected peer may supply a PID/image/SID/session-bound token and lifetime-scoped effect lease, with no WTS fallback.
 - [Phase 06]: Prove protected installed-manifest custody by composition, not broader authority. — An administrator read denial is combined with builder-verified canonical/CMS artifact bytes, direct version/size/SHA-256/Authenticode checks for all three installed binaries, and restricted-service startup plus two real authenticated pipe probes; ACLs remain unchanged and no SYSTEM helper is introduced.
+- [Phase 06]: Use evaluator-exported PLAN-01..08 and D-01..35 as the only deterministic simulation coverage authorities. — Prevents drift to legacy five-ID coverage.
+- [Phase 06]: Derive deterministic evidence timestamps from immutable artifact authority and prohibit human review, owner/friends consent, Narrator comprehension, or physical PASS claims. — Keeps simulation truthful and non-physical.
+- [Phase 06]: Preserve the full v1/v2 UAT prefix and snapshot exact superseded v2 manifest bytes before replacing current evidence authority. — Maintains append-only blocked history while advancing current authority.
 
 ### Pending Todos
 
@@ -944,6 +948,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T13:29:51.653Z
-Stopped at: Completed 06-31-PLAN.md
+Last session: 2026-08-14T13:55:54.408Z
+Stopped at: Completed 06-38-PLAN.md
 Resume file: None
