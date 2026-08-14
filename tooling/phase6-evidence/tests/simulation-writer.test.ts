@@ -118,17 +118,20 @@ const fixture = (operationVersion = 'managed-power-scheme-v41') => {
   };
 };
 
-const appendSuccessorArtifact = (setup: ReturnType<typeof fixture>) => {
-  const operationVersion = 'managed-power-scheme-v43';
-  const buildId = 'physical-build-managed-power-scheme-v43';
+const appendSuccessorArtifact = (
+  setup: ReturnType<typeof fixture>,
+  operationVersion = 'managed-power-scheme-v43',
+) => {
+  const buildId = `physical-build-${operationVersion}`;
+  const versionNumber = Number(operationVersion.slice(operationVersion.lastIndexOf('v') + 1));
   const artifactRoot = join(setup.root, 'target', 'phase6-physical', 'successor', buildId);
   const artifact = {
     ...setup.artifact,
     buildId,
-    createdAt: '2026-08-14T16:00:00.000Z',
-    manifestId: 'artifact-manifest-v43',
+    createdAt: `2026-08-14T${String(Math.min(versionNumber, 23)).padStart(2, '0')}:00:00.000Z`,
+    manifestId: `artifact-manifest-v${String(versionNumber)}`,
     operationVersionId: operationVersion,
-    sourceCommit: 'c'.repeat(40),
+    sourceCommit: String.fromCharCode(97 + (versionNumber % 6)).repeat(40),
   };
   for (const entry of Object.values(artifact.files)) {
     const relativePath = entry.relativePath;
@@ -357,6 +360,89 @@ describe('artifact-bound atomic admission', () => {
       priorManifestBytes,
     );
     expect(historical.manifestRecord!.sha256).toBe(sha256(priorManifestBytes));
+    expect(readFileSync(setup.uatPath, 'utf8').startsWith(uatBefore)).toBe(true);
+  });
+
+  it('RED: extends an existing schema v3 chain with one authorized v44 successor', () => {
+    const setup = fixture();
+    writeCanonicalSimulationEvidence({
+      artifactManifestPath: setup.artifactPath,
+      evidenceManifestPath: setup.evidenceManifestPath,
+      harnessPath: setup.harnessPath,
+      minimumVersion: 'managed-power-scheme-v3',
+      summaryPath: setup.summaryPath,
+      uatPath: setup.uatPath,
+      workspaceRoot: setup.root,
+    });
+    const v43 = appendSuccessorArtifact(setup);
+    writeCanonicalSimulationEvidence({
+      artifactManifestPath: v43.artifactPath,
+      evidenceManifestPath: setup.evidenceManifestPath,
+      harnessPath: setup.harnessPath,
+      minimumVersion: 'managed-power-scheme-v43',
+      summaryPath: setup.summaryPath,
+      uatPath: setup.uatPath,
+      workspaceRoot: setup.root,
+    });
+    const v43ManifestBytes = readFileSync(setup.evidenceManifestPath, 'utf8');
+    const v43Manifest = JSON.parse(v43ManifestBytes) as {
+      deterministicAdmissions: {
+        operationVersion: string;
+        status: string;
+        runEvidenceSha256: string;
+        successorEvidenceSha256: string | null;
+        manifestRecord: { path: string; sha256: string } | null;
+      }[];
+    };
+    const v41Record = structuredClone(v43Manifest.deterministicAdmissions[0]?.manifestRecord);
+    const v43Admission = v43Manifest.deterministicAdmissions[1];
+    if (v43Admission === undefined) throw new Error('v43 active admission missing');
+    const uatBefore = readFileSync(setup.uatPath, 'utf8');
+    const v44 = appendSuccessorArtifact(setup, 'managed-power-scheme-v44');
+
+    const result = writeCanonicalSimulationEvidence({
+      artifactManifestPath: v44.artifactPath,
+      evidenceManifestPath: setup.evidenceManifestPath,
+      harnessPath: setup.harnessPath,
+      minimumVersion: 'managed-power-scheme-v44',
+      summaryPath: setup.summaryPath,
+      uatPath: setup.uatPath,
+      workspaceRoot: setup.root,
+    });
+    const current = JSON.parse(readFileSync(setup.evidenceManifestPath, 'utf8')) as {
+      deterministicAdmissions: {
+        operationVersion: string;
+        status: string;
+        runEvidenceSha256: string;
+        predecessorEvidenceSha256: string | null;
+        successorEvidenceSha256: string | null;
+        manifestRecord: { path: string; sha256: string } | null;
+      }[];
+    };
+    const [v41Current, v43Current, v44Current] = current.deterministicAdmissions;
+    if (v41Current === undefined || v43Current === undefined || v44Current === undefined)
+      throw new Error('three-link deterministic chain missing');
+
+    expect(result.operationVersion).toBe('managed-power-scheme-v44');
+    expect(current.deterministicAdmissions).toHaveLength(3);
+    expect(v41Current.manifestRecord).toEqual(v41Record);
+    expect(v43Current).toMatchObject({
+      operationVersion: 'managed-power-scheme-v43',
+      status: 'superseded',
+      successorEvidenceSha256: v44Current.runEvidenceSha256,
+    });
+    expect(v44Current).toMatchObject({
+      operationVersion: 'managed-power-scheme-v44',
+      status: 'active',
+      predecessorEvidenceSha256: v43Admission.runEvidenceSha256,
+      successorEvidenceSha256: null,
+      manifestRecord: null,
+    });
+    expect(v43Current.manifestRecord).not.toBeNull();
+    expect(readFileSync(resolve(setup.root, v43Current.manifestRecord!.path), 'utf8')).toBe(
+      v43ManifestBytes,
+    );
+    expect(v43Current.manifestRecord!.sha256).toBe(sha256(v43ManifestBytes));
     expect(readFileSync(setup.uatPath, 'utf8').startsWith(uatBefore)).toBe(true);
   });
 
