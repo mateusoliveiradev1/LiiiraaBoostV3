@@ -48,9 +48,7 @@ const manifestPath = () => join(sandbox, 'artifact-manifest.json');
 const envelopePath = () => join(sandbox, 'evidence', 'clean-windows-vm', 'raw-run-envelope.json');
 const evidencePath = () => resolve('tooling/phase6-evidence/evidence-manifest.json');
 
-const physicalRun = (
-  stage: Phase6RunEvidence['stage'] = 'clean-windows-vm',
-): Phase6RunEvidence => {
+const physicalRun = (stage: Phase6RunEvidence['stage'] = 'clean-windows-vm'): Phase6RunEvidence => {
   const initial = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
     stages: { runs: unknown[] }[];
   };
@@ -279,7 +277,11 @@ const prepareFriendsEnvelope = (): { path: string; run: Phase6RunEvidence } => {
   const manifest = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
     stages: { friendsRoster: { rosterSha256: string } | null; runs: unknown[] }[];
   };
-  const ownerPredecessor = { ...physicalRunWithoutManifest(), id: 'run-owner-001', stage: 'owner-pc' };
+  const ownerPredecessor = {
+    ...physicalRunWithoutManifest(),
+    id: 'run-owner-001',
+    stage: 'owner-pc',
+  };
   manifest.stages[2]!.runs.push(ownerPredecessor);
   writeFileSync(evidencePath(), `${JSON.stringify(manifest, null, 2)}\n`);
   const run = {
@@ -628,6 +630,65 @@ describe('artifact-verifier-first physical ingestion', () => {
     ).toThrow(/duplicate|exists/u);
     expect(snapshot()).toEqual(before);
   });
+
+  it('derives host metadata for a closed runner observation without inventing passed drills', () => {
+    const envelope = {
+      observation: {
+        id: 'run-clean-observation-001',
+        source: 'phase6-physical-runner-rust-1',
+        stage: 'clean-windows-vm',
+        participantId: 'owner-local',
+        machineSlot: null,
+        artifactManifestSha256: ARTIFACT_HASH,
+        configSha256: prefixed(
+          readFileSync(join(sandbox, 'configs/clean-windows-vm.run-config.json')),
+        ),
+        friendsRosterSha256: null,
+        continuation: [...CONTINUATION],
+        lifecycle: {
+          prepareObserved: true,
+          applyObserved: true,
+          rebootBoundaryObserved: true,
+          resumeObservedBeforeMutation: true,
+          restoreObserved: true,
+        },
+        journalObservationSha256: prefixed('observed-journal'),
+        receiptObservationSha256: prefixed('observed-receipt'),
+        diagnostics: {
+          redacted: true,
+          previewed: false,
+          consentBound: false,
+          autoUpload: false,
+          rawFieldsFound: [],
+          byteLength: Buffer.byteLength(REDACTED_OUTPUT),
+        },
+        coverageGaps: [
+          'physical-security-drills-unmeasured',
+          'physical-fault-drills-unmeasured',
+          'physical-accessibility-audit-unmeasured',
+        ],
+        recordedAt: '2030-01-15T18:00:00Z',
+      },
+      consent: null,
+      redactedOutput: REDACTED_OUTPUT,
+    };
+    writeFileSync(envelopePath(), `${JSON.stringify(envelope)}\n`);
+    const result = writePhysicalRunEvidence({
+      artifactManifestPath: manifestPath(),
+      runEnvelopePath: envelopePath(),
+      stage: 'clean-windows-vm',
+    });
+    expect(result.run.status).toBe('FAIL');
+    expect(result.run.security.ipcAdversarial).toBe('FAIL');
+    expect(result.run.faults.diskFull).toBe('FAIL');
+    expect(result.run.coverageGaps).toContain('physical-security-drills-unmeasured');
+    expect(result.consentRecordPath).toBeNull();
+    const manifest = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
+      stages: { runs: unknown[] }[];
+    };
+    expect(manifest.stages[1]!.runs).toHaveLength(0);
+    expect(existsSync(result.runRecordPath)).toBe(true);
+  });
 });
 
 describe('frozen friends roster and later review', () => {
@@ -771,12 +832,18 @@ describe('frozen friends roster and later review', () => {
   });
 
   it.each([
-    ['mismatched local preview bytes', (envelope: Record<string, unknown>) => {
-      (envelope['consent'] as Record<string, unknown>)['previewSha256'] = hash('other-preview');
-    }],
-    ['participant outside signed roster', (envelope: Record<string, unknown>) => {
-      (envelope['run'] as Record<string, unknown>)['participantId'] = prefixed('intruder');
-    }],
+    [
+      'mismatched local preview bytes',
+      (envelope: Record<string, unknown>) => {
+        (envelope['consent'] as Record<string, unknown>)['previewSha256'] = hash('other-preview');
+      },
+    ],
+    [
+      'participant outside signed roster',
+      (envelope: Record<string, unknown>) => {
+        (envelope['run'] as Record<string, unknown>)['participantId'] = prefixed('intruder');
+      },
+    ],
   ])('rejects %s without appending friends evidence', (_name, mutate) => {
     const prepared = prepareFriendsEnvelope();
     const envelope = JSON.parse(readFileSync(prepared.path, 'utf8')) as Record<string, unknown>;

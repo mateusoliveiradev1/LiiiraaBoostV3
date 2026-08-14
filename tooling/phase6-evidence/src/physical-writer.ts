@@ -414,10 +414,7 @@ const validateRun = (
   return run as unknown as Phase6RunEvidence;
 };
 
-const validateFriendsRunCustody = (
-  run: Phase6RunEvidence,
-  authority: StageAuthority,
-): void => {
+const validateFriendsRunCustody = (run: Phase6RunEvidence, authority: StageAuthority): void => {
   if (run.stage !== 'friends-pc') {
     if (run.friendsRosterSha256 !== null)
       throw new Error('Friends roster authority is forbidden outside friends stage.');
@@ -433,7 +430,11 @@ const validateFriendsRunCustody = (
     authority.config['friendsRosterSignaturePath'],
     'friends roster signature',
   );
-  if (signaturePath !== `${rosterPath}.p7s` || !existsSync(rosterPath) || !existsSync(signaturePath))
+  if (
+    signaturePath !== `${rosterPath}.p7s` ||
+    !existsSync(rosterPath) ||
+    !existsSync(signaturePath)
+  )
     throw new Error('Friends roster signed pair is missing from fixed config custody.');
   verifyRosterCms(rosterPath, signaturePath);
   const roster = readJson(rosterPath, 'friends roster');
@@ -491,6 +492,162 @@ const validateConsent = (
   return value as unknown as Phase6Consent;
 };
 
+const writePhysicalObservationAttempt = (
+  envelope: JsonObject,
+  stage: Phase6PhysicalStage,
+  authority: StageAuthority,
+  manifest: Phase6EvidenceManifest,
+): { run: Phase6RunEvidence; runRecordPath: string; consentRecordPath: null } => {
+  assertExactKeys(
+    envelope,
+    ['observation', 'consent', 'redactedOutput'],
+    'physical observation envelope',
+  );
+  const observation = envelope['observation'];
+  const redactedOutput = envelope['redactedOutput'];
+  if (!isObject(observation) || typeof redactedOutput !== 'string')
+    throw new Error('Physical observation envelope is invalid.');
+  assertExactKeys(
+    observation,
+    [
+      'id',
+      'source',
+      'stage',
+      'participantId',
+      'machineSlot',
+      'artifactManifestSha256',
+      'configSha256',
+      'friendsRosterSha256',
+      'continuation',
+      'lifecycle',
+      'journalObservationSha256',
+      'receiptObservationSha256',
+      'diagnostics',
+      'coverageGaps',
+      'recordedAt',
+    ],
+    'physical runner observation',
+  );
+  if (
+    observation['source'] !== 'phase6-physical-runner-rust-1' ||
+    observation['stage'] !== stage ||
+    observation['artifactManifestSha256'] !== authority.artifactManifestSha256 ||
+    unprefix(observation['configSha256'], 'observation config') !== authority.configSha256 ||
+    JSON.stringify(observation['continuation']) !== JSON.stringify(CONTINUATION)
+  )
+    throw new Error('Physical observation custody or continuation mismatch.');
+  const lifecycle = observation['lifecycle'];
+  if (
+    !isObject(lifecycle) ||
+    lifecycle['prepareObserved'] !== true ||
+    lifecycle['applyObserved'] !== true ||
+    lifecycle['rebootBoundaryObserved'] !== true ||
+    lifecycle['resumeObservedBeforeMutation'] !== true ||
+    lifecycle['restoreObserved'] !== true
+  )
+    throw new Error('Physical observation lifecycle is incomplete.');
+  const diagnostics = observation['diagnostics'];
+  if (
+    !isObject(diagnostics) ||
+    diagnostics['redacted'] !== true ||
+    diagnostics['autoUpload'] !== false ||
+    !Array.isArray(diagnostics['rawFieldsFound']) ||
+    diagnostics['rawFieldsFound'].length !== 0 ||
+    diagnostics['byteLength'] !== Buffer.byteLength(redactedOutput, 'utf8') ||
+    Buffer.byteLength(redactedOutput, 'utf8') > MAX_REDACTED_BYTES ||
+    SECRET.test(redactedOutput)
+  )
+    throw new Error('Physical observation diagnostics are unsafe or inconsistent.');
+  const gaps = observation['coverageGaps'];
+  if (!Array.isArray(gaps) || gaps.length === 0 || !gaps.every((gap) => typeof gap === 'string'))
+    throw new Error('Physical observation must disclose every unmeasured gate.');
+  const predecessor = manifest.stages[PHASE6_PROMOTION_STAGES.indexOf(stage) - 1]?.runs.at(-1);
+  if (predecessor === undefined)
+    throw new Error('Physical observation predecessor is unavailable.');
+  const relative = (path: string): string =>
+    path.slice(authority.root.length + 1).replaceAll('\\', '/');
+  const run: Phase6RunEvidence = {
+    id: String(observation['id']),
+    source: 'phase6-physical-runner-rust-1',
+    stage,
+    evidenceKind: 'physical',
+    status: 'FAIL',
+    operationVersion: authority.operationVersionId,
+    buildId: authority.buildId,
+    participantId: String(observation['participantId']),
+    machineSlot: typeof observation['machineSlot'] === 'string' ? observation['machineSlot'] : null,
+    artifactManifestSha256: unprefix(authority.artifactManifestSha256, 'artifact authority'),
+    configSha256: authority.configSha256,
+    friendsRosterSha256:
+      typeof observation['friendsRosterSha256'] === 'string'
+        ? unprefix(observation['friendsRosterSha256'], 'observation friends roster')
+        : null,
+    predecessorRunEvidenceSha256: phase6EvidenceSha256(predecessor),
+    recordedAt: String(observation['recordedAt']),
+    exportedAt: null,
+    expiresAt: String(observation['recordedAt']),
+    artifacts: [
+      { path: relative(authority.msiPath), sha256: authority.msiSha256 },
+      { path: relative(authority.runnerPath), sha256: authority.runnerSha256 },
+      { path: relative(authority.configPath), sha256: authority.configSha256 },
+    ],
+    cycle: {
+      prepare: 'PASS',
+      apply: 'PASS',
+      verifyApply: 'PASS',
+      restartRequired: true,
+      restart: 'PASS',
+      restore: 'PASS',
+      verifyRestore: 'PASS',
+    },
+    continuation: [...CONTINUATION],
+    journalSha256: unprefix(observation['journalObservationSha256'], 'journal observation'),
+    receiptSha256: unprefix(observation['receiptObservationSha256'], 'receipt observation'),
+    security: {
+      ipcAdversarial: 'FAIL',
+      replayRejected: false,
+      identitySpoofRejected: false,
+      sessionSwapRejected: false,
+    },
+    faults: { diskFull: 'FAIL', crash: 'FAIL', reboot: 'PASS', drift: 'FAIL' },
+    accessibility: { status: 'FAIL', seriousOrCriticalViolations: 0 },
+    diagnostics: {
+      redacted: true,
+      previewed: diagnostics['previewed'] === true,
+      consentBound: diagnostics['consentBound'] === true,
+      autoUpload: false,
+      rawFieldsFound: [],
+      byteLength: Buffer.byteLength(redactedOutput, 'utf8'),
+    },
+    revocation: {
+      signed: true,
+      blocksNewApply: false,
+      localRecoveryAvailable: true,
+      remoteRollback: false,
+      remoteExecution: false,
+    },
+    coverageGaps: gaps as string[],
+    universalSupportClaim: false,
+    manualOverride: false,
+  };
+  if (stage === 'friends-pc') {
+    if (!isObject(envelope['consent']))
+      throw new Error('Friends observation requires local consent.');
+  } else if (envelope['consent'] !== null) {
+    throw new Error('Consent is forbidden outside friends observations.');
+  }
+  const runRecordPath = join(
+    'tooling/phase6-evidence/records',
+    stage,
+    'attempts',
+    `${run.id}.json`,
+  );
+  if (existsSync(runRecordPath))
+    throw new Error('Create-only physical observation already exists.');
+  writeExclusiveJson(runRecordPath, run);
+  return { run, runRecordPath, consentRecordPath: null };
+};
+
 export const writePhysicalRunEvidence = (input: {
   artifactManifestPath: string;
   runEnvelopePath: string;
@@ -510,6 +667,10 @@ export const writePhysicalRunEvidence = (input: {
   )
     throw new Error('Run envelope path is not the signed config path.');
   const envelope = readJson(input.runEnvelopePath, 'physical run envelope');
+  if ('observation' in envelope) {
+    const loaded = loadEvidence();
+    return writePhysicalObservationAttempt(envelope, input.stage, authority, loaded.manifest);
+  }
   assertExactKeys(envelope, ['run', 'consent', 'redactedOutput'], 'physical run envelope');
   if (
     typeof envelope['redactedOutput'] !== 'string' ||

@@ -15,6 +15,10 @@ phase6-physical = []
 name = "liiiraa-desktop"
 path = "src/main.rs"
 
+[[bin]]
+name = "phase6-physical-runner"
+path = "src/bin/phase6-physical-runner.rs"
+
 [build-dependencies]
 tauri-build = { version = "=2.6.3", features = [] }
 
@@ -41,7 +45,7 @@ tauri-plugin-process = "=2.3.1"
 tauri-plugin-single-instance = "=2.4.3"
 tauri-plugin-updater = "=2.10.1"
 tauri-plugin-window-state = "=2.4.1"
-windows = { version = "=0.62.2", features = ["Wdk_System_SystemServices", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Networking_WinHttp", "Win32_Security_Cryptography", "Win32_Storage_FileSystem", "Win32_System_Com", "Win32_System_IO", "Win32_System_Performance", "Win32_System_Pipes", "Win32_System_SystemInformation", "Win32_System_Threading", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "=0.62.2", features = ["Wdk_System_SystemServices", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Networking_WinHttp", "Win32_Security", "Win32_Security_Authorization", "Win32_Security_Cryptography", "Win32_Security_WinTrust", "Win32_Storage_FileSystem", "Win32_System_ApplicationInstallationAndServicing", "Win32_System_Com", "Win32_System_IO", "Win32_System_Performance", "Win32_System_Pipes", "Win32_System_Power", "Win32_System_Registry", "Win32_System_Restore", "Win32_System_SystemInformation", "Win32_System_Threading", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 [dev-dependencies]
 proptest = "=1.11.0"
