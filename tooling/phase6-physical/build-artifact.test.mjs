@@ -526,6 +526,14 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
 });
 
+test('Windows handle-growth proof runs in a dedicated subprocess', () => {
+  const source = readFileSync('apps/optimizer-service/tests/physical_user_context.rs', 'utf8');
+  assert.match(source, /current_exe\(\)/u);
+  assert.match(source, /LIIIRAA_HANDLE_GROWTH_CHILD/u);
+  assert.match(source, /--exact/u);
+  assert.match(source, /after <= before \+ 2/u);
+});
+
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
   const programDataSddl =
     'O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
