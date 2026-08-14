@@ -180,3 +180,22 @@ The create-once v42 bytes and CMS evidence remain historical and unchanged. The 
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v43` — CLEAN WINDOWS VM BLOCKED
+
+- **Recorded at:** `2026-08-14T22:12:11.2674205Z`
+- **Required VM:** `LiiiraaBoost-W11-25H2-Clean`
+- **Required clean checkpoint:** `Clean-Windows-Ready`
+- **Build ID:** `physical-3eec8d7e3665a7f3-managed-power-scheme-v43`
+- **Artifact manifest SHA-256:** `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa`
+- **Result:** `BLOCKED-HYPERV-INTEGRATION-SERVICES-UNHEALTHY`
+- **Physical mutation status:** none
+- **Human review:** not presented; Task 2 remains closed
+
+The exact elevated `RunCleanVm` bridge was invoked once. It re-verified the immutable artifact and the fresh deterministic admission, then failed the live Hyper-V audit because the required integration services were not healthy. The failure occurred before the clean checkpoint restore, VM start, artifact copy, guest runner, installed checkpoint, apply approval, restart, bounded-evidence copy, or `physical-writer` ingestion.
+
+The immutable blocker record is `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-191211-clean-vm-BLOCKED.json`, SHA-256 `fc7f2fe875daf0f7ad6c5b33fbeaa9c53c2a7b3dcd09690a5836fa216db0c5a0`. Its completed boundaries are exactly `artifact-verifier-pass` and `simulation-admission-pass`, and its reason is `BLOCKED: Hyper-V integration services are not healthy.`
+
+The plan verifier `rtk pnpm phase6:verify -- --mode planned --require-run-evidence clean-windows-vm` exited nonzero as required, with `ok: false`, `runReadyForReview: false`, highest admitted stage `deterministic-simulation`, and diagnostic `PHYSICAL_RUN_EVIDENCE_MISSING`. No physical PASS, reviewer approval, or replacement operation version is claimed. Resume only after the exact VM integration services are healthy; do not reuse this attempt as physical evidence.
