@@ -349,11 +349,21 @@ fn live_hash_authenticode_version_acl_reparse_downgrade_and_replay_fail_closed()
 #[test]
 fn windows_cryptography_and_wintrust_bindings_are_typed_and_reachable() {
     use windows::Win32::Security::{
-        Cryptography::{CertGetCertificateContextProperty, CryptQueryObject},
+        Cryptography::{
+            CertGetCertificateContextProperty, CryptQueryObject,
+            CryptVerifyDetachedMessageSignature,
+        },
         WinTrust::WinVerifyTrust,
     };
 
     let _crypt_query_object = CryptQueryObject;
+    let _crypt_verify_detached = CryptVerifyDetachedMessageSignature;
     let _cert_property = CertGetCertificateContextProperty;
     let _win_verify_trust = WinVerifyTrust;
+
+    let source = include_str!("../src/installation_manifest.rs");
+    assert!(
+        source.contains("CryptVerifyDetachedMessageSignature("),
+        "installed CMS must use the CryptoAPI operation dedicated to detached signatures"
+    );
 }
