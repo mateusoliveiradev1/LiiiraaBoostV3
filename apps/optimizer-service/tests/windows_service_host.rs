@@ -14,9 +14,12 @@ use std::{
 
 use service::ipc::{Broker, BrokerConfig, ClientIdentity};
 use service::windows_pipe::{
-    AuthenticatedClientToken, FrameError, HostLifecycle, HostState, PipeHostConfig, decode_frame,
-    encode_frame,
+    AuthenticatedClientToken, FrameError, HostError, HostErrorCode, HostLifecycle, HostState,
+    PipeHostConfig, decode_frame, encode_frame,
 };
+
+#[cfg(windows)]
+use windows_service::service::{ServiceExitCode, ServiceState};
 
 static NEXT_DATABASE: AtomicUsize = AtomicUsize::new(1);
 
@@ -69,6 +72,46 @@ fn installed_host_uses_the_only_local_bounded_endpoint() {
     assert_eq!(config.write_timeout, Duration::from_secs(5));
     assert_eq!(config.request_timeout, Duration::from_secs(5));
     assert!(config.reject_remote_clients);
+}
+
+#[cfg(windows)]
+#[test]
+fn startup_failures_reach_scm_as_stable_bounded_service_specific_codes() {
+    let cases = [
+        (HostErrorCode::InstalledCustody, 63_101_u32),
+        (HostErrorCode::InteractiveSession, 63_102_u32),
+        (HostErrorCode::RestrictedToken, 63_103_u32),
+        (HostErrorCode::StorageAdmission, 63_104_u32),
+        (HostErrorCode::PipeAdmission, 63_105_u32),
+    ];
+
+    let mut observed = Vec::new();
+    for (stage, expected) in cases {
+        let error = HostError::for_test(stage);
+        assert_eq!(error.service_specific_exit_code(), expected);
+
+        let status = service::windows_service_host::startup_failure_status(error);
+        assert_eq!(status.current_state, ServiceState::Stopped);
+        assert_eq!(
+            status.exit_code,
+            ServiceExitCode::ServiceSpecific(expected),
+            "SCM must preserve the bounded startup-stage code"
+        );
+        observed.push(expected);
+    }
+
+    observed.sort_unstable();
+    observed.dedup();
+    assert_eq!(observed.len(), cases.len(), "startup codes must be unique");
+    assert!(observed.iter().all(|code| (63_101..=63_105).contains(code)));
+}
+
+#[cfg(windows)]
+#[test]
+fn service_wrapper_never_reports_the_legacy_generic_startup_code() {
+    let source = include_str!("../src/main.rs");
+    assert!(!source.contains("ServiceSpecific(1)"));
+    assert!(source.contains("startup_failure_status(error)"));
 }
 
 #[test]
