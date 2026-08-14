@@ -21,10 +21,7 @@ const THUMBPRINT: &str = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 #[test]
 fn msi_database_view_accepts_only_canonical_local_verbatim_disk_paths() {
     assert_eq!(
-        local_msi_database_path(Path::new(
-            r"\\?\C:\phase6\artifact\liiiraa-boost.msi"
-        ))
-        .unwrap(),
+        local_msi_database_path(Path::new(r"\\?\C:\phase6\artifact\liiiraa-boost.msi")).unwrap(),
         PathBuf::from(r"C:\phase6\artifact\liiiraa-boost.msi")
     );
 
@@ -35,6 +32,7 @@ fn msi_database_view_accepts_only_canonical_local_verbatim_disk_paths() {
         r"C:\phase6\artifact\liiiraa-boost.msi",
         r"phase6\artifact\liiiraa-boost.msi",
         r"\\?\C:phase6\artifact\liiiraa-boost.msi",
+        "\\\\?\\Ń:\\phase6\\artifact\\liiiraa-boost.msi",
         r"\\?\C:\phase6\..\liiiraa-boost.msi",
         r"\\?\C:\phase6\.\liiiraa-boost.msi",
         r"\\?\C:\phase6\\liiiraa-boost.msi",

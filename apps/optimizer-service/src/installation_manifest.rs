@@ -23,6 +23,39 @@ pub const TRUSTED_INSTALLER_SPKI_SHA256: &str =
 const INSTALLATION_MANIFEST_NAME: &str = "installation-manifest.json";
 const INSTALLATION_SIGNATURE_NAME: &str = "installation-manifest.json.p7s";
 
+#[cfg(windows)]
+pub(crate) fn local_msi_database_path(path: &Path) -> Result<PathBuf, CustodyError> {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+
+    let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+    let is_ascii_drive = wide
+        .get(4)
+        .is_some_and(|value| matches!(*value, 0x41..=0x5a | 0x61..=0x7a));
+    if wide.len() < 8
+        || wide[..4] != [b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16]
+        || !is_ascii_drive
+        || wide[5] != b':' as u16
+        || wide[6] != b'\\' as u16
+    {
+        return Err(CustodyError::path("msi-local-verbatim-disk"));
+    }
+
+    for segment in wide[7..].split(|value| *value == b'\\' as u16) {
+        if segment.is_empty()
+            || segment == [b'.' as u16]
+            || segment == [b'.' as u16, b'.' as u16]
+            || segment
+                .iter()
+                .any(|value| *value == 0 || *value == b':' as u16 || *value == b'/' as u16)
+        {
+            return Err(CustodyError::path("msi-local-canonical-shape"));
+        }
+    }
+
+    Ok(PathBuf::from(OsString::from_wide(&wide[4..])))
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CustodyErrorCode {
     Acl,
@@ -871,7 +904,13 @@ pub(crate) mod windows_backend {
     }
 
     fn msi_product_version(path: &Path) -> Result<String, CustodyError> {
-        let path_wide = wide_path(path);
+        let database_path = super::local_msi_database_path(path)?;
+        let canonical_database_path = std::fs::canonicalize(&database_path)
+            .map_err(|_| CustodyError::path("msi-database-canonicalize"))?;
+        if canonical_database_path != path {
+            return Err(CustodyError::path("msi-database-canonical-drift"));
+        }
+        let path_wide = wide_path(&database_path);
         let read_only = [0_u16];
         let query = wide("SELECT `Value` FROM `Property` WHERE `Property`='ProductVersion'");
         let mut database = MSIHANDLE::default();
