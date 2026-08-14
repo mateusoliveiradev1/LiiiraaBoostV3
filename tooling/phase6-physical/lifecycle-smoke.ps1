@@ -6,6 +6,8 @@ param(
   [Parameter(Mandatory = $true)][string]$OutputRoot,
   [Parameter(Mandatory = $true)][string]$ExpectedWebView2Version,
   [Parameter(Mandatory = $true)][string]$ExpectedWebView2Sha256,
+  [Parameter(Mandatory = $true)][string]$ExpectedInstallationManifestSha256,
+  [Parameter(Mandatory = $true)][string]$ExpectedInstallationSignatureSha256,
   [Parameter(Mandatory = $true)][string]$ResultPath
 )
 
@@ -125,14 +127,55 @@ function Assert-BrokerClientBinding {
   }
 }
 
-function Get-InstalledSetHash {
+function Get-ExpectedInstallationManifestCustody {
+  $manifestPath = Join-Path $OutputRoot 'installation-manifest.json'
+  $signaturePath = "$manifestPath.p7s"
+  Assert-ContainedPath $manifestPath $OutputRoot 'installation manifest'
+  Assert-ContainedPath $signaturePath $OutputRoot 'installation manifest signature'
+  if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf) -or -not (Test-Path -LiteralPath $signaturePath -PathType Leaf)) {
+    throw 'verified artifact installation manifest custody pair is missing'
+  }
+  $manifestBytes = [IO.File]::ReadAllBytes($manifestPath)
+  $signatureBytes = [IO.File]::ReadAllBytes($signaturePath)
+  $manifestSha256 = 'sha256:' + [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($manifestBytes)).Replace('-', '').ToLowerInvariant()
+  $signatureSha256 = 'sha256:' + [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($signatureBytes)).Replace('-', '').ToLowerInvariant()
+  if ($manifestSha256 -ne $ExpectedInstallationManifestSha256 -or $signatureSha256 -ne $ExpectedInstallationSignatureSha256) {
+    throw 'artifact installation manifest custody changed after canonical CMS verification'
+  }
+  $manifest = [Text.Encoding]::UTF8.GetString($manifestBytes) | ConvertFrom-Json
+  if ($manifest.kind -ne 'installation-manifest' -or $manifest.schemaVersion -ne '1.0' -or $manifest.files.PSObject.Properties.Count -ne 3) {
+    throw 'artifact installation manifest shape is invalid'
+  }
+  return [pscustomobject]@{
+    Document = $manifest
+    ManifestSha256 = $manifestSha256
+    SignatureSha256 = $signatureSha256
+  }
+}
+
+function Assert-InstalledManifestAdministratorReadDenied {
   $manifestPath = Join-Path $installedRoot 'installation-manifest.json'
   $signaturePath = "$manifestPath.p7s"
   if (-not (Test-Path -LiteralPath $manifestPath) -or -not (Test-Path -LiteralPath $signaturePath)) {
     throw 'installed manifest custody pair is missing'
   }
-  $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-  $entries = foreach ($property in ($manifest.files.PSObject.Properties | Sort-Object Name)) {
+  $denied = $false
+  try {
+    [IO.File]::ReadAllBytes($manifestPath) | Out-Null
+  } catch {
+    $exception = $_.Exception
+    if ($exception -is [UnauthorizedAccessException] -or $exception.InnerException -is [UnauthorizedAccessException]) {
+      $denied = $true
+    } else {
+      throw
+    }
+  }
+  if (-not $denied) { throw 'administrator unexpectedly read protected installed manifest' }
+}
+
+function Get-InstalledSetHash([object]$ExpectedCustody) {
+  Assert-InstalledManifestAdministratorReadDenied
+  $entries = foreach ($property in ($ExpectedCustody.Document.files.PSObject.Properties | Sort-Object Name)) {
     $entry = $property.Value
     $path = Join-Path $installedRoot $entry.relativePath
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -143,11 +186,18 @@ function Get-InstalledSetHash {
     if ($item.Length -ne $entry.sizeBytes -or $hash -ne $entry.sha256) {
       throw "installed live identity mismatch: $($entry.relativePath)"
     }
+    if ($item.VersionInfo.FileVersion -ne $entry.version) {
+      throw "installed file version mismatch: $($entry.relativePath)"
+    }
     $signature = Get-AuthenticodeSignature -LiteralPath $path
     if (-not $signature.SignerCertificate -or $signature.Status -notin @('Valid', 'UnknownError')) {
       throw "installed Authenticode verification failed: $($entry.relativePath)"
     }
-    [ordered]@{ role = $entry.role; relativePath = $entry.relativePath; sizeBytes = $item.Length; sha256 = $hash }
+    $certificateSha256 = 'sha256:' + [BitConverter]::ToString($signature.SignerCertificate.GetCertHash([Security.Cryptography.HashAlgorithmName]::SHA256)).Replace('-', '').ToLowerInvariant()
+    if ($certificateSha256 -ne $entry.authenticodeThumbprint) {
+      throw "installed Authenticode signer mismatch: $($entry.relativePath)"
+    }
+    [ordered]@{ role = $entry.role; relativePath = $entry.relativePath; version = $item.VersionInfo.FileVersion; sizeBytes = $item.Length; sha256 = $hash; authenticodeThumbprint = $certificateSha256 }
   }
   foreach ($driver in $portableDriverNames) {
     if (Test-Path -LiteralPath (Join-Path $installedRoot $driver)) {
@@ -155,8 +205,8 @@ function Get-InstalledSetHash {
     }
   }
   $document = [ordered]@{
-    manifestSha256 = 'sha256:' + (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
-    signatureSha256 = 'sha256:' + (Get-FileHash -Algorithm SHA256 -LiteralPath $signaturePath).Hash.ToLowerInvariant()
+    manifestSha256 = $ExpectedCustody.ManifestSha256
+    signatureSha256 = $ExpectedCustody.SignatureSha256
     roles = @($entries)
   }
   $bytes = [Text.Encoding]::UTF8.GetBytes(($document | ConvertTo-Json -Depth 6 -Compress))
@@ -199,18 +249,19 @@ try {
   if (-not (Test-Path -LiteralPath $MsiPath -PathType Leaf)) { throw 'MSI is missing' }
   if (-not (Test-Path -LiteralPath $DowngradeMsiPath -PathType Leaf)) { throw 'downgrade probe is missing' }
   $webView2Runtime = Get-VerifiedWebView2Runtime
+  $expectedCustody = Get-ExpectedInstallationManifestCustody
 
   Invoke-Msi @('/i', ('"' + $MsiPath + '"')) 'install' | Out-Null
   $installed = $true
   Assert-ServiceRunning
   Assert-BrokerClientBinding
-  $installedSet = Get-InstalledSetHash
+  $installedSet = Get-InstalledSetHash $expectedCustody
   $recoveryCustody = Get-RecoveryCustodyHash
 
   Invoke-Msi @('/fa', ('"' + $MsiPath + '"')) 'repair-update' | Out-Null
   Assert-ServiceRunning
   Assert-BrokerClientBinding
-  if ((Get-InstalledSetHash) -ne $installedSet) { throw 'repair changed the coherent installed set' }
+  if ((Get-InstalledSetHash $expectedCustody) -ne $installedSet) { throw 'repair changed the coherent installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'repair changed recovery custody' }
 
   $desktopPath = Join-Path $installedRoot 'liiiraa-desktop.exe'
@@ -221,12 +272,12 @@ try {
     $lock.Dispose()
   }
   Assert-ServiceRunning
-  if ((Get-InstalledSetHash) -ne $installedSet) { throw 'failed repair did not restore the coherent installed set' }
+  if ((Get-InstalledSetHash $expectedCustody) -ne $installedSet) { throw 'failed repair did not restore the coherent installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'failed repair changed recovery custody' }
 
   $downgradeExit = Invoke-MsiExpectedFailure @('/i', ('"' + $DowngradeMsiPath + '"')) 'downgrade-rejection'
   Assert-ServiceRunning
-  if ((Get-InstalledSetHash) -ne $installedSet) { throw 'downgrade attempt changed the installed set' }
+  if ((Get-InstalledSetHash $expectedCustody) -ne $installedSet) { throw 'downgrade attempt changed the installed set' }
   if ((Get-RecoveryCustodyHash) -ne $recoveryCustody) { throw 'downgrade attempt changed recovery custody' }
 
   Invoke-Msi @('/x', $ProductCode) 'uninstall' | Out-Null
@@ -244,6 +295,10 @@ try {
     install = 'passed'
     brokerClientBinding = 'passed'
     brokerClientConnections = 4
+    installedManifestAdministratorReadDenied = $true
+    artifactManifestCanonicalCmsVerified = $true
+    installedBinaryIdentitiesVerified = 3
+    serviceAcceptedProtectedManifest = $true
     repairUpdate = 'passed'
     rollbackFailureDrill = 'passed'
     rollbackFailureExitCode = $rollbackExit

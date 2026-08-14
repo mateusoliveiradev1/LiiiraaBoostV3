@@ -1083,6 +1083,8 @@ const runLifecycleSmoke = ({
   productCode,
   outputRoot,
   webView2Runtime,
+  installationManifestSha256,
+  installationSignatureSha256,
 }) => {
   const resultPath = join(outputRoot, 'elevated-lifecycle-result.json');
   const helper = join(ROOT, LIFECYCLE_HELPER);
@@ -1097,6 +1099,8 @@ $arguments = @(
   '-OutputRoot', '"${outputRoot.replaceAll("'", "''")}"',
   '-ExpectedWebView2Version', '${webView2Runtime.version.replaceAll("'", "''")}',
   '-ExpectedWebView2Sha256', '${webView2Runtime.executableSha256.replaceAll("'", "''")}',
+  '-ExpectedInstallationManifestSha256', '${installationManifestSha256}',
+  '-ExpectedInstallationSignatureSha256', '${installationSignatureSha256}',
   '-ResultPath', '"${resultPath.replaceAll("'", "''")}"'
 )
 $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
@@ -1115,6 +1119,10 @@ if ($process.ExitCode -ne 0) { throw "elevated lifecycle helper exited $($proces
     result.recoveryCustodyPreserved !== true ||
     result.forcedReboot !== false ||
     result.residualsAbsent !== true ||
+    result.installedManifestAdministratorReadDenied !== true ||
+    result.artifactManifestCanonicalCmsVerified !== true ||
+    result.installedBinaryIdentitiesVerified !== 3 ||
+    result.serviceAcceptedProtectedManifest !== true ||
     result.webView2RuntimeVersion !== webView2Runtime.version ||
     result.webView2RuntimeSha256 !== webView2Runtime.executableSha256
   ) {
@@ -1455,6 +1463,8 @@ const buildAndSmoke = (options) => {
       productCode: msiInspection.productCode,
       outputRoot: workRoot,
       webView2Runtime,
+      installationManifestSha256: sha256(readFileSync(installationPath)),
+      installationSignatureSha256: sha256(readFileSync(`${installationPath}.p7s`)),
     });
     rmSync(downgradeMsiPath, { force: true });
     writeCreateOnce(
