@@ -887,11 +887,25 @@ const locateMsEdgeDriver = () => {
   return path;
 };
 
-const findBuiltMsi = () => {
-  const directory = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release', 'bundle', 'msi');
+const builtMsiDirectory = () =>
+  join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release', 'bundle', 'msi');
+
+const removeStaleBuiltMsis = () => {
+  const directory = builtMsiDirectory();
+  if (!existsSync(directory)) return;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isFile() && /\.msi$/iu.test(entry.name))
+      rmSync(join(directory, entry.name), { force: true });
+  }
+};
+
+const findBuiltMsi = (notBeforeMillis) => {
+  const directory = builtMsiDirectory();
   if (!existsSync(directory)) fail('Tauri did not emit an MSI directory');
   const files = walkFiles(directory).filter((path) => /\.msi$/iu.test(path));
   if (files.length !== 1) fail(`expected exactly one physical MSI, found ${files.length}`);
+  if (statSync(files[0]).mtimeMs < notBeforeMillis)
+    fail('Tauri emitted MSI is stale relative to the current bundle invocation');
   return files[0];
 };
 
@@ -910,7 +924,26 @@ function Read-Property([string]$name) {
 $files = $database.OpenView('SELECT FileName FROM File')
 $null = $files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $null = $files.Close()
 $custom = $database.OpenView('SELECT Action, Type, Source, Target FROM CustomAction'); $null = $custom.Execute(); $customActions = @(); while ($record = $custom.Fetch()) { $customActions += [pscustomobject]@{ action = $record.StringData(1); type = $record.IntegerData(2); source = $record.StringData(3); target = $record.StringData(4) } }; $null = $custom.Close()
-[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions) } | ConvertTo-Json -Depth 5 -Compress
+function Read-Record([string]$query) {
+  $view = $database.OpenView($query); $null = $view.Execute(); $record = $view.Fetch(); $null = $view.Close(); return $record
+}
+$storageComponent = Read-Record "SELECT \`Component\`, \`Directory_\` FROM \`Component\` WHERE \`Component\`='PhysicalProgramDataAclComponent'"
+$storageDirectory = Read-Record "SELECT \`Directory_Parent\` FROM \`Directory\` WHERE \`Directory\`='LiiiraaBoostProgramData'"
+$storageCreate = Read-Record "SELECT \`Directory_\`, \`Component_\` FROM \`CreateFolder\` WHERE \`Directory_\`='LiiiraaBoostProgramData'"
+$storagePermission = Read-Record "SELECT \`SDDLText\` FROM \`MsiLockPermissionsEx\` WHERE \`LockObject\`='LiiiraaBoostProgramData'"
+$storageFeature = Read-Record "SELECT \`Feature_\` FROM \`FeatureComponents\` WHERE \`Component_\`='PhysicalProgramDataAclComponent'"
+$programDataStorage = $null
+if ($storageComponent -and $storageDirectory -and $storageCreate -and $storagePermission -and $storageFeature) {
+  $programDataStorage = [pscustomobject]@{
+    component = $storageComponent.StringData(1)
+    directory = $storageComponent.StringData(2)
+    parent = $storageDirectory.StringData(1)
+    feature = $storageFeature.StringData(1)
+    createFolder = ($storageCreate.StringData(1) -eq 'LiiiraaBoostProgramData' -and $storageCreate.StringData(2) -eq 'PhysicalProgramDataAclComponent')
+    sddl = $storagePermission.StringData(1)
+  }
+}
+[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions); programDataStorage = $programDataStorage } | ConvertTo-Json -Depth 5 -Compress
 `);
 };
 
@@ -984,6 +1017,17 @@ export function validateMsiInspection(inspection, expected) {
     )
   )
     fail('MSI inspection contains forbidden bootstrapper or shell authority');
+  const storage = inspection.programDataStorage;
+  if (
+    !storage ||
+    storage.component !== 'PhysicalProgramDataAclComponent' ||
+    storage.directory !== 'LiiiraaBoostProgramData' ||
+    storage.parent !== 'CommonAppDataFolder' ||
+    storage.feature !== 'External' ||
+    storage.createFolder !== true ||
+    storage.sddl !== PROGRAM_DATA_STORAGE_SDDL
+  )
+    fail('MSI must contain the protected ProgramData storage tables');
   return true;
 }
 
@@ -1260,11 +1304,14 @@ const buildAndSmoke = (options) => {
     if (existsSync(wixStaging))
       fail('WiX physical staging directory already exists; refusing ambiguous input');
     mkdirSync(wixStaging, { recursive: false });
+    let msiBuildStartedAt = 0;
     try {
       copyFileSync(built.service, join(wixStaging, 'liiiraa-optimizer-service.exe'));
       copyFileSync(built.runner, join(wixStaging, 'phase6-physical-runner.exe'));
       copyFileSync(installationPath, join(wixStaging, 'installation-manifest.json'));
       copyFileSync(`${installationPath}.p7s`, join(wixStaging, 'installation-manifest.json.p7s'));
+      removeStaleBuiltMsis();
+      msiBuildStartedAt = Date.now();
       run(process.execPath, [
         pnpmCli,
         '--filter',
@@ -1282,7 +1329,7 @@ const buildAndSmoke = (options) => {
     } finally {
       rmSync(wixStaging, { recursive: true, force: true });
     }
-    const emittedMsi = findBuiltMsi();
+    const emittedMsi = findBuiltMsi(msiBuildStartedAt);
     const msiPath = join(workRoot, 'liiiraa-boost.msi');
     copyFileSync(emittedMsi, msiPath);
     stripMsiCustomActions(msiPath);
