@@ -161,22 +161,24 @@ const wix = () => `<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
-      <ComponentGroup Id="Phase6PhysicalRuntime">
-        <Component Id="InstallationManifestComponent" Guid="*">
-          <File Id="InstallationManifestFile" Source="installation-manifest.json" KeyPath="yes">
-            <PermissionEx User="SYSTEM" GenericAll="yes" />
-            <PermissionEx User="LiiiraaBoostOptimizer" GenericRead="yes" />
-          </File>
-        </Component>
-        <Component Id="OptimizerServiceComponent" Guid="*">
-          <File Id="OptimizerServiceFile" Source="liiiraa-optimizer-service.exe" KeyPath="yes" />
-          <ServiceInstall Id="OptimizerServiceInstall" Name="LiiiraaBoostOptimizer" Type="ownProcess" Start="auto" Account="LocalSystem" ErrorControl="normal">
-            <ServiceConfig ServiceSid="restricted" OnInstall="yes" OnReinstall="yes" />
-          </ServiceInstall>
-          <ServiceControl Id="OptimizerServiceControl" Name="LiiiraaBoostOptimizer" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
-        </Component>
-      </ComponentGroup>
+      <Component Id="InstallationManifestComponent" Guid="*">
+        <File Id="InstallationManifestFile" Source="installation-manifest.json" KeyPath="yes">
+          <PermissionEx User="SYSTEM" GenericAll="yes" />
+          <PermissionEx User="LiiiraaBoostOptimizer" GenericRead="yes" />
+        </File>
+      </Component>
+      <Component Id="OptimizerServiceComponent" Guid="*">
+        <File Id="OptimizerServiceFile" Source="liiiraa-optimizer-service.exe" KeyPath="yes" />
+        <ServiceInstall Id="OptimizerServiceInstall" Name="LiiiraaBoostOptimizer" Type="ownProcess" Start="auto" Account="LocalSystem" ErrorControl="normal">
+          <ServiceConfig ServiceSid="restricted" OnInstall="yes" OnReinstall="yes" />
+        </ServiceInstall>
+        <ServiceControl Id="OptimizerServiceControl" Name="LiiiraaBoostOptimizer" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+      </Component>
     </DirectoryRef>
+    <ComponentGroup Id="Phase6PhysicalRuntime">
+      <ComponentRef Id="InstallationManifestComponent" />
+      <ComponentRef Id="OptimizerServiceComponent" />
+    </ComponentGroup>
   </Fragment>
 </Wix>`;
 
@@ -237,6 +239,21 @@ test('physical Tauri profile is MSI-only, non-elevated, downgrade-safe, updater-
 
 test('WiX uses installer tables for coherent service custody and contains no driver, shell, reboot, or recovery deletion authority', () => {
   assert.doesNotThrow(() => validateWixContract(wix()));
+  const validWix = wix();
+  const componentGroupStart = validWix.indexOf('    <ComponentGroup');
+  const componentGroupEnd = validWix.indexOf('    </ComponentGroup>') +
+    '    </ComponentGroup>\n'.length;
+  const componentGroup = validWix.slice(componentGroupStart, componentGroupEnd);
+  const nestedComponentGroup =
+    validWix.slice(0, componentGroupStart) +
+    validWix.slice(componentGroupEnd).replace(
+      '    </DirectoryRef>',
+      `${componentGroup}    </DirectoryRef>`,
+    );
+  assert.throws(
+    () => validateWixContract(nestedComponentGroup),
+    /ComponentGroup.*DirectoryRef/u,
+  );
   for (const [target, replacement, pattern] of [
     ['Account="LocalSystem"', 'Account="LocalService"', /LocalSystem/u],
     ['Type="ownProcess"', 'Type="shareProcess"', /ownProcess/u],
