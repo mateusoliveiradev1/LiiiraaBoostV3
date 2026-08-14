@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  createCanonicalDeterministicSimulationEvidence,
   createTransactionalPackagedHarness,
   DeterministicBrokerProbe,
   PROMOTION_STAGES,
@@ -163,6 +164,76 @@ describe('physical promotion safety gate', () => {
 });
 
 describe('deterministic broker and failure drill hooks', () => {
+  it('emits the complete observation-first deterministic lifecycle without physical claims', () => {
+    const evidence = createCanonicalDeterministicSimulationEvidence({
+      buildSha256: BUILD_SHA256,
+      operationVersion: 'managed-power-scheme-v41',
+    });
+
+    expect(evidence.runKind).toBe('deterministic-simulation');
+    expect(evidence.physicalMutationExecuted).toBe(false);
+    expect(evidence.powerScheme).toEqual({
+      observed: REQUESTED_GUID,
+      prior: PRIOR_GUID,
+      requested: REQUESTED_GUID,
+      restored: PRIOR_GUID,
+    });
+    expect(evidence.canonicalSimulation).toMatchObject({
+      accessibilityAutomation: {
+        narratorComprehensionClaimed: false,
+        seriousOrCriticalViolations: 0,
+        status: 'PASS',
+      },
+      continuation: [
+        'installed-ready',
+        'checkpoint-ready',
+        'running',
+        'reboot-pending',
+        'resumed-observation',
+        'restored-complete',
+      ],
+      durableEvents: [
+        'recovery-prepared',
+        'apply-dispatch-recorded',
+        'apply-observation-recorded',
+        'apply-verified',
+        'reboot-checkpoint-recorded',
+        'reconciled-without-redispatch',
+        'restore-dispatch-recorded',
+        'restore-observation-recorded',
+        'restore-verified',
+      ],
+      faults: {
+        crash: 'PASS',
+        diskFull: 'PASS',
+        drift: 'PASS',
+        reboot: 'PASS',
+      },
+      humanReviewClaimed: false,
+      ownerOrFriendsConsentClaimed: false,
+      physicalPassClaimed: false,
+      revocation: {
+        blocksNewApply: true,
+        localRecoveryAvailable: true,
+        remoteExecution: false,
+        remoteRollback: false,
+      },
+    });
+    expect(evidence.canonicalSimulation?.journalSha256).toMatch(/^[0-9a-f]{64}$/u);
+    expect(evidence.canonicalSimulation?.receiptSha256).toMatch(/^[0-9a-f]{64}$/u);
+    expect(evidence.drills.map(({ kind }) => kind)).toEqual([
+      'legitimate-client',
+      'replay',
+      'same-user-spoof',
+      'wrong-session',
+      'remote-client',
+      'crash-before-observation',
+      'reboot-reconciliation',
+      'external-drift',
+      'disk-full',
+    ]);
+  });
+
   it('accepts one legitimate message and rejects replay, spoof, wrong-session, and remote clients', () => {
     const probe = new DeterministicBrokerProbe('signed-client-identity-v1', 'session-local-0001');
     const harness = createTransactionalPackagedHarness({
