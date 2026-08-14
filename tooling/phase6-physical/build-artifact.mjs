@@ -934,8 +934,8 @@ function Read-Property([string]$name) {
 $packageCode = $database.SummaryInformation(0).Property(9)
 $files = $database.OpenView('SELECT FileName FROM File')
 $null = $files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $null = $files.Close()
-$upgrade = $database.OpenView('SELECT \`UpgradeCode\`,\`VersionMin\`,\`VersionMax\`,\`Attributes\`,\`ActionProperty\` FROM \`Upgrade\`')
-$null = $upgrade.Execute(); $upgradeRows = @(); while ($record = $upgrade.Fetch()) { $upgradeRows += [pscustomobject]@{ upgradeCode = $record.StringData(1); versionMin = $record.StringData(2); versionMax = $record.StringData(3); attributes = $record.IntegerData(4); actionProperty = $record.StringData(5) } }; $null = $upgrade.Close()
+$upgrade = $database.OpenView('SELECT \`UpgradeCode\`,\`VersionMin\`,\`VersionMax\`,\`Language\`,\`Attributes\`,\`Remove\`,\`ActionProperty\` FROM \`Upgrade\`')
+$null = $upgrade.Execute(); $upgradeRows = @(); while ($record = $upgrade.Fetch()) { $upgradeRows += [pscustomobject]@{ upgradeCode = $record.StringData(1); versionMin = $record.StringData(2); versionMax = $record.StringData(3); language = $record.StringData(4); attributes = $record.IntegerData(5); remove = $record.StringData(6); actionProperty = $record.StringData(7) } }; $null = $upgrade.Close()
 $custom = $database.OpenView('SELECT Action, Type, Source, Target FROM CustomAction'); $null = $custom.Execute(); $customActions = @(); while ($record = $custom.Fetch()) { $customActions += [pscustomobject]@{ action = $record.StringData(1); type = $record.IntegerData(2); source = $record.StringData(3); target = $record.StringData(4) } }; $null = $custom.Close()
 function Read-Record([string]$query) {
   $view = $database.OpenView($query); $null = $view.Execute(); $record = $view.Fetch(); $null = $view.Close(); return $record
@@ -1101,8 +1101,29 @@ export function validateDowngradeProbeIdentity(main, probe, expected) {
     fail('WIX_DOWNGRADE_DETECTED VersionMin must be exactly 0.0.1');
   if (upgradeRow?.attributes !== 513 || downgradeRow?.attributes !== 2)
     fail('downgrade probe Upgrade row attributes must remain exact');
+  if (upgradeRow?.language !== '' || downgradeRow?.language !== '' || upgradeRow?.remove !== '' || downgradeRow?.remove !== '')
+    fail('downgrade probe Upgrade nullable fields must remain empty');
   return true;
 }
+
+const validateOriginalUpgradeRows = (inspection) => {
+  const version = inspection?.packageVersion;
+  const rows = inspection?.upgradeRows;
+  const family = normalizedMsiGuid(inspection?.upgradeCode);
+  if (!Array.isArray(rows) || rows.length !== 2) fail('original Upgrade rows must be exact');
+  const byAction = new Map(rows.map((row) => [row?.actionProperty, row]));
+  const upgrade = byAction.get('WIX_UPGRADE_DETECTED');
+  const downgrade = byAction.get('WIX_DOWNGRADE_DETECTED');
+  if (byAction.size !== 2 || !upgrade || !downgrade) fail('original Upgrade rows must be exact');
+  if (
+    normalizedMsiGuid(upgrade.upgradeCode) !== family ||
+    normalizedMsiGuid(downgrade.upgradeCode) !== family ||
+    upgrade.versionMin !== '' || upgrade.versionMax !== version || upgrade.language !== '' ||
+    upgrade.attributes !== 513 || upgrade.remove !== '' ||
+    downgrade.versionMin !== version || downgrade.versionMax !== '' || downgrade.language !== '' ||
+    downgrade.attributes !== 2 || downgrade.remove !== ''
+  ) fail('original Upgrade rows must be exact');
+};
 
 const setMsiProductCode = (path, productCode) => {
   const escaped = path.replaceAll("'", "''");
@@ -1121,11 +1142,13 @@ $view.Execute(); $view.Close(); $database.Commit()
   ]);
 };
 
-const setMsiIdentity = (path, { productCode, packageCode, packageVersion }) => {
+const setMsiIdentity = (path, { productCode, packageCode, packageVersion }, originalInspection) => {
   const escaped = path.replaceAll("'", "''");
   const msiProductCode = formatMsiGuid(productCode, 'downgrade ProductCode');
   const msiPackageCode = formatMsiGuid(packageCode, 'downgrade PackageCode');
   if (packageVersion !== '0.0.1') fail('downgrade ProductVersion must be exactly 0.0.1');
+  validateOriginalUpgradeRows(originalInspection);
+  const upgradeCode = formatMsiGuid(normalizedMsiGuid(originalInspection.upgradeCode), 'UpgradeCode');
   run('powershell', [
     '-NoProfile',
     '-NonInteractive',
@@ -1140,10 +1163,13 @@ $product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHE
 $product.Execute(); $product.Close()
 $version = $database.OpenView("UPDATE Property SET Value='${packageVersion}' WHERE Property='ProductVersion'")
 $version.Execute(); $version.Close()
-$upgrade = $database.OpenView("UPDATE \`Upgrade\` SET \`VersionMax\`='${packageVersion}' WHERE \`ActionProperty\`='WIX_UPGRADE_DETECTED'")
-$upgrade.Execute(); $upgrade.Close()
-$downgrade = $database.OpenView("UPDATE \`Upgrade\` SET \`VersionMin\`='${packageVersion}' WHERE \`ActionProperty\`='WIX_DOWNGRADE_DETECTED'")
-$downgrade.Execute(); $downgrade.Close()
+$delete = $database.OpenView("DELETE FROM \`Upgrade\` WHERE \`ActionProperty\`=?")
+foreach ($action in @('WIX_UPGRADE_DETECTED','WIX_DOWNGRADE_DETECTED')) { $parameter = $installer.CreateRecord(1); $parameter.StringData(1) = $action; $delete.Execute($parameter) }
+$delete.Close()
+$insert = $database.OpenView("INSERT INTO \`Upgrade\` (\`UpgradeCode\`,\`VersionMin\`,\`VersionMax\`,\`Language\`,\`Attributes\`,\`Remove\`,\`ActionProperty\`) VALUES (?,?,?,?,?,?,?)")
+$upgradeRecord = $installer.CreateRecord(7); $upgradeRecord.StringData(1) = '${upgradeCode}'; $upgradeRecord.StringData(3) = '${packageVersion}'; $upgradeRecord.IntegerData(5) = 513; $upgradeRecord.StringData(7) = 'WIX_UPGRADE_DETECTED'; $insert.Execute($upgradeRecord)
+$downgradeRecord = $installer.CreateRecord(7); $downgradeRecord.StringData(1) = '${upgradeCode}'; $downgradeRecord.StringData(2) = '${packageVersion}'; $downgradeRecord.IntegerData(5) = 2; $downgradeRecord.StringData(7) = 'WIX_DOWNGRADE_DETECTED'; $insert.Execute($downgradeRecord)
+$insert.Close()
 $summary = $database.SummaryInformation(1)
 $summary.Property(9) = $msiPackageCode
 $summary.Persist()
@@ -1536,7 +1562,7 @@ const buildAndSmoke = (options) => {
       packageCode: randomUUID(),
       packageVersion: '0.0.1',
     };
-    setMsiIdentity(downgradeMsiPath, downgradeIdentity);
+    setMsiIdentity(downgradeMsiPath, downgradeIdentity, msiInspection);
     const downgradeInspection = inspectMsi(downgradeMsiPath);
     validateDowngradeProbeIdentity(msiInspection, downgradeInspection, downgradeIdentity);
     signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath);

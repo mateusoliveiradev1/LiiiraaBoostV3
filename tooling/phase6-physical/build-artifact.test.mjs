@@ -804,14 +804,18 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
         upgradeCode: main.upgradeCode,
         versionMin: '',
         versionMax: '0.0.1',
+        language: '',
         attributes: 513,
+        remove: '',
         actionProperty: 'WIX_UPGRADE_DETECTED',
       },
       {
         upgradeCode: main.upgradeCode,
         versionMin: '0.0.1',
         versionMax: '',
+        language: '',
         attributes: 2,
+        remove: '',
         actionProperty: 'WIX_DOWNGRADE_DETECTED',
       },
     ],
@@ -868,7 +872,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.match(source, /\$msiPackageCode\s*=\s*'\$\{msiPackageCode\}'/u);
   assert.match(source, /\.Property\(9\)\s*=\s*\$msiPackageCode/u);
   assert.match(source, /const downgradeIdentity\s*=\s*\{/u);
-  assert.match(source, /setMsiIdentity\(downgradeMsiPath, downgradeIdentity\)/u);
+  assert.match(source, /setMsiIdentity\(downgradeMsiPath, downgradeIdentity, msiInspection\)/u);
   assert.match(
     source,
     /validateDowngradeProbeIdentity\(msiInspection, downgradeInspection, downgradeIdentity\)/u,
@@ -877,7 +881,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
   assert.ok(
     source.includes(
-      'SELECT \\`UpgradeCode\\`,\\`VersionMin\\`,\\`VersionMax\\`,\\`Attributes\\`,\\`ActionProperty\\` FROM \\`Upgrade\\`',
+      'SELECT \\`UpgradeCode\\`,\\`VersionMin\\`,\\`VersionMax\\`,\\`Language\\`,\\`Attributes\\`,\\`Remove\\`,\\`ActionProperty\\` FROM \\`Upgrade\\`',
     ),
   );
 
@@ -895,7 +899,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.match(identityWriter, /DELETE FROM \\`Upgrade\\` WHERE/u);
   assert.match(identityWriter, /INSERT INTO \\`Upgrade\\`/u);
   assert.match(identityWriter, /CreateRecord\(7\)/u);
-  assert.match(identityWriter, /original Upgrade rows must be exact/u);
+  assert.match(source, /original Upgrade rows must be exact/u);
 
   const probeFlow = source.slice(
     source.indexOf("const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi')"),
