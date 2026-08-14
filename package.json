@@ -53,6 +53,7 @@
     "phase4:verify": "node --experimental-strip-types tooling/phase4-evidence/src/evaluate.ts",
     "phase5:verify": "node tooling/phase5-evidence/run.mjs",
     "phase6:verify": "node --experimental-strip-types tooling/phase6-evidence/src/evaluate.ts",
+    "phase6:simulate": "node --experimental-strip-types tooling/phase6-evidence/src/simulation-writer.ts",
     "phase6:ingest-physical": "node --experimental-strip-types tooling/phase6-evidence/src/physical-writer.ts ingest",
     "phase6:freeze-friends-roster": "node --experimental-strip-types tooling/phase6-evidence/src/physical-writer.ts freeze-roster",
     "phase6:record-review": "node --experimental-strip-types tooling/phase6-evidence/src/physical-writer.ts review",

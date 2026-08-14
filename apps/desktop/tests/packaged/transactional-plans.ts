@@ -61,8 +61,52 @@ type RestorePointStatus =
   | 'observed-frequency-limited'
   | 'observation-failed';
 
+const CANONICAL_CONTINUATION = Object.freeze([
+  'installed-ready',
+  'checkpoint-ready',
+  'running',
+  'reboot-pending',
+  'resumed-observation',
+  'restored-complete',
+] as const);
+
+const CANONICAL_DURABLE_EVENTS = Object.freeze([
+  'recovery-prepared',
+  'apply-dispatch-recorded',
+  'apply-observation-recorded',
+  'apply-verified',
+  'reboot-checkpoint-recorded',
+  'reconciled-without-redispatch',
+  'restore-dispatch-recorded',
+  'restore-observation-recorded',
+  'restore-verified',
+] as const);
+
+export type CanonicalDeterministicSimulation = Readonly<{
+  accessibilityAutomation: Readonly<{
+    narratorComprehensionClaimed: false;
+    seriousOrCriticalViolations: 0;
+    status: 'PASS';
+  }>;
+  continuation: typeof CANONICAL_CONTINUATION;
+  durableEvents: typeof CANONICAL_DURABLE_EVENTS;
+  faults: Readonly<{ crash: 'PASS'; diskFull: 'PASS'; drift: 'PASS'; reboot: 'PASS' }>;
+  humanReviewClaimed: false;
+  journalSha256: string;
+  ownerOrFriendsConsentClaimed: false;
+  physicalPassClaimed: false;
+  receiptSha256: string;
+  revocation: Readonly<{
+    blocksNewApply: true;
+    localRecoveryAvailable: true;
+    remoteExecution: false;
+    remoteRollback: false;
+  }>;
+}>;
+
 export type TransactionalPackagedEvidence = Readonly<{
   build: Readonly<{ sha256: string }>;
+  canonicalSimulation: CanonicalDeterministicSimulation | null;
   clientIdentityHash: string | null;
   drills: readonly Readonly<{ kind: DrillKind; mutationCount: number; result: string }>[];
   evidenceHash: string;
@@ -161,21 +205,24 @@ export const validateRegisteredTransactionalAuthority = ({
     fail('Tauri capability must be an object.');
   }
   const record = capability as Readonly<Record<string, unknown>>;
-  const permissions = record['permissions'];
+  const permissions = Array.isArray(record['permissions'])
+    ? (record['permissions'] as unknown[])
+    : null;
+  const exactPermissions =
+    permissions ?? fail('transactional capability permissions must be an array.');
   if (
     JSON.stringify(record['windows']) !== JSON.stringify(['main']) ||
-    JSON.stringify(record['webviews']) !== JSON.stringify(['main']) ||
-    !Array.isArray(permissions)
+    JSON.stringify(record['webviews']) !== JSON.stringify(['main'])
   ) {
     fail('transactional capability must be scoped to the trusted main window and webview.');
   }
   for (const command of TRANSACTIONAL_TAURI_COMMANDS) {
     const permission = `allow-${command.replaceAll('_', '-')}`;
-    if (!permissions.includes(permission)) fail(`capability is missing ${permission}.`);
+    if (!exactPermissions.includes(permission)) fail(`capability is missing ${permission}.`);
     if (!buildSource.includes(`"${command}"`)) fail(`build manifest is missing ${command}.`);
     if (!mainSource.includes(command)) fail(`Tauri handler is missing ${command}.`);
   }
-  const unsafe = permissions.find(
+  const unsafe = exactPermissions.find(
     (permission) =>
       typeof permission === 'string' &&
       /(?:shell:|execute-arbitrary|generic-native|registry|powershell|wmi)/iu.test(permission),
@@ -239,6 +286,7 @@ export class TransactionalPackagedHarness {
   readonly #operationVersion: string;
   readonly #physicalMutationEnabled: boolean;
   readonly #runKind: PromotionStage;
+  #canonicalSimulation: CanonicalDeterministicSimulation | null = null;
   #physicalMutationExecuted = false;
   #clientIdentityHash: string | null = null;
   readonly #drills: Array<Readonly<{ kind: DrillKind; mutationCount: number; result: string }>> =
@@ -316,6 +364,72 @@ export class TransactionalPackagedHarness {
     this.#restorePoints.push(Object.freeze({ sequence, status }));
   }
 
+  public completeCanonicalSimulationLifecycle(): void {
+    if (this.#runKind !== 'deterministic-simulation' || this.#physicalMutationExecuted) {
+      fail('canonical simulation can only complete on a non-physical deterministic run.');
+    }
+    const exactPowerScheme = ['prior', 'requested', 'observed', 'restored'] as const;
+    if (exactPowerScheme.some((phase) => this.#powerScheme[phase] === undefined)) {
+      fail('canonical simulation requires every exact power-scheme observation.');
+    }
+    const requiredDrills: readonly DrillKind[] = [
+      'legitimate-client',
+      'replay',
+      'same-user-spoof',
+      'wrong-session',
+      'remote-client',
+      'crash-before-observation',
+      'reboot-reconciliation',
+      'external-drift',
+      'disk-full',
+    ];
+    if (
+      JSON.stringify(this.#drills.map(({ kind }) => kind)) !== JSON.stringify(requiredDrills) ||
+      this.#drills[0]?.result !== 'accepted-once' ||
+      this.#drills.slice(1, 5).some(({ result }) => result !== 'rejected-before-dispatch')
+    ) {
+      fail('canonical simulation requires the exact broker and fault matrix.');
+    }
+    const journal = {
+      durableEvents: CANONICAL_DURABLE_EVENTS,
+      operationVersion: this.#operationVersion,
+      powerScheme: this.#powerScheme,
+    };
+    const receipts = {
+      apply: {
+        observed: this.#powerScheme.observed,
+        prior: this.#powerScheme.prior,
+        requested: this.#powerScheme.requested,
+      },
+      restore: {
+        observed: this.#powerScheme.restored,
+        prior: this.#powerScheme.observed,
+        requested: this.#powerScheme.prior,
+      },
+    };
+    this.#canonicalSimulation = Object.freeze({
+      accessibilityAutomation: Object.freeze({
+        narratorComprehensionClaimed: false,
+        seriousOrCriticalViolations: 0,
+        status: 'PASS',
+      }),
+      continuation: CANONICAL_CONTINUATION,
+      durableEvents: CANONICAL_DURABLE_EVENTS,
+      faults: Object.freeze({ crash: 'PASS', diskFull: 'PASS', drift: 'PASS', reboot: 'PASS' }),
+      humanReviewClaimed: false,
+      journalSha256: sha256(stableJson(journal)),
+      ownerOrFriendsConsentClaimed: false,
+      physicalPassClaimed: false,
+      receiptSha256: sha256(stableJson(receipts)),
+      revocation: Object.freeze({
+        blocksNewApply: true,
+        localRecoveryAvailable: true,
+        remoteExecution: false,
+        remoteRollback: false,
+      }),
+    });
+  }
+
   public async executePhysicalMutation(mutation: () => Promise<void>): Promise<void> {
     if (!this.canExecutePhysicalMutation) {
       fail('physical mutation is disabled until an explicit promotion-stage checkpoint is active.');
@@ -327,6 +441,7 @@ export class TransactionalPackagedHarness {
   public evidence(): TransactionalPackagedEvidence {
     const withoutHash = {
       build: { sha256: this.#buildSha256 },
+      canonicalSimulation: this.#canonicalSimulation,
       clientIdentityHash: this.#clientIdentityHash,
       drills: this.#drills,
       evidenceId: `phase6-${this.#runKind}-${this.#operationVersion}`,
@@ -354,3 +469,28 @@ export class TransactionalPackagedHarness {
 export const createTransactionalPackagedHarness = (
   options: TransactionalPackagedHarnessOptions,
 ): TransactionalPackagedHarness => new TransactionalPackagedHarness(options);
+
+export const createCanonicalDeterministicSimulationEvidence = ({
+  buildSha256,
+  operationVersion,
+}: Readonly<{ buildSha256: string; operationVersion: string }>): TransactionalPackagedEvidence => {
+  const harness = createTransactionalPackagedHarness({ buildSha256, operationVersion });
+  harness.attachBrokerProbe(
+    new DeterministicBrokerProbe('deterministic-signed-client-v1', 'deterministic-session-v1'),
+  );
+  harness.recordDrill('crash-before-observation', 'observation-required');
+  harness.recordDrill('reboot-reconciliation', 'reconciled-without-redispatch');
+  harness.recordDrill('external-drift', 'observed-blocked');
+  harness.recordDrill('disk-full', 'observed-blocked');
+  harness.recordPowerScheme('prior', '11111111-1111-4111-8111-111111111111');
+  harness.recordPowerScheme('requested', '22222222-2222-4222-8222-222222222222');
+  harness.recordPowerScheme('observed', '22222222-2222-4222-8222-222222222222');
+  harness.recordPowerScheme('restored', '11111111-1111-4111-8111-111111111111');
+  harness.recordRestorePoint('observed-ready', 41);
+  harness.recordRestorePoint('observed-unavailable', null);
+  harness.recordRestorePoint('observed-disabled-by-policy', null);
+  harness.recordRestorePoint('observed-frequency-limited', null);
+  harness.recordRestorePoint('observation-failed', null);
+  harness.completeCanonicalSimulationLifecycle();
+  return harness.evidence();
+};

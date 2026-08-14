@@ -695,7 +695,7 @@ const validateRun = (
     diagnostics,
     !run.diagnostics.redacted ||
       !run.diagnostics.previewed ||
-      !run.diagnostics.consentBound ||
+      run.diagnostics.consentBound !== physical ||
       run.diagnostics.autoUpload ||
       run.diagnostics.rawFieldsFound.length > 0 ||
       !Number.isInteger(run.diagnostics.byteLength) ||
@@ -803,7 +803,7 @@ const validateConsent = (
     diagnostics,
     !isIsoDate(consent.recordedAt) ||
       !isIsoDate(run.exportedAt) ||
-      Date.parse(consent.recordedAt) >= Date.parse(run.exportedAt ?? ''),
+      Date.parse(consent.recordedAt) >= Date.parse(run.exportedAt),
     'CONSENT_NOT_BEFORE_EXPORT',
     `${path}.recordedAt`,
     'Consent must precede export strictly.',
@@ -1174,14 +1174,18 @@ export const evaluatePhase6Evidence = (
           ),
         );
     } else if (cell.stage !== 'deterministic-simulation') {
+      const singleRun = cell.runs[0];
+      const singleReview = cell.reviews[0];
       if (requiresAdmission) {
         if (
           cell.runs.length !== 1 ||
           cell.reviews.length !== 1 ||
+          singleRun === undefined ||
+          singleReview === undefined ||
           !validateReview(
             manifest,
-            cell.runs[0]!,
-            cell.reviews[0]!,
+            singleRun,
+            singleReview,
             null,
             `${path}.reviews[0]`,
             diagnostics,
@@ -1240,11 +1244,13 @@ export const evaluatePhase6Evidence = (
 export const parsePhase6CliOptions = (args: readonly string[] | undefined): Phase6CliOptions => {
   const fail = (): never => {
     throw new Error(
-      'Phase 6 CLI accepts only --mode planned with one canonical stage gate, or bare --mode final.',
+      'Phase 6 CLI accepts bare --mode planned for deterministic admission, planned with one canonical stage gate, or bare --mode final.',
     );
   };
   if (!Array.isArray(args)) return fail();
   if (args.length === 2 && args[0] === '--mode' && args[1] === 'final') return { mode: 'final' };
+  if (args.length === 2 && args[0] === '--mode' && args[1] === 'planned')
+    return { mode: 'planned', requireAdmittedStage: 'deterministic-simulation' };
   if (args.length !== 4 || args[0] !== '--mode' || args[1] !== 'planned' || !isStage(args[3]))
     return fail();
   if (args[2] === '--require-run-evidence') return { mode: 'planned', requireRunEvidence: args[3] };

@@ -166,10 +166,10 @@
         "continuation": {
           "const": [
             "installed-ready",
-            "checkpoint-created",
-            "reboot-requested",
+            "checkpoint-ready",
+            "running",
+            "reboot-pending",
             "resumed-observation",
-            "restore-requested",
             "restored-complete"
           ]
         },
@@ -262,7 +262,7 @@
       "properties": {
         "redacted": { "const": true },
         "previewed": { "const": true },
-        "consentBound": { "const": true },
+        "consentBound": { "type": "boolean" },
         "autoUpload": { "const": false },
         "rawFieldsFound": { "type": "array", "maxItems": 0 },
         "byteLength": { "type": "integer", "minimum": 1, "maximum": 65536 }

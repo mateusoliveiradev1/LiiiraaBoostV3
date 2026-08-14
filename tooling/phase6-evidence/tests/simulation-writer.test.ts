@@ -1,11 +1,5 @@
 import { createHash } from 'node:crypto';
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
@@ -16,6 +10,7 @@ import {
   assertCanonicalSimulationCandidate,
   createCanonicalSimulationCandidate,
   parseSimulationWriterCli,
+  type CanonicalSimulationCandidate,
   writeCanonicalSimulationEvidence,
 } from '../src/simulation-writer.js';
 
@@ -92,18 +87,19 @@ const fixture = (operationVersion = 'managed-power-scheme-v41') => {
       '',
     ].join('\n'),
   );
-  const uatPath = join(
-    root,
-    '.planning/phases/06-transactional-plans-and-recovery/06-UAT.md',
-  );
+  const uatPath = join(root, '.planning/phases/06-transactional-plans-and-recovery/06-UAT.md');
   const uatBytes = '# UAT\n\nmanaged-power-scheme-v1 BLOCKED\nmanaged-power-scheme-v2 BLOCKED\n';
   write(uatPath, uatBytes);
   const evidenceManifestPath = join(root, 'tooling/phase6-evidence/evidence-manifest.json');
-  const legacyBytes = `${JSON.stringify({
-    schemaVersion: 1,
-    operationVersion: 'managed-power-scheme-v2',
-    requirementsCoverage: ['PLAN-01', 'PLAN-05', 'PLAN-06', 'PLAN-07', 'PLAN-08'],
-  }, null, 2)}\n`;
+  const legacyBytes = `${JSON.stringify(
+    {
+      schemaVersion: 1,
+      operationVersion: 'managed-power-scheme-v2',
+      requirementsCoverage: ['PLAN-01', 'PLAN-05', 'PLAN-06', 'PLAN-07', 'PLAN-08'],
+    },
+    null,
+    2,
+  )}\n`;
   write(evidenceManifestPath, legacyBytes);
   const harnessPath = join(root, 'apps/desktop/tests/packaged/transactional-plans.ts');
   write(harnessPath, 'export const deterministicHarness = true;\n');
@@ -175,14 +171,14 @@ describe('canonical simulation candidate', () => {
     expect(() => assertCanonicalSimulationCandidate(candidate)).not.toThrow();
   });
 
-  it.each([
-    ['omitted requirement', (value: any) => value.requirementsCoverage.pop()],
-    ['reordered requirement', (value: any) => value.requirementsCoverage.reverse()],
-    ['duplicate requirement', (value: any) => (value.requirementsCoverage[7] = 'PLAN-07')],
-    ['unknown requirement', (value: any) => (value.requirementsCoverage[7] = 'PLAN-99')],
-    ['partial cycle', (value: any) => (value.run.cycle.restore = 'FAIL')],
-    ['physical relabel', (value: any) => (value.run.evidenceKind = 'physical')],
-    ['physical source', (value: any) => (value.run.source = 'phase6-physical-runner-rust-1')],
+  it.each<[string, (value: CanonicalSimulationCandidate) => unknown]>([
+    ['omitted requirement', (value) => value.requirementsCoverage.pop()],
+    ['reordered requirement', (value) => value.requirementsCoverage.reverse()],
+    ['duplicate requirement', (value) => (value.requirementsCoverage[7] = 'PLAN-07')],
+    ['unknown requirement', (value) => (value.requirementsCoverage[7] = 'PLAN-99')],
+    ['partial cycle', (value) => (value.run.cycle.restore = 'FAIL')],
+    ['physical relabel', (value) => (value.run.evidenceKind = 'physical')],
+    ['physical source', (value) => (value.run.source = 'phase6-physical-runner-rust-1')],
   ])('rejects %s before any persistence', (_name, mutate) => {
     const setup = fixture();
     const candidate = structuredClone(
@@ -219,15 +215,24 @@ describe('artifact-bound atomic admission', () => {
       uatPath: setup.uatPath,
       workspaceRoot: setup.root,
     });
-    const manifest = JSON.parse(readFileSync(setup.evidenceManifestPath, 'utf8')) as any;
+    const manifest = JSON.parse(readFileSync(setup.evidenceManifestPath, 'utf8')) as {
+      schemaVersion: number;
+      requirementsCoverage: string[];
+      legacyBlockedAttempts: { path: string }[];
+      stages: { runs: unknown[] }[];
+    };
     const uat = readFileSync(setup.uatPath, 'utf8');
-    const legacyPath = resolve(setup.root, manifest.legacyBlockedAttempts[0].path);
+    const legacy = manifest.legacyBlockedAttempts[0];
+    const deterministic = manifest.stages[0];
+    if (legacy === undefined || deterministic === undefined)
+      throw new Error('admitted manifest omitted deterministic or legacy evidence');
+    const legacyPath = resolve(setup.root, legacy.path);
 
     expect(result.operationVersion).toBe('managed-power-scheme-v41');
     expect(manifest.schemaVersion).toBe(2);
     expect(manifest.requirementsCoverage).toEqual(PHASE6_REQUIREMENTS);
-    expect(manifest.stages[0].runs).toHaveLength(1);
-    expect(manifest.stages.slice(1).every((cell: any) => cell.runs.length === 0)).toBe(true);
+    expect(deterministic.runs).toHaveLength(1);
+    expect(manifest.stages.slice(1).every((cell) => cell.runs.length === 0)).toBe(true);
     expect(uat.startsWith(setup.uatBytes)).toBe(true);
     expect(readFileSync(legacyPath, 'utf8')).toBe(setup.legacyBytes);
   });
