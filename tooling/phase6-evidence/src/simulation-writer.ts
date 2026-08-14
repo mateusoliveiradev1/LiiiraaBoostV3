@@ -623,6 +623,225 @@ export const writeCanonicalSimulationEvidence = (
       uatPath,
       workspaceRoot,
     });
+  if (isObject(oldManifest) && oldManifest['schemaVersion'] === 3) {
+    const priorBuild = oldManifest['immutableBuild'];
+    const priorArtifact = isObject(priorBuild) ? priorBuild['artifact'] : null;
+    const priorLegacy = oldManifest['legacyBlockedAttempts'];
+    const priorStages = oldManifest['stages'];
+    const priorAdmissionsValue = oldManifest['deterministicAdmissions'];
+    if (
+      !hasExactKeys(oldManifest, [
+        'schemaVersion',
+        'generatedAt',
+        'operationVersion',
+        'immutableBuild',
+        'promotionStage',
+        'requirementsCoverage',
+        'decisionCoverage',
+        'legacyBlockedAttempts',
+        'deterministicAdmissions',
+        'stages',
+      ]) ||
+      typeof oldManifest['operationVersion'] !== 'string' ||
+      oldManifest['promotionStage'] !== 'deterministic-simulation' ||
+      !isObject(priorBuild) ||
+      !hasExactKeys(priorBuild, ['id', 'commit', 'artifact', 'artifactManifestSha256']) ||
+      typeof priorBuild['id'] !== 'string' ||
+      typeof priorBuild['commit'] !== 'string' ||
+      !COMMIT.test(priorBuild['commit']) ||
+      !isObject(priorArtifact) ||
+      !hasExactKeys(priorArtifact, ['path', 'sha256']) ||
+      typeof priorArtifact['path'] !== 'string' ||
+      typeof priorArtifact['sha256'] !== 'string' ||
+      typeof priorBuild['artifactManifestSha256'] !== 'string' ||
+      unprefix(priorArtifact['sha256'], 'schema v3 artifact') !==
+        unprefix(priorBuild['artifactManifestSha256'], 'schema v3 artifact manifest') ||
+      !Array.isArray(oldManifest['requirementsCoverage']) ||
+      !Array.isArray(oldManifest['decisionCoverage']) ||
+      JSON.stringify(oldManifest['requirementsCoverage']) !== JSON.stringify(PHASE6_REQUIREMENTS) ||
+      JSON.stringify(oldManifest['decisionCoverage']) !== JSON.stringify(PHASE6_DECISIONS) ||
+      !Array.isArray(priorLegacy) ||
+      priorLegacy.some(
+        (reference) =>
+          !isObject(reference) ||
+          !hasExactKeys(reference, ['path', 'sha256']) ||
+          typeof reference['path'] !== 'string' ||
+          !HASH.test(String(reference['sha256'])),
+      ) ||
+      !Array.isArray(priorStages) ||
+      priorStages.length !== PHASE6_PROMOTION_STAGES.length ||
+      priorStages.some(
+        (cell, index) =>
+          !isObject(cell) ||
+          !hasExactKeys(cell, [
+            'stage',
+            'predecessorStage',
+            'friendsRoster',
+            'runs',
+            'consents',
+            'reviews',
+          ]) ||
+          cell['stage'] !== PHASE6_PROMOTION_STAGES[index] ||
+          cell['predecessorStage'] !==
+            (index === 0 ? null : PHASE6_PROMOTION_STAGES[index - 1]) ||
+          cell['friendsRoster'] !== null ||
+          !Array.isArray(cell['runs']) ||
+          !Array.isArray(cell['consents']) ||
+          !Array.isArray(cell['reviews']) ||
+          (index === 0
+            ? cell['runs'].length !== 1
+            : cell['runs'].length !== 0 ||
+              cell['consents'].length !== 0 ||
+              cell['reviews'].length !== 0),
+      ) ||
+      !Array.isArray(priorAdmissionsValue)
+    )
+      throw new Error('Schema v3 predecessor identity is incomplete.');
+
+    assertAdmissionChain(priorAdmissionsValue);
+    const priorAdmissions = priorAdmissionsValue as Phase6DeterministicAdmission[];
+    const activeAdmission = priorAdmissions.at(-1);
+    const priorCell = priorStages[0];
+    const priorRun = isObject(priorCell) ? (priorCell['runs'] as unknown[])[0] : null;
+    if (
+      activeAdmission === undefined ||
+      !isObject(priorRun) ||
+      activeAdmission.operationVersion !== oldManifest['operationVersion'] ||
+      activeAdmission.buildId !== priorBuild['id'] ||
+      activeAdmission.artifactManifestSha256 !==
+        unprefix(priorBuild['artifactManifestSha256'], 'schema v3 artifact manifest') ||
+      activeAdmission.runEvidenceId !== priorRun['id'] ||
+      activeAdmission.runEvidenceSha256 !== phase6EvidenceSha256(priorRun) ||
+      priorRun['operationVersion'] !== activeAdmission.operationVersion ||
+      priorRun['buildId'] !== activeAdmission.buildId ||
+      priorRun['artifactManifestSha256'] !== activeAdmission.artifactManifestSha256 ||
+      priorRun['predecessorRunEvidenceSha256'] !== activeAdmission.predecessorEvidenceSha256
+    )
+      throw new Error('Schema v3 active admission does not match its exact live run.');
+    assertCanonicalSimulationCandidate({
+      requirementsCoverage: oldManifest['requirementsCoverage'] as string[],
+      decisionCoverage: oldManifest['decisionCoverage'] as string[],
+      run: priorRun as unknown as Phase6RunEvidence,
+      consents: [],
+      reviews: [],
+    });
+    for (const admission of priorAdmissions.slice(0, -1)) {
+      const record = admission.manifestRecord;
+      if (record === null) throw new Error('Historical admission record is missing.');
+      const recordPath = resolve(workspaceRoot, record.path);
+      if (
+        exactRelativePath(workspaceRoot, recordPath) !== record.path ||
+        !existsSync(recordPath) ||
+        sha256(readFileSync(recordPath)) !== record.sha256
+      )
+        throw new Error('Historical admission record bytes do not match their exact hash.');
+    }
+
+    const priorRunSha256 = activeAdmission.runEvidenceSha256;
+    const candidate = createCanonicalSimulationCandidate({
+      artifactManifestPath: resolve(input.artifactManifestPath),
+      artifactManifestSha256: artifact.artifactManifestSha256,
+      buildId: artifact.buildId,
+      harnessPath: resolve(input.harnessPath),
+      operationVersion: artifact.operationVersion,
+      recordedAt: artifact.recordedAt,
+      sourceCommit: artifact.sourceCommit,
+      workspaceRoot,
+      predecessorEvidenceSha256: priorRunSha256,
+    });
+    assertCanonicalSimulationCandidate(candidate);
+    const priorRecordRelative = `tooling/phase6-evidence/records/superseded/${activeAdmission.operationVersion}-evidence-manifest.json`;
+    const priorRecordPath = resolve(workspaceRoot, priorRecordRelative);
+    mkdirSync(dirname(priorRecordPath), { recursive: true });
+    let priorRecordCreated = false;
+    if (existsSync(priorRecordPath)) {
+      if (readFileSync(priorRecordPath, 'utf8') !== originalManifest)
+        throw new Error('Superseded deterministic record already contains different bytes.');
+    } else {
+      writeFileSync(priorRecordPath, originalManifest, { flag: 'wx' });
+      priorRecordCreated = true;
+    }
+
+    const stages: Phase6EvidenceManifest['stages'] = PHASE6_PROMOTION_STAGES.map(
+      (stage, index) => ({
+        stage,
+        predecessorStage: index === 0 ? null : (PHASE6_PROMOTION_STAGES[index - 1] ?? null),
+        friendsRoster: null,
+        runs: index === 0 ? [candidate.run] : [],
+        consents: [],
+        reviews: [],
+      }),
+    );
+    const activeRunSha256 = phase6EvidenceSha256(candidate.run);
+    const deterministicAdmissions: Phase6DeterministicAdmission[] = [
+      ...priorAdmissions.slice(0, -1),
+      {
+        ...activeAdmission,
+        status: 'superseded',
+        successorEvidenceSha256: activeRunSha256,
+        manifestRecord: { path: priorRecordRelative, sha256: sha256(originalManifest) },
+      },
+      {
+        status: 'active',
+        operationVersion: artifact.operationVersion,
+        buildId: artifact.buildId,
+        artifactManifestSha256: artifact.artifactManifestSha256,
+        runEvidenceId: candidate.run.id,
+        runEvidenceSha256: activeRunSha256,
+        predecessorEvidenceSha256: priorRunSha256,
+        successorEvidenceSha256: null,
+        manifestRecord: null,
+      },
+    ];
+    assertAdmissionChain(deterministicAdmissions);
+    const manifest: Phase6EvidenceManifest = {
+      schemaVersion: 3,
+      generatedAt: artifact.recordedAt,
+      operationVersion: artifact.operationVersion,
+      immutableBuild: {
+        id: artifact.buildId,
+        commit: artifact.sourceCommit,
+        artifact: {
+          path: exactRelativePath(workspaceRoot, resolve(input.artifactManifestPath)),
+          sha256: artifact.artifactManifestSha256,
+        },
+        artifactManifestSha256: artifact.artifactManifestSha256,
+      },
+      promotionStage: 'deterministic-simulation',
+      requirementsCoverage: [...candidate.requirementsCoverage],
+      decisionCoverage: [...candidate.decisionCoverage],
+      legacyBlockedAttempts: priorLegacy as Phase6EvidenceManifest['legacyBlockedAttempts'],
+      deterministicAdmissions,
+      stages,
+    };
+    const manifestBytes = `${JSON.stringify(manifest, null, 2)}\n`;
+    const relativeSummary = exactRelativePath(workspaceRoot, resolve(input.summaryPath));
+    const command = `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary ${relativeSummary} --minimum-version ${input.minimumVersion}`;
+    const result: SimulationWriterResult = {
+      operationVersion: artifact.operationVersion,
+      buildId: artifact.buildId,
+      artifactManifestSha256: artifact.artifactManifestSha256,
+      runEvidenceSha256: activeRunSha256,
+      evidenceManifestSha256: sha256(manifestBytes),
+      highestAdmittedStage: 'deterministic-simulation',
+      requirementsCoverage: [...candidate.requirementsCoverage],
+    };
+    const nextUat = appendTranscript(originalUat, command, result);
+    try {
+      replaceAuthorityAtomically(
+        manifestPath,
+        originalManifest,
+        manifestBytes,
+        uatPath,
+        originalUat,
+        nextUat,
+      );
+    } catch (error) {
+      if (priorRecordCreated) unlinkIfPresent(priorRecordPath);
+      throw error;
+    }
+    return result;
+  }
   if (!isObject(oldManifest) || oldManifest['schemaVersion'] !== 2)
     throw new Error(
       'Simulation supersession requires exactly one immutable schema v2 predecessor.',
