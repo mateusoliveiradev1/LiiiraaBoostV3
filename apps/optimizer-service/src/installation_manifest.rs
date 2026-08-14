@@ -229,7 +229,11 @@ pub(crate) fn verify_installed_manifest_with_backend(
         }
         verified_files.push(path);
     }
-    backend.verify_installed_acl(&root, &verified_files)?;
+    let mut acl_paths = Vec::with_capacity(verified_files.len() + 2);
+    acl_paths.push(manifest_path);
+    acl_paths.push(signature_path);
+    acl_paths.extend(verified_files.iter().cloned());
+    backend.verify_installed_acl(&root, &acl_paths)?;
 
     Ok(VerifiedInstallationManifest {
         root,
@@ -461,8 +465,8 @@ pub(crate) mod windows_backend {
     };
 
     use super::{
-        AuthenticodeEvidence, CustodyBackend, CustodyError, InstalledAdmissionState,
-        SignerEvidence, sha256_prefixed,
+        AuthenticodeEvidence, CustodyBackend, CustodyError, INSTALLATION_MANIFEST_NAME,
+        INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState, SignerEvidence, sha256_prefixed,
     };
 
     const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
@@ -546,9 +550,13 @@ pub(crate) mod windows_backend {
             root: &Path,
             files: &[PathBuf],
         ) -> Result<(), CustodyError> {
-            verify_acl(root)?;
+            verify_acl(root, true)?;
             for file in files {
-                verify_acl(file)?;
+                let require_protected = file.file_name().is_some_and(|name| {
+                    name.eq_ignore_ascii_case(INSTALLATION_MANIFEST_NAME)
+                        || name.eq_ignore_ascii_case(INSTALLATION_SIGNATURE_NAME)
+                });
+                verify_acl(file, require_protected)?;
             }
             Ok(())
         }
@@ -584,7 +592,7 @@ pub(crate) mod windows_backend {
             if canonical != expected {
                 return Err(CustodyError::path("last-admitted-path"));
             }
-            verify_acl(&canonical)?;
+            verify_acl(&canonical, true)?;
             let bytes = std::fs::read(&canonical)
                 .map_err(|_| CustodyError::missing("last-admitted-read"))?;
             if bytes.len() > 4096 {
@@ -889,9 +897,11 @@ pub(crate) mod windows_backend {
         result
     }
 
-    fn verify_acl(path: &Path) -> Result<(), CustodyError> {
+    fn verify_acl(path: &Path, require_protected: bool) -> Result<(), CustodyError> {
         let text = acl_sddl(path)?;
-        if acl_has_hardened_owner_and_dacl(&text) && text.contains(SERVICE_SID_MARKER) {
+        if acl_has_hardened_owner_and_dacl(&text, require_protected)
+            && text.contains(SERVICE_SID_MARKER)
+        {
             Ok(())
         } else {
             Err(CustodyError::acl("owner-dacl-service-sid"))
@@ -900,7 +910,7 @@ pub(crate) mod windows_backend {
 
     fn verify_portable_acl(path: &Path) -> Result<(), CustodyError> {
         let text = acl_sddl(path)?;
-        if acl_has_hardened_owner_and_dacl(&text) {
+        if acl_has_hardened_owner_and_dacl(&text, true) {
             Ok(())
         } else {
             Err(CustodyError::acl("portable-owner-dacl"))
@@ -955,8 +965,8 @@ pub(crate) mod windows_backend {
         Ok(text)
     }
 
-    fn acl_has_hardened_owner_and_dacl(text: &str) -> bool {
-        let protected = text.contains("D:P");
+    fn acl_has_hardened_owner_and_dacl(text: &str, require_protected: bool) -> bool {
+        let protected = !require_protected || text.contains("D:P");
         let owner_is_system_or_admin = text.contains("O:SY") || text.contains("O:BA");
         let system_full = text.contains(";;;SY)");
         let ordinary_write = [";;;BU)", ";;;AU)", ";;;WD)"].iter().any(|trustee| {

@@ -174,6 +174,11 @@ const wix = () => `<?xml version="1.0"?>
           <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
         </File>
       </Component>
+      <Component Id="InstallationManifestSignatureComponent" Guid="*">
+        <File Id="InstallationManifestSignatureFile" Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json.p7s" KeyPath="yes">
+          <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
+        </File>
+      </Component>
       <Component Id="OptimizerServiceComponent" Guid="*">
         <File Id="OptimizerServiceFile" Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/liiiraa-optimizer-service.exe" KeyPath="yes" />
         <ServiceInstall Id="OptimizerServiceInstall" Name="LiiiraaBoostOptimizer" Type="ownProcess" Start="auto" Account="LocalSystem" ErrorControl="normal">
@@ -185,6 +190,7 @@ const wix = () => `<?xml version="1.0"?>
     <ComponentGroup Id="Phase6PhysicalRuntime">
       <ComponentRef Id="PhysicalInstallDirectoryAclComponent" />
       <ComponentRef Id="InstallationManifestComponent" />
+      <ComponentRef Id="InstallationManifestSignatureComponent" />
       <ComponentRef Id="OptimizerServiceComponent" />
       <ComponentRef Id="phase6_physical_runner" />
     </ComponentGroup>
@@ -415,15 +421,24 @@ test('WiX uses installer tables for coherent service custody and contains no dri
       pattern,
     );
   assert.throws(
-    () =>
+    () => {
+      const source = wix();
+      const manifestComponent = source.match(
+        /\s*<Component Id="InstallationManifestComponent"[\s\S]*?<\/Component>/u,
+      )[0];
+      const signatureComponent = source.match(
+        /\s*<Component Id="InstallationManifestSignatureComponent"[\s\S]*?<\/Component>/u,
+      )[0];
       validateWixContract(
-        wix()
-          .replace('installation-manifest.json', 'delayed-marker.bin')
+        source
+          .replace(manifestComponent, '')
+          .replace(signatureComponent, '')
           .replace(
             '</DirectoryRef>',
-            '<Component Id="LateManifest" Guid="*"><File Source="installation-manifest.json" /></Component></DirectoryRef>',
+            `${manifestComponent}${signatureComponent}</DirectoryRef>`,
           ),
-      ),
+      );
+    },
     /manifest.*service/u,
   );
 });

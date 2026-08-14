@@ -25,6 +25,8 @@ export const TRUSTED_INSTALLER_SPKI_SHA256 =
   'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
 const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
+const INSTALLATION_DIRECTORY_SDDL =
+  'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -346,14 +348,27 @@ export function validateWixContract(xml) {
     fail('WiX ComponentGroup must reference DirectoryRef components');
   if (!/<ComponentRef\b[^>]*Id="phase6_physical_runner"/iu.test(runtimeGroup[1]))
     fail('WiX contract requires the Tauri-generated runner component');
-  const permissions = [...xml.matchAll(/<PermissionEx\b([^>]*)\/?\s*>/giu)];
+  const permissions = [...xml.matchAll(/<PermissionEx\b([^>]*)\/?\s*>/giu)].map(
+    (permission) => permission[1],
+  );
+  const directoryAcl = xml.match(
+    /<Component\b[^>]*Id="PhysicalInstallDirectoryAclComponent"[^>]*>[\s\S]*?<CreateFolder\b[^>]*>[\s\S]*?<PermissionEx\b([^>]*)\/?\s*>[\s\S]*?<\/CreateFolder>[\s\S]*?<\/Component>/iu,
+  );
   if (
-    permissions.length === 0 ||
-    permissions.some(
-      (permission) => !permission[1].includes(`Sddl="${INSTALLATION_MANIFEST_SDDL}"`),
-    )
+    !directoryAcl ||
+    !directoryAcl[1].includes(`Sddl="${INSTALLATION_DIRECTORY_SDDL}"`) ||
+    !/<ComponentRef\b[^>]*Id="PhysicalInstallDirectoryAclComponent"/iu.test(runtimeGroup[1])
   )
-    fail('WiX PermissionEx must use the protected installation-manifest SDDL');
+    fail('WiX contract requires the protected inherited runtime directory ACL');
+  const manifestPermissions = permissions.filter((permission) =>
+    permission.includes(`Sddl="${INSTALLATION_MANIFEST_SDDL}"`),
+  );
+  if (
+    permissions.length !== 3 ||
+    manifestPermissions.length !== 2 ||
+    !permissions.includes(directoryAcl[1])
+  )
+    fail('WiX PermissionEx must use the reviewed runtime and installation-manifest SDDL');
   const required = [
     ['Name="LiiiraaBoostOptimizer"', 'named optimizer service'],
     ['Type="ownProcess"', 'ownProcess service'],

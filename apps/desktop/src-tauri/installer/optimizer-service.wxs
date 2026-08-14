@@ -3,6 +3,12 @@
   <!-- 'installation-manifest.json InstallFiles PermissionEx ServiceControl' is the audited standard-table custody order. -->
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
+      <Component Id="PhysicalInstallDirectoryAclComponent" Guid="*">
+        <CreateFolder>
+          <PermissionEx Sddl="D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
+        </CreateFolder>
+      </Component>
+
       <Component Id="Phase6InstallationManifestComponent" Guid="*">
         <File Id="Phase6InstallationManifestFile"
               Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json"
@@ -46,6 +52,7 @@
     </DirectoryRef>
 
     <ComponentGroup Id="Phase6PhysicalRuntime">
+      <ComponentRef Id="PhysicalInstallDirectoryAclComponent" />
       <ComponentRef Id="Phase6InstallationManifestComponent" />
       <ComponentRef Id="Phase6InstallationManifestSignatureComponent" />
       <ComponentRef Id="OptimizerServiceComponent" />
