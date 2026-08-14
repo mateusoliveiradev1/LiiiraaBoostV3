@@ -340,6 +340,60 @@ fn tauri_startup_and_capability_keep_recovery_first_and_least_privilege() {
     assert!(main_source.contains("executor.begin_shutdown()"));
 }
 
+#[test]
+fn physical_feature_injects_one_serialized_native_authority_into_all_mutation_intents() {
+    let main_source = include_str!("../src/main.rs");
+    let executor_source = include_str!("../src/plan_executor.rs");
+    let cargo_source = include_str!("../Cargo.toml");
+
+    assert!(cargo_source.contains("phase6-physical"));
+    assert!(executor_source.contains("pub struct NativePhysicalExecutionAuthority"));
+    assert!(executor_source.contains("AuthenticatedBrokerClient<WindowsNamedPipeBrokerTransport"));
+    assert!(main_source.contains("WindowsNamedPipeBrokerTransport"));
+    assert!(main_source.contains("NativePhysicalExecutionAuthority"));
+    assert!(main_source.contains("fn execute_physical_plan"));
+    assert_eq!(main_source.matches("execute_physical_plan(").count(), 5);
+    assert!(main_source.contains("PlanExecutor::execute"));
+}
+
+#[test]
+fn physical_and_nonphysical_mutation_paths_are_distinct_and_never_fallback() {
+    let main_source = include_str!("../src/main.rs");
+    let physical = main_source
+        .find("fn execute_physical_plan")
+        .expect("physical executor path");
+    let unavailable = main_source
+        .find("fn reject_unavailable_mutation")
+        .expect("nonphysical fail-closed path");
+    assert_ne!(physical, unavailable);
+    assert!(main_source.contains("#[cfg(feature = \"phase6-physical\")]"));
+    assert!(main_source.contains("#[cfg(not(feature = \"phase6-physical\"))]"));
+    for forbidden in [
+        "catch { fixture }",
+        "executePhysicalMutation",
+        "TcpStream",
+        "Command::new",
+    ] {
+        assert!(!main_source.contains(forbidden), "forbidden fallback: {forbidden}");
+    }
+}
+
+#[test]
+fn physical_recovery_is_observation_first_and_never_redispatches_pending_mutation() {
+    let executor_source = include_str!("../src/plan_executor.rs");
+    assert!(executor_source.contains("pub fn reconcile_pending"));
+    assert!(executor_source.contains("engine.reconcile_startup"));
+    let reconcile = executor_source
+        .find("pub fn reconcile_pending")
+        .expect("physical reconciliation method");
+    let reconciliation_body = &executor_source[reconcile..];
+    let end = reconciliation_body.find("\n    }").unwrap();
+    let reconciliation_body = &reconciliation_body[..end];
+    assert!(reconciliation_body.contains("reconcile_startup"));
+    assert!(!reconciliation_body.contains(".mutate("));
+    assert!(!reconciliation_body.contains("executor.execute("));
+}
+
 fn temporary_export_path() -> PathBuf {
     let sequence = Cell::new(0_u64);
     sequence.set(sequence.get() + 1);
