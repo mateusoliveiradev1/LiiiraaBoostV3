@@ -447,13 +447,13 @@ pub(crate) mod windows_backend {
                 },
                 Cryptography::{
                     CERT_CONTEXT, CERT_NAME_SIMPLE_DISPLAY_TYPE,
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED,
                     CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
-                    CERT_QUERY_OBJECT_FILE, CERT_SHA256_HASH_PROP_ID, CertCloseStore,
-                    CertFreeCertificateContext, CertGetCertificateContextProperty,
+                    CERT_QUERY_OBJECT_FILE, CERT_SHA256_HASH_PROP_ID, CRYPT_VERIFY_MESSAGE_PARA,
+                    CertCloseStore, CertFreeCertificateContext, CertGetCertificateContextProperty,
                     CertGetNameStringW, CryptEncodeObjectEx, CryptMsgClose,
-                    CryptMsgGetAndVerifySigner, CryptMsgUpdate, CryptQueryObject, HCERTSTORE,
-                    PKCS_7_ASN_ENCODING, X509_ASN_ENCODING, X509_PUBLIC_KEY_INFO,
+                    CryptMsgGetAndVerifySigner, CryptQueryObject,
+                    CryptVerifyDetachedMessageSignature, HCERTSTORE, PKCS_7_ASN_ENCODING,
+                    X509_ASN_ENCODING, X509_PUBLIC_KEY_INFO,
                 },
                 DACL_SECURITY_INFORMATION, OWNER_SECURITY_INFORMATION,
                 PROTECTED_DACL_SECURITY_INFORMATION, PSECURITY_DESCRIPTOR,
@@ -639,20 +639,18 @@ pub(crate) mod windows_backend {
         detached_content: &[u8],
         embedded: bool,
     ) -> Result<NativeSigner, CustodyError> {
+        if !embedded {
+            return detached_signer(path, detached_content);
+        }
         let wide = wide_path(path);
         let mut store = HCERTSTORE::default();
         let mut message: *mut c_void = null_mut();
         let mut signer: *mut CERT_CONTEXT = null_mut();
         let result = unsafe {
-            let content_flags = if embedded {
-                CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED
-            } else {
-                CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED
-            };
             CryptQueryObject(
                 CERT_QUERY_OBJECT_FILE,
                 PCWSTR(wide.as_ptr()).0.cast(),
-                content_flags,
+                CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
                 CERT_QUERY_FORMAT_FLAG_BINARY,
                 0,
                 None,
@@ -663,10 +661,6 @@ pub(crate) mod windows_backend {
                 None,
             )
             .map_err(|_| CustodyError::signature("crypt-query-object"))?;
-            if !embedded {
-                CryptMsgUpdate(message, Some(detached_content), true)
-                    .map_err(|_| CustodyError::signature("crypt-msg-update"))?;
-            }
             CryptMsgGetAndVerifySigner(message, Some(&[store]), 0, Some(&mut signer), None)
                 .map_err(|_| CustodyError::signature("crypt-msg-verify"))?;
             native_signer(signer)
@@ -680,6 +674,40 @@ pub(crate) mod windows_backend {
             }
             if !store.is_invalid() {
                 let _ = CertCloseStore(Some(store), 0);
+            }
+        }
+        result
+    }
+
+    fn detached_signer(path: &Path, content: &[u8]) -> Result<NativeSigner, CustodyError> {
+        let signature =
+            std::fs::read(path).map_err(|_| CustodyError::signature("detached-signature-read"))?;
+        let content_size = u32::try_from(content.len())
+            .map_err(|_| CustodyError::signature("detached-content-size"))?;
+        let content_pointers = [content.as_ptr()];
+        let content_sizes = [content_size];
+        let parameters = CRYPT_VERIFY_MESSAGE_PARA {
+            cbSize: size_of::<CRYPT_VERIFY_MESSAGE_PARA>() as u32,
+            dwMsgAndCertEncodingType: X509_ASN_ENCODING.0 | PKCS_7_ASN_ENCODING.0,
+            ..Default::default()
+        };
+        let mut signer: *mut CERT_CONTEXT = null_mut();
+        let result = unsafe {
+            CryptVerifyDetachedMessageSignature(
+                &parameters,
+                0,
+                &signature,
+                1,
+                content_pointers.as_ptr(),
+                content_sizes.as_ptr(),
+                Some(&mut signer),
+            )
+            .map_err(|_| CustodyError::signature("detached-signature-verify"))?;
+            native_signer(signer)
+        };
+        unsafe {
+            if !signer.is_null() {
+                let _ = CertFreeCertificateContext(Some(signer));
             }
         }
         result
