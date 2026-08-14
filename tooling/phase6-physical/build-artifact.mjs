@@ -393,7 +393,7 @@ export function validateWixContract(xml) {
   )
     fail('WiX contract requires the protected inherited runtime directory ACL');
   const programDataAcl = xml.match(
-    /<DirectoryRef\b[^>]*Id="CommonAppDataFolder"[^>]*>[\s\S]*?<Directory\b[^>]*Id="LiiiraaBoostProgramData"[^>]*Name="Liiiraa Boost"[^>]*>[\s\S]*?<Component\b([^>]*)Id="PhysicalProgramDataAclComponent"([^>]*)>[\s\S]*?<CreateFolder\b[^>]*>[\s\S]*?<PermissionEx\b([^>]*)\/?\s*>[\s\S]*?<\/CreateFolder>[\s\S]*?<\/Component>[\s\S]*?<\/Directory>[\s\S]*?<\/DirectoryRef>/iu,
+    /<DirectoryRef\b[^>]*Id="TARGETDIR"[^>]*>[\s\S]*?<Directory\b[^>]*Id="CommonAppDataFolder"[^>]*>[\s\S]*?<Directory\b[^>]*Id="LiiiraaBoostProgramData"[^>]*Name="Liiiraa Boost"[^>]*>[\s\S]*?<Component\b([^>]*)Id="PhysicalProgramDataAclComponent"([^>]*)>[\s\S]*?<CreateFolder\b[^>]*>[\s\S]*?<PermissionEx\b([^>]*)\/?\s*>[\s\S]*?<\/CreateFolder>[\s\S]*?<\/Component>[\s\S]*?<\/Directory>[\s\S]*?<\/Directory>[\s\S]*?<\/DirectoryRef>/iu,
   );
   if (
     !programDataAcl ||

@@ -165,13 +165,15 @@ const physicalProfile = () => ({
 const wix = () => `<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
-    <DirectoryRef Id="CommonAppDataFolder">
-      <Directory Id="LiiiraaBoostProgramData" Name="Liiiraa Boost">
-        <Component Id="PhysicalProgramDataAclComponent" Guid="{E13FCD86-47D1-5ED7-9FB2-72F546A789D4}" Permanent="yes">
-          <CreateFolder>
-            <PermissionEx Sddl="O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
-          </CreateFolder>
-        </Component>
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="CommonAppDataFolder">
+        <Directory Id="LiiiraaBoostProgramData" Name="Liiiraa Boost">
+          <Component Id="PhysicalProgramDataAclComponent" Guid="{E13FCD86-47D1-5ED7-9FB2-72F546A789D4}" Permanent="yes">
+            <CreateFolder>
+              <PermissionEx Sddl="O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
+            </CreateFolder>
+          </Component>
+        </Directory>
       </Directory>
     </DirectoryRef>
     <DirectoryRef Id="INSTALLDIR">
