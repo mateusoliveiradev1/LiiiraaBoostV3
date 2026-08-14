@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-32-PLAN.md
-last_updated: "2026-08-14T00:11:39.933Z"
+stopped_at: Completed 06-36-PLAN.md
+last_updated: "2026-08-14T00:30:58.237Z"
 last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 244
+  completed_plans: 245
   percent: 40
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 6 of 39
+Plan: 7 of 39
 Status: Ready to execute
 Last activity: 2026-08-14
 
-Progress: [██████████] 95%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -272,6 +272,7 @@ _Updated after plan completion_
 | Phase 06 P35 | 19min | 1 tasks | 7 files |
 | Phase 06 P30 | 13 min | 1 tasks | 6 files |
 | Phase 06 P32 | 25 min | 2 tasks | 7 files |
+| Phase 06 P36 | 14 min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -878,6 +879,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Keep planned run and admitted-stage checks mutually exclusive and scoped to the exact predecessor chain; only final mode evaluates all four stages. — Supports safe stage-by-stage promotion without weakening final readiness.
 - [Phase 06]: Bind friends consent to exact locally previewed redacted bytes before export and require a strictly later immutable review. — Prevents consent from authorizing different or unreviewed diagnostics.
 - [Phase 06]: Revalidate canonical fixed-path roster CMS custody against the compiled SPKI on every friends ingestion. — Prevents a roster freeze from becoming stale trust after byte or signature substitution.
+- [Phase 06]: Bind effect-lease lifetime to session-owned token custody — The borrowed handle cannot outlive authentication or be cloned into renderer/domain authority.
+- [Phase 06]: Drain and join timed-out impersonated workers — Timeout remains observation-required uncertainty only after verified RevertToSelf cleanup.
+- [Phase 06]: Verify effective TokenUser SID and TokenSessionId before PowrProf — LocalSystem or a mismatched client identity must make zero physical calls.
 
 ### Pending Todos
 
@@ -929,6 +933,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T00:11:39.926Z
-Stopped at: Completed 06-32-PLAN.md
+Last session: 2026-08-14T00:30:58.228Z
+Stopped at: Completed 06-36-PLAN.md
 Resume file: None
