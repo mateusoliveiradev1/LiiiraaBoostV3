@@ -178,3 +178,22 @@ None. The local development signing identity and WebView2 runtime used by the ph
 ---
 *Phase: 06-transactional-plans-and-recovery*
 *Completed: 2026-08-14*
+
+## Append-only authority update: v43
+
+The immutable v41 publication above remains the historical predecessor. Its later 06-35
+revalidation exposed native-version policy incompatibilities, while v42 was recorded BLOCKED
+after its publication ACL failed closed. Neither identity was overwritten or relabeled.
+
+The single monotonic v43 lifecycle publication passed native ACL custody and the corrected
+06-35 CMS/SPKI/live-byte verifier. This block is the latest complete artifact authority for
+deterministic admission; all earlier bytes and audit history remain preserved above.
+
+- **Root:** `target/phase6-physical/41e8c18e0318bdb1fbd317360e1f4e775c838a70/physical-3eec8d7e3665a7f3-managed-power-scheme-v43`
+- **Build ID:** `physical-3eec8d7e3665a7f3-managed-power-scheme-v43`
+- **Operation version:** `managed-power-scheme-v43`
+- **Source commit:** `41e8c18e0318bdb1fbd317360e1f4e775c838a70`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `a94f83e0605b9ab7c501ec2c3d79c15a1a5b79a24f828c980bf2d4987fc163fa` | 3241 |
