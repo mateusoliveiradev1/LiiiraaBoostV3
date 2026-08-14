@@ -136,9 +136,13 @@ fn ipc_pipe_policy_is_local_only_and_has_an_explicit_service_dacl() {
     assert_eq!(policy.pipe_name, r"\\.\pipe\LiiiraaBoost\optimizer-v1");
     assert_ne!(policy.open_mode_flags & PIPE_REJECT_REMOTE_CLIENTS, 0);
     assert!(policy.sddl.starts_with("D:P"));
-    for required_sid in ["SY", "BA", "S-1-5-5-7-42", "S-1-5-80-424242"] {
+    for required_sid in ["SY", "BA", "IU", "S-1-5-80-424242"] {
         assert!(policy.sddl.contains(required_sid), "missing {required_sid}");
     }
+    assert!(
+        !policy.sddl.contains("S-1-5-5-7-42"),
+        "pipe creation must not freeze one WTS logon SID before a client connects"
+    );
     assert!(
         !policy.sddl.contains("WD"),
         "Everyone must not receive access"

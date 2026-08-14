@@ -51,6 +51,39 @@ fn broker_config() -> BrokerConfig {
     }
 }
 
+#[test]
+fn installed_startup_is_session_independent_and_client_identity_is_connection_bound() {
+    let host_source = include_str!("../src/windows_pipe.rs");
+    let broker_source = include_str!("../src/ipc.rs");
+
+    for forbidden_startup_dependency in [
+        "WTSGetActiveConsoleSessionId",
+        "WTSQueryUserToken",
+        "query_active_user_token",
+    ] {
+        assert!(
+            !host_source.contains(forbidden_startup_dependency),
+            "installed startup must not depend on {forbidden_startup_dependency}"
+        );
+    }
+    assert!(
+        host_source.contains("ImpersonateNamedPipeClient"),
+        "the connected named-pipe peer must remain the token authority"
+    );
+    assert!(
+        host_source.contains("(A;;GRGW;;;IU)"),
+        "the protected pipe DACL must admit interactive clients before exact peer authentication"
+    );
+    assert!(
+        !broker_source.contains("pub interactive_session_id"),
+        "startup configuration must not select a future client session"
+    );
+    assert!(
+        !broker_source.contains("pub interactive_logon_sid"),
+        "startup configuration must not select a future client logon SID"
+    );
+}
+
 fn identity() -> ClientIdentity {
     ClientIdentity {
         local_machine: true,
@@ -231,6 +264,63 @@ fn broker_disconnect_and_preshutdown_release_owned_client_tokens() {
         .expect("authenticated token session");
     broker.begin_preshutdown();
     assert_eq!(releases.load(Ordering::SeqCst), 2);
+}
+
+#[test]
+fn each_authenticated_connection_owns_exactly_one_client_bound_token() {
+    let releases = Arc::new(AtomicUsize::new(0));
+    let mut broker = Broker::open(
+        database_path("per-connection-token"),
+        broker_config(),
+        b"phase-06-test-only-install-secret",
+    )
+    .expect("open broker");
+
+    for (session_id, logon_sid, nonce) in [
+        (7, "S-1-5-5-7-42", "nonce-session-7"),
+        (8, "S-1-5-5-8-99", "nonce-session-8"),
+    ] {
+        let mut client = identity();
+        client.session_id = session_id;
+        client.logon_sid = logon_sid.to_owned();
+        let ticket = broker
+            .authenticate_client_with_token(
+                &client,
+                nonce,
+                AuthenticatedClientToken::for_test(session_id, logon_sid, releases.clone()),
+            )
+            .expect("the connected peer token, not startup WTS state, authenticates");
+        broker.disconnect_session(&ticket);
+    }
+
+    assert_eq!(
+        releases.load(Ordering::SeqCst),
+        2,
+        "one connection owns and releases one token lease"
+    );
+}
+
+#[test]
+fn local_system_connection_identity_is_rejected_before_session_creation() {
+    let releases = Arc::new(AtomicUsize::new(0));
+    let mut broker = Broker::open(
+        database_path("local-system-client"),
+        broker_config(),
+        b"phase-06-test-only-install-secret",
+    )
+    .expect("open broker");
+    let mut client = identity();
+    client.session_id = 0;
+    client.logon_sid = "S-1-5-18".to_owned();
+
+    broker
+        .authenticate_client_with_token(
+            &client,
+            "nonce-local-system",
+            AuthenticatedClientToken::for_test(0, "S-1-5-18", releases.clone()),
+        )
+        .expect_err("LocalSystem must never mint interactive-user effect authority");
+    assert_eq!(releases.load(Ordering::SeqCst), 1);
 }
 
 #[test]
