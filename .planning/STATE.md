@@ -890,6 +890,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Guest runner emits only directly measured observations — The 06-32 host writer derives predecessor and custody metadata; unmeasured gates cannot become PASS evidence.
 - [Phase 06]: Incomplete physical observations are isolated FAIL attempts — Coverage gaps remain visible without contaminating the promotion manifest or fabricating security, fault, or accessibility success.
 - [Phase 06]: Physical apply and friends export require exact local confirmation phrases — The runner cannot auto-approve plan mutation or fabricate participant consent.
+- [Phase 06]: Preserve the restricted service SID and protected ACL custody while removing WTS from optimizer startup. — Installed startup validates custody/storage and opens the local pipe without selecting a user; only the authenticated connected peer may supply a PID/image/SID/session-bound token and lifetime-scoped effect lease, with no WTS fallback.
 
 ### Pending Todos
 
