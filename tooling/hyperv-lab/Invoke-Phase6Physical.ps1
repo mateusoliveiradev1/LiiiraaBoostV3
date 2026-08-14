@@ -230,10 +230,14 @@ function Invoke-FixedProcess {
         '"' + $_.Replace('"', '\\"') + '"'
     }) -join ' ')
     $process = [Diagnostics.Process]::Start($start)
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
     $process.WaitForExit()
-    return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout; Stderr = $stderr }
+    return [pscustomobject]@{
+        ExitCode = $process.ExitCode
+        Stdout = $stdoutTask.GetAwaiter().GetResult()
+        Stderr = $stderrTask.GetAwaiter().GetResult()
+    }
 }
 
 function Assert-ArtifactVerifierPass {
