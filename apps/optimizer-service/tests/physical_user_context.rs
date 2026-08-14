@@ -40,7 +40,10 @@ fn effect_thread_uses_the_authenticated_token_user_and_session_then_reverts() {
         })
         .expect("bounded user-context effect");
 
-    assert!(inside.thread_impersonating, "effect must have a thread token");
+    assert!(
+        inside.thread_impersonating,
+        "effect must have a thread token"
+    );
     assert_eq!(inside.token_user_sid, expected.token_user_sid);
     assert_eq!(inside.session_id, expected.session_id);
     assert!(
@@ -66,17 +69,41 @@ fn wrong_session_never_enters_the_effect_closure() {
     let called = Arc::new(AtomicBool::new(false));
     let called_inside = called.clone();
 
-    let result = token.effect_lease().with_interactive_user(
-        Duration::from_secs(1),
-        &wrong,
-        move |_| {
-            called_inside.store(true, Ordering::SeqCst);
-            Ok::<_, InjectedError>(())
-        },
-    );
+    let result =
+        token
+            .effect_lease()
+            .with_interactive_user(Duration::from_secs(1), &wrong, move |_| {
+                called_inside.store(true, Ordering::SeqCst);
+                Ok::<_, InjectedError>(())
+            });
 
     assert_eq!(result, Err(InteractiveUserEffectError::ClientMismatch));
     assert!(!called.load(Ordering::SeqCst));
+}
+
+#[test]
+fn local_system_identity_cannot_substitute_for_the_authenticated_user() {
+    let token = AuthenticatedClientToken::duplicate_current_process_for_test()
+        .expect("duplicate controlled current-client token");
+    let client = token.verified_client_context_for_test();
+    let process_identity =
+        current_effective_identity_for_test().expect("interactive process identity");
+    assert_ne!(process_identity.token_user_sid, "S-1-5-18");
+    let called = Arc::new(AtomicBool::new(false));
+    let called_inside = called.clone();
+
+    let result = token
+        .effect_lease_with_token_user_sid_for_test("S-1-5-18")
+        .with_interactive_user(Duration::from_secs(1), &client, move |_| {
+            called_inside.store(true, Ordering::SeqCst);
+            Ok::<_, InjectedError>(())
+        });
+
+    assert_eq!(result, Err(InteractiveUserEffectError::IdentityMismatch));
+    assert!(
+        !called.load(Ordering::SeqCst),
+        "mismatched LocalSystem identity must make zero PowrProf calls"
+    );
 }
 
 #[test]
@@ -85,11 +112,11 @@ fn error_unwind_and_timeout_drain_restore_before_returning() {
         .expect("duplicate controlled current-client token");
     let client = token.verified_client_context_for_test();
 
-    let error = token.effect_lease().with_interactive_user(
-        Duration::from_secs(1),
-        &client,
-        |_| Err::<(), _>(InjectedError::Effect),
-    );
+    let error = token
+        .effect_lease()
+        .with_interactive_user(Duration::from_secs(1), &client, |_| {
+            Err::<(), _>(InjectedError::Effect)
+        });
     assert_eq!(
         error,
         Err(InteractiveUserEffectError::Effect(InjectedError::Effect))
@@ -104,15 +131,14 @@ fn error_unwind_and_timeout_drain_restore_before_returning() {
 
     let drained = Arc::new(AtomicBool::new(false));
     let drained_inside = drained.clone();
-    let timeout = token.effect_lease().with_interactive_user(
-        Duration::from_millis(1),
-        &client,
-        move |_| {
-            thread::sleep(Duration::from_millis(20));
-            drained_inside.store(true, Ordering::SeqCst);
-            Ok::<_, InjectedError>(())
-        },
-    );
+    let timeout =
+        token
+            .effect_lease()
+            .with_interactive_user(Duration::from_millis(1), &client, move |_| {
+                thread::sleep(Duration::from_millis(20));
+                drained_inside.store(true, Ordering::SeqCst);
+                Ok::<_, InjectedError>(())
+            });
     assert_eq!(timeout, Err(InteractiveUserEffectError::Timeout));
     assert!(
         drained.load(Ordering::SeqCst),
@@ -133,32 +159,39 @@ fn repeated_success_failure_unwind_and_timeout_have_zero_handle_growth() {
         let token = AuthenticatedClientToken::duplicate_current_process_for_test()
             .expect("duplicate controlled current-client token");
         let client = token.verified_client_context_for_test();
-        let result = match iteration % 4 {
-            0 => token.effect_lease().with_interactive_user(
-                Duration::from_secs(1),
-                &client,
-                |_| Ok::<_, InjectedError>(()),
-            ),
-            1 => token.effect_lease().with_interactive_user(
-                Duration::from_secs(1),
-                &client,
-                |_| Err::<(), _>(InjectedError::Effect),
-            ),
-            2 => token.effect_lease().with_interactive_user(
-                Duration::from_secs(1),
-                &client,
-                |_| -> Result<(), InjectedError> { panic!("injected unwind") },
-            ),
-            _ => token.effect_lease().with_interactive_user(
-                Duration::from_millis(1),
-                &client,
-                |_| {
-                    thread::sleep(Duration::from_millis(4));
-                    Ok::<_, InjectedError>(())
-                },
-            ),
-        };
-        assert!(result.is_ok() || result.is_err());
+        let result =
+            match iteration % 4 {
+                0 => token.effect_lease().with_interactive_user(
+                    Duration::from_secs(1),
+                    &client,
+                    |_| Ok::<_, InjectedError>(()),
+                ),
+                1 => token.effect_lease().with_interactive_user(
+                    Duration::from_secs(1),
+                    &client,
+                    |_| Err::<(), _>(InjectedError::Effect),
+                ),
+                2 => token.effect_lease().with_interactive_user(
+                    Duration::from_secs(1),
+                    &client,
+                    |_| -> Result<(), InjectedError> { panic!("injected unwind") },
+                ),
+                _ => token.effect_lease().with_interactive_user(
+                    Duration::from_millis(1),
+                    &client,
+                    |_| {
+                        thread::sleep(Duration::from_millis(4));
+                        Ok::<_, InjectedError>(())
+                    },
+                ),
+            };
+        match (iteration % 4, result) {
+            (0, Ok(()))
+            | (1, Err(InteractiveUserEffectError::Effect(InjectedError::Effect)))
+            | (2, Err(InteractiveUserEffectError::Panicked))
+            | (3, Err(InteractiveUserEffectError::Timeout)) => {}
+            (_, unexpected) => panic!("unexpected repeated-cycle result: {unexpected:?}"),
+        }
         drop(token);
     }
 

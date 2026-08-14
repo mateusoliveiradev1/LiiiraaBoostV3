@@ -204,7 +204,7 @@ fn request(kind: &str, step: &str) -> Value {
     common
 }
 
-fn context(step: &str, version: &str) -> DispatchContext {
+fn context(step: &str, version: &str) -> DispatchContext<'static> {
     let lease = InteractiveUserEffectLease::for_test(7, SID);
     DispatchContext::with_effect_lease(
         "transaction-physical",

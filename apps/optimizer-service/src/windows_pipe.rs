@@ -9,9 +9,14 @@ use std::{
     time::Duration,
 };
 
+#[cfg(windows)]
+use std::os::windows::io::AsHandle;
+
 use serde_json::Value;
 
-use super::dispatcher::InteractiveUserEffectLease;
+use super::operations::power_scheme::InteractiveUserEffectLease;
+#[cfg(test)]
+use super::operations::power_scheme::VerifiedClientContext;
 
 pub const OPTIMIZER_PIPE_NAME: &str = r"\\.\pipe\LiiiraaBoost\optimizer-v1";
 pub const MAX_FRAME_BYTES: usize = 64 * 1024;
@@ -157,7 +162,7 @@ pub struct HostLifecycleError;
 enum TokenCustody {
     #[cfg(windows)]
     Native {
-        _handle: std::os::windows::io::OwnedHandle,
+        handle: std::os::windows::io::OwnedHandle,
     },
     #[cfg(debug_assertions)]
     Test(Arc<AtomicUsize>),
@@ -168,6 +173,7 @@ enum TokenCustody {
 pub struct AuthenticatedClientToken {
     session_id: u32,
     logon_sid: String,
+    token_user_sid: String,
     custody: TokenCustody,
 }
 
@@ -178,9 +184,11 @@ impl AuthenticatedClientToken {
         logon_sid: impl Into<String>,
         releases: Arc<AtomicUsize>,
     ) -> Self {
+        let logon_sid = logon_sid.into();
         Self {
             session_id,
-            logon_sid: logon_sid.into(),
+            token_user_sid: logon_sid.clone(),
+            logon_sid,
             custody: TokenCustody::Test(releases),
         }
     }
@@ -189,14 +197,29 @@ impl AuthenticatedClientToken {
         self.session_id == session_id && self.logon_sid == logon_sid
     }
 
-    pub(crate) fn effect_lease(&self) -> InteractiveUserEffectLease {
-        // SAFETY: this capability can only be minted while this owned token is
-        // alive and its immutable SID/session binding has already authenticated.
-        unsafe {
-            InteractiveUserEffectLease::from_authenticated_pipe_host(
-                self.session_id,
-                self.logon_sid.clone(),
-            )
+    pub(crate) fn effect_lease(&self) -> InteractiveUserEffectLease<'_> {
+        #[cfg(windows)]
+        if let TokenCustody::Native { handle } = &self.custody {
+            // SAFETY: the borrow ties the lease to this owned token's lifetime;
+            // its immutable SID/session binding was verified before custody.
+            return unsafe {
+                InteractiveUserEffectLease::from_authenticated_pipe_host(
+                    self.session_id,
+                    self.logon_sid.clone(),
+                    self.token_user_sid.clone(),
+                    handle.as_handle(),
+                )
+            };
+        }
+
+        #[cfg(debug_assertions)]
+        {
+            InteractiveUserEffectLease::for_test(self.session_id, self.logon_sid.clone())
+        }
+
+        #[cfg(not(debug_assertions))]
+        {
+            panic!("authenticated client token has no usable custody")
         }
     }
 
@@ -204,12 +227,43 @@ impl AuthenticatedClientToken {
     fn from_native(
         session_id: u32,
         logon_sid: String,
+        token_user_sid: String,
         handle: std::os::windows::io::OwnedHandle,
     ) -> Self {
         Self {
             session_id,
             logon_sid,
-            custody: TokenCustody::Native { _handle: handle },
+            token_user_sid,
+            custody: TokenCustody::Native { handle },
+        }
+    }
+
+    #[cfg(all(test, windows))]
+    pub fn duplicate_current_process_for_test() -> Result<Self, HostError> {
+        windows_host::duplicate_current_process_token_for_test()
+    }
+
+    #[cfg(test)]
+    pub fn verified_client_context_for_test(&self) -> VerifiedClientContext {
+        VerifiedClientContext::establish(self.session_id, self.logon_sid.clone(), true, true)
+            .expect("test token has verified client binding")
+    }
+
+    #[cfg(all(test, windows))]
+    pub(crate) fn effect_lease_with_token_user_sid_for_test(
+        &self,
+        token_user_sid: impl Into<String>,
+    ) -> InteractiveUserEffectLease<'_> {
+        let TokenCustody::Native { handle } = &self.custody else {
+            panic!("native token required for the Windows identity mismatch proof");
+        };
+        unsafe {
+            InteractiveUserEffectLease::from_authenticated_pipe_host(
+                self.session_id,
+                self.logon_sid.clone(),
+                token_user_sid.into(),
+                handle.as_handle(),
+            )
         }
     }
 }
@@ -265,7 +319,7 @@ mod windows_host {
                 OWNER_SECURITY_INFORMATION, PROTECTED_DACL_SECURITY_INFORMATION,
                 PSECURITY_DESCRIPTOR, RevertToSelf, SECURITY_ATTRIBUTES, SecurityImpersonation,
                 SetFileSecurityW, TOKEN_ASSIGN_PRIMARY, TOKEN_DUPLICATE, TOKEN_GROUPS, TOKEN_QUERY,
-                TokenGroups, TokenPrimary, TokenSessionId,
+                TOKEN_USER, TokenGroups, TokenPrimary, TokenSessionId, TokenUser,
             },
             Storage::FileSystem::{
                 CreateDirectoryW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
@@ -803,6 +857,7 @@ mod windows_host {
         let impersonation = NativeHandle::new(impersonation)?;
         let token_session = token_session_id(impersonation.raw())?;
         let logon_sid = logon_sid(impersonation.raw())?;
+        let token_user_sid = token_user_sid(impersonation.raw())?;
         if token_session != session_id {
             return Err(host_error(HostErrorCode::Authentication));
         }
@@ -835,7 +890,44 @@ mod windows_host {
         let NativeHandle(primary) = primary;
         Ok((
             identity,
-            AuthenticatedClientToken::from_native(session_id, logon_sid, primary),
+            AuthenticatedClientToken::from_native(session_id, logon_sid, token_user_sid, primary),
+        ))
+    }
+
+    #[cfg(test)]
+    pub(super) fn duplicate_current_process_token_for_test()
+    -> Result<AuthenticatedClientToken, HostError> {
+        let mut process_token = HANDLE::default();
+        unsafe {
+            OpenProcessToken(
+                GetCurrentProcess(),
+                TOKEN_QUERY | TOKEN_DUPLICATE,
+                &mut process_token,
+            )
+        }
+        .map_err(|_| host_error(HostErrorCode::Authentication))?;
+        let process_token = NativeHandle::new(process_token)?;
+        let session_id = token_session_id(process_token.raw())?;
+        let logon_sid = logon_sid(process_token.raw())?;
+        let token_user_sid = token_user_sid(process_token.raw())?;
+        let mut primary = HANDLE::default();
+        unsafe {
+            DuplicateTokenEx(
+                process_token.raw(),
+                TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY,
+                None,
+                SecurityImpersonation,
+                TokenPrimary,
+                &mut primary,
+            )
+        }
+        .map_err(|_| host_error(HostErrorCode::Authentication))?;
+        let NativeHandle(primary) = NativeHandle::new(primary)?;
+        Ok(AuthenticatedClientToken::from_native(
+            session_id,
+            logon_sid,
+            token_user_sid,
+            primary,
         ))
     }
 
@@ -911,6 +1003,27 @@ mod windows_host {
             return Err(host_error(HostErrorCode::Authentication));
         }
         Ok(session_id)
+    }
+
+    fn token_user_sid(token: HANDLE) -> Result<String, HostError> {
+        let mut bytes = 0_u32;
+        let _ = unsafe { GetTokenInformation(token, TokenUser, None, 0, &mut bytes) };
+        if bytes < size_of::<TOKEN_USER>() as u32 {
+            return Err(host_error(HostErrorCode::Authentication));
+        }
+        let mut buffer = vec![0_u8; bytes as usize];
+        unsafe {
+            GetTokenInformation(
+                token,
+                TokenUser,
+                Some(buffer.as_mut_ptr().cast()),
+                bytes,
+                &mut bytes,
+            )
+        }
+        .map_err(|_| host_error(HostErrorCode::Authentication))?;
+        let user = unsafe { &*buffer.as_ptr().cast::<TOKEN_USER>() };
+        sid_string(user.User.Sid)
     }
 
     fn sid_string(sid: windows::Win32::Security::PSID) -> Result<String, HostError> {

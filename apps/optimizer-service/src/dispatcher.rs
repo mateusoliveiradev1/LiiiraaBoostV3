@@ -1,6 +1,6 @@
 //! Request-preserving dispatch for the five Phase 6 privileged operations.
 
-use std::marker::PhantomData;
+use std::time::Duration;
 
 use liiiraa_contracts_rust::PrivilegedBrokerRequest;
 use serde_json::{Value, json};
@@ -10,8 +10,9 @@ use super::{
     operations::{
         PowerOperation,
         power_scheme::{
-            MANAGED_SCHEME_DESCRIPTION, MANAGED_SCHEME_FRIENDLY_NAME, PowerSchemeError,
-            PowerSchemeId, PowerSchemePort, PowerSchemeSnapshot, VerifiedClientContext,
+            InteractiveUserEffectError, MANAGED_SCHEME_DESCRIPTION, MANAGED_SCHEME_FRIENDLY_NAME,
+            PowerSchemeError, PowerSchemeId, PowerSchemePort, PowerSchemeSnapshot,
+            VerifiedClientContext,
         },
     },
     restore_point::{
@@ -20,49 +21,13 @@ use super::{
     },
 };
 
+pub use super::operations::power_scheme::InteractiveUserEffectLease;
+
 pub const POWER_SCHEME_OPERATION_VERSION: &str = "power-scheme-v1";
 pub const RESTORE_POINT_OPERATION_VERSION: &str = "restore-point-v1";
 
-/// Opaque proof that the pipe host acquired a bounded interactive-user token.
-///
-/// Public identity strings cannot construct this capability. The production
-/// constructor remains crate-private until the authenticated Windows host owns
-/// token duplication in Plan 06-30.
-pub struct InteractiveUserEffectLease {
-    session_id: u32,
-    interactive_logon_sid: String,
-    _not_clone_or_send: PhantomData<*mut ()>,
-}
-
-impl InteractiveUserEffectLease {
-    #[cfg(debug_assertions)]
-    pub fn for_test(session_id: u32, interactive_logon_sid: impl Into<String>) -> Self {
-        Self {
-            session_id,
-            interactive_logon_sid: interactive_logon_sid.into(),
-            _not_clone_or_send: PhantomData,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) unsafe fn from_authenticated_pipe_host(
-        session_id: u32,
-        interactive_logon_sid: String,
-    ) -> Self {
-        Self {
-            session_id,
-            interactive_logon_sid,
-            _not_clone_or_send: PhantomData,
-        }
-    }
-
-    fn matches(&self, session_id: u32, interactive_logon_sid: &str) -> bool {
-        self.session_id == session_id && self.interactive_logon_sid == interactive_logon_sid
-    }
-}
-
 /// Exact broker and authenticated-client metadata supplied to one dispatch.
-pub struct DispatchContext {
+pub struct DispatchContext<'token> {
     transaction_id: String,
     step_id: String,
     operation_version_id: String,
@@ -70,10 +35,11 @@ pub struct DispatchContext {
     interactive_logon_sid: String,
     process_id: u32,
     process_image_hash: String,
-    effect_lease: Option<InteractiveUserEffectLease>,
+    effect_timeout: Duration,
+    effect_lease: Option<InteractiveUserEffectLease<'token>>,
 }
 
-impl DispatchContext {
+impl<'token> DispatchContext<'token> {
     #[allow(clippy::too_many_arguments)]
     pub fn metadata_only(
         transaction_id: impl Into<String>,
@@ -92,6 +58,7 @@ impl DispatchContext {
             interactive_logon_sid: interactive_logon_sid.into(),
             process_id,
             process_image_hash: process_image_hash.into(),
+            effect_timeout: Duration::from_secs(5),
             effect_lease: None,
         }
     }
@@ -105,7 +72,7 @@ impl DispatchContext {
         interactive_logon_sid: impl Into<String>,
         process_id: u32,
         process_image_hash: impl Into<String>,
-        effect_lease: InteractiveUserEffectLease,
+        effect_lease: InteractiveUserEffectLease<'token>,
     ) -> Self {
         let mut context = Self::metadata_only(
             transaction_id,
@@ -120,14 +87,37 @@ impl DispatchContext {
         context
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn with_effect_lease_and_timeout(
+        transaction_id: impl Into<String>,
+        step_id: impl Into<String>,
+        operation_version_id: impl Into<String>,
+        interactive_session_id: u32,
+        interactive_logon_sid: impl Into<String>,
+        process_id: u32,
+        process_image_hash: impl Into<String>,
+        effect_timeout: Duration,
+        effect_lease: InteractiveUserEffectLease<'token>,
+    ) -> Self {
+        let mut context = Self::with_effect_lease(
+            transaction_id,
+            step_id,
+            operation_version_id,
+            interactive_session_id,
+            interactive_logon_sid,
+            process_id,
+            process_image_hash,
+            effect_lease,
+        );
+        context.effect_timeout = effect_timeout;
+        context
+    }
+
     fn verified_client(&self) -> Result<VerifiedClientContext, BrokerError> {
-        let Some(lease) = self.effect_lease.as_ref() else {
+        let Some(_lease) = self.effect_lease.as_ref() else {
             return Err(error(BrokerErrorCode::AuthenticationFailed));
         };
-        if self.process_id == 0
-            || self.process_image_hash.trim().is_empty()
-            || !lease.matches(self.interactive_session_id, &self.interactive_logon_sid)
-        {
+        if self.process_id == 0 || self.process_image_hash.trim().is_empty() {
             return Err(error(BrokerErrorCode::AuthenticationFailed));
         }
         VerifiedClientContext::establish(
@@ -137,6 +127,24 @@ impl DispatchContext {
             true,
         )
         .map_err(|_| error(BrokerErrorCode::AuthenticationFailed))
+    }
+
+    fn with_interactive_user<T, F>(
+        &self,
+        client: &VerifiedClientContext,
+        effect: F,
+    ) -> Result<T, BrokerError>
+    where
+        T: Send,
+        F: FnOnce(&VerifiedClientContext) -> Result<T, PowerSchemeError> + Send,
+    {
+        let lease = self
+            .effect_lease
+            .as_ref()
+            .ok_or_else(|| error(BrokerErrorCode::AuthenticationFailed))?;
+        lease
+            .with_interactive_user(self.effect_timeout, client, effect)
+            .map_err(map_effect_error)
     }
 }
 
@@ -160,7 +168,7 @@ pub struct DispatchAudit {
 
 pub struct PhysicalOperationDispatcher<'a, P, A, O>
 where
-    P: PowerSchemePort,
+    P: PowerSchemePort + Send,
     A: RestorePointApi,
     O: RestorePointObserver,
 {
@@ -172,7 +180,7 @@ where
 
 impl<'a, P, A, O> PhysicalOperationDispatcher<'a, P, A, O>
 where
-    P: PowerSchemePort,
+    P: PowerSchemePort + Send,
     A: RestorePointApi,
     O: RestorePointObserver,
 {
@@ -195,7 +203,7 @@ where
 
     fn push_audit(
         &mut self,
-        context: &DispatchContext,
+        context: &DispatchContext<'_>,
         request_id: &str,
         operation: &'static str,
         outcome: DispatchOutcome,
@@ -210,7 +218,7 @@ where
     }
 
     fn validate_common(
-        context: &DispatchContext,
+        context: &DispatchContext<'_>,
         request_id: &str,
         version: &str,
     ) -> Result<VerifiedClientContext, BrokerError> {
@@ -223,24 +231,26 @@ where
 
 impl<P, A, O> OperationDispatcher for PhysicalOperationDispatcher<'_, P, A, O>
 where
-    P: PowerSchemePort,
+    P: PowerSchemePort + Send,
     A: RestorePointApi,
     O: RestorePointObserver,
 {
     fn dispatch(
         &mut self,
         request: PrivilegedBrokerRequest,
-        context: &DispatchContext,
+        context: &DispatchContext<'_>,
     ) -> Result<Value, BrokerError> {
         match request {
             PrivilegedBrokerRequest::ObservePowerSchemeRequest(request) => {
                 let request_id = request.request_id.as_str();
                 let client =
                     Self::validate_common(context, request_id, POWER_SCHEME_OPERATION_VERSION)?;
-                self.power.preflight(&client).map_err(map_power_error)?;
-                self.power
-                    .observe_active(&client)
-                    .map_err(map_power_error)?;
+                // Key-link witness: 'with_interactive_user guards WindowsPowrProf'
+                context.with_interactive_user(&client, |client| {
+                    self.power.preflight(client)?;
+                    self.power.observe_active(client)?;
+                    Ok(())
+                })?;
                 self.push_audit(
                     context,
                     request_id,
@@ -255,18 +265,18 @@ where
                     Self::validate_common(context, request_id, POWER_SCHEME_OPERATION_VERSION)?;
                 let source = parse_scheme_id(&request.source_scheme_id)?;
                 let destination = parse_scheme_id(&request.destination_scheme_id)?;
-                self.power.preflight(&client).map_err(map_power_error)?;
-                let active = self
-                    .power
-                    .observe_active(&client)
-                    .map_err(map_power_error)?;
-                if active.id != source
-                    || self
-                        .power
-                        .observe_scheme(&client, destination)
-                        .map_err(map_power_error)?
-                        .is_some()
-                {
+                let dispatched = context.with_interactive_user(&client, |client| {
+                    self.power.preflight(client)?;
+                    let active = self.power.observe_active(client)?;
+                    if active.id != source
+                        || self.power.observe_scheme(client, destination)?.is_some()
+                    {
+                        return Ok(false);
+                    }
+                    self.power.duplicate_managed(client, source, destination)?;
+                    Ok(true)
+                })?;
+                if !dispatched {
                     self.push_audit(
                         context,
                         request_id,
@@ -275,9 +285,6 @@ where
                     );
                     return Ok(rejected(request_id, "power-scheme-drift"));
                 }
-                self.power
-                    .duplicate_managed(&client, source, destination)
-                    .map_err(map_power_error)?;
                 self.push_audit(
                     context,
                     request_id,
@@ -292,16 +299,19 @@ where
                     Self::validate_common(context, request_id, POWER_SCHEME_OPERATION_VERSION)?;
                 let target_id = parse_scheme_id(&request.scheme_id)?;
                 let expected_current = parse_scheme_id(&request.expected_current_scheme_id)?;
-                self.power.preflight(&client).map_err(map_power_error)?;
-                let active = self
-                    .power
-                    .observe_active(&client)
-                    .map_err(map_power_error)?;
-                let target = self
-                    .power
-                    .observe_scheme(&client, target_id)
-                    .map_err(map_power_error)?;
-                if active.id != expected_current || !target.as_ref().is_some_and(is_owned_target) {
+                let dispatched = context.with_interactive_user(&client, |client| {
+                    self.power.preflight(client)?;
+                    let active = self.power.observe_active(client)?;
+                    let target = self.power.observe_scheme(client, target_id)?;
+                    if active.id != expected_current
+                        || !target.as_ref().is_some_and(is_owned_target)
+                    {
+                        return Ok(false);
+                    }
+                    self.power.activate_managed(client, target_id)?;
+                    Ok(true)
+                })?;
+                if !dispatched {
                     self.push_audit(
                         context,
                         request_id,
@@ -310,9 +320,6 @@ where
                     );
                     return Ok(rejected(request_id, "power-scheme-drift"));
                 }
-                self.power
-                    .activate_managed(&client, target_id)
-                    .map_err(map_power_error)?;
                 self.push_audit(
                     context,
                     request_id,
@@ -326,21 +333,21 @@ where
                 let client =
                     Self::validate_common(context, request_id, POWER_SCHEME_OPERATION_VERSION)?;
                 let target_id = parse_scheme_id(&request.scheme_id)?;
-                self.power.preflight(&client).map_err(map_power_error)?;
-                let active = self
-                    .power
-                    .observe_active(&client)
-                    .map_err(map_power_error)?;
-                let target = self
-                    .power
-                    .observe_scheme(&client, target_id)
-                    .map_err(map_power_error)?;
-                let owned_with_exact_hash = target.as_ref().is_some_and(|target| {
-                    is_owned_target(target)
-                        && target.settings_fingerprint
-                            == request.expected_canonical_state_hash.as_str()
-                });
-                if active.id == target_id || !owned_with_exact_hash {
+                let expected_hash = request.expected_canonical_state_hash.as_str();
+                let dispatched = context.with_interactive_user(&client, |client| {
+                    self.power.preflight(client)?;
+                    let active = self.power.observe_active(client)?;
+                    let target = self.power.observe_scheme(client, target_id)?;
+                    let owned_with_exact_hash = target.as_ref().is_some_and(|target| {
+                        is_owned_target(target) && target.settings_fingerprint == expected_hash
+                    });
+                    if active.id == target_id || !owned_with_exact_hash {
+                        return Ok(false);
+                    }
+                    self.power.delete_owned(client, target_id)?;
+                    Ok(true)
+                })?;
+                if !dispatched {
                     self.push_audit(
                         context,
                         request_id,
@@ -349,9 +356,6 @@ where
                     );
                     return Ok(rejected(request_id, "power-scheme-conflict"));
                 }
-                self.power
-                    .delete_owned(&client, target_id)
-                    .map_err(map_power_error)?;
                 self.push_audit(
                     context,
                     request_id,
@@ -446,6 +450,21 @@ fn unavailable(request_id: &str, reason_code: &str) -> Value {
 
 fn map_power_error(_power_error: PowerSchemeError) -> BrokerError {
     error(BrokerErrorCode::InvalidMessage)
+}
+
+fn map_effect_error(error_value: InteractiveUserEffectError<PowerSchemeError>) -> BrokerError {
+    match error_value {
+        InteractiveUserEffectError::Effect(power_error) => map_power_error(power_error),
+        InteractiveUserEffectError::Timeout => error(BrokerErrorCode::Timeout),
+        InteractiveUserEffectError::ClientMismatch
+        | InteractiveUserEffectError::IdentityMismatch
+        | InteractiveUserEffectError::ImpersonationFailed(_) => {
+            error(BrokerErrorCode::AuthenticationFailed)
+        }
+        InteractiveUserEffectError::Panicked | InteractiveUserEffectError::CleanupFailed(_) => {
+            error(BrokerErrorCode::ServerStopping)
+        }
+    }
 }
 
 fn error(code: BrokerErrorCode) -> BrokerError {

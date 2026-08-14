@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     path::Path,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use liiiraa_contracts_rust::{
@@ -122,7 +122,7 @@ pub trait OperationDispatcher {
     fn dispatch(
         &mut self,
         request: PrivilegedBrokerRequest,
-        context: &DispatchContext,
+        context: &DispatchContext<'_>,
     ) -> Result<Value, BrokerError>;
 }
 
@@ -373,7 +373,7 @@ impl Broker {
             .mark_unknown_after_dispatch(&envelope.transaction_id, &envelope.step_id)
             .map_err(map_store_error)?;
         let context = if let Some(token) = session.client_token.as_ref() {
-            DispatchContext::with_effect_lease(
+            DispatchContext::with_effect_lease_and_timeout(
                 &envelope.transaction_id,
                 &envelope.step_id,
                 &envelope.operation_version_id,
@@ -381,6 +381,7 @@ impl Broker {
                 &session.interactive_logon_sid,
                 session.process_id,
                 &session.process_image_hash,
+                Duration::from_millis(self.config.request_timeout_millis),
                 token.effect_lease(),
             )
         } else {

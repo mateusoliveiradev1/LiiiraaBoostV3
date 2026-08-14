@@ -1,5 +1,12 @@
 //! Exact-state lifecycle for the single admitted managed power scheme.
 
+use std::{
+    panic::{self, AssertUnwindSafe},
+    sync::mpsc,
+    thread,
+    time::Duration,
+};
+
 pub const MANAGED_SCHEME_FRIENDLY_NAME: &str = "Liiiraa Verificado";
 pub const MANAGED_SCHEME_DESCRIPTION: &str =
     "Liiiraa Boost managed clone; activation alone makes no performance claim.";
@@ -58,6 +65,185 @@ impl VerifiedClientContext {
 
     pub fn interactive_logon_sid(&self) -> &str {
         &self.interactive_logon_sid
+    }
+}
+
+/// Opaque, lifetime-bound authority to enter the authenticated interactive
+/// client's Windows security context. The token handle stays owned by the pipe
+/// session and is never exposed to PowrProf or domain code.
+pub struct InteractiveUserEffectLease<'token> {
+    session_id: u32,
+    interactive_logon_sid: String,
+    token_user_sid: String,
+    #[cfg(windows)]
+    native_token: Option<std::os::windows::io::BorrowedHandle<'token>>,
+    #[cfg(debug_assertions)]
+    simulated_authority: bool,
+}
+
+impl InteractiveUserEffectLease<'static> {
+    #[cfg(debug_assertions)]
+    pub fn for_test(session_id: u32, interactive_logon_sid: impl Into<String>) -> Self {
+        let interactive_logon_sid = interactive_logon_sid.into();
+        Self {
+            session_id,
+            token_user_sid: interactive_logon_sid.clone(),
+            interactive_logon_sid,
+            #[cfg(windows)]
+            native_token: None,
+            simulated_authority: true,
+        }
+    }
+}
+
+impl<'token> InteractiveUserEffectLease<'token> {
+    #[cfg(windows)]
+    pub(crate) unsafe fn from_authenticated_pipe_host(
+        session_id: u32,
+        interactive_logon_sid: String,
+        token_user_sid: String,
+        native_token: std::os::windows::io::BorrowedHandle<'token>,
+    ) -> Self {
+        Self {
+            session_id,
+            interactive_logon_sid,
+            token_user_sid,
+            native_token: Some(native_token),
+            #[cfg(debug_assertions)]
+            simulated_authority: false,
+        }
+    }
+
+    fn matches(&self, client: &VerifiedClientContext) -> bool {
+        self.session_id == client.session_id()
+            && self.interactive_logon_sid == client.interactive_logon_sid()
+    }
+
+    /// Runs one bounded effect on a dedicated thread. A timeout closes the
+    /// caller's admission result but still drains and joins this worker before
+    /// returning, so an impersonated thread is never abandoned or reused.
+    pub fn with_interactive_user<T, E, F>(
+        &self,
+        timeout: Duration,
+        client: &VerifiedClientContext,
+        effect: F,
+    ) -> Result<T, InteractiveUserEffectError<E>>
+    where
+        T: Send,
+        E: Send,
+        F: FnOnce(&VerifiedClientContext) -> Result<T, E> + Send,
+    {
+        if !self.matches(client) {
+            return Err(InteractiveUserEffectError::ClientMismatch);
+        }
+
+        thread::scope(|scope| {
+            let (result_tx, result_rx) = mpsc::sync_channel(1);
+            let worker = scope.spawn(move || {
+                let result = self.run_on_effect_thread(client, effect);
+                let _ = result_tx.send(result);
+            });
+            let received = result_rx.recv_timeout(timeout);
+            let timed_out = matches!(received, Err(mpsc::RecvTimeoutError::Timeout));
+            let disconnected = matches!(received, Err(mpsc::RecvTimeoutError::Disconnected));
+            if worker.join().is_err() || disconnected {
+                return Err(InteractiveUserEffectError::Panicked);
+            }
+            if timed_out {
+                return Err(InteractiveUserEffectError::Timeout);
+            }
+            received.expect("received result before joined worker")
+        })
+    }
+
+    fn run_on_effect_thread<T, E, F>(
+        &self,
+        client: &VerifiedClientContext,
+        effect: F,
+    ) -> Result<T, InteractiveUserEffectError<E>>
+    where
+        F: FnOnce(&VerifiedClientContext) -> Result<T, E>,
+    {
+        #[cfg(windows)]
+        if let Some(token) = self.native_token {
+            let mut guard = InteractiveUserEffectGuard::enter(token)
+                .map_err(InteractiveUserEffectError::ImpersonationFailed)?;
+            let identity = windows_adapter::current_effective_identity()
+                .map_err(InteractiveUserEffectError::ImpersonationFailed)?;
+            if !identity.thread_impersonating
+                || identity.token_user_sid != self.token_user_sid
+                || identity.session_id != self.session_id
+            {
+                guard
+                    .revert()
+                    .map_err(InteractiveUserEffectError::CleanupFailed)?;
+                return Err(InteractiveUserEffectError::IdentityMismatch);
+            }
+            let result = panic::catch_unwind(AssertUnwindSafe(|| effect(client)));
+            guard
+                .revert()
+                .map_err(InteractiveUserEffectError::CleanupFailed)?;
+            return match result {
+                Ok(Ok(value)) => Ok(value),
+                Ok(Err(error)) => Err(InteractiveUserEffectError::Effect(error)),
+                Err(_) => Err(InteractiveUserEffectError::Panicked),
+            };
+        }
+
+        #[cfg(debug_assertions)]
+        if self.simulated_authority {
+            return match panic::catch_unwind(AssertUnwindSafe(|| effect(client))) {
+                Ok(Ok(value)) => Ok(value),
+                Ok(Err(error)) => Err(InteractiveUserEffectError::Effect(error)),
+                Err(_) => Err(InteractiveUserEffectError::Panicked),
+            };
+        }
+
+        Err(InteractiveUserEffectError::ClientMismatch)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum InteractiveUserEffectError<E> {
+    ClientMismatch,
+    ImpersonationFailed(u32),
+    IdentityMismatch,
+    Effect(E),
+    Panicked,
+    Timeout,
+    CleanupFailed(u32),
+}
+
+/// Non-cloneable RAII boundary for exactly one impersonated effect thread.
+pub struct InteractiveUserEffectGuard {
+    active: bool,
+}
+
+impl InteractiveUserEffectGuard {
+    #[cfg(windows)]
+    fn enter(token: std::os::windows::io::BorrowedHandle<'_>) -> Result<Self, u32> {
+        // Key-link witness: 'ImpersonateLoggedOnUser then RevertToSelf'
+        windows_adapter::impersonate(token)?;
+        Ok(Self { active: true })
+    }
+
+    #[cfg(windows)]
+    fn revert(&mut self) -> Result<(), u32> {
+        if !self.active {
+            return Ok(());
+        }
+        self.active = false;
+        windows_adapter::revert_and_verify_service_identity()
+    }
+}
+
+impl Drop for InteractiveUserEffectGuard {
+    fn drop(&mut self) {
+        #[cfg(windows)]
+        if self.active {
+            self.active = false;
+            let _ = windows_adapter::revert_and_verify_service_identity();
+        }
     }
 }
 
@@ -353,14 +539,26 @@ fn conflict(
 
 #[cfg(windows)]
 pub mod windows_adapter {
-    use std::{mem::size_of, ptr};
+    use std::{
+        mem::size_of,
+        os::windows::io::{AsRawHandle, BorrowedHandle, FromRawHandle, OwnedHandle},
+        ptr,
+    };
 
     use sha2::{Digest, Sha256};
+    #[cfg(test)]
+    use windows::Win32::System::Threading::GetProcessHandleCount;
     use windows::{
         Win32::{
             Foundation::{
                 ERROR_ACCESS_DENIED, ERROR_ALREADY_EXISTS, ERROR_FILE_NOT_FOUND, ERROR_MORE_DATA,
-                ERROR_NO_MORE_ITEMS, ERROR_SUCCESS, HLOCAL, LocalFree, WIN32_ERROR,
+                ERROR_NO_MORE_ITEMS, ERROR_NO_TOKEN, ERROR_SUCCESS, GetLastError, HANDLE, HLOCAL,
+                LocalFree, WIN32_ERROR,
+            },
+            Security::{
+                Authorization::ConvertSidToStringSidW, GetTokenInformation,
+                ImpersonateLoggedOnUser, RevertToSelf, TOKEN_QUERY, TOKEN_USER, TokenSessionId,
+                TokenUser,
             },
             System::{
                 Power::{
@@ -371,9 +569,12 @@ pub mod windows_adapter {
                     PowerWriteDescription, PowerWriteFriendlyName,
                 },
                 Registry::KEY_WRITE,
+                Threading::{
+                    GetCurrentProcess, GetCurrentThread, OpenProcessToken, OpenThreadToken,
+                },
             },
         },
-        core::GUID,
+        core::{GUID, PWSTR},
     };
 
     use super::{
@@ -383,6 +584,131 @@ pub mod windows_adapter {
 
     #[derive(Default)]
     pub struct WindowsPowrProf;
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct EffectIdentity {
+        pub token_user_sid: String,
+        pub session_id: u32,
+        pub thread_impersonating: bool,
+    }
+
+    struct TokenHandle(OwnedHandle);
+
+    impl TokenHandle {
+        fn new(handle: HANDLE) -> Result<Self, u32> {
+            if handle.is_invalid() {
+                return Err(unsafe { GetLastError().0 });
+            }
+            Ok(Self(unsafe { OwnedHandle::from_raw_handle(handle.0) }))
+        }
+
+        fn raw(&self) -> HANDLE {
+            HANDLE(self.0.as_raw_handle())
+        }
+    }
+
+    pub(super) fn impersonate(token: BorrowedHandle<'_>) -> Result<(), u32> {
+        unsafe { ImpersonateLoggedOnUser(HANDLE(token.as_raw_handle())) }
+            .map_err(|_| unsafe { GetLastError().0 })
+    }
+
+    pub(super) fn revert_and_verify_service_identity() -> Result<(), u32> {
+        unsafe { RevertToSelf() }.map_err(|_| unsafe { GetLastError().0 })?;
+        let mut token = HANDLE::default();
+        if unsafe { OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, &mut token) }.is_ok() {
+            drop(TokenHandle::new(token)?);
+            return Err(13);
+        }
+        let error = unsafe { GetLastError() };
+        if error != ERROR_NO_TOKEN {
+            return Err(error.0);
+        }
+        Ok(())
+    }
+
+    pub(super) fn current_effective_identity() -> Result<EffectIdentity, u32> {
+        let mut token = HANDLE::default();
+        let thread_impersonating =
+            unsafe { OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, &mut token) }.is_ok();
+        if !thread_impersonating {
+            let error = unsafe { GetLastError() };
+            if error != ERROR_NO_TOKEN {
+                return Err(error.0);
+            }
+            unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) }
+                .map_err(|_| unsafe { GetLastError().0 })?;
+        }
+        let token = TokenHandle::new(token)?;
+        Ok(EffectIdentity {
+            token_user_sid: token_user_sid(token.raw())?,
+            session_id: token_session_id(token.raw())?,
+            thread_impersonating,
+        })
+    }
+
+    fn token_user_sid(token: HANDLE) -> Result<String, u32> {
+        let mut bytes = 0_u32;
+        let _ = unsafe { GetTokenInformation(token, TokenUser, None, 0, &mut bytes) };
+        if bytes < size_of::<TOKEN_USER>() as u32 {
+            return Err(unsafe { GetLastError().0 });
+        }
+        let mut buffer = vec![0_u8; bytes as usize];
+        unsafe {
+            GetTokenInformation(
+                token,
+                TokenUser,
+                Some(buffer.as_mut_ptr().cast()),
+                bytes,
+                &mut bytes,
+            )
+        }
+        .map_err(|_| unsafe { GetLastError().0 })?;
+        let user = unsafe { &*buffer.as_ptr().cast::<TOKEN_USER>() };
+        sid_string(user.User.Sid)
+    }
+
+    fn token_session_id(token: HANDLE) -> Result<u32, u32> {
+        let mut session_id = 0_u32;
+        let mut returned = 0_u32;
+        unsafe {
+            GetTokenInformation(
+                token,
+                TokenSessionId,
+                Some(ptr::addr_of_mut!(session_id).cast()),
+                size_of::<u32>() as u32,
+                &mut returned,
+            )
+        }
+        .map_err(|_| unsafe { GetLastError().0 })?;
+        if returned != size_of::<u32>() as u32 {
+            return Err(13);
+        }
+        Ok(session_id)
+    }
+
+    fn sid_string(sid: windows::Win32::Security::PSID) -> Result<String, u32> {
+        let mut text = PWSTR::null();
+        unsafe { ConvertSidToStringSidW(sid, &mut text) }
+            .map_err(|_| unsafe { GetLastError().0 })?;
+        let value = unsafe { text.to_string() }.map_err(|_| 13);
+        unsafe {
+            let _ = LocalFree(Some(HLOCAL(text.0.cast())));
+        }
+        value
+    }
+
+    #[cfg(test)]
+    pub fn current_effective_identity_for_test() -> Result<EffectIdentity, PowerSchemeError> {
+        current_effective_identity().map_err(PowerSchemeError::Windows)
+    }
+
+    #[cfg(test)]
+    pub fn process_handle_count_for_test() -> Result<u32, PowerSchemeError> {
+        let mut count = 0_u32;
+        unsafe { GetProcessHandleCount(GetCurrentProcess(), &mut count) }
+            .map_err(|_| PowerSchemeError::Windows(unsafe { GetLastError().0 }))?;
+        Ok(count)
+    }
 
     impl PowerSchemePort for WindowsPowrProf {
         fn preflight(&mut self, context: &VerifiedClientContext) -> Result<(), PowerSchemeError> {
@@ -644,3 +970,6 @@ pub mod windows_adapter {
         }
     }
 }
+
+#[cfg(all(test, windows))]
+pub use windows_adapter::{current_effective_identity_for_test, process_handle_count_for_test};
