@@ -14,6 +14,7 @@ import {
   assertDeclaredInputState,
   assertImmutableFile,
   buildCanonicalRunConfigs,
+  patchTauriBundleTypeForMsi,
   selectUnusedOperationVersion,
   validateTauriDriverInstallReceipt,
   validateArtifactManifest,
@@ -585,6 +586,33 @@ test('installation manifest contains exactly desktop, service, and runner roles'
     validateInstallationManifest,
     /canonical installed path/u,
   );
+});
+
+test('desktop bundle type is patched to MSI before signing and manifest custody', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'liiiraa-bundle-type-'));
+  const executable = join(directory, 'liiiraa-desktop.exe');
+  try {
+    writeFileSync(executable, Buffer.from('prefix__TAURI_BUNDLE_TYPE_VAR_UNK\0suffix', 'ascii'));
+    assert.equal(patchTauriBundleTypeForMsi(executable), true);
+    assert.equal(
+      readFileSync(executable).toString('ascii'),
+      'prefix__TAURI_BUNDLE_TYPE_VAR_MSI\0suffix',
+    );
+    assert.equal(patchTauriBundleTypeForMsi(executable), false, 'MSI patch must be idempotent');
+
+    writeFileSync(executable, Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK__TAURI_BUNDLE_TYPE_VAR_UNK'));
+    assert.throws(() => patchTauriBundleTypeForMsi(executable), /exactly one/u);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  const patchCall = source.indexOf('patchTauriBundleTypeForMsi(built.desktop)');
+  const signingLoop = source.indexOf('for (const [key, path] of Object.entries(built))');
+  const manifestIdentity = source.indexOf('installedRoleIdentity(role, path, built[key]');
+  assert.ok(patchCall >= 0, 'builder must patch the final MSI bundle marker');
+  assert.ok(patchCall < signingLoop, 'bundle patch must happen before Authenticode signing');
+  assert.ok(signingLoop < manifestIdentity, 'signing must happen before manifest identity capture');
 });
 
 test('optimizer service embeds the physical package version in Windows VERSIONINFO', () => {
