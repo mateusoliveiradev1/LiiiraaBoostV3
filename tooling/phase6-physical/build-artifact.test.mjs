@@ -23,6 +23,21 @@ import {
 } from './build-artifact.mjs';
 
 const sha = (character) => `sha256:${character.repeat(64)}`;
+const ROTATED_DEVELOPMENT_SPKI_SHA256 =
+  'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
+
+test('development signing trust is pinned atomically to the rotated CNG identity', () => {
+  assert.equal(TRUSTED_INSTALLER_SPKI_SHA256, ROTATED_DEVELOPMENT_SPKI_SHA256);
+
+  for (const path of [
+    'apps/optimizer-service/src/installation_manifest.rs',
+    'tooling/phase6-evidence/src/physical-writer.ts',
+  ]) {
+    const source = readFileSync(path, 'utf8');
+    assert.match(source, new RegExp(ROTATED_DEVELOPMENT_SPKI_SHA256, 'u'));
+  }
+});
+
 const role = (name, relativePath, character = 'a') => {
   const expected = PORTABLE_ROLES.find(
     (candidate) => candidate.role === name && candidate.path === relativePath,
