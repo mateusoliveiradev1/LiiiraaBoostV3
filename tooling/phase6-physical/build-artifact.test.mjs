@@ -806,6 +806,31 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.match(source, /validateDowngradeProbeIdentity\(msiInspection, downgradeInspection\)/u);
   assert.match(source, /packageCode\s*=\s*\$database\.SummaryInformation\(0\)\.Property\(9\)/u);
   assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
+
+  const identityWriter = source.slice(
+    source.indexOf('const setMsiIdentity'),
+    source.indexOf('const runLifecycleSmoke'),
+  );
+  const summaryPropertyIndex = identityWriter.indexOf('$summary.Property(9) = $msiPackageCode');
+  const persistIndex = identityWriter.indexOf('$summary.Persist()');
+  const finalCommitIndex = identityWriter.indexOf('$database.Commit()');
+  assert.ok(summaryPropertyIndex >= 0);
+  assert.ok(summaryPropertyIndex < persistIndex);
+  assert.ok(persistIndex < finalCommitIndex, 'SummaryInformation must persist before final commit');
+
+  const probeFlow = source.slice(
+    source.indexOf("const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi')"),
+    source.indexOf('const lifecycle = runLifecycleSmoke'),
+  );
+  const mutateIndex = probeFlow.indexOf('setMsiIdentity(downgradeMsiPath');
+  const reopenIndex = probeFlow.indexOf('inspectMsi(downgradeMsiPath)');
+  const validateIndex = probeFlow.indexOf(
+    'validateDowngradeProbeIdentity(msiInspection, downgradeInspection)',
+  );
+  const signIndex = probeFlow.indexOf('signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath)');
+  assert.ok(mutateIndex >= 0 && mutateIndex < reopenIndex);
+  assert.ok(reopenIndex < validateIndex);
+  assert.ok(validateIndex < signIndex, 'final reopened MSI identity must pass before signing');
 });
 
 test('real bundle removes and rejects stale generated MSI output', () => {
