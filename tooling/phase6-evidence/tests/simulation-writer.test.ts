@@ -5,7 +5,12 @@ import { dirname, join, resolve } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { PHASE6_DECISIONS, PHASE6_REQUIREMENTS, phase6EvidenceSha256 } from '../src/evaluate.js';
+import {
+  PHASE6_DECISIONS,
+  PHASE6_REQUIREMENTS,
+  evaluatePhase6Evidence,
+  phase6EvidenceSha256,
+} from '../src/evaluate.js';
 import {
   assertCanonicalSimulationCandidate,
   assertDeterministicAdmissionChain,
@@ -410,6 +415,9 @@ describe('artifact-bound atomic admission', () => {
       workspaceRoot: setup.root,
     });
     const current = JSON.parse(readFileSync(setup.evidenceManifestPath, 'utf8')) as {
+      generatedAt: string;
+      immutableBuild: { artifact: { path: string } };
+      legacyBlockedAttempts: { path: string }[];
       deterministicAdmissions: {
         operationVersion: string;
         status: string;
@@ -418,6 +426,7 @@ describe('artifact-bound atomic admission', () => {
         successorEvidenceSha256: string | null;
         manifestRecord: { path: string; sha256: string } | null;
       }[];
+      stages: { runs: { artifacts: { path: string }[] }[] }[];
     };
     const [v41Current, v43Current, v44Current] = current.deterministicAdmissions;
     if (v41Current === undefined || v43Current === undefined || v44Current === undefined)
@@ -444,6 +453,28 @@ describe('artifact-bound atomic admission', () => {
     );
     expect(v43Current.manifestRecord!.sha256).toBe(sha256(v43ManifestBytes));
     expect(readFileSync(setup.uatPath, 'utf8').startsWith(uatBefore)).toBe(true);
+
+    const referencedPaths = new Set<string>([
+      current.immutableBuild.artifact.path,
+      ...current.legacyBlockedAttempts.map(({ path }) => path),
+      ...current.deterministicAdmissions.flatMap(({ manifestRecord }) =>
+        manifestRecord === null ? [] : [manifestRecord.path],
+      ),
+      ...current.stages.flatMap(({ runs }) =>
+        runs.flatMap(({ artifacts }) => artifacts.map(({ path }) => path)),
+      ),
+    ]);
+    const artifactContents = Object.fromEntries(
+      [...referencedPaths].map((path) => [path, readFileSync(resolve(setup.root, path))]),
+    );
+    const evaluation = evaluatePhase6Evidence(current, {
+      mode: 'planned',
+      requireAdmittedStage: 'deterministic-simulation',
+      evaluatedAt: new Date(Date.parse(current.generatedAt) + 1000).toISOString(),
+      artifactContents,
+    });
+    expect(evaluation.diagnostics).toEqual([]);
+    expect(evaluation.ok).toBe(true);
   });
 
   it('selects the latest complete append-only artifact authority block', () => {
