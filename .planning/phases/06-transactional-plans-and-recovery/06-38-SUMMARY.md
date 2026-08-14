@@ -2,7 +2,7 @@
 phase: 06-transactional-plans-and-recovery
 plan: '38'
 subsystem: deterministic-evidence-admission
-tags: [typescript, vitest, tdd, immutable-evidence, sha256, atomic-write, windows]
+tags: [typescript, vitest, tdd, immutable-evidence, sha256, atomic-write, windows, fixture-boundary]
 requires:
   - phase: 06-31
     provides: Immutable signed MSI v41 artifact and exact reserved operation identity
@@ -19,8 +19,10 @@ tech-stack:
     - Deterministic evidence derives identity and timestamps only from immutable artifact authority
     - Previous blocked evidence is snapshotted create-once while the UAT remains append-only
     - CLI grammar carries no physical, review, consent, or caller-declared PASS flags
+    - Deterministic harness consumers use a fixture-owned public subpath; immutable admitted source bytes remain archived at their original path
 key-files:
   created:
+    - packages/desktop-simulator/src/transactional-plans.ts
     - tooling/phase6-evidence/src/simulation-writer.ts
     - tooling/phase6-evidence/records/legacy/managed-power-scheme-v2-evidence-manifest.json
   modified:
@@ -75,6 +77,7 @@ completed: 2026-08-14
 1. **Task 1 RED: fresh-version simulation admission tests** — `418f5f47` (test)
 2. **Task 1 GREEN: artifact-bound simulation emitter** — `d89cd690` (feat)
 3. **Task 2: mint and admit managed-power-scheme-v41** — `9a886cc0` (feat)
+4. **Post-wave: expose harness through the fixture boundary** — `2ba88739` (fix)
 
 ## Exact Admitted Authority
 
@@ -90,10 +93,12 @@ completed: 2026-08-14
 
 ## Verification
 
-- `rtk pnpm --filter @liiiraa/desktop exec vitest --run tests/packaged/transactional-plans.test.ts` — 13/13 passed.
+- `rtk pnpm --filter @liiiraa/desktop-simulator exec vitest --run src/transactional-plans.test.ts` — 13/13 passed from the fixture owner.
 - `rtk pnpm --filter @liiiraa/phase6-evidence exec vitest --run tests/simulation-writer.test.ts tests/evaluate.test.ts tests/physical-writer.test.ts` — 98/98 passed, including deterministic-as-physical rejection.
 - `rtk pnpm --filter @liiiraa/phase6-evidence exec tsc --noEmit` — passed.
 - Focused ESLint and Prettier checks — passed for all source, schema, manifest, and test files. The append-only UAT intentionally retains its pre-existing byte formatting.
+- `rtk pnpm test:architecture` — 51/51 passed with no exception or policy relaxation.
+- `rtk cargo build` — passed with warnings only; `rtk cargo test` — 412 passed, 1 ignored.
 - `rtk pnpm phase6:verify -- --mode planned` — `ok: true`, highest admitted stage `deterministic-simulation`, no diagnostics; clean VM, owner PC, and friends PCs remain pending.
 - Both 06-38 key-link patterns passed.
 - Exact byte comparison confirmed the current UAT starts with the complete previous UAT and the legacy record equals the previous v2 manifest byte-for-byte.
@@ -135,7 +140,16 @@ completed: 2026-08-14
 - **Verification:** The exact plan command succeeded once, duplicate re-entry remains rejected, and planned verification passed.
 - **Committed in:** `9a886cc0`.
 
-**Total deviations:** 3 auto-fixed (1 missing critical truthfulness, 1 bug, 1 blocking issue). **Impact:** All fixes preserve or tighten the stated trust boundary; no physical authority was broadened.
+**4. [Rule 1 - Bug] Removed the evidence writer's private desktop-app import**
+
+- **Found during:** Post-wave global architecture gate.
+- **Issue:** `simulation-writer.ts` imported `apps/desktop/tests/packaged/transactional-plans.ts`, creating a forbidden deep import into the desktop composition module.
+- **Fix:** Published the active deterministic-only harness from `@liiiraa/desktop-simulator/transactional-plans`, moved its regression suite under that fixture owner, and retained the original v41 source bytes only as the already-hashed immutable evidence artifact. No production module now depends on the fixture package.
+- **Files modified:** `architecture/module-boundaries.json`, `packages/desktop-simulator`, `tooling/phase6-evidence`, workspace manifests and lockfile.
+- **Verification:** Architecture 51/51, harness 13/13, evidence 98/98, TypeScript/ESLint, Cargo build/test, both key-links, and planned evaluation all passed. The admitted manifest and UAT hashes remain unchanged.
+- **Committed in:** `2ba88739`.
+
+**Total deviations:** 4 auto-fixed (1 missing critical truthfulness, 2 bugs, 1 blocking issue). **Impact:** All fixes preserve or tighten the stated trust boundary; no physical authority was broadened.
 
 ## Issues Encountered
 
@@ -159,9 +173,10 @@ None.
 ## Self-Check: PASSED
 
 - Both created files and the complete summary exist on disk.
-- RED `418f5f47`, GREEN `d89cd690`, and admission `9a886cc0` exist in git history.
+- RED `418f5f47`, GREEN `d89cd690`, admission `9a886cc0`, and architecture correction `2ba88739` exist in git history.
 - Planned evaluation still returns `ok: true` with only `deterministic-simulation` admitted.
 
 ---
-*Phase: 06-transactional-plans-and-recovery*
-*Completed: 2026-08-14*
+
+_Phase: 06-transactional-plans-and-recovery_
+_Completed: 2026-08-14_
