@@ -380,12 +380,61 @@ function Assert-ExactHyperVAudit {
         }
     }
     $integration = @(Get-VMIntegrationService -VMName $ExpectedVmName)
-    $healthy = @($integration | Where-Object { $_.Enabled -and $_.PrimaryStatusDescription -eq 'OK' })
-    if ($healthy.Count -lt 6) {
-        throw 'BLOCKED: Hyper-V integration services are not healthy.'
+    $disabled = @($integration | Where-Object { -not $_.Enabled })
+    if ($integration.Count -ne 6 -or $disabled.Count -ne 0) {
+        throw 'BLOCKED: exactly six enabled Hyper-V integration services are required before start.'
     }
-    [void]$CompletedBoundaries.Add('hyper-v-audit-pass')
-    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; Integration = $healthy }
+    [void]$CompletedBoundaries.Add('hyper-v-prestart-audit-pass')
+    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; Integration = $integration }
+}
+
+function Wait-ExactIntegrationServicesHealthy {
+    $deadline = [DateTime]::UtcNow.AddSeconds(180)
+    do {
+        $integration = @(Get-VMIntegrationService -VMName $ExpectedVmName -ErrorAction Stop)
+        $healthy = @($integration | Where-Object { $_.Enabled -and $_.PrimaryStatusDescription -eq 'OK' })
+        if ($integration.Count -eq 6 -and $healthy.Count -eq 6) {
+            return $healthy
+        }
+        Start-Sleep -Seconds 2
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw 'BLOCKED: exact Hyper-V integration services did not become healthy within 180 seconds.'
+}
+
+function Assert-ExactReadOnlyIntegrationHealth {
+    $initialVm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
+    $initialState = $initialVm.State.ToString()
+    $startedForAudit = $false
+    try {
+        if ($initialState -eq 'Off') {
+            Start-VM -Name $ExpectedVmName -ErrorAction Stop | Out-Null
+            $startedForAudit = $true
+        }
+        elseif ($initialState -ne 'Running') {
+            throw "BLOCKED: read-only Audit cannot safely observe integration health from VM state $initialState."
+        }
+        $healthy = Wait-ExactIntegrationServicesHealthy
+        [void]$CompletedBoundaries.Add('integration-services-healthy')
+        return $healthy
+    }
+    finally {
+        if ($startedForAudit) {
+            $currentVm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
+            if ($currentVm.State.ToString() -ne 'Off') {
+                Stop-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
+            }
+            $stopDeadline = [DateTime]::UtcNow.AddSeconds(120)
+            do {
+                $currentVm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
+                if ($currentVm.State.ToString() -eq 'Off') { break }
+                Start-Sleep -Seconds 2
+            } while ([DateTime]::UtcNow -lt $stopDeadline)
+            if ($currentVm.State.ToString() -ne 'Off') {
+                throw 'BLOCKED: read-only Audit did not restore the exact VM to its initial Off state within 120 seconds.'
+            }
+            [void]$CompletedBoundaries.Add('audit-vm-state-restored')
+        }
+    }
 }
 
 function Copy-ExactArtifactToGuest {
@@ -640,6 +689,8 @@ function Invoke-CleanVmRun {
     $vm = Get-VM -Name $ExpectedVmName
     if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
     Wait-ExactVmReady -Credential $Credential
+    [void](Wait-ExactIntegrationServicesHealthy)
+    [void]$CompletedBoundaries.Add('integration-services-healthy')
     Copy-ExactArtifactToGuest -Authority $Authority
 
     $first = Invoke-ExactGuestRunner -Credential $Credential
@@ -694,6 +745,8 @@ try {
     Assert-FreshSimulationAdmission
     $hyperV = Assert-ExactHyperVAudit
     if ($Action -eq 'Audit') {
+        $hyperV.Integration = @(Assert-ExactReadOnlyIntegrationHealth)
+        [void]$CompletedBoundaries.Add('hyper-v-audit-pass')
         [ordered]@{
             status = 'PASSED'; action = 'Audit'; readOnly = $true; vmName = $ExpectedVmName
             cleanCheckpoint = $ExpectedCleanCheckpoint; operationVersion = $ExpectedOperationVersion

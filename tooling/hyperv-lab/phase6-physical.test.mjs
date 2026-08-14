@@ -140,7 +140,7 @@ test('RED: Off pre-start audit requires six enabled services without claiming gu
   const source = bridgeSource();
   const auditBody = source.slice(
     source.indexOf('function Assert-ExactHyperVAudit'),
-    source.indexOf('function Copy-ExactArtifactToGuest'),
+    source.indexOf('function Wait-ExactIntegrationServicesHealthy'),
   );
   assert.match(auditBody, /\$integration\.Count\s+-ne\s+6/u);
   assert.match(auditBody, /Where-Object\s+\{\s*-not\s+\$_\.Enabled\s*\}/u);
