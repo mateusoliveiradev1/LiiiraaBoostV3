@@ -400,6 +400,48 @@ fn ipc_replay_counter_and_nonce_authority_survive_a_fresh_service_session() {
 }
 
 #[test]
+fn ipc_reconnect_receives_the_next_durable_counter_without_weakening_replay() {
+    let path = database_path("reconnect-counter");
+    let mut dispatcher = SpyDispatcher::new();
+    let mut broker = Broker::open(&path, config(), SECRET).expect("open broker");
+    let (first_ticket, first_envelope) = accepted_envelope(&mut broker, observe_request(1));
+    broker
+        .submit(
+            &first_ticket,
+            &first_envelope,
+            &mut dispatcher,
+            FaultPoint::None,
+        )
+        .expect("first connection observation");
+    broker.disconnect_session(&first_ticket);
+
+    let reconnect = broker
+        .authenticate_client(&legitimate_identity(), "client-nonce-reconnect")
+        .expect("reconnect authenticates");
+    assert_eq!(reconnect.next_counter, 2);
+    let request = json!({
+        "kind": "observe-power-scheme-request",
+        "schemaVersion": "1.0",
+        "requestId": "step-reconnect",
+        "deviceBindingId": "device-verified",
+        "issuedAt": "2026-08-13T08:00:00Z",
+        "nonce": "request-nonce-reconnect",
+        "counter": reconnect.next_counter
+    });
+    let envelope = Broker::sign_envelope(
+        &reconnect,
+        "transaction-reconnect",
+        "step-reconnect",
+        "power-scheme-observe-v1",
+        request,
+    );
+    broker
+        .submit(&reconnect, &envelope, &mut dispatcher, FaultPoint::None)
+        .expect("reconnected observation uses the durable counter floor");
+    assert_eq!(dispatcher.calls, 2);
+}
+
+#[test]
 fn ipc_repeated_reopen_never_redispatches_a_terminal_identity() {
     let path = database_path("repeated-reopen");
     let mut dispatcher = SpyDispatcher::new();

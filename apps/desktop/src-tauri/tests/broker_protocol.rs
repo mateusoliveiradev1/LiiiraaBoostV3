@@ -231,6 +231,7 @@ fn fixed_pipe_handshake_is_length_prefixed_partial_io_safe_and_identity_checked(
         "sessionId": "session-0001",
         "serverNonce": "server-nonce-0001",
         "sessionKey": "5a".repeat(32),
+        "nextCounter": 41,
     });
     let response = fixture_value("bounded broker response");
     let accepted_frame = framed(accepted);
@@ -256,6 +257,7 @@ fn fixed_pipe_handshake_is_length_prefixed_partial_io_safe_and_identity_checked(
         result,
         PrivilegedBrokerResponse::ObservationResponse(_)
     ));
+    assert_eq!(client.next_counter(), 42);
     let transport = client.transport();
     let wire = transport.wire();
     assert_eq!(wire.connect_count, 1);
