@@ -212,3 +212,21 @@ The plan verifier `rtk pnpm phase6:verify -- --mode planned --require-run-eviden
 The authorized one-time retry used the same `managed-power-scheme-v43` artifact and deterministic admission. The corrected pre-start audit accepted the legitimate Off state only after checking the exact VM/checkpoint, SecureBoot, TPM, host services, and exactly six enabled integration services. The bridge then restored `Clean-Windows-Ready` and started the VM sequence, but PowerShell Direct did not become available within the fixed 60-second observation-first timeout.
 
 The completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, and `clean-checkpoint-restored`. The failure occurred before integration-health admission, artifact copy, guest runner, installed checkpoint, apply approval, restart, evidence copy, or `physical-writer` ingestion. The persisted reason is `BLOCKED: exact VM did not become available for observation-first continuation.` This retry is append-only evidence and must not be relabeled as a physical PASS.
+
+### Clean checkpoint prepared for a future operation version
+
+- **Recorded at:** `2026-08-14T23:33:21.2808515Z`
+- **VM state before/after:** `Off` / `Off`
+- **Checkpoint type:** `Standard`
+- **Security:** Generation 2, SecureBoot `On`, TPM enabled
+- **Immutable backup:** `Clean-Windows-Ready-PreLabAccount-v43`
+- **Backup ID:** `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Backup creation time:** `2026-08-13T00:32:47.7334670Z`
+- **New clean checkpoint:** `Clean-Windows-Ready`
+- **New clean checkpoint ID:** `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **New clean checkpoint creation time:** `2026-08-14T23:33:22.8856440Z`
+- **`LiiiraaBoost-Installed`:** absent before and after
+- **Evidence:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-203321-clean-checkpoint-rotation.json`
+- **Evidence SHA-256:** `f4de5d2d73ae9f28a04f14db7cf9b1d4d93a19d61d90ea14795f674c1e223b63`
+
+The prior clean checkpoint was renamed create-once and was not deleted. A distinct clean checkpoint was then created after the owner manually validated the local `LiiiraaLab` account. This is environment preparation only: it is not physical run evidence, does not unblock `managed-power-scheme-v43`, and does not authorize `RunCleanVm`. The next physical attempt requires a new monotonic operation version beginning again at deterministic simulation.
