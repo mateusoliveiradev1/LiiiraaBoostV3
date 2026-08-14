@@ -163,8 +163,7 @@ const wix = () => `<?xml version="1.0"?>
     <DirectoryRef Id="INSTALLDIR">
       <Component Id="InstallationManifestComponent" Guid="*">
         <File Id="InstallationManifestFile" Source="installation-manifest.json" KeyPath="yes">
-          <PermissionEx User="SYSTEM" GenericAll="yes" />
-          <PermissionEx User="LiiiraaBoostOptimizer" GenericRead="yes" />
+          <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
         </File>
       </Component>
       <Component Id="OptimizerServiceComponent" Guid="*">
@@ -240,19 +239,25 @@ test('physical Tauri profile is MSI-only, non-elevated, downgrade-safe, updater-
 test('WiX uses installer tables for coherent service custody and contains no driver, shell, reboot, or recovery deletion authority', () => {
   assert.doesNotThrow(() => validateWixContract(wix()));
   const validWix = wix();
-  const componentGroupStart = validWix.indexOf('    <ComponentGroup');
-  const componentGroupEnd = validWix.indexOf('    </ComponentGroup>') +
-    '    </ComponentGroup>\n'.length;
-  const componentGroup = validWix.slice(componentGroupStart, componentGroupEnd);
-  const nestedComponentGroup =
-    validWix.slice(0, componentGroupStart) +
-    validWix.slice(componentGroupEnd).replace(
-      '    </DirectoryRef>',
-      `${componentGroup}    </DirectoryRef>`,
+  const nestedComponentGroup = validWix
+    .replace('    </DirectoryRef>\n    <ComponentGroup', '    <ComponentGroup')
+    .replace(
+      '    </ComponentGroup>\n  </Fragment>',
+      '    </ComponentGroup>\n    </DirectoryRef>\n  </Fragment>',
     );
   assert.throws(
     () => validateWixContract(nestedComponentGroup),
     /ComponentGroup.*DirectoryRef/u,
+  );
+  assert.throws(
+    () =>
+      validateWixContract(
+        wix().replace(
+          'Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)"',
+          'User="SYSTEM" GenericAll="yes"',
+        ),
+      ),
+    /SDDL/u,
   );
   for (const [target, replacement, pattern] of [
     ['Account="LocalSystem"', 'Account="LocalService"', /LocalSystem/u],
@@ -282,8 +287,8 @@ test('WiX uses installer tables for coherent service custody and contains no dri
         wix()
           .replace('installation-manifest.json', 'delayed-marker.bin')
           .replace(
-            '</ComponentGroup>',
-            '<Component Id="LateManifest" Guid="*"><File Source="installation-manifest.json" /></Component></ComponentGroup>',
+            '</DirectoryRef>',
+            '<Component Id="LateManifest" Guid="*"><File Source="installation-manifest.json" /></Component></DirectoryRef>',
           ),
       ),
     /manifest.*service/u,
