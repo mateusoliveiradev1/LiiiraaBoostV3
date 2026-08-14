@@ -12,8 +12,8 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use service::ipc::{Broker, BrokerConfig, ClientIdentity};
 use service::installation_manifest::CustodyErrorCode;
+use service::ipc::{Broker, BrokerConfig, ClientIdentity};
 use service::windows_pipe::{
     AuthenticatedClientToken, FrameError, HostError, HostErrorCode, HostLifecycle, HostState,
     PipeHostConfig, decode_frame, encode_frame,

@@ -349,7 +349,9 @@ mod windows_host {
     use super::super::{
         dedup_store::FaultPoint,
         dispatcher::PhysicalOperationDispatcher,
-        installation_manifest::{VerifiedInstallationManifest, verify_installed_manifest},
+        installation_manifest::{
+            CustodyError, CustodyErrorCode, VerifiedInstallationManifest, verify_installed_manifest,
+        },
         ipc::{
             Broker, BrokerConfig, BrokerEnvelope, BrokerError, ClientIdentity,
             PIPE_REJECT_REMOTE_CLIENTS, PipeSecurityPolicy, SessionTicket,
@@ -377,6 +379,10 @@ mod windows_host {
         RestrictedToken,
         StorageAdmission,
         PipeAdmission,
+        InstalledManifest,
+        InstalledCms,
+        InstalledIdentity,
+        InstalledAcl,
         Authentication,
         Custody,
         Framing,
@@ -398,6 +404,10 @@ mod windows_host {
                 HostErrorCode::RestrictedToken => 63_103,
                 HostErrorCode::StorageAdmission => 63_104,
                 HostErrorCode::PipeAdmission => 63_105,
+                HostErrorCode::InstalledManifest => 63_106,
+                HostErrorCode::InstalledCms => 63_107,
+                HostErrorCode::InstalledIdentity => 63_108,
+                HostErrorCode::InstalledAcl => 63_109,
                 HostErrorCode::Authentication => 63_201,
                 HostErrorCode::Custody => 63_202,
                 HostErrorCode::Framing => 63_203,
@@ -411,6 +421,13 @@ mod windows_host {
         pub const fn for_test(code: HostErrorCode) -> Self {
             Self { code }
         }
+
+        #[cfg(debug_assertions)]
+        pub const fn for_custody_test(code: CustodyErrorCode) -> Self {
+            Self {
+                code: installed_custody_code(code),
+            }
+        }
     }
 
     impl WindowsPipeHost {
@@ -422,8 +439,7 @@ mod windows_host {
                 return Err(host_error(HostErrorCode::PipeAdmission));
             }
             // Key-link witness: 'verify_installed_manifest'
-            let manifest = verify_installed_manifest()
-                .map_err(|_| host_error(HostErrorCode::InstalledCustody))?;
+            let manifest = verify_installed_manifest().map_err(installed_custody_error)?;
             let active_session = unsafe { WTSGetActiveConsoleSessionId() };
             if active_session == u32::MAX {
                 return Err(host_error(HostErrorCode::InteractiveSession));
@@ -1314,6 +1330,22 @@ mod windows_host {
 
     fn host_error(code: HostErrorCode) -> HostError {
         HostError { code }
+    }
+
+    const fn installed_custody_code(code: CustodyErrorCode) -> HostErrorCode {
+        match code {
+            CustodyErrorCode::Missing | CustodyErrorCode::Path => HostErrorCode::InstalledCustody,
+            CustodyErrorCode::Schema => HostErrorCode::InstalledManifest,
+            CustodyErrorCode::Signature => HostErrorCode::InstalledCms,
+            CustodyErrorCode::Authenticode | CustodyErrorCode::Hash | CustodyErrorCode::Version => {
+                HostErrorCode::InstalledIdentity
+            }
+            CustodyErrorCode::Acl => HostErrorCode::InstalledAcl,
+        }
+    }
+
+    fn installed_custody_error(error: CustodyError) -> HostError {
+        host_error(installed_custody_code(error.code))
     }
 }
 
