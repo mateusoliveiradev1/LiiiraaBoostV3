@@ -130,7 +130,10 @@
       "owner": "desktop",
       "layer": "adapter",
       "roots": ["packages/desktop-simulator"],
-      "publicRoots": ["packages/desktop-simulator/src/index.ts"],
+      "publicRoots": [
+        "packages/desktop-simulator/src/index.ts",
+        "packages/desktop-simulator/src/transactional-plans.ts"
+      ],
       "runtimeClass": "fixture",
       "status": "active"
     },

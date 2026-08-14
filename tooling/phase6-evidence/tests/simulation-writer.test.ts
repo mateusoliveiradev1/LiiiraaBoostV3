@@ -101,7 +101,7 @@ const fixture = (operationVersion = 'managed-power-scheme-v41') => {
     2,
   )}\n`;
   write(evidenceManifestPath, legacyBytes);
-  const harnessPath = join(root, 'apps/desktop/tests/packaged/transactional-plans.ts');
+  const harnessPath = join(root, 'packages/desktop-simulator/src/transactional-plans.ts');
   write(harnessPath, 'export const deterministicHarness = true;\n');
   return {
     artifact,
@@ -169,6 +169,9 @@ describe('canonical simulation candidate', () => {
     });
     expect(candidate.reviews).toEqual([]);
     expect(candidate.consents).toEqual([]);
+    expect(candidate.run.artifacts[1]?.path).toBe(
+      'packages/desktop-simulator/src/transactional-plans.ts',
+    );
     expect(() => assertCanonicalSimulationCandidate(candidate)).not.toThrow();
   });
 

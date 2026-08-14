@@ -14,8 +14,8 @@ import {
   validateRegisteredTransactionalAuthority,
 } from './transactional-plans.ts';
 
-const desktopRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
-const workspaceRoot = resolve(desktopRoot, '../..');
+const workspaceRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
+const desktopRoot = resolve(workspaceRoot, 'apps/desktop');
 const BUILD_SHA256 = 'a'.repeat(64);
 const OPERATION_VERSION = 'managed-power-scheme-v1';
 const PRIOR_GUID = '11111111-1111-4111-8111-111111111111';

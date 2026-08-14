@@ -696,10 +696,16 @@ importers:
 
   packages/desktop-simulator:
     dependencies:
+      '@liiiraa/contracts-ts':
+        specifier: workspace:*
+        version: link:../contracts-ts
       '@liiiraa/desktop-client':
         specifier: workspace:*
         version: link:../desktop-client
     devDependencies:
+      '@types/node':
+        specifier: 24.13.3
+        version: 24.13.3
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.10)(yaml@2.9.0)
@@ -911,6 +917,10 @@ importers:
         version: 4.1.10(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.10)(yaml@2.9.0)
 
   tooling/phase6-evidence:
+    dependencies:
+      '@liiiraa/desktop-simulator':
+        specifier: workspace:*
+        version: link:../../packages/desktop-simulator
     devDependencies:
       vitest:
         specifier: 4.1.10

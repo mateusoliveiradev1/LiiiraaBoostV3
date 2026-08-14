@@ -11,7 +11,7 @@ import {
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createCanonicalDeterministicSimulationEvidence } from '../../../apps/desktop/tests/packaged/transactional-plans.ts';
+import { createCanonicalDeterministicSimulationEvidence } from '@liiiraa/desktop-simulator/transactional-plans';
 import {
   PHASE6_DECISIONS,
   PHASE6_PROMOTION_STAGES,
@@ -605,7 +605,7 @@ const runCli = (): void => {
   const result = writeCanonicalSimulationEvidence({
     artifactManifestPath,
     evidenceManifestPath: resolve(workspaceRoot, 'tooling/phase6-evidence/evidence-manifest.json'),
-    harnessPath: resolve(workspaceRoot, 'apps/desktop/tests/packaged/transactional-plans.ts'),
+    harnessPath: resolve(workspaceRoot, 'packages/desktop-simulator/src/transactional-plans.ts'),
     minimumVersion: parsed.minimumVersion,
     summaryPath,
     uatPath: resolve(

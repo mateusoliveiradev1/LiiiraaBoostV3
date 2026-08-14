@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./transactional-plans": {
+      "types": "./src/transactional-plans.ts",
+      "default": "./src/transactional-plans.ts"
     }
   },
   "scripts": {
@@ -15,9 +19,11 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@liiiraa/contracts-ts": "workspace:*",
     "@liiiraa/desktop-client": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "24.13.3",
     "vitest": "4.1.10"
   }
 }
