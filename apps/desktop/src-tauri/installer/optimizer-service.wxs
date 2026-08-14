@@ -5,7 +5,7 @@
     <DirectoryRef Id="INSTALLDIR">
       <Component Id="Phase6InstallationManifestComponent" Guid="*">
         <File Id="Phase6InstallationManifestFile"
-              Source="installer\physical-staging\installation-manifest.json"
+              Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json"
               Name="installation-manifest.json"
               KeyPath="yes">
           <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
@@ -14,23 +14,16 @@
 
       <Component Id="Phase6InstallationManifestSignatureComponent" Guid="*">
         <File Id="Phase6InstallationManifestSignatureFile"
-              Source="installer\physical-staging\installation-manifest.json.p7s"
+              Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json.p7s"
               Name="installation-manifest.json.p7s"
               KeyPath="yes">
           <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
         </File>
       </Component>
 
-      <Component Id="Phase6RunnerComponent" Guid="*">
-        <File Id="Phase6RunnerFile"
-              Source="installer\physical-staging\phase6-physical-runner.exe"
-              Name="phase6-physical-runner.exe"
-              KeyPath="yes" />
-      </Component>
-
       <Component Id="OptimizerServiceComponent" Guid="*">
         <File Id="OptimizerServiceFile"
-              Source="installer\physical-staging\liiiraa-optimizer-service.exe"
+              Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/liiiraa-optimizer-service.exe"
               Name="liiiraa-optimizer-service.exe"
               KeyPath="yes" />
         <ServiceInstall Id="OptimizerServiceInstall"
@@ -55,8 +48,8 @@
     <ComponentGroup Id="Phase6PhysicalRuntime">
       <ComponentRef Id="Phase6InstallationManifestComponent" />
       <ComponentRef Id="Phase6InstallationManifestSignatureComponent" />
-      <ComponentRef Id="Phase6RunnerComponent" />
       <ComponentRef Id="OptimizerServiceComponent" />
+      <ComponentRef Id="phase6_physical_runner" />
     </ComponentGroup>
   </Fragment>
 </Wix>

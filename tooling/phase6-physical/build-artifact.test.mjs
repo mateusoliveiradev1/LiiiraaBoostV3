@@ -162,12 +162,12 @@ const wix = () => `<?xml version="1.0"?>
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
       <Component Id="InstallationManifestComponent" Guid="*">
-        <File Id="InstallationManifestFile" Source="apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json" KeyPath="yes">
+        <File Id="InstallationManifestFile" Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/installation-manifest.json" KeyPath="yes">
           <PermissionEx Sddl="D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
         </File>
       </Component>
       <Component Id="OptimizerServiceComponent" Guid="*">
-        <File Id="OptimizerServiceFile" Source="apps/desktop/src-tauri/installer/physical-staging/liiiraa-optimizer-service.exe" KeyPath="yes" />
+        <File Id="OptimizerServiceFile" Source="../../../../../apps/desktop/src-tauri/installer/physical-staging/liiiraa-optimizer-service.exe" KeyPath="yes" />
         <ServiceInstall Id="OptimizerServiceInstall" Name="LiiiraaBoostOptimizer" Type="ownProcess" Start="auto" Account="LocalSystem" ErrorControl="normal">
           <ServiceConfig ServiceSid="restricted" OnInstall="yes" OnReinstall="yes" />
         </ServiceInstall>
@@ -264,11 +264,11 @@ test('WiX uses installer tables for coherent service custody and contains no dri
     () =>
       validateWixContract(
         wix().replaceAll(
-          'apps/desktop/src-tauri/installer/physical-staging/',
+          '../../../../../apps/desktop/src-tauri/installer/physical-staging/',
           'installer/physical-staging/',
         ),
       ),
-    /repository-root.*staging/u,
+    /link working directory.*staging/u,
   );
   assert.throws(
     () =>

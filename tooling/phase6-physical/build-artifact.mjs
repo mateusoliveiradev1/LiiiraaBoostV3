@@ -299,6 +299,8 @@ export function validateWixContract(xml) {
   if (!runtimeGroup) fail('WiX contract requires the physical runtime component group');
   if (/<Component\b/iu.test(runtimeGroup[1]))
     fail('WiX ComponentGroup must reference DirectoryRef components');
+  if (!/<ComponentRef\b[^>]*Id="phase6_physical_runner"/iu.test(runtimeGroup[1]))
+    fail('WiX contract requires the Tauri-generated runner component');
   const permissions = [...xml.matchAll(/<PermissionEx\b([^>]*)\/?\s*>/giu)];
   if (
     permissions.length === 0 ||
@@ -337,6 +339,17 @@ export function validateWixContract(xml) {
   ];
   for (const [pattern, description] of forbidden)
     if (pattern.test(xml)) fail(`WiX contract forbids ${description}`);
+  const stagedSources = [...xml.matchAll(/<File\b[^>]*Source="([^"]+)"/giu)];
+  if (
+    stagedSources.length === 0 ||
+    stagedSources.some(
+      (source) =>
+        !source[1].startsWith(
+          '../../../../../apps/desktop/src-tauri/installer/physical-staging/',
+        ),
+    )
+  )
+    fail('WiX File sources must use the Tauri link working directory staging path');
   return true;
 }
 
