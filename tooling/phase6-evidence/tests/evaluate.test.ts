@@ -249,7 +249,10 @@ const reviewedThrough = (stage: PhysicalStage): Manifest => {
 
 describe('closed Phase 6 CLI grammar', () => {
   it.each([
-    [['--mode', 'planned'], { mode: 'planned', requireAdmittedStage: 'deterministic-simulation' }],
+    [
+      ['--', '--mode', 'planned'],
+      { mode: 'planned', requireAdmittedStage: 'deterministic-simulation' },
+    ],
     [
       ['--mode', 'planned', '--require-run-evidence', 'clean-windows-vm'],
       { mode: 'planned', requireRunEvidence: 'clean-windows-vm' },

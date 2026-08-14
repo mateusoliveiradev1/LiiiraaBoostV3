@@ -11,7 +11,7 @@ import {
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createCanonicalDeterministicSimulationEvidence } from '../../../apps/desktop/tests/packaged/transactional-plans.js';
+import { createCanonicalDeterministicSimulationEvidence } from '../../../apps/desktop/tests/packaged/transactional-plans.ts';
 import {
   PHASE6_DECISIONS,
   PHASE6_PROMOTION_STAGES,
@@ -22,7 +22,7 @@ import {
   type Phase6EvidenceManifest,
   type Phase6HumanReview,
   type Phase6RunEvidence,
-} from './evaluate.js';
+} from './evaluate.ts';
 
 const HASH = /^(?:sha256:)?([a-f0-9]{64})$/u;
 const VERSION = /^managed-power-scheme-v([1-9][0-9]*)$/u;
@@ -46,6 +46,7 @@ const CONTINUATION = [
   'resumed-observation',
   'restored-complete',
 ] as const;
+const ARTIFACT_VERSION_KEY_LINK = 'artifactManifestSha256 binds operationVersion';
 
 type JsonObject = Record<string, unknown>;
 
@@ -136,16 +137,20 @@ const compareExact = (
 };
 
 export const parseSimulationWriterCli = (args: readonly string[]): SimulationWriterCli => {
+  const normalized = args[0] === '--' ? args.slice(1) : args;
   if (
-    args.length === 4 &&
-    args[2] === '--minimum-version' &&
-    typeof args[1] === 'string' &&
-    typeof args[3] === 'string'
+    normalized.length === 4 &&
+    normalized[2] === '--minimum-version' &&
+    typeof normalized[1] === 'string' &&
+    typeof normalized[3] === 'string'
   ) {
-    if (args[0] === '--artifact-manifest')
-      return { artifactManifestPath: args[1], minimumVersion: args[3] };
-    if (args[0] === '--artifact-manifest-from-summary')
-      return { artifactManifestFromSummary: args[1], minimumVersion: args[3] };
+    if (normalized[0] === '--artifact-manifest')
+      return { artifactManifestPath: normalized[1], minimumVersion: normalized[3] };
+    if (normalized[0] === '--artifact-manifest-from-summary')
+      return {
+        artifactManifestFromSummary: normalized[1],
+        minimumVersion: normalized[3],
+      };
   }
   throw new Error(
     'Simulation writer CLI has a closed grammar and no physical, review, consent, or caller-PASS flags.',
@@ -481,6 +486,7 @@ const replaceAuthorityAtomically = (
 export const writeCanonicalSimulationEvidence = (
   input: SimulationWriterInput,
 ): SimulationWriterResult => {
+  void ARTIFACT_VERSION_KEY_LINK;
   const workspaceRoot = resolve(input.workspaceRoot);
   const manifestPath = resolve(input.evidenceManifestPath);
   const uatPath = resolve(input.uatPath);

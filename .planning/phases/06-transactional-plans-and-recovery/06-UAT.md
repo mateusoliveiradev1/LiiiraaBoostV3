@@ -92,3 +92,39 @@ Plan 06-26 remains blocked before clean-VM Task 1 mutation. A new implementation
 ### Fail-closed evaluator result
 
 Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage clean-vm --require-run-evidence` and the evaluator's canonical stage form `rtk pnpm phase6:verify -- --mode final --require-run-evidence clean-windows-vm` exited nonzero. The result was `ok: false`, `runReadyForReview: false`, `highestAdmittedStage: null`, with all four stages pending. Diagnostics explicitly include `RUN_EVIDENCE_NOT_PASSED`, every incomplete lifecycle step, missing journal/receipt hashes, blocked accessibility/revocation/consent, and `PHYSICAL_RUN_EVIDENCE_MISSING`. This is the required fail-closed outcome; it is not a PASS package.
+
+---
+
+## Operation `managed-power-scheme-v41` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v3`
+- **Artifact manifest SHA-256:** `8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784`
+- **Run evidence SHA-256:** `626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7`
+- **Evidence manifest SHA-256:** `ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v41",
+  "buildId": "physical-8d162575a964ec77-managed-power-scheme-v41",
+  "artifactManifestSha256": "8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784",
+  "runEvidenceSha256": "626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7",
+  "evidenceManifestSha256": "ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```

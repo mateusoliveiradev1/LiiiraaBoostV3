@@ -1,17 +1,27 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-08-13T18:47:29.8358907Z",
-  "operationVersion": "managed-power-scheme-v2",
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T13:24:00.195Z",
+  "operationVersion": "managed-power-scheme-v41",
   "immutableBuild": {
-    "id": "phase6-plan20-build",
-    "commit": "a334a68f037fa198f9df5fc5228a3ca7fda0d64b",
+    "id": "physical-8d162575a964ec77-managed-power-scheme-v41",
+    "commit": "994994ec4e61b45013930a7f650aaf0b46918d68",
     "artifact": {
-      "path": "apps/desktop/tests/packaged/transactional-plans.ts",
-      "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
-    }
+      "path": "target/phase6-physical/994994ec4e61b45013930a7f650aaf0b46918d68/physical-8d162575a964ec77-managed-power-scheme-v41/artifact-manifest.json",
+      "sha256": "8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784"
+    },
+    "artifactManifestSha256": "8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784"
   },
   "promotionStage": "deterministic-simulation",
-  "requirementsCoverage": ["PLAN-01", "PLAN-05", "PLAN-06", "PLAN-07", "PLAN-08"],
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ],
   "decisionCoverage": [
     "D-01",
     "D-02",
@@ -49,102 +59,131 @@
     "D-34",
     "D-35"
   ],
+  "legacyBlockedAttempts": [
+    {
+      "path": "tooling/phase6-evidence/records/legacy/managed-power-scheme-v2-evidence-manifest.json",
+      "sha256": "c63133c73c40c5958ae3dbcab3f0c5fe05cc495dbdc51b004d06f98ec149c461"
+    }
+  ],
   "stages": [
     {
       "stage": "deterministic-simulation",
       "predecessorStage": null,
-      "runEvidence": {
-        "id": "phase6-deterministic-managed-power-scheme-v2-blocked-20260813t184729z",
-        "stage": "deterministic-simulation",
-        "evidenceKind": "deterministic",
-        "status": "FAIL",
-        "operationVersion": "managed-power-scheme-v2",
-        "buildId": "phase6-plan20-build",
-        "participantId": "deterministic-test-runner",
-        "recordedAt": "2026-08-13T18:47:29.8358907Z",
-        "expiresAt": "2026-08-14T18:47:29.8358907Z",
-        "artifacts": [
-          {
-            "path": "apps/desktop/tests/packaged/transactional-plans.ts",
-            "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+      "friendsRoster": null,
+      "runs": [
+        {
+          "id": "phase6-deterministic-simulation-managed-power-scheme-v41-8789c54ca0a7",
+          "source": "phase6-deterministic-rust-1",
+          "stage": "deterministic-simulation",
+          "evidenceKind": "deterministic",
+          "status": "PASS",
+          "operationVersion": "managed-power-scheme-v41",
+          "buildId": "physical-8d162575a964ec77-managed-power-scheme-v41",
+          "participantId": "deterministic-simulation-runner",
+          "machineSlot": null,
+          "artifactManifestSha256": "8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784",
+          "configSha256": "8c56f14bd10e26041bc4e3cc66d29509a27ee6cbc0c3e79655b832f6310c2d48",
+          "friendsRosterSha256": null,
+          "predecessorRunEvidenceSha256": null,
+          "recordedAt": "2026-08-14T13:24:00.195Z",
+          "exportedAt": null,
+          "expiresAt": "2099-12-31T23:59:59.999Z",
+          "artifacts": [
+            {
+              "path": "target/phase6-physical/994994ec4e61b45013930a7f650aaf0b46918d68/physical-8d162575a964ec77-managed-power-scheme-v41/artifact-manifest.json",
+              "sha256": "8789c54ca0a73e2f496fedb7710dae6eac4b1b4bad10864e0284b7591d607784"
+            },
+            {
+              "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+              "sha256": "be3143c5f65d85da17185121adf42be41baf7c1cddf1bbece818ea3c064cf734"
+            }
+          ],
+          "cycle": {
+            "prepare": "PASS",
+            "apply": "PASS",
+            "verifyApply": "PASS",
+            "restartRequired": true,
+            "restart": "PASS",
+            "restore": "PASS",
+            "verifyRestore": "PASS"
           },
-          {
-            "path": ".planning/phases/06-transactional-plans-and-recovery/06-UAT.md",
-            "sha256": "711c1a39d01be37b66589708d475c01d59a36e9e99213e816f1c1b36e931e3ba"
-          }
-        ],
-        "cycle": {
-          "prepare": "BLOCKED",
-          "apply": "BLOCKED",
-          "verifyApply": "BLOCKED",
-          "restartRequired": true,
-          "restart": "BLOCKED",
-          "restore": "BLOCKED",
-          "verifyRestore": "BLOCKED"
-        },
-        "journalSha256": "",
-        "receiptSha256": "",
-        "security": {
-          "ipcAdversarial": "PASS",
-          "replayRejected": true,
-          "identitySpoofRejected": true,
-          "sessionSwapRejected": true
-        },
-        "faults": {
-          "diskFull": "PASS",
-          "crash": "PASS",
-          "reboot": "PASS",
-          "drift": "PASS"
-        },
-        "accessibility": {
-          "status": "BLOCKED",
-          "seriousOrCriticalViolations": 0
-        },
-        "diagnostics": {
-          "redacted": true,
-          "previewed": true,
-          "consentBound": false,
-          "autoUpload": false,
-          "rawFieldsFound": []
-        },
-        "revocation": {
-          "signed": false,
-          "blocksNewApply": true,
-          "localRecoveryAvailable": false,
-          "remoteRollback": false,
-          "remoteExecution": false
-        },
-        "coverageGaps": [
-          "deterministic-simulation-blocked-no-version-bound-emitter",
-          "exact-installable-build-not-tracked",
-          "optimizer-service-physical-dispatcher-not-wired",
-          "clean-windows-vm-not-run",
-          "owner-pc-not-run",
-          "friends-pc-not-run",
-          "physical-hardware-matrix-incomplete"
-        ],
-        "universalSupportClaim": false,
-        "manualOverride": false
-      },
-      "humanReview": { "status": "not-required" }
+          "continuation": [
+            "installed-ready",
+            "checkpoint-ready",
+            "running",
+            "reboot-pending",
+            "resumed-observation",
+            "restored-complete"
+          ],
+          "journalSha256": "06ed25fc88bb772c60323786a9a6d0b62db32bd5f0561ad09568049c66e598cc",
+          "receiptSha256": "78cef6d3d622538fce874c4b7e3cb6d60ea514177416121a64d4755c76a29608",
+          "security": {
+            "ipcAdversarial": "PASS",
+            "replayRejected": true,
+            "identitySpoofRejected": true,
+            "sessionSwapRejected": true
+          },
+          "faults": {
+            "crash": "PASS",
+            "diskFull": "PASS",
+            "drift": "PASS",
+            "reboot": "PASS"
+          },
+          "accessibility": {
+            "status": "PASS",
+            "seriousOrCriticalViolations": 0
+          },
+          "diagnostics": {
+            "redacted": true,
+            "previewed": true,
+            "consentBound": false,
+            "autoUpload": false,
+            "rawFieldsFound": [],
+            "byteLength": 2738
+          },
+          "revocation": {
+            "signed": true,
+            "blocksNewApply": true,
+            "localRecoveryAvailable": true,
+            "remoteExecution": false,
+            "remoteRollback": false
+          },
+          "coverageGaps": [
+            "clean-windows-vm-physical-evidence-pending",
+            "owner-pc-physical-evidence-pending",
+            "friends-pc-physical-evidence-pending",
+            "narrator-human-comprehension-pending"
+          ],
+          "universalSupportClaim": false,
+          "manualOverride": false
+        }
+      ],
+      "consents": [],
+      "reviews": []
     },
     {
       "stage": "clean-windows-vm",
       "predecessorStage": "deterministic-simulation",
-      "runEvidence": null,
-      "humanReview": { "status": "pending" }
+      "friendsRoster": null,
+      "runs": [],
+      "consents": [],
+      "reviews": []
     },
     {
       "stage": "owner-pc",
       "predecessorStage": "clean-windows-vm",
-      "runEvidence": null,
-      "humanReview": { "status": "pending" }
+      "friendsRoster": null,
+      "runs": [],
+      "consents": [],
+      "reviews": []
     },
     {
       "stage": "friends-pc",
       "predecessorStage": "owner-pc",
-      "runEvidence": null,
-      "humanReview": { "status": "pending" }
+      "friendsRoster": null,
+      "runs": [],
+      "consents": [],
+      "reviews": []
     }
   ]
 }

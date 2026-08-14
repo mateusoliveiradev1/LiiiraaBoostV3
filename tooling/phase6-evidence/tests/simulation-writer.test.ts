@@ -121,6 +121,7 @@ describe('closed simulation writer CLI', () => {
   it('accepts only summary/direct artifact input plus the explicit minimum version', () => {
     expect(
       parseSimulationWriterCli([
+        '--',
         '--artifact-manifest-from-summary',
         '.planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md',
         '--minimum-version',

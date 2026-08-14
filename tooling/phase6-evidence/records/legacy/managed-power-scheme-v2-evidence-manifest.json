@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-13T18:47:29.8358907Z",
+  "operationVersion": "managed-power-scheme-v2",
+  "immutableBuild": {
+    "id": "phase6-plan20-build",
+    "commit": "a334a68f037fa198f9df5fc5228a3ca7fda0d64b",
+    "artifact": {
+      "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+      "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+    }
+  },
+  "promotionStage": "deterministic-simulation",
+  "requirementsCoverage": ["PLAN-01", "PLAN-05", "PLAN-06", "PLAN-07", "PLAN-08"],
+  "decisionCoverage": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-04",
+    "D-05",
+    "D-06",
+    "D-07",
+    "D-08",
+    "D-09",
+    "D-10",
+    "D-11",
+    "D-12",
+    "D-13",
+    "D-14",
+    "D-15",
+    "D-16",
+    "D-17",
+    "D-18",
+    "D-19",
+    "D-20",
+    "D-21",
+    "D-22",
+    "D-23",
+    "D-24",
+    "D-25",
+    "D-26",
+    "D-27",
+    "D-28",
+    "D-29",
+    "D-30",
+    "D-31",
+    "D-32",
+    "D-33",
+    "D-34",
+    "D-35"
+  ],
+  "stages": [
+    {
+      "stage": "deterministic-simulation",
+      "predecessorStage": null,
+      "runEvidence": {
+        "id": "phase6-deterministic-managed-power-scheme-v2-blocked-20260813t184729z",
+        "stage": "deterministic-simulation",
+        "evidenceKind": "deterministic",
+        "status": "FAIL",
+        "operationVersion": "managed-power-scheme-v2",
+        "buildId": "phase6-plan20-build",
+        "participantId": "deterministic-test-runner",
+        "recordedAt": "2026-08-13T18:47:29.8358907Z",
+        "expiresAt": "2026-08-14T18:47:29.8358907Z",
+        "artifacts": [
+          {
+            "path": "apps/desktop/tests/packaged/transactional-plans.ts",
+            "sha256": "751803993672ad7a716946e08f785f425b0bcd220d95cd2d9b2467405838ceba"
+          },
+          {
+            "path": ".planning/phases/06-transactional-plans-and-recovery/06-UAT.md",
+            "sha256": "711c1a39d01be37b66589708d475c01d59a36e9e99213e816f1c1b36e931e3ba"
+          }
+        ],
+        "cycle": {
+          "prepare": "BLOCKED",
+          "apply": "BLOCKED",
+          "verifyApply": "BLOCKED",
+          "restartRequired": true,
+          "restart": "BLOCKED",
+          "restore": "BLOCKED",
+          "verifyRestore": "BLOCKED"
+        },
+        "journalSha256": "",
+        "receiptSha256": "",
+        "security": {
+          "ipcAdversarial": "PASS",
+          "replayRejected": true,
+          "identitySpoofRejected": true,
+          "sessionSwapRejected": true
+        },
+        "faults": {
+          "diskFull": "PASS",
+          "crash": "PASS",
+          "reboot": "PASS",
+          "drift": "PASS"
+        },
+        "accessibility": {
+          "status": "BLOCKED",
+          "seriousOrCriticalViolations": 0
+        },
+        "diagnostics": {
+          "redacted": true,
+          "previewed": true,
+          "consentBound": false,
+          "autoUpload": false,
+          "rawFieldsFound": []
+        },
+        "revocation": {
+          "signed": false,
+          "blocksNewApply": true,
+          "localRecoveryAvailable": false,
+          "remoteRollback": false,
+          "remoteExecution": false
+        },
+        "coverageGaps": [
+          "deterministic-simulation-blocked-no-version-bound-emitter",
+          "exact-installable-build-not-tracked",
+          "optimizer-service-physical-dispatcher-not-wired",
+          "clean-windows-vm-not-run",
+          "owner-pc-not-run",
+          "friends-pc-not-run",
+          "physical-hardware-matrix-incomplete"
+        ],
+        "universalSupportClaim": false,
+        "manualOverride": false
+      },
+      "humanReview": { "status": "not-required" }
+    },
+    {
+      "stage": "clean-windows-vm",
+      "predecessorStage": "deterministic-simulation",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    },
+    {
+      "stage": "owner-pc",
+      "predecessorStage": "clean-windows-vm",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    },
+    {
+      "stage": "friends-pc",
+      "predecessorStage": "owner-pc",
+      "runEvidence": null,
+      "humanReview": { "status": "pending" }
+    }
+  ]
+}

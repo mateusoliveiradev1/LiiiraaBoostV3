@@ -1248,14 +1248,22 @@ export const parsePhase6CliOptions = (args: readonly string[] | undefined): Phas
     );
   };
   if (!Array.isArray(args)) return fail();
-  if (args.length === 2 && args[0] === '--mode' && args[1] === 'final') return { mode: 'final' };
-  if (args.length === 2 && args[0] === '--mode' && args[1] === 'planned')
+  const normalized = args[0] === '--' ? args.slice(1) : args;
+  if (normalized.length === 2 && normalized[0] === '--mode' && normalized[1] === 'final')
+    return { mode: 'final' };
+  if (normalized.length === 2 && normalized[0] === '--mode' && normalized[1] === 'planned')
     return { mode: 'planned', requireAdmittedStage: 'deterministic-simulation' };
-  if (args.length !== 4 || args[0] !== '--mode' || args[1] !== 'planned' || !isStage(args[3]))
+  if (
+    normalized.length !== 4 ||
+    normalized[0] !== '--mode' ||
+    normalized[1] !== 'planned' ||
+    !isStage(normalized[3])
+  )
     return fail();
-  if (args[2] === '--require-run-evidence') return { mode: 'planned', requireRunEvidence: args[3] };
-  if (args[2] === '--require-admitted-stage')
-    return { mode: 'planned', requireAdmittedStage: args[3] };
+  if (normalized[2] === '--require-run-evidence')
+    return { mode: 'planned', requireRunEvidence: normalized[3] };
+  if (normalized[2] === '--require-admitted-stage')
+    return { mode: 'planned', requireAdmittedStage: normalized[3] };
   return fail();
 };
 
