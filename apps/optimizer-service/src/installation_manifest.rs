@@ -10,6 +10,8 @@ use liiiraa_contracts_rust::{
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
+use super::numeric_version::{equivalent_numeric_version, parse_bounded_numeric_version};
+
 /// SHA-256 of the DER SubjectPublicKeyInfo from the reviewed Phase 2 development
 /// signing certificate embedded in `quality/evidence/phase-02/staged/liiiraa-desktop.exe`.
 /// The private key is not present in the repository and no runtime input can replace this pin.
@@ -394,28 +396,8 @@ fn verify_monotonic_admission(
 }
 
 fn parse_numeric_version(value: &str) -> Result<Vec<u64>, CustodyError> {
-    let parts: Result<Vec<_>, _> = value.split('.').map(str::parse::<u64>).collect();
-    let parts = parts.map_err(|_| CustodyError::version("non-numeric-package-version"))?;
-    if parts.is_empty() || parts.len() > 4 {
-        return Err(CustodyError::version("package-version-shape"));
-    }
-    Ok(parts)
-}
-
-fn equivalent_numeric_version(expected: &str, actual: &str) -> bool {
-    let (Ok(mut expected), Ok(mut actual)) = (
-        parse_numeric_version(expected),
-        parse_numeric_version(actual),
-    ) else {
-        return false;
-    };
-    while expected.len() > 1 && expected.last() == Some(&0) {
-        expected.pop();
-    }
-    while actual.len() > 1 && actual.last() == Some(&0) {
-        actual.pop();
-    }
-    expected == actual
+    parse_bounded_numeric_version(value)
+        .ok_or_else(|| CustodyError::version("non-numeric-package-version"))
 }
 
 fn required_str<'a>(

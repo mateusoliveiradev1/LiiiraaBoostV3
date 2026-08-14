@@ -19,6 +19,8 @@ use sha2::{Digest, Sha256};
 mod artifact_manifest;
 #[path = "../../../optimizer-service/src/installation_manifest.rs"]
 mod installation_manifest;
+#[path = "../../../optimizer-service/src/numeric_version.rs"]
+mod numeric_version;
 
 use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,

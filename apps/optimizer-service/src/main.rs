@@ -5,6 +5,7 @@ pub mod dedup_store;
 pub mod dispatcher;
 pub mod installation_manifest;
 pub mod ipc;
+pub(crate) mod numeric_version;
 pub mod operations;
 pub mod restore_point;
 pub mod windows_pipe;

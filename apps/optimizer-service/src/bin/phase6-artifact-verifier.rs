@@ -2,6 +2,8 @@
 mod artifact_manifest;
 #[path = "../installation_manifest.rs"]
 mod installation_manifest;
+#[path = "../numeric_version.rs"]
+mod numeric_version;
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();

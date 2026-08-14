@@ -238,7 +238,7 @@ fn fixture() -> FakeBackend {
             true,
         ),
         ("tauri-driver.exe", b"tauri".as_slice(), "2.0.6", true),
-        ("msedgedriver.exe", b"edge".as_slice(), "stable", true),
+        ("msedgedriver.exe", b"edge".as_slice(), "120.0.0.1", true),
     ];
     for (relative, bytes, version, signed) in base_files {
         let path = backend.path(relative);
@@ -319,7 +319,7 @@ fn fixture() -> FakeBackend {
                     "binaryName": "tauri-driver.exe"
                 }
             },
-            "msedgeDriver": role("msedgedriver.exe", "stable", "file-version", "authenticode-required", b"edge")
+            "msedgeDriver": role("msedgedriver.exe", "120.0.0.1", "file-version", "authenticode-required", b"edge")
         }
     });
     for (key, role_name) in [
@@ -362,7 +362,11 @@ fn authenticates_exact_portable_roles_live_bytes_configs_and_both_drivers() {
     assert_eq!(verified.operation_version_id(), "managed-power-scheme-v3");
     assert_eq!(backend.authenticode_calls, 4);
     assert_eq!(backend.version_calls.len(), 3);
-    assert!(!backend.version_calls.contains(&backend.path("tauri-driver.exe")));
+    assert!(
+        !backend
+            .version_calls
+            .contains(&backend.path("tauri-driver.exe"))
+    );
     assert_eq!(verified.friends_config().config_sha256().len(), 71);
 }
 
@@ -388,9 +392,7 @@ fn native_portable_versions_accept_only_equivalent_trailing_zero_segments() {
         "1.2.",
     ] {
         let mut backend = fixture();
-        backend
-            .versions
-            .insert(runner.clone(), rejected.to_owned());
+        backend.versions.insert(runner.clone(), rejected.to_owned());
         let path = backend.path("artifact-manifest.json");
         assert!(
             verify_artifact_manifest_with_backend(&path, &mut backend).is_err(),
@@ -413,18 +415,34 @@ fn cargo_receipt_policy_is_closed_to_exact_portable_tauri_driver_identity() {
         let mut value = artifact_value(&backend);
         match mutation {
             "missing-receipt" => {
-                value["files"]["tauriDriver"].as_object_mut().unwrap().remove("cargoInstallReceipt");
+                value["files"]["tauriDriver"]
+                    .as_object_mut()
+                    .unwrap()
+                    .remove("cargoInstallReceipt");
             }
-            "receipt-version" => value["files"]["tauriDriver"]["cargoInstallReceipt"]["packageVersion"] = json!("2.0.5"),
+            "receipt-version" => {
+                value["files"]["tauriDriver"]["cargoInstallReceipt"]["packageVersion"] =
+                    json!("2.0.5")
+            }
             "identity-version" => value["files"]["tauriDriver"]["version"] = json!("2.0.5"),
-            "receipt-source" => value["files"]["tauriDriver"]["cargoInstallReceipt"]["source"] = json!("git+https://example.invalid/tauri-driver"),
-            "legacy-file-version" => value["files"]["tauriDriver"]["versionPolicy"] = json!("file-version"),
-            "msedge-policy" => value["files"]["msedgeDriver"]["versionPolicy"] = json!("cargo-install-receipt"),
+            "receipt-source" => {
+                value["files"]["tauriDriver"]["cargoInstallReceipt"]["source"] =
+                    json!("git+https://example.invalid/tauri-driver")
+            }
+            "legacy-file-version" => {
+                value["files"]["tauriDriver"]["versionPolicy"] = json!("file-version")
+            }
+            "msedge-policy" => {
+                value["files"]["msedgeDriver"]["versionPolicy"] = json!("cargo-install-receipt")
+            }
             _ => unreachable!(),
         }
         backend.set_signed_json("artifact-manifest.json", &value);
         let path = backend.path("artifact-manifest.json");
-        assert!(verify_artifact_manifest_with_backend(&path, &mut backend).is_err(), "{mutation}");
+        assert!(
+            verify_artifact_manifest_with_backend(&path, &mut backend).is_err(),
+            "{mutation}"
+        );
     }
 }
 

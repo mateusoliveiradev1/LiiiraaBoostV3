@@ -15,6 +15,7 @@ use super::installation_manifest::{
     parse_installation_manifest, resolve_below_root, sha256_prefixed, verify_compiled_spki,
     verify_live_identity,
 };
+use super::numeric_version::equivalent_numeric_version;
 
 // Key-link witness: 'ArtifactManifestDocument FriendsRosterDocument PhysicalRunConfigDocument'
 // Key-link witness: 'CryptQueryObject CertGetCertificateContextProperty TRUSTED_INSTALLER_SPKI_SHA256'
@@ -242,7 +243,7 @@ pub(crate) fn verify_artifact_manifest_with_backend(
                 return Err(CustodyError::version("portable-native-version-policy"));
             }
             let expected_version = required_str(identity, "version")?;
-            if backend.file_version(&path)? != expected_version {
+            if !equivalent_numeric_version(expected_version, &backend.file_version(&path)?) {
                 return Err(CustodyError::version("portable-live-file-version"));
             }
         }
@@ -257,9 +258,7 @@ pub(crate) fn verify_artifact_manifest_with_backend(
     })
 }
 
-fn verify_tauri_driver_cargo_receipt(
-    identity: &Map<String, Value>,
-) -> Result<(), CustodyError> {
+fn verify_tauri_driver_cargo_receipt(identity: &Map<String, Value>) -> Result<(), CustodyError> {
     if required_str(identity, "version")? != "2.0.6"
         || required_str(identity, "versionPolicy")? != "cargo-install-receipt"
     {
