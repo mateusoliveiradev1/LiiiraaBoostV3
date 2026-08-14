@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 export const TRUSTED_INSTALLER_SPKI_SHA256 =
   'sha256:1951cb0610550369bdffafffaec6ed48bb7c5e7ddbf9b99733cfbd288e86fdf2';
+export const PHYSICAL_PRODUCT_CODE = '72696290-c079-44db-9fdd-6e7cc11aa2c2';
 const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 const INSTALLATION_DIRECTORY_SDDL =
@@ -1285,7 +1286,7 @@ const buildAndSmoke = (options) => {
     );
     copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
 
-    const productCode = randomUUID();
+    const productCode = PHYSICAL_PRODUCT_CODE;
     const createdAt = new Date().toISOString();
     const installationManifest = {
       kind: 'installation-manifest',
