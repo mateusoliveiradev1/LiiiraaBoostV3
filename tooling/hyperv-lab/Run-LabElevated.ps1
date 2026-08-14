@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint', 'Phase6Audit', 'Phase6ObservedAudit')]
+    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint', 'Phase6Audit', 'Phase6ObservedAudit', 'Phase6ObservationCleanup')]
     [string]$Action = 'Status',
 
     [string]$LabRoot = (Join-Path $env:USERPROFILE 'VM-Lab'),
@@ -25,6 +25,62 @@ New-Item -ItemType Directory -Path $evidenceDirectory -Force | Out-Null
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $outputPath = Join-Path $evidenceDirectory "$timestamp-$($Action.ToLowerInvariant())-console.log"
 
+if ($Action -eq 'Phase6ObservationCleanup') {
+    $expectedVmName = 'LiiiraaBoost-W11-25H2-Clean'
+    $expectedCheckpointName = 'Clean-Windows-Ready'
+    $record = [ordered]@{
+        schemaVersion = 1
+        action = 'Phase6ObservationCleanup'
+        vmName = $expectedVmName
+        checkpointName = $expectedCheckpointName
+        command = "Stop-VM -Name $expectedVmName -Force"
+        beforeState = $null
+        afterState = $null
+        checkpoints = $null
+        integrationServices = $null
+        result = 'BLOCKED'
+        failure = $null
+    }
+    $exitCode = 1
+    try {
+        if ($VmName -cne $expectedVmName -or $CheckpointName -cne $expectedCheckpointName) {
+            throw 'BLOCKED: observation cleanup target or checkpoint override rejected.'
+        }
+        $vm = Get-VM -Name $expectedVmName -ErrorAction Stop
+        $checkpoints = @(Get-VMSnapshot -VMName $expectedVmName -Name $expectedCheckpointName -ErrorAction SilentlyContinue)
+        $record.beforeState = $vm.State.ToString()
+        if ($checkpoints.Count -ne 1) {
+            throw 'BLOCKED: observation cleanup requires exactly one clean checkpoint.'
+        }
+        if ($vm.State.ToString() -ne 'Off') {
+            Stop-VM -Name $expectedVmName -Force -ErrorAction Stop
+            $deadline = [DateTime]::UtcNow.AddSeconds(120)
+            do {
+                Start-Sleep -Seconds 2
+                $vm = Get-VM -Name $expectedVmName -ErrorAction Stop
+            } while ($vm.State.ToString() -ne 'Off' -and [DateTime]::UtcNow -lt $deadline)
+        }
+        $checkpoints = @(Get-VMSnapshot -VMName $expectedVmName -Name $expectedCheckpointName -ErrorAction SilentlyContinue)
+        $integration = @(Get-VMIntegrationService -VMName $expectedVmName -ErrorAction Stop)
+        $record.afterState = $vm.State.ToString()
+        $record.checkpoints = @($checkpoints | Select-Object Name, Id, CreationTime)
+        $record.integrationServices = @($integration | Select-Object Name, Enabled, PrimaryStatusDescription, SecondaryStatusDescription)
+        if ($vm.State.ToString() -ne 'Off' -or $checkpoints.Count -ne 1) {
+            throw 'BLOCKED: cleanup did not restore exact Off/checkpoint state within 120 seconds.'
+        }
+        $record.result = 'PASSED'
+        $exitCode = 0
+    }
+    catch {
+        $record.failure = $_.Exception.Message
+        $exitCode = 1
+    }
+    $json = $record | ConvertTo-Json -Depth 8
+    [IO.File]::WriteAllText($outputPath, $json + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+    Write-Output $json
+    exit $exitCode
+}
+
 if ($Action -eq 'Phase6ObservedAudit') {
     $expectedVmName = 'LiiiraaBoost-W11-25H2-Clean'
     $expectedCheckpointName = 'Clean-Windows-Ready'
@@ -40,7 +96,7 @@ if ($Action -eq 'Phase6ObservedAudit') {
             "Get-VMIntegrationService -VMName $expectedVmName"
             "Start-VM -Name $expectedVmName"
             "Run-LabElevated.ps1 -Action Phase6Audit -VmName $expectedVmName -CheckpointName $expectedCheckpointName"
-            "Stop-VM -Name $expectedVmName -Shutdown -Force"
+            "Stop-VM -Name $expectedVmName -Force"
         )
         before = $null
         health = $null
@@ -118,7 +174,7 @@ if ($Action -eq 'Phase6ObservedAudit') {
         try {
             $currentVm = Get-VM -Name $expectedVmName -ErrorAction Stop
             if ($startedByObservation -and $currentVm.State.ToString() -ne 'Off') {
-                Stop-VM -Name $expectedVmName -Shutdown -Force -ErrorAction Stop
+                Stop-VM -Name $expectedVmName -Force -ErrorAction Stop
                 $stopDeadline = [DateTime]::UtcNow.AddSeconds(120)
                 do {
                     Start-Sleep -Seconds 2
