@@ -164,7 +164,7 @@ const wix = () => `<?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
-      <Component Id="PhysicalInstallDirectoryAclComponent" Guid="*">
+      <Component Id="PhysicalInstallDirectoryAclComponent" Guid="{3BA41754-6199-4B96-BD9A-613FDBBD270A}">
         <CreateFolder>
           <PermissionEx Sddl="D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)" />
         </CreateFolder>
@@ -370,6 +370,16 @@ test('WiX uses installer tables for coherent service custody and contains no dri
         ),
       ),
     /runtime directory ACL/u,
+  );
+  assert.throws(
+    () =>
+      validateWixContract(
+        wix().replace(
+          'Id="PhysicalInstallDirectoryAclComponent" Guid="{3BA41754-6199-4B96-BD9A-613FDBBD270A}"',
+          'Id="PhysicalInstallDirectoryAclComponent" Guid="*"',
+        ),
+      ),
+    /stable component GUID/u,
   );
   assert.throws(
     () =>
