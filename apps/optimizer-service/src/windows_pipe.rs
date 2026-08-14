@@ -908,7 +908,7 @@ mod windows_host {
             OpenThreadToken(
                 GetCurrentThread(),
                 TOKEN_QUERY | TOKEN_DUPLICATE,
-                false,
+                true,
                 &mut impersonation,
             )
         }
