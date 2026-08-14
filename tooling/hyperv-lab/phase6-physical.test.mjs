@@ -136,6 +136,56 @@ test('RED: dedicated bridge exposes only exact Audit and RunCleanVm authority', 
   assertSourcePolicy(bridgeSource());
 });
 
+test('RED: Off pre-start audit requires six enabled services without claiming guest health', () => {
+  const source = bridgeSource();
+  const auditBody = source.slice(
+    source.indexOf('function Assert-ExactHyperVAudit'),
+    source.indexOf('function Copy-ExactArtifactToGuest'),
+  );
+  assert.match(auditBody, /\$integration\.Count\s+-ne\s+6/u);
+  assert.match(auditBody, /Where-Object\s+\{\s*-not\s+\$_\.Enabled\s*\}/u);
+  assert.doesNotMatch(auditBody, /PrimaryStatusDescription\s+-eq\s+'OK'/u);
+});
+
+test('RED: RunCleanVm waits boundedly for six healthy services before guest copy', () => {
+  const source = bridgeSource();
+  const healthStart = source.indexOf('function Wait-ExactIntegrationServicesHealthy');
+  const healthEnd = source.indexOf('function Copy-ExactArtifactToGuest');
+  assert.ok(healthStart >= 0 && healthEnd > healthStart);
+  const healthBody = source.slice(healthStart, healthEnd);
+  assert.match(healthBody, /AddSeconds\(180\)/u);
+  assert.match(healthBody, /Get-VMIntegrationService\s+-VMName\s+\$ExpectedVmName/u);
+  assert.match(healthBody, /PrimaryStatusDescription\s+-eq\s+'OK'/u);
+  assert.match(healthBody, /\$integration\.Count\s+-eq\s+6/u);
+  assert.match(healthBody, /\$healthy\.Count\s+-eq\s+6/u);
+  assert.match(healthBody, /within 180 seconds/iu);
+
+  const runBody = source.slice(
+    source.indexOf('function Invoke-CleanVmRun'),
+    source.indexOf('Assert-ExactInvocation\n'),
+  );
+  assertInOrder(runBody, [
+    'Start-VM',
+    'Wait-ExactVmReady',
+    'Wait-ExactIntegrationServicesHealthy',
+    'Copy-ExactArtifactToGuest',
+    'Invoke-ExactGuestRunner',
+  ]);
+});
+
+test('RED: read-only Audit restores an initially Off VM after bounded health observation', () => {
+  const source = bridgeSource();
+  const auditStart = source.indexOf('function Assert-ExactReadOnlyIntegrationHealth');
+  const auditEnd = source.indexOf('function Copy-ExactArtifactToGuest');
+  assert.ok(auditStart >= 0 && auditEnd > auditStart);
+  const auditBody = source.slice(auditStart, auditEnd);
+  assert.match(auditBody, /Start-VM\s+-Name\s+\$ExpectedVmName/u);
+  assert.match(auditBody, /Wait-ExactIntegrationServicesHealthy/u);
+  assert.match(auditBody, /finally/u);
+  assert.match(auditBody, /Stop-VM\s+-Name\s+\$ExpectedVmName\s+-Force/u);
+  assert.match(auditBody, /AddSeconds\(120\)/u);
+});
+
 test('elevated logger records only the fixed Phase 6 Audit action', () => {
   const source = readFileSync(elevatedLoggerPath, 'utf8');
   assert.match(source, /'Phase6Audit'/u);
