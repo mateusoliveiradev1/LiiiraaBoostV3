@@ -18,6 +18,7 @@ import {
   validateTauriDriverInstallReceipt,
   validateArtifactManifest,
   validateInstallationManifest,
+  validateMsiInspection,
   validatePhysicalProfile,
   validateWebView2RuntimeEvidence,
   validateWixContract,
@@ -398,6 +399,55 @@ test('WiX uses installer tables for coherent service custody and contains no dri
           ),
       ),
     /manifest.*service/u,
+  );
+});
+
+test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
+  const expected = {
+    productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
+    packageVersion: '0.1.0',
+    files: [
+      'short.exe|liiiraa-desktop.exe',
+      'runner.exe|phase6-physical-runner.exe',
+      'manifest.jso|installation-manifest.json',
+      'manifest.p7s|installation-manifest.json.p7s',
+      'service.exe|liiiraa-optimizer-service.exe',
+    ],
+    customActionCount: 0,
+    customActions: [],
+  };
+  assert.doesNotThrow(() =>
+    validateMsiInspection(expected, {
+      productCode: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      packageVersion: '0.1.0',
+    }),
+  );
+  rejectsMutation(
+    expected,
+    (value) => {
+      value.customActionCount = 1;
+      value.customActions = [
+        { action: 'DownloadAndInvokeBootstrapper', source: 'powershell.exe', target: 'download' },
+      ];
+    },
+    (value) =>
+      validateMsiInspection(value, {
+        productCode: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        packageVersion: '0.1.0',
+      }),
+    /zero CustomAction/u,
+  );
+  rejectsMutation(
+    expected,
+    (value) => {
+      value.files.push('driver.exe|msedgedriver.exe');
+    },
+    (value) =>
+      validateMsiInspection(value, {
+        productCode: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        packageVersion: '0.1.0',
+      }),
+    /exact installed files/u,
   );
 });
 
