@@ -116,6 +116,7 @@ export const PORTABLE_ROLES = Object.freeze([
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PHYSICAL_CONFIG = 'apps/desktop/src-tauri/tauri.phase6-physical.conf.json';
 const WIX_FRAGMENT = 'apps/desktop/src-tauri/installer/optimizer-service.wxs';
+const LIFECYCLE_HELPER = 'tooling/phase6-physical/lifecycle-smoke.ps1';
 const DECLARED_INPUTS = Object.freeze([
   PHYSICAL_CONFIG,
   WIX_FRAGMENT,
@@ -128,6 +129,7 @@ const DECLARED_INPUTS = Object.freeze([
   'Cargo.lock',
   'pnpm-lock.yaml',
   'tooling/phase6-physical/build-artifact.mjs',
+  LIFECYCLE_HELPER,
 ]);
 const SHA_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
@@ -496,23 +498,6 @@ $certificates | ConvertTo-Json -Compress
   return signer;
 };
 
-const assertElevated = () => {
-  const elevated = run(
-    'powershell',
-    [
-      '-NoProfile',
-      '-NonInteractive',
-      '-Command',
-      '([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)',
-    ],
-    { capture: true },
-  );
-  if (elevated.trim().toLowerCase() !== 'true')
-    fail(
-      'build-and-smoke requires an elevated Windows administrator session for MSI lifecycle verification',
-    );
-};
-
 const fileVersion = (path) => {
   const escaped = path.replaceAll("'", "''");
   return (
@@ -614,6 +599,19 @@ const writeCreateOnce = (path, bytes) => {
   return 'created';
 };
 
+export function validateTauriDriverInstallReceipt(receipt, executableName = 'tauri-driver.exe') {
+  const exactKey = 'tauri-driver 2.0.6 (registry+https://github.com/rust-lang/crates.io-index)';
+  const installed = receipt?.installs?.[exactKey];
+  if (
+    installed?.version_req !== '=2.0.6' ||
+    !Array.isArray(installed.bins) ||
+    !installed.bins.includes(executableName)
+  ) {
+    fail('tauri-driver exact 2.0.6 crates.io install receipt is invalid');
+  }
+  return { version: '2.0.6', source: 'registry+https://github.com/rust-lang/crates.io-index' };
+}
+
 const locateTauriDriver = () => {
   const candidates = [
     join(process.env.USERPROFILE || '', '.cargo', 'bin', 'tauri-driver.exe'),
@@ -624,9 +622,13 @@ const locateTauriDriver = () => {
     fail(
       'tauri-driver 2.0.6 is unavailable; install the approved exact release before the physical build',
     );
-  const version = run(path, ['--version'], { capture: true });
-  if (!/\b2\.0\.6\b/u.test(version)) fail(`tauri-driver exact release mismatch: ${version}`);
-  return path;
+  const receiptPath = join(dirname(dirname(path)), '.crates2.json');
+  if (!existsSync(receiptPath)) fail('tauri-driver Cargo install receipt is unavailable');
+  const provenance = validateTauriDriverInstallReceipt(
+    JSON.parse(readFileSync(receiptPath, 'utf8')),
+    basename(path),
+  );
+  return { path, ...provenance };
 };
 
 const edgeVersion = () =>
@@ -713,57 +715,59 @@ $view.Execute(); $view.Close(); $database.Commit()
   ]);
 };
 
-const runLifecycleSmoke = ({ msiPath, productCode, outputRoot }) => {
-  const log = (name) => join(outputRoot, `${name}.msiexec.log`);
-  const invoke = (args, expected = 0) => {
-    const result = spawnSync('msiexec.exe', args, {
-      cwd: ROOT,
-      encoding: 'utf8',
-      windowsHide: true,
-      stdio: 'pipe',
-    });
-    if (result.status !== expected)
-      fail(`msiexec ${args.join(' ')} exited ${result.status}, expected ${expected}`);
-  };
-  invoke(['/i', msiPath, '/qn', '/norestart', '/l*v', log('install')]);
-  const installedRoot = join(process.env.ProgramFiles || 'C:\\Program Files', 'Liiiraa Boost');
-  for (const role of INSTALLED_ROLES)
-    if (!existsSync(join(installedRoot, role.path)))
-      fail(`installed runtime role is missing: ${role.path}`);
-  for (const driver of ['tauri-driver.exe', 'msedgedriver.exe'])
-    if (existsSync(join(installedRoot, driver))) fail(`portable driver was installed: ${driver}`);
-  const service = run('sc.exe', ['query', 'LiiiraaBoostOptimizer'], { capture: true });
-  if (!/RUNNING/iu.test(service)) fail('optimizer service did not reach RUNNING state');
-  invoke(['/fa', msiPath, '/qn', '/norestart', '/l*v', log('repair')]);
-  const downgrade = spawnSync(
-    'msiexec.exe',
-    [
-      '/i',
-      msiPath,
-      'REINSTALLMODE=amus',
-      'REINSTALL=ALL',
-      '/qn',
-      '/norestart',
-      '/l*v',
-      log('downgrade-rejection'),
-    ],
-    { windowsHide: true },
-  );
-  if (![0, 1638].includes(downgrade.status))
-    fail(`downgrade/reinstall policy returned unexpected status ${downgrade.status}`);
-  invoke(['/x', productCode, '/qn', '/norestart', '/l*v', log('uninstall')]);
+const setMsiIdentity = (path, { productCode, packageVersion }) => {
+  const escaped = path.replaceAll("'", "''");
+  const msiProductCode = `{${productCode.toUpperCase()}}`;
+  run('powershell', [
+    '-NoProfile',
+    '-NonInteractive',
+    '-Command',
+    `
+$ErrorActionPreference = 'Stop'
+$installer = New-Object -ComObject WindowsInstaller.Installer
+$database = $installer.OpenDatabase('${escaped}', 1)
+$product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHERE Property='ProductCode'")
+$product.Execute(); $product.Close()
+$version = $database.OpenView("UPDATE Property SET Value='${packageVersion}' WHERE Property='ProductVersion'")
+$version.Execute(); $version.Close(); $database.Commit()
+`,
+  ]);
+};
+
+const runLifecycleSmoke = ({ msiPath, downgradeMsiPath, productCode, outputRoot }) => {
+  const resultPath = join(outputRoot, 'elevated-lifecycle-result.json');
+  const helper = join(ROOT, LIFECYCLE_HELPER);
+  const script = `
+$ErrorActionPreference = 'Stop'
+$arguments = @(
+  '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'RemoteSigned', '-File',
+  '${helper.replaceAll("'", "''")}',
+  '-MsiPath', '"${msiPath.replaceAll("'", "''")}"',
+  '-DowngradeMsiPath', '"${downgradeMsiPath.replaceAll("'", "''")}"',
+  '-ProductCode', '${productCode.replaceAll("'", "''")}',
+  '-OutputRoot', '"${outputRoot.replaceAll("'", "''")}"',
+  '-ResultPath', '"${resultPath.replaceAll("'", "''")}"'
+)
+$process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
+if ($process.ExitCode -ne 0) { throw "elevated lifecycle helper exited $($process.ExitCode)" }
+`;
+  run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script]);
+  if (!existsSync(resultPath)) fail('elevated lifecycle helper did not produce its result');
+  const result = JSON.parse(readFileSync(resultPath, 'utf8').replace(/^\uFEFF/u, ''));
   if (
-    existsSync(installedRoot) &&
-    INSTALLED_ROLES.some((role) => existsSync(join(installedRoot, role.path)))
-  )
-    fail('uninstall retained an installed runtime role');
-  return {
-    install: 'passed',
-    repairUpdate: 'passed',
-    downgradeRejected: true,
-    uninstall: 'passed',
-    forcedReboot: false,
-  };
+    result.status !== 'PASSED' ||
+    result.install !== 'passed' ||
+    result.repairUpdate !== 'passed' ||
+    result.rollbackFailureDrill !== 'passed' ||
+    result.downgradeRejected !== true ||
+    result.uninstall !== 'passed' ||
+    result.recoveryCustodyPreserved !== true ||
+    result.forcedReboot !== false ||
+    result.residualsAbsent !== true
+  ) {
+    fail('elevated lifecycle result did not satisfy the closed lifecycle contract');
+  }
+  return result;
 };
 
 const writeBlockedReport = (error, context) => {
@@ -812,7 +816,6 @@ const buildAndSmoke = (options) => {
   const context = { mode: 'build-and-smoke', sourceCommit: null, operationVersionId: null };
   try {
     if (process.platform !== 'win32') fail('physical artifact build requires Windows');
-    assertElevated();
     const signtool = findSignTool();
     if (!signtool) fail('Windows SDK signtool.exe is unavailable');
     const signer = signerIdentity(TRUSTED_INSTALLER_SPKI_SHA256);
@@ -898,7 +901,7 @@ const buildAndSmoke = (options) => {
       tauriDriver: join(workRoot, 'tauri-driver.exe'),
       msedgeDriver: join(workRoot, 'msedgedriver.exe'),
     };
-    copyFileSync(tauriDriverSource, portableDrivers.tauriDriver);
+    copyFileSync(tauriDriverSource.path, portableDrivers.tauriDriver);
     copyFileSync(msedgeDriverSource, portableDrivers.msedgeDriver);
     signatures.tauriDriver = signAuthenticode(
       signtool,
@@ -1036,7 +1039,7 @@ const buildAndSmoke = (options) => {
         signaturePolicy: 'authenticode-required',
       },
       tauriDriver: {
-        version: fileVersion(portableSources.tauriDriver),
+        version: tauriDriverSource.version,
         versionPolicy: 'file-version',
         signaturePolicy: 'authenticode-required',
       },
@@ -1073,11 +1076,20 @@ const buildAndSmoke = (options) => {
       TRUSTED_INSTALLER_SPKI_SHA256,
     );
     verifyDetachedCmsEvidence(cmsEvidence);
+    const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi');
+    copyFileSync(msiPath, downgradeMsiPath);
+    setMsiIdentity(downgradeMsiPath, {
+      productCode: randomUUID(),
+      packageVersion: '0.0.1',
+    });
+    signAuthenticode(signtool, signer.thumbprint, downgradeMsiPath);
     const lifecycle = runLifecycleSmoke({
       msiPath,
+      downgradeMsiPath,
       productCode: msiInspection.productCode,
       outputRoot: workRoot,
     });
+    rmSync(downgradeMsiPath, { force: true });
     writeCreateOnce(
       join(workRoot, 'lifecycle-report.json'),
       canonicalBytes({

@@ -15,6 +15,7 @@ import {
   assertImmutableFile,
   buildCanonicalRunConfigs,
   selectUnusedOperationVersion,
+  validateTauriDriverInstallReceipt,
   validateArtifactManifest,
   validateInstallationManifest,
   validatePhysicalProfile,
@@ -36,6 +37,30 @@ test('development signing trust is pinned atomically to the rotated CNG identity
     const source = readFileSync(path, 'utf8');
     assert.match(source, new RegExp(ROTATED_DEVELOPMENT_SPKI_SHA256, 'u'));
   }
+});
+
+test('tauri-driver provenance requires the exact Cargo 2.0.6 crates.io receipt', () => {
+  const exactKey = 'tauri-driver 2.0.6 (registry+https://github.com/rust-lang/crates.io-index)';
+  assert.deepEqual(
+    validateTauriDriverInstallReceipt({
+      installs: {
+        [exactKey]: { version_req: '=2.0.6', bins: ['tauri-driver.exe'] },
+      },
+    }),
+    { version: '2.0.6', source: 'registry+https://github.com/rust-lang/crates.io-index' },
+  );
+  assert.throws(
+    () =>
+      validateTauriDriverInstallReceipt({
+        installs: {
+          'tauri-driver 2.0.5 (registry+https://github.com/rust-lang/crates.io-index)': {
+            version_req: '=2.0.5',
+            bins: ['tauri-driver.exe'],
+          },
+        },
+      }),
+    /exact 2\.0\.6/u,
+  );
 });
 
 const role = (name, relativePath, character = 'a') => {
