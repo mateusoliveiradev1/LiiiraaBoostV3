@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   PHASE6_PROMOTION_STAGES,
+  assertDeterministicAdmissionChain,
   canonicalPhase6Evidence,
   phase6EvidenceSha256,
   type Phase6Consent,
@@ -303,9 +304,24 @@ const stageAuthority = (
 const loadEvidence = (): { bytes: string; manifest: Phase6EvidenceManifest } => {
   const bytes = readFileSync(evidenceManifestPath(), 'utf8');
   const value: unknown = JSON.parse(bytes);
-  if (!isObject(value) || value['schemaVersion'] !== 2)
-    throw new Error('Current Phase 6 evidence manifest must be schema v2.');
-  return { bytes, manifest: value as unknown as Phase6EvidenceManifest };
+  if (!isObject(value) || value['schemaVersion'] !== 3)
+    throw new Error('Current Phase 6 evidence manifest must be schema v3.');
+  assertDeterministicAdmissionChain(value['deterministicAdmissions']);
+  const manifest = value as unknown as Phase6EvidenceManifest;
+  const activeAdmission = manifest.deterministicAdmissions.at(-1);
+  const deterministicRun = manifest.stages[0]?.runs[0];
+  if (
+    activeAdmission === undefined ||
+    deterministicRun === undefined ||
+    activeAdmission.status !== 'active' ||
+    activeAdmission.operationVersion !== manifest.operationVersion ||
+    activeAdmission.buildId !== manifest.immutableBuild.id ||
+    activeAdmission.artifactManifestSha256 !== manifest.immutableBuild.artifactManifestSha256 ||
+    activeAdmission.runEvidenceId !== deterministicRun.id ||
+    activeAdmission.runEvidenceSha256 !== phase6EvidenceSha256(deterministicRun)
+  )
+    throw new Error('Active deterministic admission does not match current evidence authority.');
+  return { bytes, manifest };
 };
 
 const writeExclusiveJson = (path: string, value: unknown): void => {

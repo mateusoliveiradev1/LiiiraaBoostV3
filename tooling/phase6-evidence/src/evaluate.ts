@@ -159,8 +159,20 @@ export interface Phase6StageEvidence {
   reviews: Phase6HumanReview[];
 }
 
+export interface Phase6DeterministicAdmission {
+  status: 'superseded' | 'active';
+  operationVersion: string;
+  buildId: string;
+  artifactManifestSha256: string;
+  runEvidenceId: string;
+  runEvidenceSha256: string;
+  predecessorEvidenceSha256: string | null;
+  successorEvidenceSha256: string | null;
+  manifestRecord: Phase6ArtifactReference | null;
+}
+
 export interface Phase6EvidenceManifest {
-  schemaVersion: 2;
+  schemaVersion: 3;
   generatedAt: string;
   operationVersion: string;
   immutableBuild: {
@@ -173,6 +185,7 @@ export interface Phase6EvidenceManifest {
   requirementsCoverage: string[];
   decisionCoverage: string[];
   legacyBlockedAttempts: Phase6ArtifactReference[];
+  deterministicAdmissions: Phase6DeterministicAdmission[];
   stages: Phase6StageEvidence[];
 }
 
@@ -199,6 +212,7 @@ export interface Phase6EvidenceResult {
 
 const HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const OPERATION_VERSION_PATTERN = /^managed-power-scheme-v([1-9][0-9]*)$/u;
 const CONTINUATION = [
   'installed-ready',
   'checkpoint-ready',
@@ -272,6 +286,83 @@ const asArtifact = (value: unknown): Phase6ArtifactReference | null => {
   )
     return null;
   return value as unknown as Phase6ArtifactReference;
+};
+
+const asDeterministicAdmission = (value: unknown): Phase6DeterministicAdmission | null => {
+  if (
+    !isObject(value) ||
+    !hasExactKeys(value, [
+      'status',
+      'operationVersion',
+      'buildId',
+      'artifactManifestSha256',
+      'runEvidenceId',
+      'runEvidenceSha256',
+      'predecessorEvidenceSha256',
+      'successorEvidenceSha256',
+      'manifestRecord',
+    ]) ||
+    (value['status'] !== 'superseded' && value['status'] !== 'active') ||
+    typeof value['operationVersion'] !== 'string' ||
+    typeof value['buildId'] !== 'string' ||
+    typeof value['artifactManifestSha256'] !== 'string' ||
+    typeof value['runEvidenceId'] !== 'string' ||
+    typeof value['runEvidenceSha256'] !== 'string' ||
+    (value['predecessorEvidenceSha256'] !== null &&
+      typeof value['predecessorEvidenceSha256'] !== 'string') ||
+    (value['successorEvidenceSha256'] !== null &&
+      typeof value['successorEvidenceSha256'] !== 'string') ||
+    (value['manifestRecord'] !== null && asArtifact(value['manifestRecord']) === null)
+  )
+    return null;
+  return value as unknown as Phase6DeterministicAdmission;
+};
+
+export const assertDeterministicAdmissionChain = (value: unknown): void => {
+  if (!Array.isArray(value) || value.length < 1)
+    throw new Error('Deterministic admission history must be a non-empty linear chain.');
+  const admissions = value.map(asDeterministicAdmission);
+  if (admissions.some((entry) => entry === null))
+    throw new Error('Deterministic admission entry has an open or invalid shape.');
+  const chain = admissions as Phase6DeterministicAdmission[];
+  const uniqueOperation = new Set<string>();
+  const uniqueBuild = new Set<string>();
+  const uniqueArtifact = new Set<string>();
+  const uniqueEvidenceId = new Set<string>();
+  const uniqueEvidenceHash = new Set<string>();
+  let priorVersion = 0;
+  for (const [index, admission] of chain.entries()) {
+    const match = OPERATION_VERSION_PATTERN.exec(admission.operationVersion);
+    const version = match === null ? 0 : Number(match[1]);
+    const prior = chain[index - 1];
+    const next = chain[index + 1];
+    const historical = index < chain.length - 1;
+    if (
+      version <= priorVersion ||
+      !HASH_PATTERN.test(admission.artifactManifestSha256) ||
+      !HASH_PATTERN.test(admission.runEvidenceSha256) ||
+      (admission.predecessorEvidenceSha256 !== null &&
+        !HASH_PATTERN.test(admission.predecessorEvidenceSha256)) ||
+      (admission.successorEvidenceSha256 !== null &&
+        !HASH_PATTERN.test(admission.successorEvidenceSha256)) ||
+      uniqueOperation.has(admission.operationVersion) ||
+      uniqueBuild.has(admission.buildId) ||
+      uniqueArtifact.has(admission.artifactManifestSha256) ||
+      uniqueEvidenceId.has(admission.runEvidenceId) ||
+      uniqueEvidenceHash.has(admission.runEvidenceSha256) ||
+      admission.predecessorEvidenceSha256 !== (prior?.runEvidenceSha256 ?? null) ||
+      admission.successorEvidenceSha256 !== (next?.runEvidenceSha256 ?? null) ||
+      admission.status !== (historical ? 'superseded' : 'active') ||
+      (historical ? admission.manifestRecord === null : admission.manifestRecord !== null)
+    )
+      throw new Error('Deterministic admission history is forked, cyclic, duplicated, or stale.');
+    uniqueOperation.add(admission.operationVersion);
+    uniqueBuild.add(admission.buildId);
+    uniqueArtifact.add(admission.artifactManifestSha256);
+    uniqueEvidenceId.add(admission.runEvidenceId);
+    uniqueEvidenceHash.add(admission.runEvidenceSha256);
+    priorVersion = version;
+  }
 };
 
 const asRun = (value: unknown): Phase6RunEvidence | null => {
@@ -447,9 +538,10 @@ const asManifest = (value: unknown): Phase6EvidenceManifest | null => {
       'requirementsCoverage',
       'decisionCoverage',
       'legacyBlockedAttempts',
+      'deterministicAdmissions',
       'stages',
     ]) ||
-    value['schemaVersion'] !== 2 ||
+    value['schemaVersion'] !== 3 ||
     typeof value['generatedAt'] !== 'string' ||
     typeof value['operationVersion'] !== 'string' ||
     !isStage(value['promotionStage']) ||
@@ -457,6 +549,8 @@ const asManifest = (value: unknown): Phase6EvidenceManifest | null => {
     !Array.isArray(value['decisionCoverage']) ||
     !Array.isArray(value['legacyBlockedAttempts']) ||
     value['legacyBlockedAttempts'].some((entry) => asArtifact(entry) === null) ||
+    !Array.isArray(value['deterministicAdmissions']) ||
+    value['deterministicAdmissions'].some((entry) => asDeterministicAdmission(entry) === null) ||
     !Array.isArray(value['stages']) ||
     !isObject(value['immutableBuild']) ||
     !hasExactKeys(value['immutableBuild'], [
@@ -597,7 +691,11 @@ const validateRun = (
   );
   const predecessorRun = predecessor?.runs.at(-1);
   const expectedPredecessor =
-    predecessorRun === undefined ? null : phase6EvidenceSha256(predecessorRun);
+    cell.stage === 'deterministic-simulation'
+      ? (manifest.deterministicAdmissions.at(-1)?.predecessorEvidenceSha256 ?? null)
+      : predecessorRun === undefined
+        ? null
+        : phase6EvidenceSha256(predecessorRun);
   push(
     diagnostics,
     run.predecessorRunEvidenceSha256 !== expectedPredecessor,
@@ -925,16 +1023,93 @@ const validateStageShape = (
   }
 };
 
+const validateHistoricalAdmissionRecord = (
+  admission: Phase6DeterministicAdmission,
+  path: string,
+  context: Phase6EvaluationContext,
+  diagnostics: Phase6EvidenceDiagnostic[],
+): void => {
+  const record = admission.manifestRecord;
+  if (record === null) return;
+  validateArtifact(record, path, context, diagnostics);
+  const contents = context.artifactContents[record.path];
+  if (contents === undefined || sha256(contents) !== record.sha256) return;
+  let value: unknown;
+  try {
+    const text = typeof contents === 'string' ? contents : new TextDecoder().decode(contents);
+    value = JSON.parse(text) as unknown;
+  } catch {
+    diagnostics.push(
+      diagnostic(
+        'DETERMINISTIC_PREDECESSOR_RECORD_INVALID',
+        path,
+        'Historical deterministic manifest record must contain canonical JSON.',
+      ),
+    );
+    return;
+  }
+  const keys = [
+    'schemaVersion',
+    'generatedAt',
+    'operationVersion',
+    'immutableBuild',
+    'promotionStage',
+    'requirementsCoverage',
+    'decisionCoverage',
+    'legacyBlockedAttempts',
+    'stages',
+  ] as const;
+  const build = isObject(value) ? value['immutableBuild'] : null;
+  const stages = isObject(value) ? value['stages'] : null;
+  const firstStage: unknown = Array.isArray(stages) ? (stages as unknown[])[0] : null;
+  const runs = isObject(firstStage) ? firstStage['runs'] : null;
+  const priorRun =
+    Array.isArray(runs) && runs.length === 1 ? asRun((runs as unknown[])[0]) : null;
+  const priorRunSha256 = priorRun === null ? null : phase6EvidenceSha256(priorRun);
+  const laterStages: unknown[] = Array.isArray(stages) ? (stages as unknown[]).slice(1) : [];
+  if (
+    !isObject(value) ||
+    !hasExactKeys(value, keys) ||
+    value['schemaVersion'] !== 2 ||
+    value['promotionStage'] !== 'deterministic-simulation' ||
+    value['operationVersion'] !== admission.operationVersion ||
+    !isObject(build) ||
+    build['id'] !== admission.buildId ||
+    build['artifactManifestSha256'] !== admission.artifactManifestSha256 ||
+    priorRun?.id !== admission.runEvidenceId ||
+    priorRunSha256 !== admission.runEvidenceSha256 ||
+    priorRun.predecessorRunEvidenceSha256 !== admission.predecessorEvidenceSha256 ||
+    laterStages.length !== PHASE6_PROMOTION_STAGES.length - 1 ||
+    laterStages.some(
+      (cell) =>
+        !isObject(cell) ||
+        !Array.isArray(cell['runs']) ||
+        !Array.isArray(cell['consents']) ||
+        !Array.isArray(cell['reviews']) ||
+        cell['runs'].length !== 0 ||
+        cell['consents'].length !== 0 ||
+        cell['reviews'].length !== 0,
+    )
+  )
+    diagnostics.push(
+      diagnostic(
+        'DETERMINISTIC_PREDECESSOR_RECORD_INVALID',
+        path,
+        'Historical deterministic manifest record does not match its chain identity.',
+      ),
+    );
+};
+
 export const evaluatePhase6Evidence = (
   input: unknown,
   context: Phase6EvaluationContext,
 ): Phase6EvidenceResult => {
-  if (isObject(input) && input['schemaVersion'] === 1)
+  if (isObject(input) && (input['schemaVersion'] === 1 || input['schemaVersion'] === 2))
     return invalidResult([
       diagnostic(
         'LEGACY_EVIDENCE_BLOCKED',
         '$.schemaVersion',
-        'Legacy evidence is immutable blocked history and cannot promote.',
+        'Superseded evidence schemas are immutable history and cannot promote.',
       ),
     ]);
   const manifest = asManifest(input);
@@ -943,10 +1118,46 @@ export const evaluatePhase6Evidence = (
       diagnostic(
         'EVIDENCE_MANIFEST_INVALID',
         '$',
-        'Manifest does not satisfy the closed Phase 6 v2 evidence contract.',
+        'Manifest does not satisfy the closed Phase 6 v3 evidence contract.',
       ),
     ]);
   const diagnostics: Phase6EvidenceDiagnostic[] = [];
+  try {
+    assertDeterministicAdmissionChain(manifest.deterministicAdmissions);
+  } catch {
+    diagnostics.push(
+      diagnostic(
+        'DETERMINISTIC_ADMISSION_CHAIN_INVALID',
+        '$.deterministicAdmissions',
+        'Deterministic admission history must be one exact append-only linear chain.',
+      ),
+    );
+  }
+  const activeAdmission = manifest.deterministicAdmissions.at(-1);
+  const deterministicRun = manifest.stages[0]?.runs[0];
+  push(
+    diagnostics,
+    activeAdmission === undefined ||
+      deterministicRun === undefined ||
+      activeAdmission.status !== 'active' ||
+      activeAdmission.operationVersion !== manifest.operationVersion ||
+      activeAdmission.buildId !== manifest.immutableBuild.id ||
+      activeAdmission.artifactManifestSha256 !== manifest.immutableBuild.artifactManifestSha256 ||
+      activeAdmission.runEvidenceId !== deterministicRun.id ||
+      activeAdmission.runEvidenceSha256 !== phase6EvidenceSha256(deterministicRun),
+    'ACTIVE_DETERMINISTIC_ADMISSION_MISMATCH',
+    '$.deterministicAdmissions',
+    'The only active deterministic admission must match the current build and run exactly.',
+  );
+  for (const [index, admission] of manifest.deterministicAdmissions.entries()) {
+    if (admission.manifestRecord !== null)
+      validateHistoricalAdmissionRecord(
+        admission,
+        `$.deterministicAdmissions[${String(index)}].manifestRecord`,
+        context,
+        diagnostics,
+      );
+  }
   if (!isIsoDate(context.evaluatedAt) || !isIsoDate(manifest.generatedAt))
     diagnostics.push(
       diagnostic('EVIDENCE_TIMESTAMP_INVALID', '$.generatedAt', 'Exact timestamps are required.'),
@@ -1286,6 +1497,9 @@ const runCli = (): void => {
   if (manifest !== null) {
     const references = [
       manifest.immutableBuild.artifact,
+      ...manifest.deterministicAdmissions.flatMap(({ manifestRecord }) =>
+        manifestRecord === null ? [] : [manifestRecord],
+      ),
       ...manifest.stages.flatMap(({ runs }) => runs.flatMap(({ artifacts }) => artifacts)),
     ];
     for (const reference of references) {

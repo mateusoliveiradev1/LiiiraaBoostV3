@@ -54,7 +54,7 @@ const runEvidence = (
   stage,
   evidenceKind: stage === 'deterministic-simulation' ? 'deterministic' : 'physical',
   status: 'PASS',
-  operationVersion: 'power-scheme@3.0.0',
+  operationVersion: 'managed-power-scheme-v3',
   buildId: 'phase6-build-003',
   participantId,
   machineSlot,
@@ -157,7 +157,7 @@ const reviewFor = (run: Run, consent: ReturnType<typeof consentFor> | null = nul
 const roster = () => ({
   id: 'friends-roster-alpha-001',
   recordedAt: '2030-01-15T17:00:00.000Z',
-  operationVersion: 'power-scheme@3.0.0',
+  operationVersion: 'managed-power-scheme-v3',
   buildId: 'phase6-build-003',
   artifactManifestSha256,
   configSha256,
@@ -172,9 +172,9 @@ const roster = () => ({
 const manifest = () => {
   const deterministic = runEvidence('deterministic-simulation', 'deterministic-runner');
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: '2030-01-15T20:00:00.000Z',
-    operationVersion: 'power-scheme@3.0.0',
+    operationVersion: 'managed-power-scheme-v3',
     immutableBuild: {
       id: 'phase6-build-003',
       commit: '51770454aa1d17647c4fe734ae1e57f3e0b403b0',
@@ -186,6 +186,19 @@ const manifest = () => {
     decisionCoverage: [...DECISIONS],
     legacyBlockedAttempts: [
       { path: 'evidence/legacy/managed-power-scheme-v2.json', sha256: sha256('legacy') },
+    ],
+    deterministicAdmissions: [
+      {
+        status: 'active' as const,
+        operationVersion: deterministic.operationVersion,
+        buildId: deterministic.buildId,
+        artifactManifestSha256: deterministic.artifactManifestSha256,
+        runEvidenceId: deterministic.id,
+        runEvidenceSha256: phase6EvidenceSha256(deterministic),
+        predecessorEvidenceSha256: null,
+        successorEvidenceSha256: null,
+        manifestRecord: null,
+      },
     ],
     stages: PHASE6_PROMOTION_STAGES.map((stage, index) => ({
       stage,

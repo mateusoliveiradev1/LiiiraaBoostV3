@@ -29831,6 +29831,384 @@ impl ::std::convert::TryFrom<::std::string::String> for OwnerPromotionDocumentSt
         value.parse()
     }
 }
+#[doc = "`Phase6DeterministicAdmission`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Phase6DeterministicAdmission.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"artifactManifestSha256\","]
+#[doc = "    \"buildId\","]
+#[doc = "    \"manifestRecord\","]
+#[doc = "    \"operationVersion\","]
+#[doc = "    \"predecessorEvidenceSha256\","]
+#[doc = "    \"runEvidenceId\","]
+#[doc = "    \"runEvidenceSha256\","]
+#[doc = "    \"status\","]
+#[doc = "    \"successorEvidenceSha256\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"artifactManifestSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Phase6EvidenceSha256\""]
+#[doc = "    },"]
+#[doc = "    \"buildId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProvenanceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"manifestRecord\": {"]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"$ref\": \"#/definitions/Phase6EvidenceArtifactReference\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"operationVersion\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Phase6OperationVersion\""]
+#[doc = "    },"]
+#[doc = "    \"predecessorEvidenceSha256\": {"]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"$ref\": \"#/definitions/Phase6EvidenceSha256\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"runEvidenceId\": {"]
+#[doc = "      \"$ref\": \"#/definitions/ProvenanceIdentifier\""]
+#[doc = "    },"]
+#[doc = "    \"runEvidenceSha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Phase6EvidenceSha256\""]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Phase6DeterministicAdmissionStatus\""]
+#[doc = "    },"]
+#[doc = "    \"successorEvidenceSha256\": {"]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"$ref\": \"#/definitions/Phase6EvidenceSha256\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Phase6DeterministicAdmission {
+    #[serde(rename = "artifactManifestSha256")]
+    pub artifact_manifest_sha256: Phase6EvidenceSha256,
+    #[serde(rename = "buildId")]
+    pub build_id: ProvenanceIdentifier,
+    #[serde(rename = "manifestRecord")]
+    pub manifest_record: ::std::option::Option<Phase6EvidenceArtifactReference>,
+    #[serde(rename = "operationVersion")]
+    pub operation_version: Phase6OperationVersion,
+    #[serde(rename = "predecessorEvidenceSha256")]
+    pub predecessor_evidence_sha256: ::std::option::Option<Phase6EvidenceSha256>,
+    #[serde(rename = "runEvidenceId")]
+    pub run_evidence_id: ProvenanceIdentifier,
+    #[serde(rename = "runEvidenceSha256")]
+    pub run_evidence_sha256: Phase6EvidenceSha256,
+    pub status: Phase6DeterministicAdmissionStatus,
+    #[serde(rename = "successorEvidenceSha256")]
+    pub successor_evidence_sha256: ::std::option::Option<Phase6EvidenceSha256>,
+}
+#[doc = "`Phase6DeterministicAdmissionStatus`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Phase6DeterministicAdmissionStatus.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"superseded\","]
+#[doc = "    \"active\""]
+#[doc = "  ],"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum Phase6DeterministicAdmissionStatus {
+    #[serde(rename = "superseded")]
+    Superseded,
+    #[serde(rename = "active")]
+    Active,
+}
+impl ::std::fmt::Display for Phase6DeterministicAdmissionStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Superseded => f.write_str("superseded"),
+            Self::Active => f.write_str("active"),
+        }
+    }
+}
+impl ::std::str::FromStr for Phase6DeterministicAdmissionStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "superseded" => Ok(Self::Superseded),
+            "active" => Ok(Self::Active),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for Phase6DeterministicAdmissionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for Phase6DeterministicAdmissionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Phase6DeterministicAdmissionStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "`Phase6EvidenceArtifactReference`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Phase6EvidenceArtifactReference.json\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"path\","]
+#[doc = "    \"sha256\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"path\": {"]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 512,"]
+#[doc = "      \"minLength\": 1"]
+#[doc = "    },"]
+#[doc = "    \"sha256\": {"]
+#[doc = "      \"$ref\": \"#/definitions/Phase6EvidenceSha256\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false,"]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Phase6EvidenceArtifactReference {
+    pub path: Phase6EvidenceArtifactReferencePath,
+    pub sha256: Phase6EvidenceSha256,
+}
+#[doc = "`Phase6EvidenceArtifactReferencePath`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 512,"]
+#[doc = "  \"minLength\": 1"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct Phase6EvidenceArtifactReferencePath(::std::string::String);
+impl ::std::ops::Deref for Phase6EvidenceArtifactReferencePath {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<Phase6EvidenceArtifactReferencePath> for ::std::string::String {
+    fn from(value: Phase6EvidenceArtifactReferencePath) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for Phase6EvidenceArtifactReferencePath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 512usize {
+            return Err("longer than 512 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for Phase6EvidenceArtifactReferencePath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for Phase6EvidenceArtifactReferencePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Phase6EvidenceArtifactReferencePath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for Phase6EvidenceArtifactReferencePath {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "`Phase6EvidenceSha256`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Phase6EvidenceSha256.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+#[serde(transparent)]
+pub struct Phase6EvidenceSha256(pub ::std::string::String);
+impl ::std::ops::Deref for Phase6EvidenceSha256 {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<Phase6EvidenceSha256> for ::std::string::String {
+    fn from(value: Phase6EvidenceSha256) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<::std::string::String> for Phase6EvidenceSha256 {
+    fn from(value: ::std::string::String) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for Phase6EvidenceSha256 {
+    type Err = ::std::convert::Infallible;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::fmt::Display for Phase6EvidenceSha256 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+#[doc = "`Phase6OperationVersion`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"$id\": \"Phase6OperationVersion.json\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+#[serde(transparent)]
+pub struct Phase6OperationVersion(pub ::std::string::String);
+impl ::std::ops::Deref for Phase6OperationVersion {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<Phase6OperationVersion> for ::std::string::String {
+    fn from(value: Phase6OperationVersion) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<::std::string::String> for Phase6OperationVersion {
+    fn from(value: ::std::string::String) -> Self {
+        Self(value)
+    }
+}
+impl ::std::str::FromStr for Phase6OperationVersion {
+    type Err = ::std::convert::Infallible;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::fmt::Display for Phase6OperationVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 #[doc = "`PhysicalContinuationDocument`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]

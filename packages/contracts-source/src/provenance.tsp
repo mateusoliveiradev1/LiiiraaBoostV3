@@ -10,6 +10,37 @@ scalar ProvenanceIdentifier extends string;
 @maxLength(512)
 scalar ProvenanceDescription extends string;
 
+@pattern("^[a-f0-9]{64}$")
+scalar Phase6EvidenceSha256 extends string;
+
+@pattern("^managed-power-scheme-v[1-9][0-9]*$")
+scalar Phase6OperationVersion extends string;
+
+enum Phase6DeterministicAdmissionStatus {
+  superseded: "superseded",
+  active: "active",
+}
+
+model Phase6EvidenceArtifactReference {
+  @minLength(1)
+  @maxLength(512)
+  path: string;
+  sha256: Phase6EvidenceSha256;
+}
+
+@jsonSchema
+model Phase6DeterministicAdmission {
+  status: Phase6DeterministicAdmissionStatus;
+  operationVersion: Phase6OperationVersion;
+  buildId: ProvenanceIdentifier;
+  artifactManifestSha256: Phase6EvidenceSha256;
+  runEvidenceId: ProvenanceIdentifier;
+  runEvidenceSha256: Phase6EvidenceSha256;
+  predecessorEvidenceSha256: Phase6EvidenceSha256 | null;
+  successorEvidenceSha256: Phase6EvidenceSha256 | null;
+  manifestRecord: Phase6EvidenceArtifactReference | null;
+}
+
 union DiagnosticPrimitive {
   string,
   int32,

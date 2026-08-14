@@ -1035,6 +1035,21 @@ export type AdminOperationActionJson =
   | 'rollback-configuration'
   | 'execute-privacy-case'
   | 'export-sensitive-data';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Phase6DeterministicAdmissionStatus".
+ */
+export type Phase6DeterministicAdmissionStatusJson = 'superseded' | 'active';
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Phase6OperationVersion".
+ */
+export type Phase6OperationVersionJson = string;
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Phase6EvidenceSha256".
+ */
+export type Phase6EvidenceSha256Json = string;
 
 export interface GeneratedContractRoots {
   messageEnvelope:
@@ -7279,6 +7294,29 @@ export interface AdminOperationCommandJson {
       ];
   correlationId: CorrelationIdJson;
   requestedAt: string;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Phase6DeterministicAdmission".
+ */
+export interface Phase6DeterministicAdmissionJson {
+  status: Phase6DeterministicAdmissionStatusJson;
+  operationVersion: Phase6OperationVersionJson;
+  buildId: ProvenanceIdentifierJson;
+  artifactManifestSha256: Phase6EvidenceSha256Json;
+  runEvidenceId: ProvenanceIdentifierJson;
+  runEvidenceSha256: Phase6EvidenceSha256Json;
+  predecessorEvidenceSha256: Phase6EvidenceSha256Json | null;
+  successorEvidenceSha256: Phase6EvidenceSha256Json | null;
+  manifestRecord: Phase6EvidenceArtifactReferenceJson | null;
+}
+/**
+ * This interface was referenced by `GeneratedContractRoots`'s JSON-Schema
+ * via the `definition` "Phase6EvidenceArtifactReference".
+ */
+export interface Phase6EvidenceArtifactReferenceJson {
+  path: string;
+  sha256: Phase6EvidenceSha256Json;
 }
 
 export type MessageEnvelope = GeneratedContractRoots['messageEnvelope'];

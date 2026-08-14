@@ -132,7 +132,7 @@ const setupFixture = (): void => {
     predecessorRunEvidenceSha256: null,
   };
   const manifest = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: '2030-01-15T17:00:00.000Z',
     operationVersion: 'managed-power-scheme-v3',
     immutableBuild: {
@@ -151,6 +151,19 @@ const setupFixture = (): void => {
       (_, index) => `D-${String(index + 1).padStart(2, '0')}`,
     ),
     legacyBlockedAttempts: [],
+    deterministicAdmissions: [
+      {
+        status: 'active',
+        operationVersion: deterministic.operationVersion,
+        buildId: deterministic.buildId,
+        artifactManifestSha256: deterministic.artifactManifestSha256,
+        runEvidenceId: deterministic.id,
+        runEvidenceSha256: phase6EvidenceSha256(deterministic),
+        predecessorEvidenceSha256: null,
+        successorEvidenceSha256: null,
+        manifestRecord: null,
+      },
+    ],
     stages: ['deterministic-simulation', 'clean-windows-vm', 'owner-pc', 'friends-pc'].map(
       (stage, index, stages) => ({
         stage,
@@ -627,6 +640,24 @@ describe('artifact-verifier-first physical ingestion', () => {
         stage: 'clean-windows-vm',
       }),
     ).toThrow(/duplicate|exists/u);
+    expect(snapshot()).toEqual(before);
+  });
+
+  it('rejects a stale active deterministic admission before physical ingestion', () => {
+    const evidence = JSON.parse(readFileSync(evidencePath(), 'utf8')) as {
+      immutableBuild: { id: string };
+    };
+    evidence.immutableBuild.id = 'different-build';
+    writeFileSync(evidencePath(), `${JSON.stringify(evidence, null, 2)}\n`);
+    const before = snapshot();
+
+    expect(() =>
+      writePhysicalRunEvidence({
+        artifactManifestPath: manifestPath(),
+        runEnvelopePath: envelopePath(),
+        stage: 'clean-windows-vm',
+      }),
+    ).toThrow(/active deterministic admission/iu);
     expect(snapshot()).toEqual(before);
   });
 
