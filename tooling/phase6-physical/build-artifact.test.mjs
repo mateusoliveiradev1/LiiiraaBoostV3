@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import { transactionalRecoveryDocumentValidator } from '../../packages/contracts-ts/src/generated/standalone-validators.js';
+import * as artifactBuilder from './build-artifact.mjs';
 
 import {
   CANONICAL_COMMANDS,
@@ -548,6 +549,10 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.doesNotMatch(lifecycle, /schtasks|New-Service/u);
   assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
+  assert.match(lifecycle, /function Assert-DowngradeRejected/u);
+  assert.match(lifecycle, /WIX_DOWNGRADE_DETECTED/u);
+  assert.match(lifecycle, /Skipping FindRelatedProducts action: not run in maintenance mode/u);
+  assert.match(lifecycle, /downgrade probe entered maintenance mode/u);
 
   const rollbackVerification = lifecycle.slice(
     lifecycle.indexOf('$rollbackExit = Invoke-CoordinatedRollbackFailure'),
@@ -556,6 +561,14 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(
     rollbackVerification,
     /Assert-RollbackMsiProperties[\s\S]*Assert-ServiceRunning[\s\S]*Get-InstalledSetHash \$expectedCustody[\s\S]*Get-RecoveryCustodyHash/u,
+  );
+  const downgradeVerification = lifecycle.slice(
+    lifecycle.indexOf('$downgradeExit = Invoke-MsiExpectedFailure'),
+    lifecycle.indexOf("Invoke-Msi @('/x'"),
+  );
+  assert.match(
+    downgradeVerification,
+    /Assert-DowngradeRejected[\s\S]*Assert-ServiceRunning[\s\S]*Get-InstalledSetHash \$expectedCustody[\s\S]*Get-RecoveryCustodyHash/u,
   );
 });
 
@@ -614,6 +627,68 @@ Assert-RollbackMsiProperties
       assert.throws(() => runParser(exactLog.replace('Executing op: End', 'Unexpected failure 1603\r\nExecuting op: End')));
       assert.throws(() => runParser(exactLog.replace('InstallFinalize. Return value 3', 'StartServices. Return value 3')));
       assert.throws(() => runParser(exactLog, false));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  'downgrade parser requires real related-product detection and launch-condition refusal',
+  { skip: process.platform !== 'win32' },
+  () => {
+    const root = mkdtempSync(join(tmpdir(), 'liiiraa-downgrade-parser-'));
+    const lifecyclePath = join(process.cwd(), 'tooling/phase6-physical/lifecycle-smoke.ps1');
+    const logPath = join(root, 'downgrade-rejection.msiexec.log');
+    const quote = (value) => `'${value.replaceAll("'", "''")}'`;
+    const probeProduct = '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}';
+    const probePackage = '{EEEEEEEE-EEEE-4EEE-8EEE-EEEEEEEEEEEE}';
+    const installedProduct = '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}';
+    const exactLog = [
+      `PROPERTY CHANGE: Adding PackageCode property. Its value is '${probePackage}'.`,
+      `Product Code from property table after transforms:  '${probeProduct}'`,
+      'Doing action: FindRelatedProducts',
+      `PROPERTY CHANGE: Adding WIX_DOWNGRADE_DETECTED property. Its value is '${installedProduct}'.`,
+      'Action ended 00:00:00: FindRelatedProducts. Return value 1.',
+      'Action start 00:00:00: LaunchConditions.',
+      'Product: Liiiraa Boost -- A newer version of Liiiraa Boost is already installed.',
+      'Action ended 00:00:00: LaunchConditions. Return value 3.',
+      'Property(S): ProductVersion = 0.0.1',
+      'Action ended 00:00:00: INSTALL. Return value 3.',
+      'MSI (s) (10:20) [00:00:00:002]: MainEngineThread is returning 1603',
+      'MSI (c) (30:40) [00:00:00:003]: MainEngineThread is returning 1603',
+    ].join('\r\n');
+
+    const runParser = (log, exitCode = 1603) => {
+      writeFileSync(logPath, Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]));
+      const script = `
+$ErrorActionPreference = 'Stop'
+$tokens = $null
+$errors = $null
+$ast = [Management.Automation.Language.Parser]::ParseFile(${quote(lifecyclePath)}, [ref]$tokens, [ref]$errors)
+if ($errors.Count -ne 0) { throw ($errors | Out-String) }
+$functionAst = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Assert-DowngradeRejected' }, $true)
+Invoke-Expression $functionAst.Extent.Text
+$OutputRoot = ${quote(root)}
+Assert-DowngradeRejected ${exitCode} ${quote(probeProduct)} ${quote(probePackage)} ${quote(installedProduct)}
+`;
+      execFileSync('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-EncodedCommand',
+        Buffer.from(script, 'utf16le').toString('base64'),
+      ]);
+    };
+
+    try {
+      assert.doesNotThrow(() => runParser(exactLog));
+      assert.throws(() => runParser(exactLog, 0));
+      assert.throws(() => runParser(exactLog.replace(probePackage, installedProduct)));
+      assert.throws(() => runParser(exactLog.replace('ProductVersion = 0.0.1', 'ProductVersion = 0.1.36')));
+      assert.throws(() => runParser(exactLog.replace('WIX_DOWNGRADE_DETECTED', 'UNRELATED_PRODUCT')));
+      assert.throws(() => runParser(exactLog.replace('Doing action: FindRelatedProducts', 'Skipping FindRelatedProducts action: not run in maintenance mode')));
+      assert.throws(() => runParser(exactLog.replace('LaunchConditions. Return value 3', 'LaunchConditions. Return value 1')));
+      assert.throws(() => runParser(`${exactLog}\r\nProduct registered: entering maintenance mode`));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -697,6 +772,40 @@ test('final MSI inspection requires exact runtime files and zero CustomAction au
       }),
     /ProgramData storage/u,
   );
+});
+
+test('downgrade probe has a fresh package identity in the same upgrade family', () => {
+  assert.equal(typeof artifactBuilder.validateDowngradeProbeIdentity, 'function');
+  const main = {
+    productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
+    packageCode: '{BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB}',
+    upgradeCode: '{CCCCCCCC-CCCC-4CCC-8CCC-CCCCCCCCCCCC}',
+    packageVersion: '0.1.36',
+  };
+  const probe = {
+    productCode: '{DDDDDDDD-DDDD-4DDD-8DDD-DDDDDDDDDDDD}',
+    packageCode: '{EEEEEEEE-EEEE-4EEE-8EEE-EEEEEEEEEEEE}',
+    upgradeCode: main.upgradeCode,
+    packageVersion: '0.0.1',
+  };
+  const validate = artifactBuilder.validateDowngradeProbeIdentity;
+  assert.doesNotThrow(() => validate(main, probe));
+  for (const [property, value, pattern] of [
+    ['productCode', main.productCode, /ProductCode/u],
+    ['packageCode', main.packageCode, /PackageCode/u],
+    ['upgradeCode', '{FFFFFFFF-FFFF-4FFF-8FFF-FFFFFFFFFFFF}', /UpgradeCode/u],
+    ['packageVersion', '0.1.36', /0\.0\.1/u],
+  ]) {
+    assert.throws(() => validate(main, { ...probe, [property]: value }), pattern);
+  }
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  assert.match(source, /SummaryInformation\(1\)/u);
+  assert.match(source, /\.Property\(9\)\s*=\s*\$msiPackageCode/u);
+  assert.match(source, /packageCode:\s*randomUUID\(\)/u);
+  assert.match(source, /validateDowngradeProbeIdentity\(msiInspection, downgradeInspection\)/u);
+  assert.match(source, /packageCode\s*=\s*\$database\.SummaryInformation\(0\)\.Property\(9\)/u);
+  assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
 });
 
 test('real bundle removes and rejects stale generated MSI output', () => {
