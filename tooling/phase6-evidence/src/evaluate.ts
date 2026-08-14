@@ -1025,6 +1025,7 @@ const validateStageShape = (
 
 const validateHistoricalAdmissionRecord = (
   admission: Phase6DeterministicAdmission,
+  chainPrefix: Phase6DeterministicAdmission[],
   path: string,
   context: Phase6EvaluationContext,
   diagnostics: Phase6EvidenceDiagnostic[],
@@ -1048,7 +1049,7 @@ const validateHistoricalAdmissionRecord = (
     );
     return;
   }
-  const keys = [
+  const schemaV2Keys = [
     'schemaVersion',
     'generatedAt',
     'operationVersion',
@@ -1059,6 +1060,7 @@ const validateHistoricalAdmissionRecord = (
     'legacyBlockedAttempts',
     'stages',
   ] as const;
+  const schemaV3Keys = [...schemaV2Keys, 'deterministicAdmissions'] as const;
   const build = isObject(value) ? value['immutableBuild'] : null;
   const stages = isObject(value) ? value['stages'] : null;
   const firstStage: unknown = Array.isArray(stages) ? (stages as unknown[])[0] : null;
@@ -1067,10 +1069,37 @@ const validateHistoricalAdmissionRecord = (
     Array.isArray(runs) && runs.length === 1 ? asRun((runs as unknown[])[0]) : null;
   const priorRunSha256 = priorRun === null ? null : phase6EvidenceSha256(priorRun);
   const laterStages: unknown[] = Array.isArray(stages) ? (stages as unknown[]).slice(1) : [];
+  const schemaVersion = isObject(value) ? value['schemaVersion'] : null;
+  let recordedChainMatches = schemaVersion === 2 && chainPrefix.length === 1;
+  if (schemaVersion === 3 && isObject(value) && Array.isArray(value['deterministicAdmissions'])) {
+    try {
+      assertDeterministicAdmissionChain(value['deterministicAdmissions']);
+      const recordedChain = value['deterministicAdmissions'] as Phase6DeterministicAdmission[];
+      const recordedActive = recordedChain.at(-1);
+      recordedChainMatches =
+        recordedActive !== undefined &&
+        recordedChain.length === chainPrefix.length &&
+        recordedChain
+          .slice(0, -1)
+          .every((entry, index) => JSON.stringify(entry) === JSON.stringify(chainPrefix[index])) &&
+        recordedActive.status === 'active' &&
+        recordedActive.operationVersion === admission.operationVersion &&
+        recordedActive.buildId === admission.buildId &&
+        recordedActive.artifactManifestSha256 === admission.artifactManifestSha256 &&
+        recordedActive.runEvidenceId === admission.runEvidenceId &&
+        recordedActive.runEvidenceSha256 === admission.runEvidenceSha256 &&
+        recordedActive.predecessorEvidenceSha256 === admission.predecessorEvidenceSha256 &&
+        recordedActive.successorEvidenceSha256 === null &&
+        recordedActive.manifestRecord === null;
+    } catch {
+      recordedChainMatches = false;
+    }
+  }
   if (
     !isObject(value) ||
-    !hasExactKeys(value, keys) ||
-    value['schemaVersion'] !== 2 ||
+    !hasExactKeys(value, schemaVersion === 3 ? schemaV3Keys : schemaV2Keys) ||
+    (schemaVersion !== 2 && schemaVersion !== 3) ||
+    !recordedChainMatches ||
     value['promotionStage'] !== 'deterministic-simulation' ||
     value['operationVersion'] !== admission.operationVersion ||
     !isObject(build) ||
@@ -1153,6 +1182,7 @@ export const evaluatePhase6Evidence = (
     if (admission.manifestRecord !== null)
       validateHistoricalAdmissionRecord(
         admission,
+        manifest.deterministicAdmissions.slice(0, index + 1),
         `$.deterministicAdmissions[${String(index)}].manifestRecord`,
         context,
         diagnostics,
