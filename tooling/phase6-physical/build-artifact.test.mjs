@@ -491,6 +491,8 @@ test('physical lifecycle proves the installed desktop owns a read-only broker le
 });
 
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
+  const programDataSddl =
+    'O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
   const expected = {
     productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
     packageVersion: '0.1.0',
@@ -503,6 +505,14 @@ test('final MSI inspection requires exact runtime files and zero CustomAction au
     ],
     customActionCount: 0,
     customActions: [],
+    programDataStorage: {
+      component: 'PhysicalProgramDataAclComponent',
+      directory: 'LiiiraaBoostProgramData',
+      parent: 'CommonAppDataFolder',
+      feature: 'External',
+      createFolder: true,
+      sddl: programDataSddl,
+    },
   };
   assert.doesNotThrow(() =>
     validateMsiInspection(expected, {
@@ -537,6 +547,27 @@ test('final MSI inspection requires exact runtime files and zero CustomAction au
       }),
     /exact installed files/u,
   );
+  rejectsMutation(
+    expected,
+    (value) => {
+      delete value.programDataStorage;
+    },
+    (value) =>
+      validateMsiInspection(value, {
+        productCode: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        packageVersion: '0.1.0',
+      }),
+    /ProgramData storage/u,
+  );
+});
+
+test('real bundle removes and rejects stale generated MSI output', () => {
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  const clearIndex = source.indexOf('removeStaleBuiltMsis();');
+  const bundleIndex = source.indexOf("'bundle'", clearIndex);
+  const freshIndex = source.indexOf('findBuiltMsi(msiBuildStartedAt)', bundleIndex);
+  assert.ok(clearIndex >= 0 && clearIndex < bundleIndex);
+  assert.ok(bundleIndex >= 0 && bundleIndex < freshIndex);
 });
 
 test('declared input dirt and reused operation identities are rejected', () => {
