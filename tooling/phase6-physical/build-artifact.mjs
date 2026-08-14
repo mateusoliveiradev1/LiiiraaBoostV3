@@ -262,6 +262,15 @@ export function selectUnusedOperationVersion({ minimumVersion, usedVersions }) {
   return minimumVersion;
 }
 
+export function physicalPackageVersion(operationVersionId) {
+  const match = MINIMUM_OPERATION.exec(operationVersionId);
+  if (!match) fail('operation version cannot produce an MSI package version');
+  const build = Number(match[1]);
+  if (!Number.isSafeInteger(build) || build > 65_535)
+    fail('operation version exceeds the MSI range');
+  return `0.1.${build}`;
+}
+
 const assertExactRoles = (files, roles, label) => {
   if (!files || typeof files !== 'object') fail(`${label} files are required`);
   const expectedKeys = roles.map(({ key }) => key).sort();
@@ -1146,6 +1155,7 @@ const dryRun = (options) => {
     sourceCommit: git('rev-parse', 'HEAD'),
     inputTreeHash: inputTreeHash(),
     operationVersionId,
+    packageVersion: physicalPackageVersion(operationVersionId),
     installedRuntimeRoles: INSTALLED_ROLES.map(({ role }) => role),
     exactRuntimeRoles: ['desktop', 'service', 'runner', 'tauri-driver', 'msedgedriver'],
     portableOnlyRoles: ['tauri-driver', 'msedgedriver'],
@@ -1179,6 +1189,9 @@ const buildAndSmoke = (options) => {
       minimumVersion: options.minimumVersion,
       usedVersions: collectUsedVersions(),
     });
+    const packageVersion = physicalPackageVersion(operationVersionId);
+    const effectivePhysicalProfile = { ...physicalProfile, version: packageVersion };
+    const effectivePhysicalProfileJson = JSON.stringify(effectivePhysicalProfile);
     const buildId = `physical-${treeHash.slice(7, 23)}-${operationVersionId}`;
     Object.assign(context, { sourceCommit, operationVersionId, buildId, inputTreeHash: treeHash });
     const finalRoot = join(ROOT, 'target', 'phase6-physical', sourceCommit, buildId);
@@ -1209,7 +1222,7 @@ const buildAndSmoke = (options) => {
       {
         env: {
           ...process.env,
-          LIIIRAA_PHYSICAL_PACKAGE_VERSION: physicalProfile.version,
+          LIIIRAA_PHYSICAL_PACKAGE_VERSION: packageVersion,
         },
       },
     );
@@ -1238,7 +1251,7 @@ const buildAndSmoke = (options) => {
       '--features',
       'phase6-physical',
       '--config',
-      'src-tauri/tauri.phase6-physical.conf.json',
+      effectivePhysicalProfileJson,
     ]);
 
     const release = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release');
@@ -1272,7 +1285,6 @@ const buildAndSmoke = (options) => {
     );
     copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
 
-    const packageVersion = physicalProfile.version;
     const productCode = randomUUID();
     const createdAt = new Date().toISOString();
     const installationManifest = {
@@ -1324,7 +1336,7 @@ const buildAndSmoke = (options) => {
         '--bundles',
         'msi',
         '--config',
-        'src-tauri/tauri.phase6-physical.conf.json',
+        effectivePhysicalProfileJson,
       ]);
     } finally {
       rmSync(wixStaging, { recursive: true, force: true });
