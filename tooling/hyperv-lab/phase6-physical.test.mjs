@@ -178,6 +178,22 @@ test('elevated logger persists the exact child verdict and exit code', () => {
   }
 });
 
+test('RED: observed Audit starts and stops only the exact VM with bounded health wait', () => {
+  const source = readFileSync(elevatedLoggerPath, 'utf8');
+  assert.match(source, /'Phase6ObservedAudit'/u);
+  assert.match(source, /LiiiraaBoost-W11-25H2-Clean/u);
+  assert.match(source, /Clean-Windows-Ready/u);
+  assert.match(source, /Start-VM\s+-Name\s+\$expectedVmName/u);
+  assert.match(source, /Get-VMIntegrationService\s+-VMName\s+\$expectedVmName/u);
+  assert.match(source, /healthy\.Count\s+-eq\s+6/u);
+  assert.match(source, /AddSeconds\(180\)/u);
+  assert.match(source, /finally/u);
+  assert.match(source, /Stop-VM\s+-Name\s+\$expectedVmName\s+-Shutdown\s+-Force/u);
+  assert.match(source, /Phase6Audit/u);
+  assert.doesNotMatch(source, /Invoke-Command\s+-VMName/u);
+  assert.doesNotMatch(source, /Restore-VMSnapshot|Checkpoint-VM|Remove-VMSnapshot/u);
+});
+
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
   const source = bridgeSource();
   const mutations = [
