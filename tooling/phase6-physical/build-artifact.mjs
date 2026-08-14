@@ -28,6 +28,9 @@ const INSTALLATION_MANIFEST_SDDL =
 const INSTALLATION_DIRECTORY_SDDL =
   'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 const INSTALLATION_DIRECTORY_COMPONENT_GUID = '{3BA41754-6199-4B96-BD9A-613FDBBD270A}';
+const PROGRAM_DATA_STORAGE_SDDL =
+  'O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
+const PROGRAM_DATA_COMPONENT_GUID = '{E13FCD86-47D1-5ED7-9FB2-72F546A789D4}';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -368,6 +371,15 @@ export function validateWixContract(xml) {
     fail('WiX ComponentGroup must reference DirectoryRef components');
   if (!/<ComponentRef\b[^>]*Id="phase6_physical_runner"/iu.test(runtimeGroup[1]))
     fail('WiX contract requires the Tauri-generated runner component');
+  const installDirectory = xml.match(
+    /<DirectoryRef\b[^>]*Id="INSTALLDIR"[^>]*>([\s\S]*?)<\/DirectoryRef>/iu,
+  );
+  if (
+    !installDirectory ||
+    !installDirectory[1].includes('installation-manifest.json') ||
+    !installDirectory[1].includes('OptimizerServiceComponent')
+  )
+    fail('WiX manifest and service must share the protected install directory');
   const permissions = [...xml.matchAll(/<PermissionEx\b([^>]*)\/?\s*>/giu)].map(
     (permission) => permission[1],
   );
@@ -380,6 +392,17 @@ export function validateWixContract(xml) {
     !/<ComponentRef\b[^>]*Id="PhysicalInstallDirectoryAclComponent"/iu.test(runtimeGroup[1])
   )
     fail('WiX contract requires the protected inherited runtime directory ACL');
+  const programDataAcl = xml.match(
+    /<DirectoryRef\b[^>]*Id="CommonAppDataFolder"[^>]*>[\s\S]*?<Directory\b[^>]*Id="LiiiraaBoostProgramData"[^>]*Name="Liiiraa Boost"[^>]*>[\s\S]*?<Component\b([^>]*)Id="PhysicalProgramDataAclComponent"([^>]*)>[\s\S]*?<CreateFolder\b[^>]*>[\s\S]*?<PermissionEx\b([^>]*)\/?\s*>[\s\S]*?<\/CreateFolder>[\s\S]*?<\/Component>[\s\S]*?<\/Directory>[\s\S]*?<\/DirectoryRef>/iu,
+  );
+  if (
+    !programDataAcl ||
+    !`${programDataAcl[1]}${programDataAcl[2]}`.includes(`Guid="${PROGRAM_DATA_COMPONENT_GUID}"`) ||
+    !`${programDataAcl[1]}${programDataAcl[2]}`.includes('Permanent="yes"') ||
+    !programDataAcl[3].includes(`Sddl="${PROGRAM_DATA_STORAGE_SDDL}"`) ||
+    !/<ComponentRef\b[^>]*Id="PhysicalProgramDataAclComponent"/iu.test(runtimeGroup[1])
+  )
+    fail('WiX contract requires the permanent protected ProgramData storage root');
   if (
     !xml.includes(
       `Id="PhysicalInstallDirectoryAclComponent" Guid="${INSTALLATION_DIRECTORY_COMPONENT_GUID}"`,
@@ -390,11 +413,14 @@ export function validateWixContract(xml) {
     permission.includes(`Sddl="${INSTALLATION_MANIFEST_SDDL}"`),
   );
   if (
-    permissions.length !== 3 ||
+    permissions.length !== 4 ||
     manifestPermissions.length !== 2 ||
-    !permissions.includes(directoryAcl[1])
+    !permissions.includes(directoryAcl[1]) ||
+    !permissions.includes(programDataAcl[3])
   )
-    fail('WiX PermissionEx must use the reviewed runtime and installation-manifest SDDL');
+    fail(
+      'WiX PermissionEx must use the reviewed runtime, ProgramData, and installation-manifest SDDL',
+    );
   const required = [
     ['Name="LiiiraaBoostOptimizer"', 'named optimizer service'],
     ['Type="ownProcess"', 'ownProcess service'],
@@ -411,9 +437,16 @@ export function validateWixContract(xml) {
     if (!xml.includes(needle)) fail(`WiX contract requires ${description}`);
   const manifestIndex = xml.indexOf('installation-manifest.json');
   const aclIndex = xml.indexOf('PermissionEx', manifestIndex);
+  const storageIndex = xml.indexOf('Id="PhysicalProgramDataAclComponent"');
   const serviceStartIndex = xml.indexOf('<ServiceControl');
-  if (manifestIndex < 0 || aclIndex < manifestIndex || serviceStartIndex < aclIndex)
-    fail('manifest and ACL must precede service start');
+  if (
+    manifestIndex < 0 ||
+    aclIndex < manifestIndex ||
+    storageIndex < 0 ||
+    serviceStartIndex < aclIndex ||
+    serviceStartIndex < storageIndex
+  )
+    fail('manifest, runtime ACL, and ProgramData storage ACL must precede service start');
   const forbidden = [
     [/<CustomAction\b|powershell(?:\.exe)?|cmd(?:\.exe)?/iu, 'custom action or shell authority'],
     [/tauri-driver\.exe|msedgedriver\.exe/iu, 'portable driver in MSI'],
