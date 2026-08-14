@@ -140,7 +140,7 @@ test('WiX uses installer tables for coherent service custody and contains no dri
     ['<RemoveFolder Id="DeleteRecovery" Directory="PROGRAMDATARECOVERY" On="uninstall" />', /recovery custody/u],
     ['<ScheduleReboot />', /forced reboot/u],
   ]) assert.throws(() => validateWixContract(wix().replace('</Fragment>', `${addition}</Fragment>`)), pattern);
-  assert.throws(() => validateWixContract(wix().replace('<ServiceControl', '<!-- manifest starts too late --><ServiceControl').replace('</ComponentGroup>', '<Component Id="LateManifest" Guid="*"><File Source="installation-manifest.json" /></Component></ComponentGroup>')), /manifest.*service/u);
+  assert.throws(() => validateWixContract(wix().replace('installation-manifest.json', 'delayed-marker.bin').replace('</ComponentGroup>', '<Component Id="LateManifest" Guid="*"><File Source="installation-manifest.json" /></Component></ComponentGroup>')), /manifest.*service/u);
 });
 
 test('declared input dirt and reused operation identities are rejected', () => {
@@ -168,6 +168,9 @@ test('builder alone emits the three closed canonical run configs', () => {
   });
   assert.deepEqual(Object.keys(configs), ['clean-windows-vm', 'owner-pc', 'friends-pc']);
   assert.deepEqual(configs['clean-windows-vm'].tauriCommands, CANONICAL_COMMANDS);
+  for (const config of Object.values(configs)) {
+    assert.equal('artifactManifestSha256' in config, false, 'manifest authenticates config bytes; config must not hash its own root');
+  }
   assert.equal(configs['friends-pc'].friendsRosterPath, 'friends/friends-roster.json');
   assert.equal(configs['friends-pc'].friendsRosterSignaturePath, 'friends/friends-roster.json.p7s');
   assert.equal('friendsRosterSha256' in configs['friends-pc'], false);
