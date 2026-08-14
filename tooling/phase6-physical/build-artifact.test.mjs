@@ -446,6 +446,29 @@ test('WiX uses installer tables for coherent service custody and contains no dri
   }, /manifest.*service/u);
 });
 
+test('WiX provisions the protected ProgramData root before restricted service startup', () => {
+  const source = readFileSync(
+    'apps/desktop/src-tauri/installer/optimizer-service.wxs',
+    'utf8',
+  );
+  const serviceSid =
+    'S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564';
+  const storageSddl = `O:SYD:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;${serviceSid})`;
+
+  assert.match(source, /<DirectoryRef\b[^>]*Id="CommonAppDataFolder"/u);
+  assert.match(source, /<Directory\b[^>]*Id="LiiiraaBoostProgramData"[^>]*Name="Liiiraa Boost"/u);
+  assert.match(
+    source,
+    /<Component\b[^>]*Id="PhysicalProgramDataAclComponent"[^>]*Guid="\{[0-9A-F-]+\}"[^>]*Permanent="yes"/u,
+  );
+  assert.match(source, new RegExp(`Sddl="${storageSddl}"`, 'u'));
+  assert.match(source, /<ComponentRef\b[^>]*Id="PhysicalProgramDataAclComponent"/u);
+
+  const directoryIndex = source.indexOf('Id="PhysicalProgramDataAclComponent"');
+  const serviceStartIndex = source.indexOf('<ServiceControl');
+  assert.ok(directoryIndex >= 0 && directoryIndex < serviceStartIndex);
+});
+
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
   const expected = {
     productCode: '{AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA}',
