@@ -26,6 +26,9 @@ const simulationSummary = resolve(
 const evidenceManifest = resolve(root, 'tooling/phase6-evidence/evidence-manifest.json');
 const exactVm = 'LiiiraaBoost-W11-25H2-Clean';
 const cleanCheckpoint = 'Clean-Windows-Ready';
+const cleanCheckpointId = 'ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075';
+const backupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43';
+const backupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef';
 const installedCheckpoint = 'LiiiraaBoost-Installed';
 
 const runBridge = (extra = []) =>
@@ -73,6 +76,9 @@ const assertSourcePolicy = (source) => {
   for (const literal of [
     exactVm,
     cleanCheckpoint,
+    cleanCheckpointId,
+    backupCheckpoint,
+    backupCheckpointId,
     installedCheckpoint,
     'managed-power-scheme-v44',
     'physical-68bb4f974e23ee26-managed-power-scheme-v44',
@@ -295,6 +301,9 @@ test('dry-run audits the exact immutable v44 tuple without elevation or mutation
   assert.equal(report.mode, 'dry-run');
   assert.equal(report.vmName, exactVm);
   assert.equal(report.cleanCheckpoint, cleanCheckpoint);
+  assert.equal(report.cleanCheckpointId, cleanCheckpointId);
+  assert.equal(report.backupCheckpoint, backupCheckpoint);
+  assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
   assert.equal(report.operationVersion, 'managed-power-scheme-v44');
   assert.equal(
