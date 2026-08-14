@@ -508,6 +508,8 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(lifecycle, /administrator unexpectedly read protected installed manifest/u);
   assert.match(lifecycle, /function Get-ExpectedInstallationManifestCustody/u);
   assert.match(lifecycle, /Join-Path \$OutputRoot 'installation-manifest\.json'/u);
+  assert.match(lifecycle, /@\(\$manifest\.files\.PSObject\.Properties\)\.Count -ne 3/u);
+  assert.doesNotMatch(lifecycle, /\$manifest\.files\.PSObject\.Properties\.Count -ne 3/u);
   assert.match(lifecycle, /VersionInfo\.FileVersion/u);
   assert.match(lifecycle, /Get-AuthenticodeSignature/u);
   assert.match(lifecycle, /installedManifestAdministratorReadDenied\s*=\s*\$true/u);
