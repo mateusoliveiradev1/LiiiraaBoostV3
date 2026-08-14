@@ -36,6 +36,17 @@ $ExpectedGuestRunner = "$ExpectedGuestRoot\phase6-physical-runner.exe"
 $ExpectedGuestConfig = "$ExpectedGuestRoot\configs\clean-windows-vm.run-config.json"
 $RunnerKeyLink = 'phase6-physical-runner.exe --run-config'
 [void]$RunnerKeyLink
+$ExpectedManifestRoles = @(
+    'msi',
+    'installationManifest',
+    'installationManifestSignature',
+    'cleanWindowsVmConfig',
+    'ownerPcConfig',
+    'friendsPcConfig',
+    'runner',
+    'tauriDriver',
+    'msedgeDriver'
+)
 $MaximumEvidenceBytes = 64KB
 $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..')).TrimEnd('\')
 $ExpectedArtifactSummary = Join-Path $RepositoryRoot '.planning\phases\06-transactional-plans-and-recovery\06-31-SUMMARY.md'
@@ -150,22 +161,11 @@ function Get-Authority {
         throw 'BLOCKED: artifact operation/build/source tuple mismatch.'
     }
 
-    $requiredRoles = @(
-        'msi',
-        'installationManifest',
-        'installationManifestSignature',
-        'cleanWindowsVmConfig',
-        'ownerPcConfig',
-        'friendsPcConfig',
-        'runner',
-        'tauriDriver',
-        'msedgeDriver'
-    )
     $manifestRoles = @($manifest.files.PSObject.Properties.Name)
-    if (@(Compare-Object -ReferenceObject ($requiredRoles | Sort-Object) -DifferenceObject ($manifestRoles | Sort-Object)).Count -ne 0) {
+    if (@(Compare-Object -ReferenceObject ($ExpectedManifestRoles | Sort-Object) -DifferenceObject ($manifestRoles | Sort-Object)).Count -ne 0) {
         throw 'BLOCKED: artifact manifest role set widened or narrowed.'
     }
-    foreach ($role in $requiredRoles) {
+    foreach ($role in $ExpectedManifestRoles) {
         $entry = $manifest.files.$role
         $relative = [string]$entry.relativePath
         if ([IO.Path]::IsPathRooted($relative) -or $relative.Contains('..')) {
@@ -297,14 +297,10 @@ function Assert-ExactHyperVAudit {
 function Copy-ExactArtifactToGuest {
     param([Parameter(Mandatory)]$Authority)
 
-    $roles = @(
-        'msi', 'installationManifest', 'installationManifestSignature', 'cleanWindowsVmConfig',
-        'ownerPcConfig', 'friendsPcConfig', 'runner', 'tauriDriver', 'msedgeDriver'
-    )
     $copies = [Collections.Generic.List[object]]::new()
     [void]$copies.Add([pscustomobject]@{ Source = $ExpectedArtifactManifest; Relative = 'artifact-manifest.json' })
     [void]$copies.Add([pscustomobject]@{ Source = $ExpectedArtifactSignature; Relative = 'artifact-manifest.json.p7s' })
-    foreach ($role in $roles) {
+    foreach ($role in $ExpectedManifestRoles) {
         $relative = ([string]$Authority.Manifest.files.$role.relativePath).Replace('/', '\')
         [void]$copies.Add([pscustomobject]@{ Source = (Join-Path $Authority.ArtifactRoot $relative); Relative = $relative })
     }
@@ -539,8 +535,7 @@ function Write-BlockedRecord {
 function Invoke-CleanVmRun {
     param(
         [Parameter(Mandatory)]$Authority,
-        [Parameter(Mandatory)][PSCredential]$Credential,
-        [Parameter(Mandatory)]$HyperV
+        [Parameter(Mandatory)][PSCredential]$Credential
     )
 
     if (@(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue).Count -ne 0) {
@@ -617,7 +612,7 @@ try {
         $GuestCredential = Get-Credential -Message 'Credencial local da VM (mantida somente na memoria deste processo)'
     }
     if ($null -eq $GuestCredential) { throw 'BLOCKED: in-memory guest credential is required.' }
-    Invoke-CleanVmRun -Authority $authority -Credential $GuestCredential -HyperV $hyperV
+    Invoke-CleanVmRun -Authority $authority -Credential $GuestCredential
     [ordered]@{ status = 'COMPLETED'; action = 'RunCleanVm'; completedBoundaries = @($CompletedBoundaries) } | ConvertTo-Json -Depth 4
 }
 catch {
