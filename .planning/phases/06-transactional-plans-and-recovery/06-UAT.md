@@ -128,3 +128,19 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v42` — BLOCKED AT PORTABLE CUSTODY
+
+- **Recorded at:** `2026-08-14T15:52:26.5614342Z`
+- **Source commit:** `db45babed3f8887f8d0848df765d19de1c6c9511`
+- **Build ID:** `physical-9c4fe0de5a7a01c9-managed-power-scheme-v42`
+- **Artifact manifest SHA-256:** `a11f177f84f41ec8e3043422a632072365178510b88699e3d917a2a46153713a`
+- **MSI version:** `0.1.42`
+- **Lifecycle result:** `PASSED` for install, repair/update, rollback-failure drill, downgrade refusal, uninstall, recovery preservation, and residue cleanup
+- **Custody result:** `BLOCKED-ACL-INVALID`
+- **Simulation/admission:** not run
+- **Hyper-V/physical mutation:** not run
+
+The create-once v42 bytes and CMS evidence remain historical and unchanged. The 06-35 verifier rejected the published root because its owner was the interactive user and its DACL inherited writable entries instead of being protected with the minimal portable-root policy. Lifecycle PASS is not relabeled as artifact custody PASS, deterministic admission, or physical evidence. This version is permanently excluded from simulation and promotion; the approved correction starts from a new monotonic operation version after the publisher proves native ACL custody before final rename.

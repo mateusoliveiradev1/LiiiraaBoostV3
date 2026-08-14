@@ -134,3 +134,10 @@ Manual gates cannot be converted into automated PASS by deterministic fixtures. 
 - [x] `nyquist_compliant: true` is set.
 
 **Approval:** approved 2026-08-12
+
+## Append-Only Execution Addendum — 2026-08-14
+
+- `managed-power-scheme-v42` completed the contained Windows MSI lifecycle but failed the independent 06-35 portable-root check with `acl-invalid`.
+- Exact rejected authority: source `db45babed3f8887f8d0848df765d19de1c6c9511`, build `physical-9c4fe0de5a7a01c9-managed-power-scheme-v42`, artifact manifest SHA-256 `a11f177f84f41ec8e3043422a632072365178510b88699e3d917a2a46153713a`.
+- The rejection happened before deterministic simulation, admission, Hyper-V audit, or guest mutation. v42 cannot be repaired, relabeled, or promoted.
+- Publisher regression coverage now requires owner Administrators, protected non-inherited DACL, SYSTEM/Administrators full control, explicit current-user read/execute only, no extra ACE, native verification in the exact staging root, and failure before the create-once final rename.
