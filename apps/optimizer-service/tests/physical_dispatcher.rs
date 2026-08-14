@@ -38,6 +38,7 @@ struct FakePower {
     active: PowerSchemeSnapshot,
     schemes: BTreeMap<PowerSchemeId, PowerSchemeSnapshot>,
     mutations: Vec<PowerCall>,
+    calls: usize,
 }
 
 impl FakePower {
@@ -48,12 +49,14 @@ impl FakePower {
             active,
             schemes,
             mutations: Vec::new(),
+            calls: 0,
         }
     }
 }
 
 impl PowerSchemePort for FakePower {
     fn preflight(&mut self, _context: &VerifiedClientContext) -> Result<(), PowerSchemeError> {
+        self.calls += 1;
         Ok(())
     }
 
@@ -61,6 +64,7 @@ impl PowerSchemePort for FakePower {
         &mut self,
         _context: &VerifiedClientContext,
     ) -> Result<PowerSchemeSnapshot, PowerSchemeError> {
+        self.calls += 1;
         Ok(self.active.clone())
     }
 
@@ -69,6 +73,7 @@ impl PowerSchemePort for FakePower {
         _context: &VerifiedClientContext,
         id: PowerSchemeId,
     ) -> Result<Option<PowerSchemeSnapshot>, PowerSchemeError> {
+        self.calls += 1;
         Ok(self.schemes.get(&id).cloned())
     }
 
@@ -78,6 +83,7 @@ impl PowerSchemePort for FakePower {
         source: PowerSchemeId,
         destination: PowerSchemeId,
     ) -> Result<(), PowerSchemeError> {
+        self.calls += 1;
         self.mutations.push(PowerCall::Duplicate {
             source: source.as_u128(),
             destination: destination.as_u128(),
@@ -99,6 +105,7 @@ impl PowerSchemePort for FakePower {
         _context: &VerifiedClientContext,
         id: PowerSchemeId,
     ) -> Result<(), PowerSchemeError> {
+        self.calls += 1;
         self.mutations.push(PowerCall::Activate(id.as_u128()));
         self.active = self
             .schemes
@@ -113,6 +120,7 @@ impl PowerSchemePort for FakePower {
         _context: &VerifiedClientContext,
         id: PowerSchemeId,
     ) -> Result<(), PowerSchemeError> {
+        self.calls += 1;
         self.mutations.push(PowerCall::Delete(id.as_u128()));
         self.schemes.remove(&id);
         Ok(())
@@ -360,6 +368,7 @@ fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
         .dispatch(request.clone(), &metadata_only)
         .expect_err("metadata cannot authorize an effect");
     assert_eq!(error.code, BrokerErrorCode::AuthenticationFailed);
+    assert_eq!(power.calls, 0, "metadata must not reach any PowrProf call");
 
     let wrong_lease = InteractiveUserEffectLease::for_test(99, "S-1-5-5-99-1");
     let mismatched = DispatchContext::with_effect_lease(
@@ -376,6 +385,7 @@ fn metadata_only_or_mismatched_effect_context_calls_no_windows_port() {
         .dispatch(request, &mismatched)
         .expect_err("lease identity must match verified metadata");
     assert_eq!(error.code, BrokerErrorCode::AuthenticationFailed);
+    assert_eq!(power.calls, 0, "fabricated binding must make zero calls");
     assert!(power.mutations.is_empty());
     assert!(restore.descriptions.is_empty());
 }
