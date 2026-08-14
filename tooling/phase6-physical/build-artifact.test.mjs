@@ -64,12 +64,17 @@ test('tauri-driver provenance requires the exact Cargo 2.0.6 crates.io receipt',
 });
 
 test('physical signing and lifecycle scripts remain compatible with Windows PowerShell 5.1', () => {
+  const builder = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   for (const path of [
     'tooling/phase6-physical/build-artifact.mjs',
     'tooling/phase6-physical/lifecycle-smoke.ps1',
   ]) {
     assert.doesNotMatch(readFileSync(path, 'utf8'), /\[Convert\]::ToHexString/u);
   }
+  assert.match(
+    builder,
+    /Add-Type -AssemblyName System\.Security[\s\S]*SignedCms[\s\S]*Add-Type -AssemblyName System\.Security[\s\S]*SignedCms/u,
+  );
 });
 
 const role = (name, relativePath, character = 'a') => {
