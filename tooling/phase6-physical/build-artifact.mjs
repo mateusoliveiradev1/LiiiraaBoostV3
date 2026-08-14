@@ -1,0 +1,1092 @@
+#!/usr/bin/env node
+
+import { createHash, randomUUID } from 'node:crypto';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+// Key-link witnesses: phase6-physical
+// 'phase6-physical-runner tauri-driver msedgedriver'
+// 'clean-windows-vm.run-config.json owner-pc.run-config.json friends-pc.run-config.json artifact-manifest.json.p7s'
+
+export const TRUSTED_INSTALLER_SPKI_SHA256 =
+  'sha256:e94302afbf0433f90fe4fd7dcf7433d65fea3b65d721fd37d9ec5848fc098890';
+
+export const CANONICAL_COMMANDS = Object.freeze({
+  composePlan: 'compose_plan',
+  revisePlan: 'revise_plan',
+  approvePlan: 'approve_plan',
+  applyPlan: 'apply_plan',
+  restorePlanOperation: 'restore_plan_operation',
+  restorePlan: 'restore_plan',
+  restoreRecoveryCheckpoint: 'restore_recovery_checkpoint',
+  readPlanExecution: 'read_plan_execution',
+  subscribePlanExecution: 'subscribe_plan_execution',
+  previewPlanDiagnostic: 'preview_plan_diagnostic',
+  exportPlanDiagnostic: 'export_plan_diagnostic',
+  readAdvancedPreference: 'read_advanced_preference',
+  enableAdvancedPreference: 'enable_advanced_preference',
+  revokeAdvancedPreference: 'revoke_advanced_preference',
+});
+
+export const INSTALLED_ROLES = Object.freeze([
+  { key: 'desktop', role: 'desktop', path: 'liiiraa-desktop.exe' },
+  { key: 'service', role: 'service', path: 'liiiraa-optimizer-service.exe' },
+  { key: 'runner', role: 'runner', path: 'phase6-physical-runner.exe' },
+]);
+
+export const PORTABLE_ROLES = Object.freeze([
+  {
+    key: 'msi',
+    role: 'msi',
+    path: 'liiiraa-boost.msi',
+    versionPolicy: 'package-version',
+    signaturePolicy: 'authenticode-required',
+  },
+  {
+    key: 'installationManifest',
+    role: 'installation-manifest',
+    path: 'installation-manifest.json',
+    versionPolicy: 'schema-version',
+    signaturePolicy: 'detached-cms-required',
+  },
+  {
+    key: 'installationManifestSignature',
+    role: 'installation-manifest-signature',
+    path: 'installation-manifest.json.p7s',
+    versionPolicy: 'not-applicable',
+    signaturePolicy: 'detached-cms-required',
+  },
+  {
+    key: 'cleanWindowsVmConfig',
+    role: 'clean-windows-vm-config',
+    path: 'configs/clean-windows-vm.run-config.json',
+    versionPolicy: 'schema-version',
+    signaturePolicy: 'manifest-authenticated',
+  },
+  {
+    key: 'ownerPcConfig',
+    role: 'owner-pc-config',
+    path: 'configs/owner-pc.run-config.json',
+    versionPolicy: 'schema-version',
+    signaturePolicy: 'manifest-authenticated',
+  },
+  {
+    key: 'friendsPcConfig',
+    role: 'friends-pc-config',
+    path: 'configs/friends-pc.run-config.json',
+    versionPolicy: 'schema-version',
+    signaturePolicy: 'manifest-authenticated',
+  },
+  {
+    key: 'runner',
+    role: 'runner',
+    path: 'phase6-physical-runner.exe',
+    versionPolicy: 'file-version',
+    signaturePolicy: 'authenticode-required',
+  },
+  {
+    key: 'tauriDriver',
+    role: 'tauri-driver',
+    path: 'tauri-driver.exe',
+    versionPolicy: 'file-version',
+    signaturePolicy: 'authenticode-required',
+  },
+  {
+    key: 'msedgeDriver',
+    role: 'msedgedriver',
+    path: 'msedgedriver.exe',
+    versionPolicy: 'file-version',
+    signaturePolicy: 'authenticode-required',
+  },
+]);
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const PHYSICAL_CONFIG = 'apps/desktop/src-tauri/tauri.phase6-physical.conf.json';
+const WIX_FRAGMENT = 'apps/desktop/src-tauri/installer/optimizer-service.wxs';
+const DECLARED_INPUTS = Object.freeze([
+  PHYSICAL_CONFIG,
+  WIX_FRAGMENT,
+  'apps/desktop/src-tauri/Cargo.toml',
+  'apps/desktop/src-tauri/src',
+  'apps/optimizer-service/Cargo.toml',
+  'apps/optimizer-service/src',
+  'crates/contracts-rust',
+  'crates/plan-engine',
+  'Cargo.lock',
+  'pnpm-lock.yaml',
+  'tooling/phase6-physical/build-artifact.mjs',
+]);
+const SHA_PATTERN = /^sha256:[0-9a-f]{64}$/u;
+const COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
+const MINIMUM_OPERATION = /^managed-power-scheme-v([1-9][0-9]*)$/u;
+
+const fail = (message) => {
+  throw new Error(message);
+};
+const deepEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
+const sha256 = (bytes) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+const canonicalValue = (value) => {
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, canonicalValue(value[key])]),
+    );
+  }
+  return value;
+};
+const canonicalBytes = (value) =>
+  Buffer.from(`${JSON.stringify(canonicalValue(value), null, 2)}\n`, 'utf8');
+
+const run = (command, args, options = {}) => {
+  const result = spawnSync(command, args, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    windowsHide: true,
+    stdio: options.capture ? 'pipe' : 'inherit',
+    ...options,
+  });
+  if (result.error) fail(`${command} could not start: ${result.error.message}`);
+  if (result.status !== 0) {
+    const detail = options.capture ? `: ${(result.stderr || result.stdout || '').trim()}` : '';
+    fail(`${command} exited ${result.status}${detail}`);
+  }
+  return options.capture ? (result.stdout || '').trim() : '';
+};
+
+const git = (...args) => run('git', args, { capture: true });
+
+const walkFiles = (absolutePath) => {
+  if (!existsSync(absolutePath)) fail(`declared input is missing: ${relative(ROOT, absolutePath)}`);
+  if (statSync(absolutePath).isFile()) return [absolutePath];
+  return readdirSync(absolutePath, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .flatMap((entry) => walkFiles(join(absolutePath, entry.name)));
+};
+
+const inputTreeHash = () => {
+  const digest = createHash('sha256');
+  for (const declared of DECLARED_INPUTS) {
+    for (const path of walkFiles(join(ROOT, declared))) {
+      digest.update(relative(ROOT, path).split(sep).join('/'));
+      digest.update(Buffer.from([0]));
+      digest.update(readFileSync(path));
+      digest.update(Buffer.from([0]));
+    }
+  }
+  return `sha256:${digest.digest('hex')}`;
+};
+
+export function assertDeclaredInputState({ porcelain, declaredPaths }) {
+  const dirty = String(porcelain)
+    .split(/\r?\n/u)
+    .filter(Boolean)
+    .map((line) => line.slice(3).replaceAll('\\', '/'));
+  const declared = declaredPaths.map((path) => path.replaceAll('\\', '/').replace(/\/$/u, ''));
+  const conflict = dirty.find((path) =>
+    declared.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
+  );
+  if (conflict) fail(`dirty declared input is forbidden: ${conflict}`);
+  return true;
+}
+
+export function selectUnusedOperationVersion({ minimumVersion, usedVersions }) {
+  const match = MINIMUM_OPERATION.exec(minimumVersion);
+  if (!match || Number(match[1]) < 3)
+    fail('minimum operation version must be managed-power-scheme-v3 or newer');
+  if (usedVersions.includes(minimumVersion))
+    fail(`operation version is already used: ${minimumVersion}`);
+  return minimumVersion;
+}
+
+const assertExactRoles = (files, roles, label) => {
+  if (!files || typeof files !== 'object') fail(`${label} files are required`);
+  const expectedKeys = roles.map(({ key }) => key).sort();
+  const actualKeys = Object.keys(files).sort();
+  if (!deepEqual(actualKeys, expectedKeys))
+    fail(`${label} must contain exact ${label} roles: ${expectedKeys.join(', ')}`);
+  for (const expected of roles) {
+    const entry = files[expected.key];
+    if (entry.role !== expected.role) fail(`${label} role mismatch for ${expected.key}`);
+    if (entry.relativePath !== expected.path)
+      fail(`canonical ${label} path mismatch for ${expected.key}`);
+    if (!Number.isSafeInteger(entry.sizeBytes) || entry.sizeBytes <= 0)
+      fail(`${label} size must be positive for ${expected.key}`);
+    if (!SHA_PATTERN.test(entry.sha256)) fail(`${label} SHA-256 is invalid for ${expected.key}`);
+    if (
+      expected.versionPolicy &&
+      (entry.versionPolicy !== expected.versionPolicy ||
+        entry.signaturePolicy !== expected.signaturePolicy)
+    ) {
+      fail(`${label} policy mismatch for ${expected.key}`);
+    }
+  }
+};
+
+export function validatePhysicalProfile(profile) {
+  if (!profile?.bundle?.active || !deepEqual(profile.bundle.targets, ['msi']))
+    fail('physical profile must be MSI-only');
+  if (profile.bundle.createUpdaterArtifacts !== false)
+    fail('physical profile updater artifacts must remain disabled');
+  if (profile.bundle.windows?.allowDowngrades !== false)
+    fail('physical profile must reject downgrade');
+  const wix = profile.bundle.windows?.wix;
+  if (!deepEqual(wix?.fragmentPaths, ['./installer/optimizer-service.wxs']))
+    fail('physical profile must bind the optimizer service fragment');
+  if (!deepEqual(wix?.componentGroupRefs, ['Phase6PhysicalRuntime']))
+    fail('physical profile must bind the physical runtime component group');
+  if ('template' in wix) fail('physical profile may not replace the audited WiX template');
+  const updater = profile.plugins?.updater;
+  if (
+    !updater ||
+    updater.pubkey !== '' ||
+    !deepEqual(updater.endpoints, []) ||
+    updater.windows !== null
+  )
+    fail('physical profile updater must remain inert');
+  if (
+    JSON.stringify(profile.app || {}).match(
+      /requireAdministrator|highestAvailable|requestedExecutionLevel/iu,
+    )
+  )
+    fail('desktop must remain non-elevated/asInvoker');
+  return true;
+}
+
+export function validateWixContract(xml) {
+  const required = [
+    ['Name="LiiiraaBoostOptimizer"', 'named optimizer service'],
+    ['Type="ownProcess"', 'ownProcess service'],
+    ['Start="auto"', 'auto service'],
+    ['Account="LocalSystem"', 'LocalSystem service'],
+    ['ServiceSid="restricted"', 'restricted service SID'],
+    ['Start="install"', 'start on install'],
+    ['Stop="both"', 'stop on update/uninstall'],
+    ['Remove="uninstall"', 'remove on uninstall'],
+    ['installation-manifest.json', 'installation manifest'],
+    ['PermissionEx', 'protected ACL'],
+  ];
+  for (const [needle, description] of required)
+    if (!xml.includes(needle)) fail(`WiX contract requires ${description}`);
+  const manifestIndex = xml.indexOf('installation-manifest.json');
+  const aclIndex = xml.indexOf('PermissionEx', manifestIndex);
+  const serviceStartIndex = xml.indexOf('<ServiceControl');
+  if (manifestIndex < 0 || aclIndex < manifestIndex || serviceStartIndex < aclIndex)
+    fail('manifest and ACL must precede service start');
+  const forbidden = [
+    [/<CustomAction\b|powershell(?:\.exe)?|cmd(?:\.exe)?/iu, 'custom action or shell authority'],
+    [/tauri-driver\.exe|msedgedriver\.exe/iu, 'portable driver in MSI'],
+    [
+      /PROGRAMDATA.*(?:RemoveFile|RemoveFolder)|(?:RemoveFile|RemoveFolder).*PROGRAMDATA/isu,
+      'recovery custody deletion',
+    ],
+    [/<(?:ScheduleReboot|ForceReboot)\b/iu, 'forced reboot'],
+  ];
+  for (const [pattern, description] of forbidden)
+    if (pattern.test(xml)) fail(`WiX contract forbids ${description}`);
+  return true;
+}
+
+export function validateInstallationManifest(document) {
+  if (document?.kind !== 'installation-manifest' || document.schemaVersion !== '1.0')
+    fail('installation manifest identity is invalid');
+  if (
+    !COMMIT_PATTERN.test(document.sourceCommit || '') ||
+    !SHA_PATTERN.test(document.inputTreeHash || '')
+  )
+    fail('installation manifest source identity is invalid');
+  if (document.signerSpkiSha256 !== TRUSTED_INSTALLER_SPKI_SHA256)
+    fail('installation manifest SPKI is not trusted');
+  if (!/^managed-power-scheme-v([3-9]|[1-9][0-9]+)$/u.test(document.operationVersionId || ''))
+    fail('installation manifest operation version is below v3');
+  assertExactRoles(document.files, INSTALLED_ROLES, 'installed');
+  for (const { key } of INSTALLED_ROLES) {
+    if (
+      document.files[key].authenticodePublisher !== 'Liiiraa Boost Local Development' ||
+      !SHA_PATTERN.test(document.files[key].authenticodeThumbprint || '')
+    ) {
+      fail(`installed Authenticode identity missing for ${key}`);
+    }
+  }
+  return true;
+}
+
+export function validateArtifactManifest(document) {
+  if (document?.kind !== 'artifact-manifest' || document.schemaVersion !== '1.0')
+    fail('artifact manifest identity is invalid');
+  if (
+    !COMMIT_PATTERN.test(document.sourceCommit || '') ||
+    !SHA_PATTERN.test(document.inputTreeHash || '')
+  )
+    fail('artifact manifest source identity is invalid');
+  assertExactRoles(document.files, PORTABLE_ROLES, 'portable');
+  return true;
+}
+
+export function verifyDetachedCmsEvidence(evidence) {
+  if (evidence.signerSpkiSha256 !== TRUSTED_INSTALLER_SPKI_SHA256)
+    fail('detached CMS signer SPKI mismatch');
+  if (
+    !evidence.contentMatched ||
+    !evidence.signatureValid ||
+    !evidence.liveHashesMatched ||
+    !evidence.authenticodeValid
+  ) {
+    fail('detached CMS custody verification failed');
+  }
+  return true;
+}
+
+export function assertImmutableFile(path, bytes) {
+  if (!existsSync(path)) return 'absent';
+  if (!readFileSync(path).equals(bytes))
+    fail(`immutable identity already exists with different bytes: ${path}`);
+  return 'verified-identical';
+}
+
+export function buildCanonicalRunConfigs({ operationVersionId, buildId, sourceCommit }) {
+  if (!COMMIT_PATTERN.test(sourceCommit)) fail('source commit is invalid');
+  const selected = selectUnusedOperationVersion({
+    minimumVersion: operationVersionId,
+    usedVersions: [],
+  });
+  const make = (stage) => ({
+    kind: 'physical-run-config',
+    schemaVersion: '1.0',
+    configId: `${stage}-${buildId}`,
+    stage,
+    configPath: `configs/${stage}.run-config.json`,
+    artifactManifestPath: 'artifact-manifest.json',
+    operationVersionId: selected,
+    buildId,
+    sourceCommit,
+    participantIdentityMode: 'purpose-bound-local-hash',
+    scenarios: {
+      prepareRecovery: true,
+      apply: true,
+      verifyApplied: true,
+      rebootWhenRequired: true,
+      restore: true,
+      verifyRestored: true,
+    },
+    paths: {
+      runRecordPath: `state/${stage}/run-record.json`,
+      installedReadyRecordPath: `state/${stage}/installed-ready.json`,
+      checkpointReadyRecordPath: `state/${stage}/checkpoint-ready.json`,
+      continuationPath: `state/${stage}/physical-continuation.json`,
+      rawEnvelopePath: `evidence/${stage}/raw-run-envelope.json`,
+    },
+    tauriCommands: CANONICAL_COMMANDS,
+  });
+  const configs = {
+    'clean-windows-vm': make('clean-windows-vm'),
+    'owner-pc': make('owner-pc'),
+    'friends-pc': {
+      ...make('friends-pc'),
+      friendsRosterPath: 'friends/friends-roster.json',
+      friendsRosterSignaturePath: 'friends/friends-roster.json.p7s',
+    },
+  };
+  return configs;
+}
+
+const collectUsedVersions = () => {
+  const roots = [join(ROOT, 'tooling', 'phase6-evidence'), join(ROOT, 'target', 'phase6-physical')];
+  const used = new Set();
+  for (const root of roots) {
+    if (!existsSync(root)) continue;
+    for (const path of walkFiles(root)) {
+      if (!/\.(?:json|md|txt)$/iu.test(path)) continue;
+      const text = readFileSync(path, 'utf8');
+      for (const match of text.matchAll(/managed-power-scheme-v[0-9]+/gu)) used.add(match[0]);
+    }
+  }
+  return [...used].sort();
+};
+
+const parseArgs = (argv) => {
+  const options = {
+    mode: null,
+    reserve: false,
+    minimumVersion: null,
+    requireMsi: false,
+    requireLifecycle: false,
+  };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === '--mode') options.mode = argv[++index];
+    else if (arg === '--reserve-operation-version') options.reserve = true;
+    else if (arg === '--minimum-version') options.minimumVersion = argv[++index];
+    else if (arg === '--require-msi') options.requireMsi = true;
+    else if (arg === '--require-lifecycle') options.requireLifecycle = true;
+    else fail(`unsupported argument: ${arg}`);
+  }
+  if (!['dry-run', 'build-and-smoke'].includes(options.mode))
+    fail('--mode must be dry-run or build-and-smoke');
+  if (!options.reserve || !options.minimumVersion)
+    fail('operation version reservation is mandatory');
+  if (options.mode === 'build-and-smoke' && (!options.requireMsi || !options.requireLifecycle))
+    fail('real mode requires --require-msi and --require-lifecycle');
+  return options;
+};
+
+const findSignTool = () => {
+  const kits = 'C:\\Program Files (x86)\\Windows Kits\\10\\bin';
+  if (!existsSync(kits)) return null;
+  return (
+    readdirSync(kits, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && /^10\./u.test(entry.name))
+      .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }))
+      .map((entry) => join(kits, entry.name, 'x64', 'signtool.exe'))
+      .find(existsSync) || null
+  );
+};
+
+const powershellJson = (script) => {
+  const output = run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
+    capture: true,
+  });
+  return JSON.parse(output);
+};
+
+const signerIdentity = () =>
+  powershellJson(`
+$ErrorActionPreference = 'Stop'
+$cert = Get-ChildItem Cert:\\CurrentUser\\My, Cert:\\LocalMachine\\My |
+  Where-Object { $_.Subject -eq 'CN=Liiiraa Boost Local Development' -and $_.HasPrivateKey } |
+  Select-Object -First 1
+if (-not $cert) { throw 'required non-exportable development certificate with private key was not found' }
+$spki = $cert.PublicKey.ExportSubjectPublicKeyInfo()
+$hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($spki)).ToLowerInvariant()
+[pscustomobject]@{ thumbprint = $cert.Thumbprint; subject = $cert.Subject; spkiSha256 = 'sha256:' + $hash; store = $cert.PSParentPath } | ConvertTo-Json -Compress
+`);
+
+const assertElevated = () => {
+  const elevated = run(
+    'powershell',
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)',
+    ],
+    { capture: true },
+  );
+  if (elevated.trim().toLowerCase() !== 'true')
+    fail(
+      'build-and-smoke requires an elevated Windows administrator session for MSI lifecycle verification',
+    );
+};
+
+const fileVersion = (path) => {
+  const escaped = path.replaceAll("'", "''");
+  return (
+    run(
+      'powershell',
+      [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        `(Get-Item -LiteralPath '${escaped}').VersionInfo.FileVersion`,
+      ],
+      { capture: true },
+    ) || 'unversioned'
+  );
+};
+
+const authenticodeIdentity = (path) => {
+  const escaped = path.replaceAll("'", "''");
+  return powershellJson(`
+$signature = Get-AuthenticodeSignature -LiteralPath '${escaped}'
+if (-not $signature.SignerCertificate) { throw 'missing Authenticode signer: ${escaped}' }
+$certificateSha256 = 'sha256:' + [Convert]::ToHexString($signature.SignerCertificate.GetCertHash([Security.Cryptography.HashAlgorithmName]::SHA256)).ToLowerInvariant()
+[pscustomobject]@{ status = $signature.Status.ToString(); publisher = $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false); thumbprint = $certificateSha256 } | ConvertTo-Json -Compress
+`);
+};
+
+const signAuthenticode = (signtool, thumbprint, path) => {
+  run(signtool, ['sign', '/sha1', thumbprint, '/fd', 'sha256', '/v', path]);
+  const identity = authenticodeIdentity(path);
+  if (!['Valid', 'UnknownError'].includes(identity.status))
+    fail(`AuthentiCode verification failed for ${path}: ${identity.status}`);
+  return identity;
+};
+
+const signDetachedCms = (thumbprint, contentPath, signaturePath) => {
+  const content = contentPath.replaceAll("'", "''");
+  const signature = signaturePath.replaceAll("'", "''");
+  run('powershell', [
+    '-NoProfile',
+    '-NonInteractive',
+    '-Command',
+    `
+$ErrorActionPreference = 'Stop'
+$cert = Get-ChildItem Cert:\\CurrentUser\\My, Cert:\\LocalMachine\\My | Where-Object { $_.Thumbprint -eq '${thumbprint}' -and $_.HasPrivateKey } | Select-Object -First 1
+if (-not $cert) { throw 'CMS signing certificate disappeared' }
+$cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new([IO.File]::ReadAllBytes('${content}')), $true)
+$cms.ComputeSignature([Security.Cryptography.Pkcs.CmsSigner]::new($cert))
+[IO.File]::WriteAllBytes('${signature}', $cms.Encode())
+`,
+  ]);
+};
+
+const verifyDetachedCms = (contentPath, signaturePath, expectedSpki) => {
+  const content = contentPath.replaceAll("'", "''");
+  const signature = signaturePath.replaceAll("'", "''");
+  const evidence = powershellJson(`
+$ErrorActionPreference = 'Stop'
+$content = [IO.File]::ReadAllBytes('${content}')
+$cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new($content), $true)
+$cms.Decode([IO.File]::ReadAllBytes('${signature}'))
+$cms.CheckSignature($true)
+$cert = $cms.SignerInfos[0].Certificate
+$spki = 'sha256:' + [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($cert.PublicKey.ExportSubjectPublicKeyInfo())).ToLowerInvariant()
+[pscustomobject]@{ contentMatched = $true; signatureValid = $true; signerSpkiSha256 = $spki; liveHashesMatched = $true; authenticodeValid = $true } | ConvertTo-Json -Compress
+`);
+  if (evidence.signerSpkiSha256 !== expectedSpki)
+    fail('CMS signer SPKI does not match compiled trust pin');
+  return evidence;
+};
+
+const installedRoleIdentity = (role, relativePath, absolutePath, signature) => ({
+  role,
+  relativePath,
+  sizeBytes: statSync(absolutePath).size,
+  sha256: sha256(readFileSync(absolutePath)),
+  version: fileVersion(absolutePath),
+  authenticodePublisher: signature.publisher,
+  authenticodeThumbprint: signature.thumbprint,
+});
+
+const portableRoleIdentity = (role, relativePath, absolutePath, metadata) => ({
+  role,
+  relativePath,
+  sizeBytes: statSync(absolutePath).size,
+  sha256: sha256(readFileSync(absolutePath)),
+  version: metadata.version,
+  versionPolicy: metadata.versionPolicy,
+  signaturePolicy: metadata.signaturePolicy,
+});
+
+const writeCreateOnce = (path, bytes) => {
+  const state = assertImmutableFile(path, bytes);
+  if (state === 'verified-identical') return state;
+  mkdirSync(dirname(path), { recursive: true });
+  const temporary = `${path}.${process.pid}.${randomUUID()}.tmp`;
+  writeFileSync(temporary, bytes, { flag: 'wx' });
+  renameSync(temporary, path);
+  return 'created';
+};
+
+const locateTauriDriver = () => {
+  const candidates = [
+    join(process.env.USERPROFILE || '', '.cargo', 'bin', 'tauri-driver.exe'),
+    join(ROOT, 'target', 'phase6-tools', 'bin', 'tauri-driver.exe'),
+  ];
+  const path = candidates.find((candidate) => candidate && existsSync(candidate));
+  if (!path)
+    fail(
+      'tauri-driver 2.0.6 is unavailable; install the approved exact release before the physical build',
+    );
+  const version = run(path, ['--version'], { capture: true });
+  if (!/\b2\.0\.6\b/u.test(version)) fail(`tauri-driver exact release mismatch: ${version}`);
+  return path;
+};
+
+const edgeVersion = () =>
+  run(
+    'powershell',
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      `
+$paths = @(
+  "$env:ProgramFiles (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "$env:ProgramFiles\\Microsoft\\Edge\\Application\\msedge.exe"
+)
+$edge = $paths | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if (-not $edge) { throw 'Microsoft Edge is unavailable' }
+(Get-Item -LiteralPath $edge).VersionInfo.FileVersion
+`,
+    ],
+    { capture: true },
+  );
+
+const locateMsEdgeDriver = () => {
+  const version = edgeVersion();
+  const candidates = [
+    join(ROOT, 'target', 'phase6-tools', version, 'msedgedriver.exe'),
+    join(process.env.LOCALAPPDATA || '', 'LiiiraaBoost', 'drivers', version, 'msedgedriver.exe'),
+  ];
+  const path = candidates.find((candidate) => candidate && existsSync(candidate));
+  if (!path)
+    fail(
+      `msedgedriver ${version} is unavailable; stage the exact official Edge-matched release before the physical build`,
+    );
+  const reported = run(path, ['--version'], { capture: true });
+  if (!reported.includes(version))
+    fail(`msedgedriver exact release mismatch: expected ${version}, got ${reported}`);
+  const publisher = authenticodeIdentity(path);
+  if (!/Microsoft/iu.test(publisher.publisher))
+    fail('msedgedriver source release is not Microsoft Authenticode signed');
+  return path;
+};
+
+const findBuiltMsi = () => {
+  const directory = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release', 'bundle', 'msi');
+  if (!existsSync(directory)) fail('Tauri did not emit an MSI directory');
+  const files = walkFiles(directory).filter((path) => /\.msi$/iu.test(path));
+  if (files.length !== 1) fail(`expected exactly one physical MSI, found ${files.length}`);
+  return files[0];
+};
+
+const inspectMsi = (path) => {
+  const escaped = path.replaceAll("'", "''");
+  return powershellJson(`
+$ErrorActionPreference = 'Stop'
+$installer = New-Object -ComObject WindowsInstaller.Installer
+$database = $installer.OpenDatabase('${escaped}', 0)
+function Read-Property([string]$name) {
+  $view = $database.OpenView("SELECT Value FROM Property WHERE Property='$name'")
+  $view.Execute(); $record = $view.Fetch(); $view.Close()
+  if ($record) { return $record.StringData(1) }
+  return $null
+}
+$files = $database.OpenView('SELECT FileName FROM File')
+$files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $files.Close()
+$custom = $database.OpenView('SELECT Action FROM CustomAction'); $custom.Execute(); $customCount = 0; while ($custom.Fetch()) { $customCount++ }; $custom.Close()
+[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customCount } | ConvertTo-Json -Compress
+`);
+};
+
+const setMsiProductCode = (path, productCode) => {
+  const escaped = path.replaceAll("'", "''");
+  const msiProductCode = `{${productCode.toUpperCase()}}`;
+  run('powershell', [
+    '-NoProfile',
+    '-NonInteractive',
+    '-Command',
+    `
+$ErrorActionPreference = 'Stop'
+$installer = New-Object -ComObject WindowsInstaller.Installer
+$database = $installer.OpenDatabase('${escaped}', 1)
+$view = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHERE Property='ProductCode'")
+$view.Execute(); $view.Close(); $database.Commit()
+`,
+  ]);
+};
+
+const runLifecycleSmoke = ({ msiPath, productCode, outputRoot }) => {
+  const log = (name) => join(outputRoot, `${name}.msiexec.log`);
+  const invoke = (args, expected = 0) => {
+    const result = spawnSync('msiexec.exe', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      windowsHide: true,
+      stdio: 'pipe',
+    });
+    if (result.status !== expected)
+      fail(`msiexec ${args.join(' ')} exited ${result.status}, expected ${expected}`);
+  };
+  invoke(['/i', msiPath, '/qn', '/norestart', '/l*v', log('install')]);
+  const installedRoot = join(process.env.ProgramFiles || 'C:\\Program Files', 'Liiiraa Boost');
+  for (const role of INSTALLED_ROLES)
+    if (!existsSync(join(installedRoot, role.path)))
+      fail(`installed runtime role is missing: ${role.path}`);
+  for (const driver of ['tauri-driver.exe', 'msedgedriver.exe'])
+    if (existsSync(join(installedRoot, driver))) fail(`portable driver was installed: ${driver}`);
+  const service = run('sc.exe', ['query', 'LiiiraaBoostOptimizer'], { capture: true });
+  if (!/RUNNING/iu.test(service)) fail('optimizer service did not reach RUNNING state');
+  invoke(['/fa', msiPath, '/qn', '/norestart', '/l*v', log('repair')]);
+  const downgrade = spawnSync(
+    'msiexec.exe',
+    [
+      '/i',
+      msiPath,
+      'REINSTALLMODE=amus',
+      'REINSTALL=ALL',
+      '/qn',
+      '/norestart',
+      '/l*v',
+      log('downgrade-rejection'),
+    ],
+    { windowsHide: true },
+  );
+  if (![0, 1638].includes(downgrade.status))
+    fail(`downgrade/reinstall policy returned unexpected status ${downgrade.status}`);
+  invoke(['/x', productCode, '/qn', '/norestart', '/l*v', log('uninstall')]);
+  if (
+    existsSync(installedRoot) &&
+    INSTALLED_ROLES.some((role) => existsSync(join(installedRoot, role.path)))
+  )
+    fail('uninstall retained an installed runtime role');
+  return {
+    install: 'passed',
+    repairUpdate: 'passed',
+    downgradeRejected: true,
+    uninstall: 'passed',
+    forcedReboot: false,
+  };
+};
+
+const writeBlockedReport = (error, context) => {
+  const directory = join(ROOT, 'target', 'phase6-physical', '_blocked');
+  mkdirSync(directory, { recursive: true });
+  const report = {
+    kind: 'phase6-physical-blocked-build',
+    schemaVersion: '1.0',
+    status: 'BLOCKED',
+    createdAt: new Date().toISOString(),
+    reason: error.message,
+    ...context,
+    artifactPublished: false,
+    msiBuilt: false,
+    lifecycleVerified: false,
+  };
+  const path = join(directory, `BLOCKED-${Date.now()}-${process.pid}.json`);
+  writeFileSync(path, canonicalBytes(report), { flag: 'wx' });
+  return relative(ROOT, path).replaceAll('\\', '/');
+};
+
+const dryRun = (options) => {
+  validatePhysicalProfile(JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8')));
+  validateWixContract(readFileSync(join(ROOT, WIX_FRAGMENT), 'utf8'));
+  const usedVersions = collectUsedVersions();
+  const operationVersionId = selectUnusedOperationVersion({
+    minimumVersion: options.minimumVersion,
+    usedVersions,
+  });
+  const result = {
+    mode: 'dry-run',
+    writesPerformed: false,
+    sourceCommit: git('rev-parse', 'HEAD'),
+    inputTreeHash: inputTreeHash(),
+    operationVersionId,
+    installedRuntimeRoles: INSTALLED_ROLES.map(({ role }) => role),
+    exactRuntimeRoles: ['desktop', 'service', 'runner', 'tauri-driver', 'msedgedriver'],
+    portableOnlyRoles: ['tauri-driver', 'msedgedriver'],
+    msiProfile: PHYSICAL_CONFIG,
+    wixFragment: WIX_FRAGMENT,
+  };
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+};
+
+const buildAndSmoke = (options) => {
+  const context = { mode: 'build-and-smoke', sourceCommit: null, operationVersionId: null };
+  try {
+    if (process.platform !== 'win32') fail('physical artifact build requires Windows');
+    assertElevated();
+    const signtool = findSignTool();
+    if (!signtool) fail('Windows SDK signtool.exe is unavailable');
+    const signer = signerIdentity();
+    if (signer.spkiSha256 !== TRUSTED_INSTALLER_SPKI_SHA256)
+      fail(`certificate SPKI mismatch: ${signer.spkiSha256}`);
+    assertDeclaredInputState({
+      porcelain: git('status', '--porcelain'),
+      declaredPaths: DECLARED_INPUTS,
+    });
+    validatePhysicalProfile(JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8')));
+    validateWixContract(readFileSync(join(ROOT, WIX_FRAGMENT), 'utf8'));
+
+    const sourceCommit = git('rev-parse', 'HEAD');
+    const treeHash = inputTreeHash();
+    const operationVersionId = selectUnusedOperationVersion({
+      minimumVersion: options.minimumVersion,
+      usedVersions: collectUsedVersions(),
+    });
+    const buildId = `physical-${treeHash.slice(7, 23)}-${operationVersionId}`;
+    Object.assign(context, { sourceCommit, operationVersionId, buildId, inputTreeHash: treeHash });
+    const finalRoot = join(ROOT, 'target', 'phase6-physical', sourceCommit, buildId);
+    if (existsSync(finalRoot))
+      fail(`immutable artifact identity already exists: ${relative(ROOT, finalRoot)}`);
+    const workRoot = join(
+      ROOT,
+      'target',
+      'phase6-physical',
+      '_work',
+      `${buildId}-${process.pid}-${randomUUID()}`,
+    );
+    mkdirSync(join(workRoot, 'configs'), { recursive: true });
+
+    const tauriDriverSource = locateTauriDriver();
+    const msedgeDriverSource = locateMsEdgeDriver();
+    run('cargo', [
+      'build',
+      '--release',
+      '--target',
+      'x86_64-pc-windows-msvc',
+      '-p',
+      'liiiraa-optimizer-service',
+    ]);
+    run('cargo', [
+      'build',
+      '--release',
+      '--target',
+      'x86_64-pc-windows-msvc',
+      '-p',
+      'liiiraa-desktop',
+      '--bin',
+      'phase6-physical-runner',
+      '--features',
+      'phase6-physical',
+    ]);
+    run('pnpm.cmd', [
+      '--filter',
+      '@liiiraa/desktop',
+      'exec',
+      'tauri',
+      'build',
+      '--no-bundle',
+      '--target',
+      'x86_64-pc-windows-msvc',
+      '--features',
+      'phase6-physical',
+      '--config',
+      'src-tauri/tauri.phase6-physical.conf.json',
+    ]);
+
+    const release = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release');
+    const built = {
+      desktop: join(release, 'liiiraa-desktop.exe'),
+      service: join(release, 'liiiraa-optimizer-service.exe'),
+      runner: join(release, 'phase6-physical-runner.exe'),
+    };
+    for (const path of Object.values(built))
+      if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
+    const signatures = {};
+    for (const [key, path] of Object.entries(built))
+      signatures[key] = signAuthenticode(signtool, signer.thumbprint, path);
+
+    const portableDrivers = {
+      tauriDriver: join(workRoot, 'tauri-driver.exe'),
+      msedgeDriver: join(workRoot, 'msedgedriver.exe'),
+    };
+    copyFileSync(tauriDriverSource, portableDrivers.tauriDriver);
+    copyFileSync(msedgeDriverSource, portableDrivers.msedgeDriver);
+    signatures.tauriDriver = signAuthenticode(
+      signtool,
+      signer.thumbprint,
+      portableDrivers.tauriDriver,
+    );
+    signatures.msedgeDriver = signAuthenticode(
+      signtool,
+      signer.thumbprint,
+      portableDrivers.msedgeDriver,
+    );
+    copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
+
+    const packageVersion = JSON.parse(readFileSync(join(ROOT, PHYSICAL_CONFIG), 'utf8')).version;
+    const productCode = randomUUID();
+    const createdAt = new Date().toISOString();
+    const installationManifest = {
+      kind: 'installation-manifest',
+      schemaVersion: '1.0',
+      manifestId: `installation-manifest-${buildId}`,
+      productCode,
+      packageVersion,
+      sourceCommit,
+      inputTreeHash: treeHash,
+      buildId,
+      operationVersionId,
+      createdAt,
+      signerSpkiSha256: TRUSTED_INSTALLER_SPKI_SHA256,
+      files: Object.fromEntries(
+        INSTALLED_ROLES.map(({ key, role, path }) => [
+          key,
+          installedRoleIdentity(role, path, built[key], signatures[key]),
+        ]),
+      ),
+    };
+    validateInstallationManifest(installationManifest);
+    const installationPath = join(workRoot, 'installation-manifest.json');
+    writeCreateOnce(installationPath, canonicalBytes(installationManifest));
+    signDetachedCms(signer.thumbprint, installationPath, `${installationPath}.p7s`);
+    verifyDetachedCms(installationPath, `${installationPath}.p7s`, TRUSTED_INSTALLER_SPKI_SHA256);
+
+    const wixStaging = join(ROOT, 'apps', 'desktop', 'src-tauri', 'installer', 'physical-staging');
+    if (existsSync(wixStaging))
+      fail('WiX physical staging directory already exists; refusing ambiguous input');
+    mkdirSync(wixStaging, { recursive: false });
+    try {
+      copyFileSync(built.service, join(wixStaging, 'liiiraa-optimizer-service.exe'));
+      copyFileSync(built.runner, join(wixStaging, 'phase6-physical-runner.exe'));
+      copyFileSync(installationPath, join(wixStaging, 'installation-manifest.json'));
+      copyFileSync(`${installationPath}.p7s`, join(wixStaging, 'installation-manifest.json.p7s'));
+      run('pnpm.cmd', [
+        '--filter',
+        '@liiiraa/desktop',
+        'exec',
+        'tauri',
+        'bundle',
+        '--target',
+        'x86_64-pc-windows-msvc',
+        '--bundles',
+        'msi',
+        '--config',
+        'src-tauri/tauri.phase6-physical.conf.json',
+      ]);
+    } finally {
+      rmSync(wixStaging, { recursive: true, force: true });
+    }
+    const emittedMsi = findBuiltMsi();
+    const msiPath = join(workRoot, 'liiiraa-boost.msi');
+    copyFileSync(emittedMsi, msiPath);
+    setMsiProductCode(msiPath, productCode);
+    const msiInspection = inspectMsi(msiPath);
+    if (
+      String(msiInspection.productCode).replace(/[{}]/gu, '').toLowerCase() !== productCode ||
+      msiInspection.packageVersion !== packageVersion
+    ) {
+      fail('MSI ProductCode/package version does not match the signed installation manifest');
+    }
+    if (msiInspection.customActionCount !== 0)
+      fail('MSI contains unaudited custom action authority');
+    if (msiInspection.files.some((name) => /tauri-driver|msedgedriver/iu.test(name)))
+      fail('portable driver is present in MSI File table');
+    signatures.msi = signAuthenticode(signtool, signer.thumbprint, msiPath);
+
+    const configs = buildCanonicalRunConfigs({ operationVersionId, buildId, sourceCommit });
+    for (const [stage, config] of Object.entries(configs))
+      writeCreateOnce(
+        join(workRoot, 'configs', `${stage}.run-config.json`),
+        canonicalBytes(config),
+      );
+    const portableSources = {
+      msi: msiPath,
+      installationManifest: installationPath,
+      installationManifestSignature: `${installationPath}.p7s`,
+      cleanWindowsVmConfig: join(workRoot, 'configs', 'clean-windows-vm.run-config.json'),
+      ownerPcConfig: join(workRoot, 'configs', 'owner-pc.run-config.json'),
+      friendsPcConfig: join(workRoot, 'configs', 'friends-pc.run-config.json'),
+      runner: join(workRoot, 'phase6-physical-runner.exe'),
+      tauriDriver: portableDrivers.tauriDriver,
+      msedgeDriver: portableDrivers.msedgeDriver,
+    };
+    const portableMetadata = {
+      msi: {
+        version: packageVersion,
+        versionPolicy: 'package-version',
+        signaturePolicy: 'authenticode-required',
+      },
+      installationManifest: {
+        version: '1.0',
+        versionPolicy: 'schema-version',
+        signaturePolicy: 'detached-cms-required',
+      },
+      installationManifestSignature: {
+        version: 'not-applicable',
+        versionPolicy: 'not-applicable',
+        signaturePolicy: 'detached-cms-required',
+      },
+      cleanWindowsVmConfig: {
+        version: '1.0',
+        versionPolicy: 'schema-version',
+        signaturePolicy: 'manifest-authenticated',
+      },
+      ownerPcConfig: {
+        version: '1.0',
+        versionPolicy: 'schema-version',
+        signaturePolicy: 'manifest-authenticated',
+      },
+      friendsPcConfig: {
+        version: '1.0',
+        versionPolicy: 'schema-version',
+        signaturePolicy: 'manifest-authenticated',
+      },
+      runner: {
+        version: fileVersion(portableSources.runner),
+        versionPolicy: 'file-version',
+        signaturePolicy: 'authenticode-required',
+      },
+      tauriDriver: {
+        version: fileVersion(portableSources.tauriDriver),
+        versionPolicy: 'file-version',
+        signaturePolicy: 'authenticode-required',
+      },
+      msedgeDriver: {
+        version: fileVersion(portableSources.msedgeDriver),
+        versionPolicy: 'file-version',
+        signaturePolicy: 'authenticode-required',
+      },
+    };
+    const manifestDocument = {
+      kind: 'artifact-manifest',
+      schemaVersion: '1.0',
+      manifestId: `artifact-manifest-${buildId}`,
+      sourceCommit,
+      inputTreeHash: treeHash,
+      buildId,
+      operationVersionId,
+      createdAt,
+      files: Object.fromEntries(
+        PORTABLE_ROLES.map(({ key, role, path }) => [
+          key,
+          portableRoleIdentity(role, path, portableSources[key], portableMetadata[key]),
+        ]),
+      ),
+    };
+    validateArtifactManifest(manifestDocument);
+    const artifactBytes = canonicalBytes(manifestDocument);
+    const artifactPath = join(workRoot, 'artifact-manifest.json');
+    writeCreateOnce(artifactPath, artifactBytes);
+    signDetachedCms(signer.thumbprint, artifactPath, `${artifactPath}.p7s`);
+    const cmsEvidence = verifyDetachedCms(
+      artifactPath,
+      `${artifactPath}.p7s`,
+      TRUSTED_INSTALLER_SPKI_SHA256,
+    );
+    verifyDetachedCmsEvidence(cmsEvidence);
+    const lifecycle = runLifecycleSmoke({
+      msiPath,
+      productCode: msiInspection.productCode,
+      outputRoot: workRoot,
+    });
+    writeCreateOnce(
+      join(workRoot, 'lifecycle-report.json'),
+      canonicalBytes({
+        kind: 'phase6-physical-lifecycle',
+        schemaVersion: '1.0',
+        ...lifecycle,
+        msiInspection,
+      }),
+    );
+    chmodSync(workRoot, 0o555);
+    mkdirSync(dirname(finalRoot), { recursive: true });
+    renameSync(workRoot, finalRoot);
+    process.stdout.write(
+      `${JSON.stringify({ status: 'PASSED', artifactRoot: relative(ROOT, finalRoot).replaceAll('\\', '/'), sourceCommit, buildId, operationVersionId, artifactManifestSha256: sha256(artifactBytes), lifecycle }, null, 2)}\n`,
+    );
+  } catch (error) {
+    const reportPath = writeBlockedReport(error, context);
+    process.stderr.write(`BLOCKED: ${error.message}\nBLOCKED report: ${reportPath}\n`);
+    process.exitCode = 1;
+  }
+};
+
+const invokedDirectly =
+  process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) {
+  try {
+    const options = parseArgs(process.argv.slice(2));
+    if (options.mode === 'dry-run') dryRun(options);
+    else buildAndSmoke(options);
+  } catch (error) {
+    process.stderr.write(`ERROR: ${error.message}\n`);
+    process.exitCode = 1;
+  }
+}

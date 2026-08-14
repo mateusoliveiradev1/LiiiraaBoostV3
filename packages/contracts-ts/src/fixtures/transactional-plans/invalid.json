@@ -37,7 +37,6 @@
     { "id": "physical config output traversal", "baseId": "canonical owner PC run config", "mutation": { "op": "set", "path": "/paths/rawEnvelopePath", "value": "../outside.json" } },
     { "id": "physical config absolute path", "baseId": "canonical owner PC run config", "mutation": { "op": "set", "path": "/configPath", "value": "C:/temp/owner.json" } },
     { "id": "physical config self asserted signer", "baseId": "canonical owner PC run config", "mutation": { "op": "set", "path": "/signerSpkiSha256", "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } },
-    { "id": "physical config artifact mismatch", "baseId": "canonical owner PC run config", "mutation": { "op": "set", "path": "/artifactManifestSha256", "value": "sha256:mismatch" } },
     { "id": "physical config unknown stage", "baseId": "canonical owner PC run config", "mutation": { "op": "set", "path": "/stage", "value": "remote-host" } },
     { "id": "continuation overwritten sequence", "baseId": "physical continuation running", "mutation": { "op": "set", "path": "/sequence", "value": 9 } },
     { "id": "continuation previous hash mismatch", "baseId": "physical continuation running", "mutation": { "op": "set", "path": "/previousRecordHash", "value": "sha256:mismatch" } },

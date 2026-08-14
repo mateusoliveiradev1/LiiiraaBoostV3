@@ -281,8 +281,6 @@ const stageAuthority = (
     config['schemaVersion'] !== '1.0' ||
     config['stage'] !== stage ||
     config['configPath'] !== configEntry['relativePath'] ||
-    prefixed(config['artifactManifestSha256'], 'config artifact manifest') !==
-      authority.artifactManifestSha256 ||
     config['operationVersionId'] !== authority.operationVersionId ||
     config['buildId'] !== authority.buildId ||
     config['sourceCommit'] !== authority.sourceCommit

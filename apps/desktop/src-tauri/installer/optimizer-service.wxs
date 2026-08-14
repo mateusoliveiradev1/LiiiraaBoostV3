@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <!-- 'installation-manifest.json InstallFiles PermissionEx ServiceControl' is the audited standard-table custody order. -->
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <ComponentGroup Id="Phase6PhysicalRuntime">
+        <Component Id="Phase6InstallationManifestComponent" Guid="*">
+          <File Id="Phase6InstallationManifestFile"
+                Source="installer\physical-staging\installation-manifest.json"
+                Name="installation-manifest.json"
+                KeyPath="yes">
+            <PermissionEx User="SYSTEM" GenericAll="yes" />
+            <PermissionEx User="NT SERVICE\LiiiraaBoostOptimizer" GenericRead="yes" />
+          </File>
+        </Component>
+
+        <Component Id="Phase6InstallationManifestSignatureComponent" Guid="*">
+          <File Id="Phase6InstallationManifestSignatureFile"
+                Source="installer\physical-staging\installation-manifest.json.p7s"
+                Name="installation-manifest.json.p7s"
+                KeyPath="yes">
+            <PermissionEx User="SYSTEM" GenericAll="yes" />
+            <PermissionEx User="NT SERVICE\LiiiraaBoostOptimizer" GenericRead="yes" />
+          </File>
+        </Component>
+
+        <Component Id="Phase6RunnerComponent" Guid="*">
+          <File Id="Phase6RunnerFile"
+                Source="installer\physical-staging\phase6-physical-runner.exe"
+                Name="phase6-physical-runner.exe"
+                KeyPath="yes" />
+        </Component>
+
+        <Component Id="OptimizerServiceComponent" Guid="*">
+          <File Id="OptimizerServiceFile"
+                Source="installer\physical-staging\liiiraa-optimizer-service.exe"
+                Name="liiiraa-optimizer-service.exe"
+                KeyPath="yes" />
+          <ServiceInstall Id="OptimizerServiceInstall"
+                          Name="LiiiraaBoostOptimizer"
+                          DisplayName="Liiiraa Boost Optimizer"
+                          Description="Privileged optimizer broker for Liiiraa Boost"
+                          Type="ownProcess"
+                          Start="auto"
+                          Account="LocalSystem"
+                          ErrorControl="normal">
+            <ServiceConfig ServiceSid="restricted" OnInstall="yes" OnReinstall="yes" />
+          </ServiceInstall>
+          <ServiceControl Id="OptimizerServiceControl"
+                          Name="LiiiraaBoostOptimizer"
+                          Start="install"
+                          Stop="both"
+                          Remove="uninstall"
+                          Wait="yes" />
+        </Component>
+      </ComponentGroup>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

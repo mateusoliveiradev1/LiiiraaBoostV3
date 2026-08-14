@@ -4174,9 +4174,6 @@
             "const": "artifact-manifest.json",
             "type": "string"
           },
-          "artifactManifestSha256": {
-            "$ref": "#/components/schemas/TransactionHash"
-          },
           "buildId": {
             "$ref": "#/components/schemas/TransactionIdentifier"
           },
@@ -4223,7 +4220,6 @@
           "schemaVersion",
           "configId",
           "artifactManifestPath",
-          "artifactManifestSha256",
           "operationVersionId",
           "buildId",
           "sourceCommit",
@@ -6078,9 +6074,6 @@
             "const": "artifact-manifest.json",
             "type": "string"
           },
-          "artifactManifestSha256": {
-            "$ref": "#/components/schemas/TransactionHash"
-          },
           "buildId": {
             "$ref": "#/components/schemas/TransactionIdentifier"
           },
@@ -6135,7 +6128,6 @@
           "schemaVersion",
           "configId",
           "artifactManifestPath",
-          "artifactManifestSha256",
           "operationVersionId",
           "buildId",
           "sourceCommit",
@@ -6648,7 +6640,7 @@
       "InstalledDesktopFileIdentity": {
         "properties": {
           "authenticodePublisher": {
-            "const": "Liiiraa Boost Development",
+            "const": "Liiiraa Boost Local Development",
             "type": "string"
           },
           "authenticodeThumbprint": {
@@ -6794,7 +6786,7 @@
       "InstalledRunnerFileIdentity": {
         "properties": {
           "authenticodePublisher": {
-            "const": "Liiiraa Boost Development",
+            "const": "Liiiraa Boost Local Development",
             "type": "string"
           },
           "authenticodeThumbprint": {
@@ -6837,7 +6829,7 @@
       "InstalledServiceFileIdentity": {
         "properties": {
           "authenticodePublisher": {
-            "const": "Liiiraa Boost Development",
+            "const": "Liiiraa Boost Local Development",
             "type": "string"
           },
           "authenticodeThumbprint": {
@@ -7789,9 +7781,6 @@
             "const": "artifact-manifest.json",
             "type": "string"
           },
-          "artifactManifestSha256": {
-            "$ref": "#/components/schemas/TransactionHash"
-          },
           "buildId": {
             "$ref": "#/components/schemas/TransactionIdentifier"
           },
@@ -7838,7 +7827,6 @@
           "schemaVersion",
           "configId",
           "artifactManifestPath",
-          "artifactManifestSha256",
           "operationVersionId",
           "buildId",
           "sourceCommit",

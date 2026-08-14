@@ -181,7 +181,6 @@ fn config(stage: &str) -> Value {
         "kind": "physical-run-config", "schemaVersion": "1.0",
         "configId": config_id, "stage": stage, "configPath": config_path,
         "artifactManifestPath": "artifact-manifest.json",
-        "artifactManifestSha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "operationVersionId": "managed-power-scheme-v3", "buildId": "physical-build-0001",
         "sourceCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "participantIdentityMode": "purpose-bound-local-hash",
@@ -214,11 +213,11 @@ fn installed_manifest() -> Value {
         "createdAt": "2026-08-13T13:00:00Z", "signerSpkiSha256": TRUSTED_INSTALLER_SPKI_SHA256,
         "files": {
             "desktop": { "role": "desktop", "relativePath": "liiiraa-desktop.exe", "sizeBytes": 1,
-                "sha256": sha256(b"d"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Development", "authenticodeThumbprint": THUMBPRINT },
+                "sha256": sha256(b"d"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Local Development", "authenticodeThumbprint": THUMBPRINT },
             "service": { "role": "service", "relativePath": "liiiraa-optimizer-service.exe", "sizeBytes": 1,
-                "sha256": sha256(b"s"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Development", "authenticodeThumbprint": THUMBPRINT },
+                "sha256": sha256(b"s"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Local Development", "authenticodeThumbprint": THUMBPRINT },
             "runner": { "role": "runner", "relativePath": "phase6-physical-runner.exe", "sizeBytes": 1,
-                "sha256": sha256(b"r"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Development", "authenticodeThumbprint": THUMBPRINT }
+                "sha256": sha256(b"r"), "version": "1.2.0", "authenticodePublisher": "Liiiraa Boost Local Development", "authenticodeThumbprint": THUMBPRINT }
         }
     })
 }

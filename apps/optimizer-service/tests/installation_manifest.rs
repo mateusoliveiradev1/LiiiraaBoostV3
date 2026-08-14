@@ -14,7 +14,7 @@ use service::installation_manifest::{
 use sha2::{Digest, Sha256};
 
 const ROOT: &str = r"C:\Program Files\Liiiraa Boost";
-const PUBLISHER: &str = "Liiiraa Boost Development";
+const PUBLISHER: &str = "Liiiraa Boost Local Development";
 const THUMBPRINT: &str = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
 #[derive(Default)]

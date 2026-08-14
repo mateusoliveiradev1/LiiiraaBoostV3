@@ -702,9 +702,6 @@
           "const": "artifact-manifest.json",
           "type": "string"
         },
-        "artifactManifestSha256": {
-          "$ref": "TransactionHash.json"
-        },
         "buildId": {
           "$ref": "TransactionIdentifier.json"
         },
@@ -751,7 +748,6 @@
         "schemaVersion",
         "configId",
         "artifactManifestPath",
-        "artifactManifestSha256",
         "operationVersionId",
         "buildId",
         "sourceCommit",
@@ -1407,9 +1403,6 @@
           "const": "artifact-manifest.json",
           "type": "string"
         },
-        "artifactManifestSha256": {
-          "$ref": "TransactionHash.json"
-        },
         "buildId": {
           "$ref": "TransactionIdentifier.json"
         },
@@ -1464,7 +1457,6 @@
         "schemaVersion",
         "configId",
         "artifactManifestPath",
-        "artifactManifestSha256",
         "operationVersionId",
         "buildId",
         "sourceCommit",
@@ -1700,7 +1692,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "authenticodePublisher": {
-          "const": "Liiiraa Boost Development",
+          "const": "Liiiraa Boost Local Development",
           "type": "string"
         },
         "authenticodeThumbprint": {
@@ -1852,7 +1844,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "authenticodePublisher": {
-          "const": "Liiiraa Boost Development",
+          "const": "Liiiraa Boost Local Development",
           "type": "string"
         },
         "authenticodeThumbprint": {
@@ -1897,7 +1889,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "authenticodePublisher": {
-          "const": "Liiiraa Boost Development",
+          "const": "Liiiraa Boost Local Development",
           "type": "string"
         },
         "authenticodeThumbprint": {
@@ -2182,9 +2174,6 @@
           "const": "artifact-manifest.json",
           "type": "string"
         },
-        "artifactManifestSha256": {
-          "$ref": "TransactionHash.json"
-        },
         "buildId": {
           "$ref": "TransactionIdentifier.json"
         },
@@ -2231,7 +2220,6 @@
         "schemaVersion",
         "configId",
         "artifactManifestPath",
-        "artifactManifestSha256",
         "operationVersionId",
         "buildId",
         "sourceCommit",

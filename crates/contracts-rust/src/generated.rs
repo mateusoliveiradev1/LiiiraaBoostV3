@@ -14441,7 +14441,6 @@ impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmPhysicalPa
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"artifactManifestPath\","]
-#[doc = "    \"artifactManifestSha256\","]
 #[doc = "    \"buildId\","]
 #[doc = "    \"configId\","]
 #[doc = "    \"configPath\","]
@@ -14461,9 +14460,6 @@ impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmPhysicalPa
 #[doc = "      \"enum\": ["]
 #[doc = "        \"artifact-manifest.json\""]
 #[doc = "      ]"]
-#[doc = "    },"]
-#[doc = "    \"artifactManifestSha256\": {"]
-#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
 #[doc = "    },"]
 #[doc = "    \"buildId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
@@ -14524,8 +14520,6 @@ impl ::std::convert::TryFrom<::std::string::String> for CleanWindowsVmPhysicalPa
 pub struct CleanWindowsVmRunConfigDocument {
     #[serde(rename = "artifactManifestPath")]
     pub artifact_manifest_path: CleanWindowsVmRunConfigDocumentArtifactManifestPath,
-    #[serde(rename = "artifactManifestSha256")]
-    pub artifact_manifest_sha256: TransactionHash,
     #[serde(rename = "buildId")]
     pub build_id: TransactionIdentifier,
     #[serde(rename = "configId")]
@@ -21812,7 +21806,6 @@ impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsRu
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"artifactManifestPath\","]
-#[doc = "    \"artifactManifestSha256\","]
 #[doc = "    \"buildId\","]
 #[doc = "    \"configId\","]
 #[doc = "    \"configPath\","]
@@ -21834,9 +21827,6 @@ impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsRu
 #[doc = "      \"enum\": ["]
 #[doc = "        \"artifact-manifest.json\""]
 #[doc = "      ]"]
-#[doc = "    },"]
-#[doc = "    \"artifactManifestSha256\": {"]
-#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
 #[doc = "    },"]
 #[doc = "    \"buildId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
@@ -21909,8 +21899,6 @@ impl ::std::convert::TryFrom<::std::string::String> for FriendsPcPhysicalPathsRu
 pub struct FriendsPcRunConfigDocument {
     #[serde(rename = "artifactManifestPath")]
     pub artifact_manifest_path: FriendsPcRunConfigDocumentArtifactManifestPath,
-    #[serde(rename = "artifactManifestSha256")]
-    pub artifact_manifest_sha256: TransactionHash,
     #[serde(rename = "buildId")]
     pub build_id: TransactionIdentifier,
     #[serde(rename = "configId")]
@@ -24482,7 +24470,7 @@ impl ::std::convert::TryFrom<::std::string::String> for InstallationManifestDocu
 #[doc = "    \"authenticodePublisher\": {"]
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"enum\": ["]
-#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "        \"Liiiraa Boost Local Development\""]
 #[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"authenticodeThumbprint\": {"]
@@ -24540,7 +24528,7 @@ pub struct InstalledDesktopFileIdentity {
 #[doc = "{"]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "    \"Liiiraa Boost Local Development\""]
 #[doc = "  ]"]
 #[doc = "}"]
 #[doc = r" ```"]
@@ -24558,13 +24546,13 @@ pub struct InstalledDesktopFileIdentity {
     PartialOrd,
 )]
 pub enum InstalledDesktopFileIdentityAuthenticodePublisher {
-    #[serde(rename = "Liiiraa Boost Development")]
-    LiiiraaBoostDevelopment,
+    #[serde(rename = "Liiiraa Boost Local Development")]
+    LiiiraaBoostLocalDevelopment,
 }
 impl ::std::fmt::Display for InstalledDesktopFileIdentityAuthenticodePublisher {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+            Self::LiiiraaBoostLocalDevelopment => f.write_str("Liiiraa Boost Local Development"),
         }
     }
 }
@@ -24572,7 +24560,7 @@ impl ::std::str::FromStr for InstalledDesktopFileIdentityAuthenticodePublisher {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
-            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            "Liiiraa Boost Local Development" => Ok(Self::LiiiraaBoostLocalDevelopment),
             _ => Err("invalid value".into()),
         }
     }
@@ -25053,7 +25041,7 @@ impl ::std::convert::TryFrom<::std::string::String> for InstalledReadyContinuati
 #[doc = "    \"authenticodePublisher\": {"]
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"enum\": ["]
-#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "        \"Liiiraa Boost Local Development\""]
 #[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"authenticodeThumbprint\": {"]
@@ -25111,7 +25099,7 @@ pub struct InstalledRunnerFileIdentity {
 #[doc = "{"]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "    \"Liiiraa Boost Local Development\""]
 #[doc = "  ]"]
 #[doc = "}"]
 #[doc = r" ```"]
@@ -25129,13 +25117,13 @@ pub struct InstalledRunnerFileIdentity {
     PartialOrd,
 )]
 pub enum InstalledRunnerFileIdentityAuthenticodePublisher {
-    #[serde(rename = "Liiiraa Boost Development")]
-    LiiiraaBoostDevelopment,
+    #[serde(rename = "Liiiraa Boost Local Development")]
+    LiiiraaBoostLocalDevelopment,
 }
 impl ::std::fmt::Display for InstalledRunnerFileIdentityAuthenticodePublisher {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+            Self::LiiiraaBoostLocalDevelopment => f.write_str("Liiiraa Boost Local Development"),
         }
     }
 }
@@ -25143,7 +25131,7 @@ impl ::std::str::FromStr for InstalledRunnerFileIdentityAuthenticodePublisher {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
-            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            "Liiiraa Boost Local Development" => Ok(Self::LiiiraaBoostLocalDevelopment),
             _ => Err("invalid value".into()),
         }
     }
@@ -25329,7 +25317,7 @@ impl ::std::convert::TryFrom<::std::string::String> for InstalledRunnerFileIdent
 #[doc = "    \"authenticodePublisher\": {"]
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"enum\": ["]
-#[doc = "        \"Liiiraa Boost Development\""]
+#[doc = "        \"Liiiraa Boost Local Development\""]
 #[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"authenticodeThumbprint\": {"]
@@ -25387,7 +25375,7 @@ pub struct InstalledServiceFileIdentity {
 #[doc = "{"]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"Liiiraa Boost Development\""]
+#[doc = "    \"Liiiraa Boost Local Development\""]
 #[doc = "  ]"]
 #[doc = "}"]
 #[doc = r" ```"]
@@ -25405,13 +25393,13 @@ pub struct InstalledServiceFileIdentity {
     PartialOrd,
 )]
 pub enum InstalledServiceFileIdentityAuthenticodePublisher {
-    #[serde(rename = "Liiiraa Boost Development")]
-    LiiiraaBoostDevelopment,
+    #[serde(rename = "Liiiraa Boost Local Development")]
+    LiiiraaBoostLocalDevelopment,
 }
 impl ::std::fmt::Display for InstalledServiceFileIdentityAuthenticodePublisher {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::LiiiraaBoostDevelopment => f.write_str("Liiiraa Boost Development"),
+            Self::LiiiraaBoostLocalDevelopment => f.write_str("Liiiraa Boost Local Development"),
         }
     }
 }
@@ -25419,7 +25407,7 @@ impl ::std::str::FromStr for InstalledServiceFileIdentityAuthenticodePublisher {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
-            "Liiiraa Boost Development" => Ok(Self::LiiiraaBoostDevelopment),
+            "Liiiraa Boost Local Development" => Ok(Self::LiiiraaBoostLocalDevelopment),
             _ => Err("invalid value".into()),
         }
     }
@@ -29103,7 +29091,6 @@ impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsRunR
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"artifactManifestPath\","]
-#[doc = "    \"artifactManifestSha256\","]
 #[doc = "    \"buildId\","]
 #[doc = "    \"configId\","]
 #[doc = "    \"configPath\","]
@@ -29123,9 +29110,6 @@ impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsRunR
 #[doc = "      \"enum\": ["]
 #[doc = "        \"artifact-manifest.json\""]
 #[doc = "      ]"]
-#[doc = "    },"]
-#[doc = "    \"artifactManifestSha256\": {"]
-#[doc = "      \"$ref\": \"#/definitions/TransactionHash\""]
 #[doc = "    },"]
 #[doc = "    \"buildId\": {"]
 #[doc = "      \"$ref\": \"#/definitions/TransactionIdentifier\""]
@@ -29186,8 +29170,6 @@ impl ::std::convert::TryFrom<::std::string::String> for OwnerPcPhysicalPathsRunR
 pub struct OwnerPcRunConfigDocument {
     #[serde(rename = "artifactManifestPath")]
     pub artifact_manifest_path: OwnerPcRunConfigDocumentArtifactManifestPath,
-    #[serde(rename = "artifactManifestSha256")]
-    pub artifact_manifest_sha256: TransactionHash,
     #[serde(rename = "buildId")]
     pub build_id: TransactionIdentifier,
     #[serde(rename = "configId")]

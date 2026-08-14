@@ -3977,7 +3977,7 @@ export interface InstalledDesktopFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
   version: PhysicalVersionJson;
-  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodePublisher: 'Liiiraa Boost Local Development';
   authenticodeThumbprint: TransactionHashJson;
   role: 'desktop';
   relativePath: 'liiiraa-desktop.exe';
@@ -3990,7 +3990,7 @@ export interface InstalledServiceFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
   version: PhysicalVersionJson;
-  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodePublisher: 'Liiiraa Boost Local Development';
   authenticodeThumbprint: TransactionHashJson;
   role: 'service';
   relativePath: 'liiiraa-optimizer-service.exe';
@@ -4003,7 +4003,7 @@ export interface InstalledRunnerFileIdentityJson {
   sizeBytes: number;
   sha256: TransactionHashJson;
   version: PhysicalVersionJson;
-  authenticodePublisher: 'Liiiraa Boost Development';
+  authenticodePublisher: 'Liiiraa Boost Local Development';
   authenticodeThumbprint: TransactionHashJson;
   role: 'runner';
   relativePath: 'phase6-physical-runner.exe';
@@ -4193,7 +4193,6 @@ export interface CleanWindowsVmRunConfigDocumentJson {
   schemaVersion: TransactionSchemaVersionJson;
   configId: TransactionIdentifierJson;
   artifactManifestPath: 'artifact-manifest.json';
-  artifactManifestSha256: TransactionHashJson;
   operationVersionId: TransactionIdentifierJson;
   buildId: TransactionIdentifierJson;
   sourceCommit: PhysicalSourceCommitJson;
@@ -4256,7 +4255,6 @@ export interface OwnerPcRunConfigDocumentJson {
   schemaVersion: TransactionSchemaVersionJson;
   configId: TransactionIdentifierJson;
   artifactManifestPath: 'artifact-manifest.json';
-  artifactManifestSha256: TransactionHashJson;
   operationVersionId: TransactionIdentifierJson;
   buildId: TransactionIdentifierJson;
   sourceCommit: PhysicalSourceCommitJson;
@@ -4287,7 +4285,6 @@ export interface FriendsPcRunConfigDocumentJson {
   schemaVersion: TransactionSchemaVersionJson;
   configId: TransactionIdentifierJson;
   artifactManifestPath: 'artifact-manifest.json';
-  artifactManifestSha256: TransactionHashJson;
   operationVersionId: TransactionIdentifierJson;
   buildId: TransactionIdentifierJson;
   sourceCommit: PhysicalSourceCommitJson;

@@ -171,7 +171,6 @@ const setupFixture = (): void => {
     stage: 'clean-windows-vm',
     configPath: 'configs/clean-windows-vm.run-config.json',
     artifactManifestPath: 'artifact-manifest.json',
-    artifactManifestSha256: ARTIFACT_HASH,
     operationVersionId: 'managed-power-scheme-v3',
     buildId: 'physical-build-0001',
     sourceCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',

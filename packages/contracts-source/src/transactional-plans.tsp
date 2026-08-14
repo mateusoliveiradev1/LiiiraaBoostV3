@@ -829,7 +829,7 @@ model InstalledFileIdentityBase {
   sizeBytes: uint32;
   sha256: TransactionHash;
   version: PhysicalVersion;
-  authenticodePublisher: "Liiiraa Boost Development";
+  authenticodePublisher: "Liiiraa Boost Local Development";
   authenticodeThumbprint: TransactionHash;
 }
 
@@ -1038,7 +1038,6 @@ model PhysicalRunConfigBase {
   schemaVersion: TransactionSchemaVersion;
   configId: TransactionIdentifier;
   artifactManifestPath: "artifact-manifest.json";
-  artifactManifestSha256: TransactionHash;
   operationVersionId: TransactionIdentifier;
   buildId: TransactionIdentifier;
   sourceCommit: PhysicalSourceCommit;

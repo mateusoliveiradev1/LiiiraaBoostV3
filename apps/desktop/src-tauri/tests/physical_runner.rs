@@ -198,7 +198,6 @@ fn config(stage: PhysicalStage) -> PhysicalRunConfig {
         stage,
         config_path: PathBuf::from(r"C:\phase6\configs\run-config.json"),
         artifact_manifest_path: PathBuf::from(r"C:\phase6\artifact-manifest.json"),
-        artifact_manifest_sha256: format!("sha256:{}", "a".repeat(64)),
         config_sha256: format!("sha256:{}", "b".repeat(64)),
         operation_version_id: "managed-power-scheme-v3".to_owned(),
         build_id: "physical-build-0001".to_owned(),

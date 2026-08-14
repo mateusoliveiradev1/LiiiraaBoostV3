@@ -149,7 +149,6 @@ pub struct PhysicalRunConfig {
     pub stage: PhysicalStage,
     pub config_path: PathBuf,
     pub artifact_manifest_path: PathBuf,
-    pub artifact_manifest_sha256: String,
     pub config_sha256: String,
     pub operation_version_id: String,
     pub build_id: String,
@@ -176,7 +175,7 @@ impl ArtifactCustody {
     pub fn test_fixture(config: &PhysicalRunConfig) -> Self {
         Self {
             root: PathBuf::from(r"C:\phase6"),
-            manifest_sha256: config.artifact_manifest_sha256.clone(),
+            manifest_sha256: format!("sha256:{}", "a".repeat(64)),
             config_sha256: config.config_sha256.clone(),
             runner_sha256: format!("sha256:{}", "c".repeat(64)),
             msi_path: r"C:\phase6\liiiraa-boost.msi".to_owned(),
@@ -303,6 +302,7 @@ impl PhysicalGuestRunner {
             io.verify_installed(&artifact)?;
             let record = self.record(
                 "installed-ready",
+                &artifact.manifest_sha256,
                 0,
                 ZERO_HASH,
                 &artifact.runner_sha256,
@@ -323,6 +323,7 @@ impl PhysicalGuestRunner {
             }
             let record = self.record(
                 "checkpoint-ready",
+                &artifact.manifest_sha256,
                 1,
                 &hash_bytes(installed.as_deref().unwrap_or_default()),
                 &artifact.runner_sha256,
@@ -342,8 +343,7 @@ impl PhysicalGuestRunner {
         &self,
         artifact: &ArtifactCustody,
     ) -> Result<(), PhysicalRunnerError> {
-        if artifact.manifest_sha256 != self.config.artifact_manifest_sha256
-            || artifact.config_sha256 != self.config.config_sha256
+        if artifact.config_sha256 != self.config.config_sha256
             || !same_canonical_path(&artifact.root, self.config.artifact_manifest_path.parent())
         {
             return Err(PhysicalRunnerError::blocked("artifact-config-binding"));
@@ -359,10 +359,21 @@ impl PhysicalGuestRunner {
         io.launch_webdriver(&artifact.tauri_driver_path, &artifact.msedge_driver_path)?;
         let prior_guid = io.observe_windows_state()?;
         let device_binding_id = io.local_device_binding_id()?;
-        let compose = transactional_plan(&prior_guid, &device_binding_id, &self.config);
+        let compose = transactional_plan(
+            &prior_guid,
+            &device_binding_id,
+            &artifact.manifest_sha256,
+            &self.config,
+        );
         let approved_at =
             io.confirm_plan_apply("phase6-physical-plan", &self.config.operation_version_id)?;
-        let approval = plan_approval(&approved_at, &prior_guid, &device_binding_id, &self.config);
+        let approval = plan_approval(
+            &approved_at,
+            &prior_guid,
+            &device_binding_id,
+            &artifact.manifest_sha256,
+            &self.config,
+        );
         let apply = plan_transaction("apply");
         io.invoke_tauri(&self.config.commands.compose_plan, &compose)?;
         io.invoke_tauri(&self.config.commands.approve_plan, &approval)?;
@@ -375,6 +386,7 @@ impl PhysicalGuestRunner {
         }
         let continuation = self.record(
             "reboot-pending",
+            &artifact.manifest_sha256,
             3,
             &hash_text(&prior_guid),
             &artifact.runner_sha256,
@@ -425,7 +437,7 @@ impl PhysicalGuestRunner {
                 "participantId": binding.participant_id,
                 "machineSlot": binding.machine_slot,
                 "runEvidenceId": format!("run-{}", self.config.build_id),
-                "artifactManifestSha256": self.config.artifact_manifest_sha256,
+                "artifactManifestSha256": artifact.manifest_sha256,
                 "configSha256": self.config.config_sha256,
                 "friendsRosterSha256": binding.roster_sha256,
                 "previewSha256": preview_sha256,
@@ -437,6 +449,7 @@ impl PhysicalGuestRunner {
             None
         };
         let envelope = self.raw_envelope(
+            artifact,
             friends,
             consent,
             &redacted_output,
@@ -507,6 +520,7 @@ impl PhysicalGuestRunner {
 
     fn raw_envelope(
         &self,
+        artifact: &ArtifactCustody,
         friends: Option<&FriendsRosterBinding>,
         consent: Option<Value>,
         redacted_output: &str,
@@ -519,7 +533,7 @@ impl PhysicalGuestRunner {
             "stage": self.config.stage.as_str(),
             "participantId": friends.map(|binding| binding.participant_id.as_str()).unwrap_or("owner-local"),
             "machineSlot": friends.map(|binding| binding.machine_slot.as_str()),
-            "artifactManifestSha256": self.config.artifact_manifest_sha256,
+            "artifactManifestSha256": artifact.manifest_sha256,
             "configSha256": self.config.config_sha256,
             "friendsRosterSha256": friends.map(|binding| binding.roster_sha256.as_str()),
             "continuation": ["installed-ready", "checkpoint-ready", "running", "reboot-pending", "resumed-observation", "restored-complete"],
@@ -541,12 +555,20 @@ impl PhysicalGuestRunner {
     fn record(
         &self,
         state: &str,
+        artifact_manifest_sha256: &str,
         sequence: u8,
         previous_hash: &str,
         runner_sha256: &str,
         observation: &str,
     ) -> Result<Vec<u8>, PhysicalRunnerError> {
-        let value = self.record_value(state, sequence, previous_hash, runner_sha256, observation);
+        let value = self.record_value(
+            state,
+            artifact_manifest_sha256,
+            sequence,
+            previous_hash,
+            runner_sha256,
+            observation,
+        );
         validate_transactional_recovery_document(&value)
             .map_err(|_| PhysicalRunnerError::blocked("continuation-schema"))?;
         serde_json::to_vec(&value)
@@ -556,6 +578,7 @@ impl PhysicalGuestRunner {
     fn record_value(
         &self,
         state: &str,
+        artifact_manifest_sha256: &str,
         sequence: u8,
         previous_hash: &str,
         runner_sha256: &str,
@@ -567,7 +590,7 @@ impl PhysicalGuestRunner {
             "continuationId": format!("continuation-{sequence}-{}", self.config.build_id),
             "state": state,
             "sequence": sequence,
-            "artifactManifestSha256": self.config.artifact_manifest_sha256,
+            "artifactManifestSha256": artifact_manifest_sha256,
             "configSha256": self.config.config_sha256,
             "runnerSha256": runner_sha256,
             "stage": self.config.stage.as_str(),
@@ -673,7 +696,6 @@ fn physical_config_from_generated(
         stage,
         config_path: path.to_path_buf(),
         artifact_manifest_path: root.join(required_string(&value, "artifactManifestPath")?),
-        artifact_manifest_sha256: required_string(&value, "artifactManifestSha256")?.to_owned(),
         config_sha256,
         operation_version_id: required_string(&value, "operationVersionId")?.to_owned(),
         build_id: required_string(&value, "buildId")?.to_owned(),
@@ -1427,12 +1449,13 @@ fn webdriver_request(
 fn transactional_plan(
     prior_guid: &str,
     device_binding_id: &str,
+    artifact_manifest_sha256: &str,
     config: &PhysicalRunConfig,
 ) -> Value {
     let hardware_fingerprint = hash_text(device_binding_id);
     let posture_fingerprint = hash_text(&format!(
         "{}:{}",
-        config.artifact_manifest_sha256, config.config_sha256
+        artifact_manifest_sha256, config.config_sha256
     ));
     json!({
         "document": {
@@ -1450,13 +1473,14 @@ fn plan_approval(
     approved_at: &str,
     prior_guid: &str,
     device_binding_id: &str,
+    artifact_manifest_sha256: &str,
     config: &PhysicalRunConfig,
 ) -> Value {
     let proof_reference = format!("local-confirmation-{}", &hash_text(approved_at)[7..23]);
     let hardware_fingerprint = hash_text(device_binding_id);
     let posture_fingerprint = hash_text(&format!(
         "{}:{}",
-        config.artifact_manifest_sha256, config.config_sha256
+        artifact_manifest_sha256, config.config_sha256
     ));
     json!({"document":{"kind":"plan-approval","schemaVersion":"1.0","approvalId":"phase6-approval","planId":"phase6-physical-plan","planRevision":1,"revisionFingerprint":hash_text(&format!("{}:{}", config.operation_version_id, prior_guid)),"evidenceFingerprint":hash_text(prior_guid),"device":{"deviceBindingId":device_binding_id,"hardwareFingerprint":hardware_fingerprint,"securityPostureFingerprint":posture_fingerprint},"approvedRisk":"verified","compatibility":"compatible","recoveryCoverage":"ready","intent":"apply","proof":{"proofReference":proof_reference,"action":"approve-plan-apply","issuedAt":approved_at,"expiresAt":timestamp_after(300)},"approvedAt":approved_at,"audit":{"auditId":"phase6-approval-audit","recordedAt":approved_at},"operationVersionIds":[config.operation_version_id]}})
 }
