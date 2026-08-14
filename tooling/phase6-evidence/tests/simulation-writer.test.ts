@@ -208,6 +208,30 @@ describe('canonical simulation candidate', () => {
 });
 
 describe('artifact-bound atomic admission', () => {
+  it('selects the latest complete append-only artifact authority block', () => {
+    const setup = fixture();
+    const latest = readFileSync(setup.summaryPath, 'utf8');
+    const historical = latest
+      .replace('target/phase6-physical/source-commit/build-v41', 'target/phase6-physical/old/build-v40')
+      .replace('physical-build-managed-power-scheme-v41', 'physical-build-managed-power-scheme-v40')
+      .replace('managed-power-scheme-v41', 'managed-power-scheme-v40')
+      .replace(setup.artifactSha256, 'b'.repeat(64));
+    write(setup.summaryPath, `${historical}\n${latest}`);
+
+    expect(() =>
+      writeCanonicalSimulationEvidence({
+        artifactManifestPath: setup.artifactPath,
+        evidenceManifestPath: setup.evidenceManifestPath,
+        harnessPath: setup.harnessPath,
+        minimumVersion: 'managed-power-scheme-v3',
+        summaryPath: setup.summaryPath,
+        uatPath: setup.uatPath,
+        workspaceRoot: setup.root,
+      }),
+    ).not.toThrow();
+    expect(readFileSync(setup.summaryPath, 'utf8').startsWith(historical)).toBe(true);
+  });
+
   it('preserves blocked bytes and admits one exact v41 deterministic predecessor', () => {
     const setup = fixture();
     const result = writeCanonicalSimulationEvidence({
