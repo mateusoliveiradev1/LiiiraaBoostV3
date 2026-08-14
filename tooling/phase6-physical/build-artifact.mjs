@@ -820,7 +820,7 @@ const findBuiltMsi = () => {
   return files[0];
 };
 
-const inspectMsi = (path) => {
+export const inspectMsi = (path) => {
   const escaped = path.replaceAll("'", "''");
   return powershellJson(`
 $ErrorActionPreference = 'Stop'
@@ -828,16 +828,86 @@ $installer = New-Object -ComObject WindowsInstaller.Installer
 $database = $installer.OpenDatabase('${escaped}', 0)
 function Read-Property([string]$name) {
   $view = $database.OpenView("SELECT Value FROM Property WHERE Property='$name'")
-  $view.Execute(); $record = $view.Fetch(); $view.Close()
+  $null = $view.Execute(); $record = $view.Fetch(); $null = $view.Close()
   if ($record) { return $record.StringData(1) }
   return $null
 }
 $files = $database.OpenView('SELECT FileName FROM File')
-$files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $files.Close()
-$custom = $database.OpenView('SELECT Action FROM CustomAction'); $custom.Execute(); $customCount = 0; while ($custom.Fetch()) { $customCount++ }; $custom.Close()
-[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customCount } | ConvertTo-Json -Compress
+$null = $files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $null = $files.Close()
+$custom = $database.OpenView('SELECT Action, Type, Source, Target FROM CustomAction'); $null = $custom.Execute(); $customActions = @(); while ($record = $custom.Fetch()) { $customActions += [pscustomobject]@{ action = $record.StringData(1); type = $record.IntegerData(2); source = $record.StringData(3); target = $record.StringData(4) } }; $null = $custom.Close()
+[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions) } | ConvertTo-Json -Depth 5 -Compress
 `);
 };
+
+const stripMsiCustomActions = (path) => {
+  const escaped = path.replaceAll("'", "''");
+  run('powershell', [
+    '-NoProfile',
+    '-NonInteractive',
+    '-Command',
+    `
+$ErrorActionPreference = 'Stop'
+$installer = New-Object -ComObject WindowsInstaller.Installer
+$database = $installer.OpenDatabase('${escaped}', 1)
+$view = $database.OpenView('SELECT Action FROM CustomAction')
+$null = $view.Execute()
+$actions = @()
+while ($record = $view.Fetch()) { $actions += $record.StringData(1) }
+$null = $view.Close()
+$sequenceTables = @('InstallExecuteSequence', 'InstallUISequence', 'AdminExecuteSequence', 'AdminUISequence', 'AdvtExecuteSequence')
+foreach ($action in $actions) {
+  $literal = $action.Replace("'", "''")
+  foreach ($table in $sequenceTables) {
+    $delete = $database.OpenView("DELETE FROM $table WHERE Action='$literal'")
+    $null = $delete.Execute()
+    $null = $delete.Close()
+  }
+  $deleteEvents = $database.OpenView("DELETE FROM ControlEvent WHERE Event='DoAction' AND Argument='$literal'")
+  $null = $deleteEvents.Execute()
+  $null = $deleteEvents.Close()
+  $deleteAction = $database.OpenView("DELETE FROM CustomAction WHERE Action='$literal'")
+  $null = $deleteAction.Execute()
+  $null = $deleteAction.Close()
+}
+$deleteWixCa = $database.OpenView("DELETE FROM Binary WHERE Name='WixUIWixca'")
+$null = $deleteWixCa.Execute()
+$null = $deleteWixCa.Close()
+$database.Commit()
+`,
+  ]);
+};
+
+export function validateMsiInspection(inspection, expected) {
+  const actualProductCode = String(inspection?.productCode || '')
+    .replace(/[{}]/gu, '')
+    .toLowerCase();
+  if (
+    actualProductCode !== expected.productCode.toLowerCase() ||
+    inspection?.packageVersion !== expected.packageVersion
+  )
+    fail('MSI ProductCode/package version does not match the signed installation manifest');
+  const expectedFiles = [
+    'installation-manifest.json',
+    'installation-manifest.json.p7s',
+    'liiiraa-desktop.exe',
+    'liiiraa-optimizer-service.exe',
+    'phase6-physical-runner.exe',
+  ].sort();
+  const actualFiles = (inspection.files || [])
+    .map((name) => name.split('|').at(-1).toLowerCase())
+    .sort();
+  if (!deepEqual(actualFiles, expectedFiles))
+    fail('MSI must contain the exact installed files');
+  if (
+    inspection.customActionCount !== 0 ||
+    !Array.isArray(inspection.customActions) ||
+    inspection.customActions.length !== 0
+  )
+    fail('MSI must contain zero CustomAction authority');
+  if (/DownloadAndInvokeBootstrapper|powershell(?:\.exe)?|cmd(?:\.exe)?/iu.test(JSON.stringify(inspection)))
+    fail('MSI inspection contains forbidden bootstrapper or shell authority');
+  return true;
+}
 
 const setMsiProductCode = (path, productCode) => {
   const escaped = path.replaceAll("'", "''");
@@ -1126,18 +1196,10 @@ const buildAndSmoke = (options) => {
     const emittedMsi = findBuiltMsi();
     const msiPath = join(workRoot, 'liiiraa-boost.msi');
     copyFileSync(emittedMsi, msiPath);
+    stripMsiCustomActions(msiPath);
     setMsiProductCode(msiPath, productCode);
     const msiInspection = inspectMsi(msiPath);
-    if (
-      String(msiInspection.productCode).replace(/[{}]/gu, '').toLowerCase() !== productCode ||
-      msiInspection.packageVersion !== packageVersion
-    ) {
-      fail('MSI ProductCode/package version does not match the signed installation manifest');
-    }
-    if (msiInspection.customActionCount !== 0)
-      fail('MSI contains unaudited custom action authority');
-    if (msiInspection.files.some((name) => /tauri-driver|msedgedriver/iu.test(name)))
-      fail('portable driver is present in MSI File table');
+    validateMsiInspection(msiInspection, { productCode, packageVersion });
     signatures.msi = signAuthenticode(signtool, signer.thumbprint, msiPath);
 
     const configs = buildCanonicalRunConfigs({ operationVersionId, buildId, sourceCommit });
