@@ -891,6 +891,7 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Incomplete physical observations are isolated FAIL attempts — Coverage gaps remain visible without contaminating the promotion manifest or fabricating security, fault, or accessibility success.
 - [Phase 06]: Physical apply and friends export require exact local confirmation phrases — The runner cannot auto-approve plan mutation or fabricate participant consent.
 - [Phase 06]: Preserve the restricted service SID and protected ACL custody while removing WTS from optimizer startup. — Installed startup validates custody/storage and opens the local pipe without selecting a user; only the authenticated connected peer may supply a PID/image/SID/session-bound token and lifetime-scoped effect lease, with no WTS fallback.
+- [Phase 06]: Prove protected installed-manifest custody by composition, not broader authority. — An administrator read denial is combined with builder-verified canonical/CMS artifact bytes, direct version/size/SHA-256/Authenticode checks for all three installed binaries, and restricted-service startup plus two real authenticated pipe probes; ACLs remain unchanged and no SYSTEM helper is introduced.
 
 ### Pending Todos
 
