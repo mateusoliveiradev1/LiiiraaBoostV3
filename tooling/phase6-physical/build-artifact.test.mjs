@@ -9,6 +9,7 @@ import { transactionalRecoveryDocumentValidator } from '../../packages/contracts
 import {
   CANONICAL_COMMANDS,
   INSTALLED_ROLES,
+  PHYSICAL_PRODUCT_CODE,
   PORTABLE_ROLES,
   TRUSTED_INSTALLER_SPKI_SHA256,
   assertDeclaredInputState,
@@ -622,6 +623,17 @@ test('each reserved operation version advances the MSI package version monotonic
   assert.match(source, /LIIIRAA_PHYSICAL_PACKAGE_VERSION: packageVersion/u);
   assert.match(source, /effectivePhysicalProfile/u);
   assert.match(source, /JSON\.stringify\(effectivePhysicalProfile\)/u);
+});
+
+test('physical updates preserve the product identity already admitted by installed custody', () => {
+  assert.equal(PHYSICAL_PRODUCT_CODE, '72696290-c079-44db-9fdd-6e7cc11aa2c2');
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  assert.match(source, /const productCode = PHYSICAL_PRODUCT_CODE/u);
+  assert.equal(
+    (source.match(/productCode: randomUUID\(\)/gu) ?? []).length,
+    1,
+    'only the lower-version downgrade probe may use a distinct ProductCode',
+  );
 });
 
 test('installation manifest contains exactly desktop, service, and runner roles', () => {
