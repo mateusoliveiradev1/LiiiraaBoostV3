@@ -806,7 +806,7 @@ Plans:
 
 **Wave 14** *(blocked on 06-30 and 06-36)*
 
-- [ ] 06-37-PLAN.md — Physical Tauri Windows named-pipe transport and command wiring
+- [x] 06-37-PLAN.md — Physical Tauri Windows named-pipe transport and command wiring
 
 **Wave 15** *(blocked on 06-32, 06-35, and 06-37)*
 
@@ -926,7 +926,7 @@ Plans:
 | 3. Complete Web Experience                         | 82/82          | Complete    | 2026-08-04 |
 | 4. Identity, Commerce, Devices, and Administration | 63/66          | In Progress |            |
 | 5. Hardware Intelligence and Measured Evidence     | 10/11 | In Progress | - |
-| 6. Transactional Plans and Recovery                | 31/39 | In Progress|  |
+| 6. Transactional Plans and Recovery                | 32/39 | In Progress|  |
 | 7. Verified Optimization Catalog                   | 0/TBD          | Not started | -          |
 | 8. Game Profiles and Session Automation            | 0/TBD          | Not started | -          |
 | 9. Advisory AI and Secure Support                  | 0/TBD          | Not started | -          |

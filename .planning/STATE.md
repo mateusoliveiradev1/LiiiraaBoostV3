@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-36-PLAN.md
-last_updated: "2026-08-14T00:30:58.237Z"
+stopped_at: Completed 06-37-PLAN.md
+last_updated: "2026-08-14T01:08:33.047Z"
 last_activity: 2026-08-14
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 256
-  completed_plans: 245
+  completed_plans: 246
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-07-26)
 ## Current Position
 
 Phase: 06 (transactional-plans-and-recovery) — EXECUTING
-Plan: 7 of 39
+Plan: 8 of 39
 Status: Ready to execute
 Last activity: 2026-08-14
 
@@ -273,6 +273,7 @@ _Updated after plan completion_
 | Phase 06 P30 | 13 min | 1 tasks | 6 files |
 | Phase 06 P32 | 25 min | 2 tasks | 7 files |
 | Phase 06 P36 | 14 min | 1 tasks | 6 files |
+| Phase 06 P37 | 29 min | 1 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -882,6 +883,9 @@ Decisions are logged in the PROJECT.md Key Decisions table. Recent decisions aff
 - [Phase 06]: Bind effect-lease lifetime to session-owned token custody — The borrowed handle cannot outlive authentication or be cloned into renderer/domain authority.
 - [Phase 06]: Drain and join timed-out impersonated workers — Timeout remains observation-required uncertainty only after verified RevertToSelf cleanup.
 - [Phase 06]: Verify effective TokenUser SID and TokenSessionId before PowrProf — LocalSystem or a mismatched client identity must make zero physical calls.
+- [Phase 06]: Compile and construct the real broker authority only for phase6-physical; ordinary builds retain explicit BrokerUnavailable mutation behavior. — This keeps development and fixture builds fail-closed and prevents a physical broker failure from selecting a lower-authority adapter.
+- [Phase 06]: Treat every post-dispatch transport failure as observation-required unknown until a new authenticated session observes Windows state; never redispatch automatically. — Durable prepare proves the mutation may have occurred, so only independent observation can safely resolve the outcome.
+- [Phase 06]: Derive observed journal and receipt state from the validated broker observation rather than from the requested target. — Requested state is intent, not evidence; dynamic binding prevents fabricated success and keeps recovery verdicts observation-authoritative.
 
 ### Pending Todos
 
@@ -933,6 +937,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T00:30:58.228Z
-Stopped at: Completed 06-36-PLAN.md
+Last session: 2026-08-14T01:08:04.017Z
+Stopped at: Completed 06-37-PLAN.md
 Resume file: None
