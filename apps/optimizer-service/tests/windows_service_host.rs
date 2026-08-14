@@ -391,6 +391,28 @@ fn windows_host_uses_reject_remote_pipe_mode_and_restores_impersonation() {
 
 #[cfg(windows)]
 #[test]
+fn connected_pipe_handle_is_closed_before_single_instance_listener_is_rearmed() {
+    let source = include_str!("../src/windows_pipe.rs");
+    let run = source
+        .split("pub fn run(host: &mut PreparedHost")
+        .nth(1)
+        .expect("WindowsPipeHost::run body");
+    let disconnected = run
+        .find("DisconnectNamedPipe(pipe.handle())")
+        .expect("connected pipe disconnect");
+    let dropped = run.find("drop(pipe);").expect("connected pipe handle drop");
+    let rearmed = run
+        .find("host.listener = Some(NativePipe::create")
+        .expect("single-instance listener rearm");
+
+    assert!(
+        disconnected < dropped && dropped < rearmed,
+        "the previous pipe handle must close before CreateNamedPipe rearms its single instance"
+    );
+}
+
+#[cfg(windows)]
+#[test]
 #[ignore = "requires an elevated installed build with signed canonical custody"]
 fn elevated_installed_host_can_start_stop_and_restart_without_dispatch() {
     use std::sync::mpsc;
