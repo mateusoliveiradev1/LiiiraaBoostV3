@@ -13,6 +13,9 @@
     "createUpdaterArtifacts": false,
     "windows": {
       "allowDowngrades": false,
+      "webviewInstallMode": {
+        "type": "skip"
+      },
       "wix": {
         "fragmentPaths": ["./installer/optimizer-service.wxs"],
         "componentGroupRefs": ["Phase6PhysicalRuntime"]

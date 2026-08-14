@@ -4,6 +4,8 @@ param(
   [Parameter(Mandatory = $true)][string]$DowngradeMsiPath,
   [Parameter(Mandatory = $true)][string]$ProductCode,
   [Parameter(Mandatory = $true)][string]$OutputRoot,
+  [Parameter(Mandatory = $true)][string]$ExpectedWebView2Version,
+  [Parameter(Mandatory = $true)][string]$ExpectedWebView2Sha256,
   [Parameter(Mandatory = $true)][string]$ResultPath
 )
 
@@ -29,6 +31,43 @@ function Assert-ContainedPath([string]$Candidate, [string]$Root, [string]$Label)
   if (-not $candidateFull.StartsWith($rootFull + '\', [StringComparison]::OrdinalIgnoreCase)) {
     throw "$Label is outside the exact lifecycle output root"
   }
+}
+
+function Get-VerifiedWebView2Runtime {
+  $clientId = '{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+  if ($ExpectedWebView2Version -notmatch '^[1-9][0-9]*\.[0-9]+\.[0-9]+\.[0-9]+$') {
+    throw 'expected WebView2 Runtime version is invalid'
+  }
+  if ($ExpectedWebView2Sha256 -notmatch '^sha256:[0-9a-f]{64}$') {
+    throw 'expected WebView2 Runtime SHA-256 is invalid'
+  }
+  $registrations = @(
+    [pscustomobject]@{ Path = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\$clientId"; Roots = @([Environment]::GetFolderPath('ProgramFilesX86'), $env:ProgramFiles) },
+    [pscustomobject]@{ Path = "HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\$clientId"; Roots = @($env:ProgramFiles, [Environment]::GetFolderPath('ProgramFilesX86')) },
+    [pscustomobject]@{ Path = "HKCU:\Software\Microsoft\EdgeUpdate\Clients\$clientId"; Roots = @($env:LOCALAPPDATA) }
+  )
+  foreach ($registration in $registrations) {
+    if (-not (Test-Path -LiteralPath $registration.Path)) { continue }
+    $version = [string](Get-ItemPropertyValue -LiteralPath $registration.Path -Name 'pv' -ErrorAction Stop)
+    if ($version -ne $ExpectedWebView2Version) { continue }
+    foreach ($root in ($registration.Roots | Where-Object { $_ })) {
+      $runtimePath = Join-Path $root "Microsoft\EdgeWebView\Application\$version\msedgewebview2.exe"
+      if (-not (Test-Path -LiteralPath $runtimePath -PathType Leaf)) { continue }
+      $item = Get-Item -LiteralPath $runtimePath
+      $signature = Get-AuthenticodeSignature -LiteralPath $runtimePath
+      $publisher = if ($signature.SignerCertificate) {
+        $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
+      } else { $null }
+      $hash = 'sha256:' + (Get-FileHash -Algorithm SHA256 -LiteralPath $runtimePath).Hash.ToLowerInvariant()
+      if ($item.VersionInfo.FileVersion -ne $version) { throw 'WebView2 Runtime file version does not match the registry' }
+      if ($item.VersionInfo.ProductName -ne 'Microsoft Edge WebView2') { throw 'WebView2 Runtime product identity is invalid' }
+      if ($signature.Status.ToString() -ne 'Valid') { throw 'WebView2 Runtime signature is invalid' }
+      if ($publisher -ne 'Microsoft Corporation') { throw 'WebView2 Runtime is not signed by Microsoft Corporation' }
+      if ($hash -ne $ExpectedWebView2Sha256) { throw 'WebView2 Runtime executable changed after builder preflight' }
+      return [ordered]@{ Version = $version; Sha256 = $hash; Path = $runtimePath }
+    }
+  }
+  throw 'verified Microsoft Edge WebView2 Runtime is unavailable'
 }
 
 function Invoke-Msi([string[]]$Arguments, [string]$LogName) {
@@ -134,6 +173,7 @@ try {
   Assert-ContainedPath $ResultPath $OutputRoot 'result'
   if (-not (Test-Path -LiteralPath $MsiPath -PathType Leaf)) { throw 'MSI is missing' }
   if (-not (Test-Path -LiteralPath $DowngradeMsiPath -PathType Leaf)) { throw 'downgrade probe is missing' }
+  $webView2Runtime = Get-VerifiedWebView2Runtime
 
   Invoke-Msi @('/i', ('"' + $MsiPath + '"')) 'install' | Out-Null
   $installed = $true
@@ -184,6 +224,8 @@ try {
     recoveryCustodyPreserved = $true
     forcedReboot = $false
     residualsAbsent = $true
+    webView2RuntimeVersion = $webView2Runtime.Version
+    webView2RuntimeSha256 = $webView2Runtime.Sha256
     installedSetSha256 = $installedSet
     recoveryCustodySha256 = $recoveryCustody
     completedAt = [DateTime]::UtcNow.ToString('o')

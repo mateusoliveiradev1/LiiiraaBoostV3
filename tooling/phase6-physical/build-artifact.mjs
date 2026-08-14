@@ -136,6 +136,13 @@ const DECLARED_INPUTS = Object.freeze([
 const SHA_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
 const MINIMUM_OPERATION = /^managed-power-scheme-v([1-9][0-9]*)$/u;
+const WEBVIEW2_CLIENT_GUID = '{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}';
+const WEBVIEW2_VERSION_PATTERN = /^[1-9][0-9]*\.[0-9]+\.[0-9]+\.[0-9]+$/u;
+const WEBVIEW2_REGISTRY_KEYS = new Set([
+  `HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\${WEBVIEW2_CLIENT_GUID}`,
+  `HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\EdgeUpdate\\Clients\\${WEBVIEW2_CLIENT_GUID}`,
+  `HKEY_CURRENT_USER\\Software\\Microsoft\\EdgeUpdate\\Clients\\${WEBVIEW2_CLIENT_GUID}`,
+]);
 
 const fail = (message) => {
   throw new Error(message);
@@ -260,6 +267,8 @@ export function validatePhysicalProfile(profile) {
     fail('physical profile updater artifacts must remain disabled');
   if (profile.bundle.windows?.allowDowngrades !== false)
     fail('physical profile must reject downgrade');
+  if (!deepEqual(profile.bundle.windows?.webviewInstallMode, { type: 'skip' }))
+    fail('physical profile WebView2 install mode must be exactly skip');
   const wix = profile.bundle.windows?.wix;
   if (!deepEqual(wix?.fragmentPaths, ['./installer/optimizer-service.wxs']))
     fail('physical profile must bind the optimizer service fragment');
@@ -281,6 +290,42 @@ export function validatePhysicalProfile(profile) {
   )
     fail('desktop must remain non-elevated/asInvoker');
   return true;
+}
+
+export function validateWebView2RuntimeEvidence(evidence) {
+  if (!WEBVIEW2_VERSION_PATTERN.test(evidence?.registryVersion || ''))
+    fail('WebView2 Runtime registry version is missing or invalid');
+  if (!WEBVIEW2_REGISTRY_KEYS.has(evidence.registryKey))
+    fail('WebView2 Runtime registry identity is invalid');
+  if (
+    evidence.registryHive !== 'HKEY_LOCAL_MACHINE' &&
+    evidence.registryHive !== 'HKEY_CURRENT_USER'
+  )
+    fail('WebView2 Runtime registry hive is invalid');
+  if (!evidence.registryKey.startsWith(`${evidence.registryHive}\\`))
+    fail('WebView2 Runtime registry hive does not match its key');
+  const escapedVersion = evidence.registryVersion.replaceAll('.', '\\.');
+  const runtimePath = new RegExp(
+    `^[A-Za-z]:\\\\.*\\\\Microsoft\\\\EdgeWebView\\\\Application\\\\${escapedVersion}\\\\msedgewebview2\\.exe$`,
+    'iu',
+  );
+  if (!runtimePath.test(evidence.executablePath || ''))
+    fail('WebView2 Runtime executable path is invalid');
+  if (evidence.fileVersion !== evidence.registryVersion)
+    fail('WebView2 Runtime file version does not match the registry version');
+  if (evidence.productName !== 'Microsoft Edge WebView2')
+    fail('WebView2 product identity is invalid');
+  if (evidence.signatureStatus !== 'Valid')
+    fail('WebView2 Runtime signature is invalid');
+  if (evidence.publisher !== 'Microsoft Corporation')
+    fail('WebView2 Runtime is not signed by the Microsoft publisher');
+  if (!SHA_PATTERN.test(evidence.executableSha256 || ''))
+    fail('WebView2 Runtime executable SHA-256 is invalid');
+  return {
+    version: evidence.registryVersion,
+    executablePath: evidence.executablePath,
+    executableSha256: evidence.executableSha256,
+  };
 }
 
 export function validateWixContract(xml) {
@@ -513,6 +558,50 @@ const powershellJson = (script) => {
     capture: true,
   });
   return JSON.parse(output);
+};
+
+export const detectWebView2Runtime = () => {
+  const evidence = powershellJson(`
+$ErrorActionPreference = 'Stop'
+$clientId = '${WEBVIEW2_CLIENT_GUID}'
+$registrations = @(
+  [pscustomobject]@{ hive = 'HKEY_LOCAL_MACHINE'; key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; providerPath = "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; roots = @([Environment]::GetFolderPath('ProgramFilesX86'), $env:ProgramFiles) },
+  [pscustomobject]@{ hive = 'HKEY_LOCAL_MACHINE'; key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; providerPath = "HKLM:\\SOFTWARE\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; roots = @($env:ProgramFiles, [Environment]::GetFolderPath('ProgramFilesX86')) },
+  [pscustomobject]@{ hive = 'HKEY_CURRENT_USER'; key = "HKEY_CURRENT_USER\\Software\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; providerPath = "HKCU:\\Software\\Microsoft\\EdgeUpdate\\Clients\\$clientId"; roots = @($env:LOCALAPPDATA) }
+)
+$results = @()
+foreach ($registration in $registrations) {
+  if (-not (Test-Path -LiteralPath $registration.providerPath)) { continue }
+  $version = [string](Get-ItemPropertyValue -LiteralPath $registration.providerPath -Name 'pv' -ErrorAction Stop)
+  $runtime = $registration.roots |
+    Where-Object { $_ } |
+    ForEach-Object { Join-Path $_ "Microsoft\\EdgeWebView\\Application\\$version\\msedgewebview2.exe" } |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+    Select-Object -First 1
+  $item = if ($runtime) { Get-Item -LiteralPath $runtime } else { $null }
+  $signature = if ($runtime) { Get-AuthenticodeSignature -LiteralPath $runtime } else { $null }
+  $publisher = if ($signature -and $signature.SignerCertificate) {
+    $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)
+  } else { $null }
+  $results += [pscustomobject]@{
+    registryHive = $registration.hive
+    registryKey = $registration.key
+    registryVersion = $version
+    executablePath = $runtime
+    fileVersion = if ($item) { $item.VersionInfo.FileVersion } else { $null }
+    productName = if ($item) { $item.VersionInfo.ProductName } else { $null }
+    signatureStatus = if ($signature) { $signature.Status.ToString() } else { $null }
+    publisher = $publisher
+    executableSha256 = if ($runtime) { 'sha256:' + (Get-FileHash -Algorithm SHA256 -LiteralPath $runtime).Hash.ToLowerInvariant() } else { $null }
+  }
+}
+@($results) | ConvertTo-Json -Depth 5 -Compress
+`);
+  const candidates = Array.isArray(evidence) ? evidence : evidence ? [evidence] : [];
+  if (candidates.length === 0)
+    fail('Microsoft Edge WebView2 Runtime registration is unavailable');
+  const verified = candidates.map(validateWebView2RuntimeEvidence);
+  return verified[0];
 };
 
 const certificateSpkiSha256 = (certificateBase64) => {
@@ -786,7 +875,13 @@ $version.Execute(); $version.Close(); $database.Commit()
   ]);
 };
 
-const runLifecycleSmoke = ({ msiPath, downgradeMsiPath, productCode, outputRoot }) => {
+const runLifecycleSmoke = ({
+  msiPath,
+  downgradeMsiPath,
+  productCode,
+  outputRoot,
+  webView2Runtime,
+}) => {
   const resultPath = join(outputRoot, 'elevated-lifecycle-result.json');
   const helper = join(ROOT, LIFECYCLE_HELPER);
   const script = `
@@ -798,6 +893,8 @@ $arguments = @(
   '-DowngradeMsiPath', '"${downgradeMsiPath.replaceAll("'", "''")}"',
   '-ProductCode', '${productCode.replaceAll("'", "''")}',
   '-OutputRoot', '"${outputRoot.replaceAll("'", "''")}"',
+  '-ExpectedWebView2Version', '${webView2Runtime.version.replaceAll("'", "''")}',
+  '-ExpectedWebView2Sha256', '${webView2Runtime.executableSha256.replaceAll("'", "''")}',
   '-ResultPath', '"${resultPath.replaceAll("'", "''")}"'
 )
 $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
@@ -816,6 +913,8 @@ if ($process.ExitCode -ne 0) { throw "elevated lifecycle helper exited $($proces
     result.recoveryCustodyPreserved !== true ||
     result.forcedReboot !== false ||
     result.residualsAbsent !== true
+    || result.webView2RuntimeVersion !== webView2Runtime.version
+    || result.webView2RuntimeSha256 !== webView2Runtime.executableSha256
   ) {
     fail('elevated lifecycle result did not satisfy the closed lifecycle contract');
   }
@@ -868,6 +967,7 @@ const buildAndSmoke = (options) => {
   const context = { mode: 'build-and-smoke', sourceCommit: null, operationVersionId: null };
   try {
     if (process.platform !== 'win32') fail('physical artifact build requires Windows');
+    const webView2Runtime = detectWebView2Runtime();
     const signtool = findSignTool();
     if (!signtool) fail('Windows SDK signtool.exe is unavailable');
     const signer = signerIdentity(TRUSTED_INSTALLER_SPKI_SHA256);
@@ -1143,6 +1243,7 @@ const buildAndSmoke = (options) => {
       downgradeMsiPath,
       productCode: msiInspection.productCode,
       outputRoot: workRoot,
+      webView2Runtime,
     });
     rmSync(downgradeMsiPath, { force: true });
     writeCreateOnce(
@@ -1158,7 +1259,7 @@ const buildAndSmoke = (options) => {
     mkdirSync(dirname(finalRoot), { recursive: true });
     renameSync(workRoot, finalRoot);
     process.stdout.write(
-      `${JSON.stringify({ status: 'PASSED', artifactRoot: relative(ROOT, finalRoot).replaceAll('\\', '/'), sourceCommit, buildId, operationVersionId, artifactManifestSha256: sha256(artifactBytes), lifecycle }, null, 2)}\n`,
+      `${JSON.stringify({ status: 'PASSED', artifactRoot: relative(ROOT, finalRoot).replaceAll('\\', '/'), sourceCommit, buildId, operationVersionId, artifactManifestSha256: sha256(artifactBytes), webView2Runtime, lifecycle }, null, 2)}\n`,
     );
   } catch (error) {
     const reportPath = writeBlockedReport(error, context);

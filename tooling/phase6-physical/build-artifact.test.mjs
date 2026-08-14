@@ -303,7 +303,7 @@ test('WebView2 preflight accepts only the official runtime registry identity and
       (value) =>
         (value.executablePath =
           'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\151.0.4129.78\\msedge.exe'),
-      /runtime executable/u,
+      /Runtime executable/u,
     ],
     [(value) => (value.productName = 'Microsoft Edge'), /WebView2 product/u],
     [(value) => (value.signatureStatus = 'UnknownError'), /signature/u],
