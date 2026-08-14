@@ -188,10 +188,25 @@ test('RED: observed Audit starts and stops only the exact VM with bounded health
   assert.match(source, /healthy\.Count\s+-eq\s+6/u);
   assert.match(source, /AddSeconds\(180\)/u);
   assert.match(source, /finally/u);
-  assert.match(source, /Stop-VM\s+-Name\s+\$expectedVmName\s+-Shutdown\s+-Force/u);
+  assert.match(source, /Stop-VM\s+-Name\s+\$expectedVmName\s+-Force/u);
+  assert.doesNotMatch(source, /Stop-VM[^\r\n]*-(?:Shutdown|TurnOff|Save)/u);
   assert.match(source, /Phase6Audit/u);
   assert.doesNotMatch(source, /Invoke-Command\s+-VMName/u);
   assert.doesNotMatch(source, /Restore-VMSnapshot|Checkpoint-VM|Remove-VMSnapshot/u);
+});
+
+test('RED: failed observation exposes cleanup-only authority for the exact VM', () => {
+  const source = readFileSync(elevatedLoggerPath, 'utf8');
+  assert.match(source, /'Phase6ObservationCleanup'/u);
+  const cleanupStart = source.indexOf("if ($Action -eq 'Phase6ObservationCleanup')");
+  const cleanupEnd = source.indexOf("if ($Action -eq 'Phase6ObservedAudit')");
+  assert.ok(cleanupStart >= 0 && cleanupEnd > cleanupStart);
+  const cleanup = source.slice(cleanupStart, cleanupEnd);
+  assert.match(cleanup, /LiiiraaBoost-W11-25H2-Clean/u);
+  assert.match(cleanup, /Clean-Windows-Ready/u);
+  assert.match(cleanup, /Stop-VM\s+-Name\s+\$expectedVmName\s+-Force/u);
+  assert.match(cleanup, /AddSeconds\(120\)/u);
+  assert.doesNotMatch(cleanup, /Start-VM|Phase6Audit|Invoke-Command|TurnOff|Save/u);
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
