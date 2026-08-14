@@ -1349,6 +1349,93 @@ mod windows_host {
     fn installed_custody_error(error: CustodyError) -> HostError {
         host_error(installed_custody_code(error.code))
     }
+
+    #[cfg(test)]
+    mod tests {
+        use std::{
+            fs::OpenOptions,
+            io::Write,
+            os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
+            sync::mpsc,
+        };
+
+        use windows::Win32::{
+            Foundation::{ERROR_PIPE_CONNECTED, GetLastError, HANDLE, INVALID_HANDLE_VALUE},
+            Storage::FileSystem::{PIPE_ACCESS_DUPLEX, ReadFile},
+            System::Pipes::{
+                ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe, NAMED_PIPE_MODE,
+                PIPE_READMODE_BYTE, PIPE_TYPE_BYTE,
+            },
+        };
+        use windows::core::PCWSTR;
+
+        use super::{PIPE_REJECT_REMOTE_CLIENTS, authenticate_pipe_client, wide};
+
+        #[test]
+        fn real_named_pipe_impersonation_yields_client_bound_token() {
+            let pipe_name = format!(r"\\.\pipe\LiiiraaBoost\token-test-{}", std::process::id());
+            let wide_name = wide(&pipe_name);
+            let mode = NAMED_PIPE_MODE(
+                PIPE_TYPE_BYTE.0 | PIPE_READMODE_BYTE.0 | PIPE_REJECT_REMOTE_CLIENTS,
+            );
+            let raw = unsafe {
+                CreateNamedPipeW(
+                    PCWSTR(wide_name.as_ptr()),
+                    PIPE_ACCESS_DUPLEX,
+                    mode,
+                    1,
+                    4096,
+                    4096,
+                    5_000,
+                    None,
+                )
+            };
+            assert_ne!(raw, INVALID_HANDLE_VALUE);
+            let server = unsafe { OwnedHandle::from_raw_handle(raw.0) };
+            let (client_tx, client_rx) = mpsc::channel();
+            let client_name = pipe_name.clone();
+            let client = std::thread::spawn(move || {
+                let mut pipe = OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .open(client_name)
+                    .expect("connect real named-pipe client");
+                pipe.write_all(b"h").expect("seed client security context");
+                client_tx.send(pipe).expect("retain client handle");
+            });
+            match unsafe { ConnectNamedPipe(HANDLE(server.as_raw_handle()), None) } {
+                Ok(()) => {}
+                Err(_) if unsafe { GetLastError() } == ERROR_PIPE_CONNECTED => {}
+                Err(error) => panic!("connect named-pipe server: {error:?}"),
+            }
+            let mut byte = [0_u8; 1];
+            let mut read = 0_u32;
+            unsafe {
+                ReadFile(
+                    HANDLE(server.as_raw_handle()),
+                    Some(&mut byte),
+                    Some(&mut read),
+                    None,
+                )
+            }
+            .expect("read client handshake byte");
+            assert_eq!(read, 1);
+            let client_handle = client_rx.recv().expect("receive live client handle");
+
+            let (identity, token) = authenticate_pipe_client(HANDLE(server.as_raw_handle()))
+                .expect("impersonate and duplicate actual pipe client token");
+            assert_eq!(identity.process_id, std::process::id());
+            assert_ne!(identity.session_id, 0);
+            assert!(token.is_interactive_client());
+            assert!(token.is_bound_to(identity.session_id, &identity.logon_sid));
+
+            drop(client_handle);
+            unsafe {
+                let _ = DisconnectNamedPipe(HANDLE(server.as_raw_handle()));
+            }
+            client.join().expect("join client thread");
+        }
+    }
 }
 
 #[cfg(windows)]

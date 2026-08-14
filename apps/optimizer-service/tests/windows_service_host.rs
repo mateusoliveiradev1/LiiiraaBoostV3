@@ -382,6 +382,9 @@ fn windows_host_uses_reject_remote_pipe_mode_and_restores_impersonation() {
     assert!(source.contains("PIPE_REJECT_REMOTE_CLIENTS"));
     assert!(source.contains("RevertGuard"));
     assert!(source.contains("revert.finish()?"));
+    assert!(source.contains(
+        "OpenThreadToken(\n                GetCurrentThread(),\n                TOKEN_QUERY | TOKEN_DUPLICATE,\n                true,"
+    ));
     assert!(source.contains("DisconnectNamedPipe"));
     assert!(source.contains("CancelIoEx"));
 }
