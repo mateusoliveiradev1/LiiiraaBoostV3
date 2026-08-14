@@ -24,6 +24,8 @@ const runBridge = (extra = []) =>
     [
       '-NoProfile',
       '-NonInteractive',
+      '-ExecutionPolicy',
+      'Bypass',
       '-File',
       bridgePath,
       '-Action',
@@ -80,13 +82,16 @@ const assertSourcePolicy = (source) => {
   }
 
   assert.match(source, /ValidateSet\('Audit',\s*'RunCleanVm'\)/u);
-  assert.match(source, /phase6-physical-runner\.exe['"]?\s*,?\s*['"]--run-config/u);
+  assert.match(source, /phase6-physical-runner\.exe --run-config configs\\clean-windows-vm\.run-config\.json/u);
   assert.doesNotMatch(source, /\[string\]\$(?:Command|Script|Executable|Config|Arguments?|RemoteHost|EvidenceLabel)/u);
   assert.doesNotMatch(source, /Restart-Computer|Stop-Computer|Set-VMHost|Set-VMHostCluster/u);
   assert.doesNotMatch(source, /(?:npm|pnpm|node|tsx|ts-node|typescript)\.exe.*Invoke-Command/iu);
 
-  assertInOrder(source, [
-    'Assert-ArtifactVerifierPass',
+  const runBody = source.slice(
+    source.indexOf('function Invoke-CleanVmRun'),
+    source.indexOf('Assert-ExactInvocation\n'),
+  );
+  assertInOrder(runBody, [
     'Copy-ExactArtifactToGuest',
     'Invoke-ExactGuestRunner',
     'Assert-InstalledReadyRecord',
@@ -96,6 +101,15 @@ const assertSourcePolicy = (source) => {
     'Assert-RebootPendingRecord',
     'Restart-VM',
     'Invoke-ExactGuestRunner',
+    'Copy-BoundedEvidenceAndIngest',
+  ]);
+  const ingestBody = source.slice(
+    source.indexOf('function Copy-BoundedEvidenceAndIngest'),
+    source.indexOf('function Write-BlockedRecord'),
+  );
+  assertInOrder(ingestBody, [
+    'Read-ExactGuestBytes',
+    '64KB',
     'Assert-ArtifactVerifierPass',
     'physical-writer.ts',
   ]);
@@ -111,19 +125,19 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
     [exactVm, 'Attacker-VM'],
     [cleanCheckpoint, 'Wrong-Clean'],
     [installedCheckpoint, cleanCheckpoint],
-    ['SecureBoot', 'SecureBootIgnored'],
-    ['TpmEnabled', 'TpmSkipped'],
+    ['SecureBoot', 'BootPolicyIgnored'],
+    ['TpmEnabled', 'VirtualSecuritySkipped'],
     ['phase6-artifact-verifier', 'Write-Host'],
     ['phase6-physical-runner.exe', 'powershell.exe'],
     ['configs\\clean-windows-vm.run-config.json', 'configs\\attacker.json'],
-    ['Assert-InstalledReadyRecord', 'Skip-InstalledReadyRecord'],
-    ['Write-CheckpointReadyRecordOnce', 'Overwrite-CheckpointReadyRecord'],
-    ['Assert-RebootPendingRecord', 'Trust-RequestedReboot'],
+    ['Assert-InstalledReadyRecord', 'SkipInstallBoundary'],
+    ['Write-CheckpointReadyRecordOnce', 'OverwriteLifecycleBoundary'],
+    ['Assert-RebootPendingRecord', 'TrustRequestedState'],
     ['physical-writer.ts', 'relabel-physical-output.ts'],
     ['64KB', '1GB'],
   ];
   for (const [expected, replacement] of mutations) {
-    const mutated = source.replace(expected, replacement);
+    const mutated = source.replaceAll(expected, replacement);
     assert.throws(() => assertSourcePolicy(mutated), `mutation must be rejected: ${expected}`);
   }
 });
@@ -166,4 +180,3 @@ test('wrong target, checkpoint, summaries, and generic authority fail closed', (
     assert.notEqual(result.status, 0, `must reject ${extra.join(' ')}`);
   }
 });
-
