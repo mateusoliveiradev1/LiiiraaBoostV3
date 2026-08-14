@@ -1094,10 +1094,11 @@ $database = $installer.OpenDatabase('${escaped}', 1)
 $product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHERE Property='ProductCode'")
 $product.Execute(); $product.Close()
 $version = $database.OpenView("UPDATE Property SET Value='${packageVersion}' WHERE Property='ProductVersion'")
-$version.Execute(); $version.Close(); $database.Commit()
+$version.Execute(); $version.Close()
 $summary = $database.SummaryInformation(1)
 $summary.Property(9) = $msiPackageCode
 $summary.Persist()
+$database.Commit()
 `,
   ]);
 };
