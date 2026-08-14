@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
@@ -136,6 +144,38 @@ test('elevated logger records only the fixed Phase 6 Audit action', () => {
   assert.match(source, /06-31-SUMMARY\.md/u);
   assert.match(source, /06-38-SUMMARY\.md/u);
   assert.doesNotMatch(source, /RunCleanVm/u);
+});
+
+test('elevated logger persists the exact child verdict and exit code', () => {
+  const labRoot = mkdtempSync(join(tmpdir(), 'phase6-audit-logger-'));
+  try {
+    const result = spawnSync(
+      'powershell.exe',
+      [
+        '-NoProfile',
+        '-NonInteractive',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        elevatedLoggerPath,
+        '-Action',
+        'Phase6Audit',
+        '-LabRoot',
+        labRoot,
+      ],
+      { cwd: root, encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'non-elevated child must preserve its blocking exit code');
+    const logs = readdirSync(join(labRoot, 'Evidence')).filter((name) =>
+      name.endsWith('-phase6audit-console.log'),
+    );
+    assert.equal(logs.length, 1);
+    const content = readFileSync(join(labRoot, 'Evidence', logs[0]), 'utf8');
+    assert.match(content, /open one elevated PowerShell/iu);
+    assert.doesNotMatch(content, /RunCleanVm/u);
+  } finally {
+    rmSync(labRoot, { force: true, recursive: true });
+  }
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
