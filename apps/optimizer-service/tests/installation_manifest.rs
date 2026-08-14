@@ -9,13 +9,43 @@ use std::{
 use serde_json::{Value, json};
 use service::installation_manifest::{
     AuthenticodeEvidence, CustodyBackend, CustodyError, InstalledAdmissionState, SignerEvidence,
-    TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_bytes, verify_installed_manifest_with_backend,
+    TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_bytes, local_msi_database_path,
+    verify_installed_manifest_with_backend,
 };
 use sha2::{Digest, Sha256};
 
 const ROOT: &str = r"C:\Program Files\Liiiraa Boost";
 const PUBLISHER: &str = "Liiiraa Boost Local Development";
 const THUMBPRINT: &str = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+#[test]
+fn msi_database_view_accepts_only_canonical_local_verbatim_disk_paths() {
+    assert_eq!(
+        local_msi_database_path(Path::new(
+            r"\\?\C:\phase6\artifact\liiiraa-boost.msi"
+        ))
+        .unwrap(),
+        PathBuf::from(r"C:\phase6\artifact\liiiraa-boost.msi")
+    );
+
+    for rejected in [
+        r"\\?\UNC\server\share\liiiraa-boost.msi",
+        r"\\.\C:\phase6\artifact\liiiraa-boost.msi",
+        r"\??\C:\phase6\artifact\liiiraa-boost.msi",
+        r"C:\phase6\artifact\liiiraa-boost.msi",
+        r"phase6\artifact\liiiraa-boost.msi",
+        r"\\?\C:phase6\artifact\liiiraa-boost.msi",
+        r"\\?\C:\phase6\..\liiiraa-boost.msi",
+        r"\\?\C:\phase6\.\liiiraa-boost.msi",
+        r"\\?\C:\phase6\\liiiraa-boost.msi",
+        r"\\?\C:\phase6\liiiraa-boost.msi:payload",
+    ] {
+        assert!(
+            local_msi_database_path(Path::new(rejected)).is_err(),
+            "MSI database path {rejected:?} must fail closed"
+        );
+    }
+}
 
 #[derive(Default)]
 struct FakeBackend {
