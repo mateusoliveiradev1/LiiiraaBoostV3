@@ -122,9 +122,34 @@ function Invoke-CoordinatedRollbackFailure([string]$DesktopPath) {
 try {
   [IO.File]::WriteAllText('$(& $escape $readyPath)', 'ready', [Text.UTF8Encoding]::new(`$false))
   `$deadline = [DateTime]::UtcNow.AddSeconds(30)
+  `$offset = 0L
+  `$tail = ''
   while ([DateTime]::UtcNow -lt `$deadline) {
-    try { `$log = [IO.File]::ReadAllText('$(& $escape $logPath)') } catch { `$log = '' }
-    if (`$log -match 'Error 1306') {
+    `$stream = `$null
+    try {
+      `$share = [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+      `$stream = [IO.FileStream]::new('$(& $escape $logPath)', [IO.FileMode]::Open, [IO.FileAccess]::Read, `$share)
+      if (`$offset -gt `$stream.Length) {
+        `$offset = 0L
+        `$tail = ''
+      }
+      [void]`$stream.Seek(`$offset, [IO.SeekOrigin]::Begin)
+      `$remaining = [Math]::Min(65536, [int](`$stream.Length - `$offset))
+      if (`$remaining -gt 0) {
+        `$buffer = New-Object byte[] `$remaining
+        `$read = `$stream.Read(`$buffer, 0, `$remaining)
+        `$offset += `$read
+        `$tail += [Text.Encoding]::Unicode.GetString(`$buffer, 0, `$read)
+        if (`$tail.Length -gt 8192) {
+          `$tail = `$tail.Substring(`$tail.Length - 8192)
+        }
+      }
+    } catch {
+      # The MSI may not have created the log yet. Keep the lock and retry boundedly.
+    } finally {
+      if (`$null -ne `$stream) { `$stream.Dispose() }
+    }
+    if (`$tail -match 'Error 1306') {
       [IO.File]::WriteAllText('$(& $escape $releasedPath)', [DateTime]::UtcNow.ToString('o'), [Text.UTF8Encoding]::new(`$false))
       exit 0
     }
