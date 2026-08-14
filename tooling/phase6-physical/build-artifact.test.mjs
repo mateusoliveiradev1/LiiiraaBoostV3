@@ -530,7 +530,13 @@ test('physical lifecycle composes protected manifest custody without administrat
   assert.match(lifecycle, /\[IO\.FileShare\]::ReadWrite -bor \[IO\.FileShare\]::Delete/u);
   assert.match(lifecycle, /\$offset/u);
   assert.match(lifecycle, /65536/u);
-  assert.match(lifecycle, /Substring\(\$tail\.Length - 8192\)/u);
+  assert.match(lifecycle, /\[Text\.Encoding\]::Unicode\.GetString/u);
+  assert.match(lifecycle, /Substring\(`?\$tail\.Length - 8192\)/u);
+  const rollbackHolder = lifecycle.slice(
+    lifecycle.indexOf('function Invoke-CoordinatedRollbackFailure'),
+    lifecycle.indexOf('function Assert-ServiceRunning'),
+  );
+  assert.doesNotMatch(rollbackHolder, /ReadAllText/u);
   assert.doesNotMatch(lifecycle, /schtasks|New-Service/u);
   assert.match(builder, /verifyDetachedCms\(installationPath,[\s\S]*TRUSTED_INSTALLER_SPKI_SHA256\)/u);
   assert.doesNotMatch(lifecycle, /Set-Acl|icacls|SeBackupPrivilege|schtasks/u);
