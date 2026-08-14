@@ -267,7 +267,7 @@ try {
   $desktopPath = Join-Path $installedRoot 'liiiraa-desktop.exe'
   $lock = [IO.File]::Open($desktopPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
   try {
-    $rollbackExit = Invoke-MsiExpectedFailure @('/fa', ('"' + $MsiPath + '"'), 'REINSTALLMODE=amus', 'REINSTALL=ALL') 'rollback-failure'
+    $rollbackExit = Invoke-MsiExpectedFailure @('/fa', ('"' + $MsiPath + '"'), 'MSIRESTARTMANAGERCONTROL=Disable', 'REINSTALLMODE=amus', 'REINSTALL=ALL') 'rollback-failure'
   } finally {
     $lock.Dispose()
   }
