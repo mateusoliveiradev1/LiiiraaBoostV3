@@ -45,8 +45,26 @@ if ($Action -eq 'Phase6Audit') {
         '-SimulationAdmissionFromSummary',
         (Join-Path $repositoryRoot '.planning\phases\06-transactional-plans-and-recovery\06-38-SUMMARY.md')
     )
-    & powershell.exe @phase6Arguments *>&1 | Tee-Object -FilePath $outputPath
-    exit $LASTEXITCODE
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = 'powershell.exe'
+    $start.WorkingDirectory = $repositoryRoot
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.Arguments = (($phase6Arguments | ForEach-Object {
+        '"' + $_.Replace('"', '\"') + '"'
+    }) -join ' ')
+    $process = [Diagnostics.Process]::Start($start)
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    $process.WaitForExit()
+    $stdout = $stdoutTask.GetAwaiter().GetResult()
+    $stderr = $stderrTask.GetAwaiter().GetResult()
+    $combined = ($stdout + $stderr).TrimEnd() + [Environment]::NewLine
+    [IO.File]::WriteAllText($outputPath, $combined, [Text.UTF8Encoding]::new($false))
+    Write-Output $combined.TrimEnd()
+    exit $process.ExitCode
 }
 
 $arguments = @{
