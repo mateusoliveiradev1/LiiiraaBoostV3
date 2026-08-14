@@ -5,9 +5,10 @@ import { dirname, join, resolve } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { PHASE6_DECISIONS, PHASE6_REQUIREMENTS } from '../src/evaluate.js';
+import { PHASE6_DECISIONS, PHASE6_REQUIREMENTS, phase6EvidenceSha256 } from '../src/evaluate.js';
 import {
   assertCanonicalSimulationCandidate,
+  assertDeterministicAdmissionChain,
   createCanonicalSimulationCandidate,
   parseSimulationWriterCli,
   type CanonicalSimulationCandidate,
@@ -117,6 +118,38 @@ const fixture = (operationVersion = 'managed-power-scheme-v41') => {
   };
 };
 
+const appendSuccessorArtifact = (setup: ReturnType<typeof fixture>) => {
+  const operationVersion = 'managed-power-scheme-v43';
+  const buildId = 'physical-build-managed-power-scheme-v43';
+  const artifactRoot = join(setup.root, 'target', 'phase6-physical', 'successor', buildId);
+  const artifact = {
+    ...setup.artifact,
+    buildId,
+    createdAt: '2026-08-14T16:00:00.000Z',
+    manifestId: 'artifact-manifest-v43',
+    operationVersionId: operationVersion,
+    sourceCommit: 'c'.repeat(40),
+  };
+  for (const entry of Object.values(artifact.files)) {
+    const relativePath = entry.relativePath;
+    write(
+      join(artifactRoot, relativePath),
+      readFileSync(join(dirname(setup.artifactPath), relativePath), 'utf8'),
+    );
+  }
+  const artifactPath = join(artifactRoot, 'artifact-manifest.json');
+  const artifactBytes = `${JSON.stringify(artifact)}\n`;
+  write(artifactPath, artifactBytes);
+  const artifactSha256 = sha256(artifactBytes);
+  const relativeRoot = artifactRoot.slice(setup.root.length + 1).replaceAll('\\', '/');
+  const originalSummary = readFileSync(setup.summaryPath, 'utf8');
+  write(
+    setup.summaryPath,
+    `${originalSummary}\n- **Root:** \`${relativeRoot}\`\n- **Build ID:** \`${buildId}\`\n- **Operation version:** \`${operationVersion}\`\n- **Source commit:** \`${artifact.sourceCommit}\`\n| \`artifact-manifest.json\` | \`${artifactSha256}\` | ${String(Buffer.byteLength(artifactBytes, 'utf8'))} |\n`,
+  );
+  return { artifact, artifactPath, artifactSha256 };
+};
+
 describe('closed simulation writer CLI', () => {
   it('accepts only summary/direct artifact input plus the explicit minimum version', () => {
     expect(
@@ -145,6 +178,54 @@ describe('closed simulation writer CLI', () => {
 });
 
 describe('canonical simulation candidate', () => {
+  it('rejects forked, cyclic, duplicate, downgraded, or reactivated admission chains', () => {
+    const hash = (digit: string): string => digit.repeat(64);
+    const valid = [
+      {
+        status: 'superseded',
+        operationVersion: 'managed-power-scheme-v41',
+        buildId: 'physical-build-v41',
+        artifactManifestSha256: hash('1'),
+        runEvidenceId: 'run-v41',
+        runEvidenceSha256: hash('2'),
+        predecessorEvidenceSha256: null,
+        successorEvidenceSha256: hash('4'),
+        manifestRecord: { path: 'records/v41.json', sha256: hash('3') },
+      },
+      {
+        status: 'active',
+        operationVersion: 'managed-power-scheme-v43',
+        buildId: 'physical-build-v43',
+        artifactManifestSha256: hash('5'),
+        runEvidenceId: 'run-v43',
+        runEvidenceSha256: hash('4'),
+        predecessorEvidenceSha256: hash('2'),
+        successorEvidenceSha256: null,
+        manifestRecord: null,
+      },
+    ];
+    expect(() => assertDeterministicAdmissionChain(valid)).not.toThrow();
+
+    const mutations = [
+      (value: typeof valid) => (value[1]!.operationVersion = value[0]!.operationVersion),
+      (value: typeof valid) => (value[1]!.runEvidenceId = value[0]!.runEvidenceId),
+      (value: typeof valid) =>
+        (value[1]!.artifactManifestSha256 = value[0]!.artifactManifestSha256),
+      (value: typeof valid) => (value[1]!.predecessorEvidenceSha256 = null),
+      (value: typeof valid) => (value[1]!.predecessorEvidenceSha256 = hash('9')),
+      (value: typeof valid) => (value[0]!.successorEvidenceSha256 = hash('9')),
+      (value: typeof valid) => (value[0]!.predecessorEvidenceSha256 = hash('4')),
+      (value: typeof valid) => (value[0]!.status = 'active'),
+      (value: typeof valid) => (value[0]!.manifestRecord = null),
+      (value: typeof valid) => value.push(structuredClone(value[1]!)),
+    ];
+    for (const mutate of mutations) {
+      const candidate = structuredClone(valid);
+      mutate(candidate);
+      expect(() => assertDeterministicAdmissionChain(candidate)).toThrow();
+    }
+  });
+
   it('uses the evaluator authority for exact PLAN-01..08 and D-01..35 coverage', () => {
     const setup = fixture();
     const candidate = createCanonicalSimulationCandidate({
@@ -208,6 +289,77 @@ describe('canonical simulation candidate', () => {
 });
 
 describe('artifact-bound atomic admission', () => {
+  it('supersedes v41 with one linear append-only v43 admission', () => {
+    const setup = fixture();
+    writeCanonicalSimulationEvidence({
+      artifactManifestPath: setup.artifactPath,
+      evidenceManifestPath: setup.evidenceManifestPath,
+      harnessPath: setup.harnessPath,
+      minimumVersion: 'managed-power-scheme-v3',
+      summaryPath: setup.summaryPath,
+      uatPath: setup.uatPath,
+      workspaceRoot: setup.root,
+    });
+    const priorManifestBytes = readFileSync(setup.evidenceManifestPath, 'utf8');
+    const priorManifest = JSON.parse(priorManifestBytes) as {
+      stages: { runs: unknown[] }[];
+    };
+    const priorRun = priorManifest.stages[0]?.runs[0];
+    if (priorRun === undefined) throw new Error('v41 deterministic run missing');
+    const priorRunSha256 = phase6EvidenceSha256(priorRun);
+    const uatBefore = readFileSync(setup.uatPath, 'utf8');
+    const successor = appendSuccessorArtifact(setup);
+
+    const result = writeCanonicalSimulationEvidence({
+      artifactManifestPath: successor.artifactPath,
+      evidenceManifestPath: setup.evidenceManifestPath,
+      harnessPath: setup.harnessPath,
+      minimumVersion: 'managed-power-scheme-v43',
+      summaryPath: setup.summaryPath,
+      uatPath: setup.uatPath,
+      workspaceRoot: setup.root,
+    });
+    const current = JSON.parse(readFileSync(setup.evidenceManifestPath, 'utf8')) as {
+      schemaVersion: number;
+      deterministicAdmissions: {
+        operationVersion: string;
+        status: string;
+        runEvidenceSha256: string;
+        predecessorEvidenceSha256: string | null;
+        successorEvidenceSha256: string | null;
+        manifestRecord: { path: string; sha256: string } | null;
+      }[];
+      stages: { runs: { predecessorRunEvidenceSha256: string | null }[] }[];
+    };
+    const [historical, active] = current.deterministicAdmissions;
+    if (historical === undefined || active === undefined)
+      throw new Error('linear deterministic history missing');
+
+    expect(result.operationVersion).toBe('managed-power-scheme-v43');
+    expect(current.schemaVersion).toBe(3);
+    expect(historical).toMatchObject({
+      operationVersion: 'managed-power-scheme-v41',
+      status: 'superseded',
+      runEvidenceSha256: priorRunSha256,
+      predecessorEvidenceSha256: null,
+      successorEvidenceSha256: active.runEvidenceSha256,
+    });
+    expect(active).toMatchObject({
+      operationVersion: 'managed-power-scheme-v43',
+      status: 'active',
+      predecessorEvidenceSha256: priorRunSha256,
+      successorEvidenceSha256: null,
+      manifestRecord: null,
+    });
+    expect(current.stages[0]?.runs[0]?.predecessorRunEvidenceSha256).toBe(priorRunSha256);
+    expect(historical.manifestRecord).not.toBeNull();
+    expect(readFileSync(resolve(setup.root, historical.manifestRecord!.path), 'utf8')).toBe(
+      priorManifestBytes,
+    );
+    expect(historical.manifestRecord!.sha256).toBe(sha256(priorManifestBytes));
+    expect(readFileSync(setup.uatPath, 'utf8').startsWith(uatBefore)).toBe(true);
+  });
+
   it('selects the latest complete append-only artifact authority block', () => {
     const setup = fixture();
     const latest = readFileSync(setup.summaryPath, 'utf8');
