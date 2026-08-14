@@ -799,6 +799,22 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
     packageCode: '{EEEEEEEE-EEEE-4EEE-8EEE-EEEEEEEEEEEE}',
     upgradeCode: main.upgradeCode,
     packageVersion: '0.0.1',
+    upgradeRows: [
+      {
+        upgradeCode: main.upgradeCode,
+        versionMin: '',
+        versionMax: '0.0.1',
+        attributes: 513,
+        actionProperty: 'WIX_UPGRADE_DETECTED',
+      },
+      {
+        upgradeCode: main.upgradeCode,
+        versionMin: '0.0.1',
+        versionMax: '',
+        attributes: 2,
+        actionProperty: 'WIX_DOWNGRADE_DETECTED',
+      },
+    ],
   };
   const expectedProbeIdentity = {
     productCode: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
@@ -831,6 +847,20 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
       }),
     /expected PackageCode/u,
   );
+  assert.throws(
+    () => validate(main, { ...probe, upgradeRows: [...probe.upgradeRows, probe.upgradeRows[0]] }, expectedProbeIdentity),
+    /exactly two Upgrade rows/u,
+  );
+  for (const [index, property, value, pattern] of [
+    [0, 'versionMax', '0.1.38', /WIX_UPGRADE_DETECTED.*VersionMax.*0\.0\.1/u],
+    [1, 'versionMin', '0.1.38', /WIX_DOWNGRADE_DETECTED.*VersionMin.*0\.0\.1/u],
+    [0, 'attributes', 1, /attributes/u],
+    [1, 'actionProperty', 'WIX_UPGRADE_DETECTED', /exact Upgrade actions/u],
+  ]) {
+    const upgradeRows = structuredClone(probe.upgradeRows);
+    upgradeRows[index][property] = value;
+    assert.throws(() => validate(main, { ...probe, upgradeRows }, expectedProbeIdentity), pattern);
+  }
 
   const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   assert.match(source, /SummaryInformation\(1\)/u);
@@ -845,6 +875,7 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   );
   assert.match(source, /packageCode\s*=\s*\$database\.SummaryInformation\(0\)\.Property\(9\)/u);
   assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
+  assert.match(source, /SELECT `UpgradeCode`,`VersionMin`,`VersionMax`,`Attributes`,`ActionProperty` FROM `Upgrade`/u);
 
   const identityWriter = source.slice(
     source.indexOf('const setMsiIdentity'),
@@ -856,6 +887,14 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.ok(summaryPropertyIndex >= 0);
   assert.ok(summaryPropertyIndex < persistIndex);
   assert.ok(persistIndex < finalCommitIndex, 'SummaryInformation must persist before final commit');
+  assert.match(
+    identityWriter,
+    /UPDATE `Upgrade` SET `VersionMax`='\$\{packageVersion\}' WHERE `ActionProperty`='WIX_UPGRADE_DETECTED'/u,
+  );
+  assert.match(
+    identityWriter,
+    /UPDATE `Upgrade` SET `VersionMin`='\$\{packageVersion\}' WHERE `ActionProperty`='WIX_DOWNGRADE_DETECTED'/u,
+  );
 
   const probeFlow = source.slice(
     source.indexOf("const downgradeMsiPath = join(workRoot, 'downgrade-probe.msi')"),
