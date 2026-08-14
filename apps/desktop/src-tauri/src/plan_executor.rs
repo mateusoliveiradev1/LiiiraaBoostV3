@@ -746,9 +746,8 @@ impl<W: BrokerWire> WindowsNamedPipeBrokerTransport<W> {
     fn read_frame(&mut self) -> Result<Vec<u8>, BrokerClientError> {
         let deadline = Instant::now() + self.io_timeout;
         let mut length = [0_u8; 4];
-        read_exact_until(&mut self.wire, &mut length, deadline).map_err(|error| {
+        read_exact_until(&mut self.wire, &mut length, deadline).inspect_err(|_| {
             self.wire.disconnect();
-            error
         })?;
         let length = u32::from_be_bytes(length) as usize;
         if length == 0 || length > MAX_BROKER_MESSAGE_BYTES {
@@ -756,9 +755,8 @@ impl<W: BrokerWire> WindowsNamedPipeBrokerTransport<W> {
             return Err(BrokerClientError::MessageTooLarge);
         }
         let mut payload = vec![0_u8; length];
-        read_exact_until(&mut self.wire, &mut payload, deadline).map_err(|error| {
+        read_exact_until(&mut self.wire, &mut payload, deadline).inspect_err(|_| {
             self.wire.disconnect();
-            error
         })?;
         Ok(payload)
     }
@@ -800,9 +798,8 @@ impl<W: BrokerWire> BrokerTransport for WindowsNamedPipeBrokerTransport<W> {
     }
 
     fn exchange(&mut self, frame: &[u8]) -> Result<Vec<u8>, BrokerClientError> {
-        self.write_frame(frame).map_err(|error| {
+        self.write_frame(frame).inspect_err(|_| {
             self.wire.disconnect();
-            error
         })?;
         self.read_frame()
     }
