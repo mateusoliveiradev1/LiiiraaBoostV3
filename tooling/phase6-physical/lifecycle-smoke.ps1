@@ -189,7 +189,7 @@ function Assert-DowngradeRejected(
   )
   $productMatches = [regex]::Matches(
     $log,
-    "(?m)^Product Code from property table after transforms:\s+'$probeProductPattern'\r?$"
+    "(?m)^MSI \([sc]\) \([0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\) \[[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}\]: Product Code from property table after transforms:\s{1,8}'$probeProductPattern'\r?$"
   )
   $versionMatches = [regex]::Matches($log, '(?m)^Property\(S\): ProductVersion = 0\.0\.1\r?$')
   if ($packageMatches.Count -ne 1 -or $productMatches.Count -ne 1 -or $versionMatches.Count -ne 1) {
