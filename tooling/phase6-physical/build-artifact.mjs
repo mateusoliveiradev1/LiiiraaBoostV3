@@ -934,6 +934,8 @@ function Read-Property([string]$name) {
 $packageCode = $database.SummaryInformation(0).Property(9)
 $files = $database.OpenView('SELECT FileName FROM File')
 $null = $files.Execute(); $names = @(); while ($record = $files.Fetch()) { $names += $record.StringData(1) }; $null = $files.Close()
+$upgrade = $database.OpenView('SELECT \`UpgradeCode\`,\`VersionMin\`,\`VersionMax\`,\`Attributes\`,\`ActionProperty\` FROM \`Upgrade\`')
+$null = $upgrade.Execute(); $upgradeRows = @(); while ($record = $upgrade.Fetch()) { $upgradeRows += [pscustomobject]@{ upgradeCode = $record.StringData(1); versionMin = $record.StringData(2); versionMax = $record.StringData(3); attributes = $record.IntegerData(4); actionProperty = $record.StringData(5) } }; $null = $upgrade.Close()
 $custom = $database.OpenView('SELECT Action, Type, Source, Target FROM CustomAction'); $null = $custom.Execute(); $customActions = @(); while ($record = $custom.Fetch()) { $customActions += [pscustomobject]@{ action = $record.StringData(1); type = $record.IntegerData(2); source = $record.StringData(3); target = $record.StringData(4) } }; $null = $custom.Close()
 function Read-Record([string]$query) {
   $view = $database.OpenView($query); $null = $view.Execute(); $record = $view.Fetch(); $null = $view.Close(); return $record
@@ -954,7 +956,7 @@ if ($storageComponent -and $storageDirectory -and $storageCreate -and $storagePe
     sddl = $storagePermission.StringData(1)
   }
 }
-[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageCode = $packageCode; upgradeCode = Read-Property 'UpgradeCode'; packageVersion = Read-Property 'ProductVersion'; files = $names; customActionCount = $customActions.Count; customActions = @($customActions); programDataStorage = $programDataStorage } | ConvertTo-Json -Depth 5 -Compress
+[pscustomobject]@{ productCode = Read-Property 'ProductCode'; packageCode = $packageCode; upgradeCode = Read-Property 'UpgradeCode'; packageVersion = Read-Property 'ProductVersion'; upgradeRows = @($upgradeRows); files = $names; customActionCount = $customActions.Count; customActions = @($customActions); programDataStorage = $programDataStorage } | ConvertTo-Json -Depth 5 -Compress
 `);
 };
 
@@ -1077,6 +1079,28 @@ export function validateDowngradeProbeIdentity(main, probe, expected) {
     fail('downgrade probe UpgradeCode must remain in the installed upgrade family');
   if (expected?.packageVersion !== '0.0.1' || probe?.packageVersion !== expected.packageVersion)
     fail('downgrade probe ProductVersion must be exactly 0.0.1');
+  const upgradeRows = Array.isArray(probe?.upgradeRows) ? probe.upgradeRows : [];
+  if (upgradeRows.length !== 2) fail('downgrade probe must contain exactly two Upgrade rows');
+  const rowsByAction = new Map(upgradeRows.map((row) => [row?.actionProperty, row]));
+  if (
+    rowsByAction.size !== 2 ||
+    !rowsByAction.has('WIX_UPGRADE_DETECTED') ||
+    !rowsByAction.has('WIX_DOWNGRADE_DETECTED')
+  )
+    fail('downgrade probe must contain the exact Upgrade actions');
+  const upgradeRow = rowsByAction.get('WIX_UPGRADE_DETECTED');
+  const downgradeRow = rowsByAction.get('WIX_DOWNGRADE_DETECTED');
+  if (
+    normalizedMsiGuid(upgradeRow?.upgradeCode) !== mainUpgradeCode ||
+    normalizedMsiGuid(downgradeRow?.upgradeCode) !== mainUpgradeCode
+  )
+    fail('downgrade probe Upgrade rows must retain the installed UpgradeCode');
+  if (upgradeRow?.versionMin !== '' || upgradeRow?.versionMax !== expected.packageVersion)
+    fail('WIX_UPGRADE_DETECTED VersionMax must be exactly 0.0.1');
+  if (downgradeRow?.versionMin !== expected.packageVersion || downgradeRow?.versionMax !== '')
+    fail('WIX_DOWNGRADE_DETECTED VersionMin must be exactly 0.0.1');
+  if (upgradeRow?.attributes !== 513 || downgradeRow?.attributes !== 2)
+    fail('downgrade probe Upgrade row attributes must remain exact');
   return true;
 }
 
@@ -1101,6 +1125,7 @@ const setMsiIdentity = (path, { productCode, packageCode, packageVersion }) => {
   const escaped = path.replaceAll("'", "''");
   const msiProductCode = formatMsiGuid(productCode, 'downgrade ProductCode');
   const msiPackageCode = formatMsiGuid(packageCode, 'downgrade PackageCode');
+  if (packageVersion !== '0.0.1') fail('downgrade ProductVersion must be exactly 0.0.1');
   run('powershell', [
     '-NoProfile',
     '-NonInteractive',
@@ -1115,6 +1140,10 @@ $product = $database.OpenView("UPDATE Property SET Value='${msiProductCode}' WHE
 $product.Execute(); $product.Close()
 $version = $database.OpenView("UPDATE Property SET Value='${packageVersion}' WHERE Property='ProductVersion'")
 $version.Execute(); $version.Close()
+$upgrade = $database.OpenView("UPDATE \`Upgrade\` SET \`VersionMax\`='${packageVersion}' WHERE \`ActionProperty\`='WIX_UPGRADE_DETECTED'")
+$upgrade.Execute(); $upgrade.Close()
+$downgrade = $database.OpenView("UPDATE \`Upgrade\` SET \`VersionMin\`='${packageVersion}' WHERE \`ActionProperty\`='WIX_DOWNGRADE_DETECTED'")
+$downgrade.Execute(); $downgrade.Close()
 $summary = $database.SummaryInformation(1)
 $summary.Property(9) = $msiPackageCode
 $summary.Persist()

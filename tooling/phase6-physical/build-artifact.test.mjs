@@ -875,7 +875,11 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   );
   assert.match(source, /packageCode\s*=\s*\$database\.SummaryInformation\(0\)\.Property\(9\)/u);
   assert.match(source, /upgradeCode\s*=\s*Read-Property 'UpgradeCode'/u);
-  assert.match(source, /SELECT `UpgradeCode`,`VersionMin`,`VersionMax`,`Attributes`,`ActionProperty` FROM `Upgrade`/u);
+  assert.ok(
+    source.includes(
+      'SELECT \\`UpgradeCode\\`,\\`VersionMin\\`,\\`VersionMax\\`,\\`Attributes\\`,\\`ActionProperty\\` FROM \\`Upgrade\\`',
+    ),
+  );
 
   const identityWriter = source.slice(
     source.indexOf('const setMsiIdentity'),
@@ -887,13 +891,15 @@ test('downgrade probe has a fresh package identity in the same upgrade family', 
   assert.ok(summaryPropertyIndex >= 0);
   assert.ok(summaryPropertyIndex < persistIndex);
   assert.ok(persistIndex < finalCommitIndex, 'SummaryInformation must persist before final commit');
-  assert.match(
-    identityWriter,
-    /UPDATE `Upgrade` SET `VersionMax`='\$\{packageVersion\}' WHERE `ActionProperty`='WIX_UPGRADE_DETECTED'/u,
+  assert.ok(
+    identityWriter.includes(
+      "UPDATE \\`Upgrade\\` SET \\`VersionMax\\`='${packageVersion}' WHERE \\`ActionProperty\\`='WIX_UPGRADE_DETECTED'",
+    ),
   );
-  assert.match(
-    identityWriter,
-    /UPDATE `Upgrade` SET `VersionMin`='\$\{packageVersion\}' WHERE `ActionProperty`='WIX_DOWNGRADE_DETECTED'/u,
+  assert.ok(
+    identityWriter.includes(
+      "UPDATE \\`Upgrade\\` SET \\`VersionMin\\`='${packageVersion}' WHERE \\`ActionProperty\\`='WIX_DOWNGRADE_DETECTED'",
+    ),
   );
 
   const probeFlow = source.slice(
