@@ -99,11 +99,65 @@ function Invoke-MsiExpectedFailure([string[]]$Arguments, [string]$LogName) {
 function Assert-RollbackMsiProperties {
   $logPath = Join-Path $OutputRoot 'rollback-failure.msiexec.log'
   $log = [IO.File]::ReadAllText($logPath)
+  $readyPath = Join-Path $OutputRoot 'rollback-lock-ready'
   $releasedPath = Join-Path $OutputRoot 'rollback-lock-released'
-  if ($log -notmatch 'MSIRESTARTMANAGERCONTROL=Disable' -or $log -notmatch 'REINSTALLMODE=amus' -or $log -notmatch 'Error 1306' -or -not (Test-Path -LiteralPath $releasedPath)) {
+  if ($log -notmatch 'MSIRESTARTMANAGERCONTROL=Disable' -or $log -notmatch 'REINSTALLMODE=amus' -or -not (Test-Path -LiteralPath $readyPath) -or -not (Test-Path -LiteralPath $releasedPath)) {
     throw 'rollback log did not preserve explicit MSI properties'
   }
-  if ($log -match 'Error in rollback skipped' -or $log -match 'failed to start') {
+  if ([IO.File]::ReadAllText($readyPath) -ne 'ready') {
+    throw 'rollback lock readiness marker is invalid'
+  }
+  [DateTime]$releasedAt = [DateTime]::MinValue
+  if (-not [DateTime]::TryParseExact(
+    [IO.File]::ReadAllText($releasedPath),
+    'o',
+    [Globalization.CultureInfo]::InvariantCulture,
+    [Globalization.DateTimeStyles]::RoundtripKind,
+    [ref]$releasedAt
+  )) {
+    throw 'rollback lock release marker is invalid'
+  }
+
+  $desktopPattern = [regex]::Escape((Join-Path $installedRoot 'liiiraa-desktop.exe'))
+  $error1306Pattern = "(?m)^Error 1306\..*'$desktopPattern'.*`r?$"
+  $error1306Matches = [regex]::Matches($log, $error1306Pattern)
+  $rollbackCompletionPattern = '(?m)^MSI \(s\)[^\r\n]*Executing op: End\(Checksum=0,[^\r\n]*\)\r?\nMSI \(s\)[^\r\n]*Error in rollback skipped\.\s+Return: 5\r?$'
+  $rollbackCompletionMatches = [regex]::Matches($log, $rollbackCompletionPattern)
+  if ($error1306Matches.Count -ne 1 -or [regex]::Matches($log, $rollbackCompletionPattern).Count -ne 1) {
+    throw 'rollback log did not contain one exact locked-file failure and completed rollback script'
+  }
+
+  $returnThreeMatches = [regex]::Matches($log, '(?m)^Action ended [^\r\n]*: (?<action>[^.]+)\. Return value 3\.\r?$')
+  $unexpectedReturnThree = @($returnThreeMatches | Where-Object {
+    $_.Groups['action'].Value -notin @('InstallFinalize', 'INSTALL')
+  })
+  $installFinalizeMatches = @($returnThreeMatches | Where-Object { $_.Groups['action'].Value -eq 'InstallFinalize' })
+  $installMatches = @($returnThreeMatches | Where-Object { $_.Groups['action'].Value -ceq 'INSTALL' })
+  if ($returnThreeMatches.Count -ne 2 -or $unexpectedReturnThree.Count -ne 0 -or $installFinalizeMatches.Count -ne 1 -or $installMatches.Count -ne 1) {
+    throw 'rollback log contained an unexpected fatal action'
+  }
+
+  $unexpected1603 = @(($log -split "`r?`n") | Where-Object {
+    $_ -match '1603' -and
+    $_ -notmatch 'SELECT `Message` FROM `Error` WHERE `Error` = 1603' -and
+    $_ -notmatch "^Info 1603\.The file $desktopPattern is being held in use\." -and
+    $_ -notmatch 'Status .+1603\.$' -and
+    $_ -notmatch 'MainEngineThread is returning 1603$'
+  })
+  if ($unexpected1603.Count -ne 0 -or [regex]::Matches($log, 'MainEngineThread is returning 1603').Count -ne 2) {
+    throw 'rollback log contained an unexpected MSI 1603 failure'
+  }
+
+  $rollbackCompletion = $rollbackCompletionMatches[0]
+  if (
+    $error1306Matches[0].Index -ge $installFinalizeMatches[0].Index -or
+    $installFinalizeMatches[0].Index -ge $rollbackCompletion.Index -or
+    $rollbackCompletion.Index -ge $installMatches[0].Index -or
+    [regex]::Matches($log, 'Return:\s*\d+').Count -ne 1 -or
+    $log -match 'Return:\s*3' -or
+    $log -match 'failed to start' -or
+    $log -match 'Error 1920'
+  ) {
     throw 'rollback did not complete after the coordinated lock release'
   }
 }

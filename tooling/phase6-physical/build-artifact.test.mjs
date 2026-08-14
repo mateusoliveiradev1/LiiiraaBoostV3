@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -557,6 +558,67 @@ test('physical lifecycle composes protected manifest custody without administrat
     /Assert-RollbackMsiProperties[\s\S]*Assert-ServiceRunning[\s\S]*Get-InstalledSetHash \$expectedCustody[\s\S]*Get-RecoveryCustodyHash/u,
   );
 });
+
+test(
+  'rollback parser accepts only the exact completed MSI failure context',
+  { skip: process.platform !== 'win32' },
+  () => {
+    const root = mkdtempSync(join(tmpdir(), 'liiiraa-rollback-parser-'));
+    const lifecyclePath = join(process.cwd(), 'tooling/phase6-physical/lifecycle-smoke.ps1');
+    const desktopPath = join(root, 'liiiraa-desktop.exe');
+    const logPath = join(root, 'rollback-failure.msiexec.log');
+    const quote = (value) => `'${value.replaceAll("'", "''")}'`;
+    const exactLog = [
+      'MSI (s) (10:20) [00:00:00:000]: Command Line: REINSTALLMODE=amus MSIRESTARTMANAGERCONTROL=Disable',
+      `Error 1306. Another application has exclusive access to the file '${desktopPath}'. Please shut down all other applications, then click Retry.`,
+      'Action ended 00:00:00: InstallFinalize. Return value 3.',
+      'MSI (s) (10:20) [00:00:00:001]: Executing op: End(Checksum=0,ProgressTotalHDWord=0,ProgressTotalLDWord=0)',
+      'MSI (s) (10:20) [00:00:00:001]: Error in rollback skipped. Return: 5',
+      'Action ended 00:00:00: INSTALL. Return value 3.',
+      'MSI (s) (10:20) [00:00:00:002]: MainEngineThread is returning 1603',
+      'MSI (c) (30:40) [00:00:00:003]: MainEngineThread is returning 1603',
+    ].join('\r\n');
+
+    const runParser = (log, includeReleased = true) => {
+      writeFileSync(logPath, Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(log, 'utf16le')]));
+      writeFileSync(join(root, 'rollback-lock-ready'), 'ready');
+      if (includeReleased) {
+        writeFileSync(join(root, 'rollback-lock-released'), '2026-08-14T11:57:43.5567509Z');
+      } else {
+        rmSync(join(root, 'rollback-lock-released'), { force: true });
+      }
+      const script = `
+$ErrorActionPreference = 'Stop'
+$tokens = $null
+$errors = $null
+$ast = [Management.Automation.Language.Parser]::ParseFile(${quote(lifecyclePath)}, [ref]$tokens, [ref]$errors)
+if ($errors.Count -ne 0) { throw ($errors | Out-String) }
+$functionAst = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Assert-RollbackMsiProperties' }, $true)
+Invoke-Expression $functionAst.Extent.Text
+$OutputRoot = ${quote(root)}
+$installedRoot = ${quote(root)}
+Assert-RollbackMsiProperties
+`;
+      execFileSync('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-EncodedCommand',
+        Buffer.from(script, 'utf16le').toString('base64'),
+      ]);
+    };
+
+    try {
+      assert.doesNotThrow(() => runParser(exactLog));
+      assert.throws(() => runParser(exactLog.replace('Return: 5', 'Return: 3')));
+      assert.throws(() => runParser(exactLog.replace('Executing op: End', 'Service failed to start\r\nExecuting op: End')));
+      assert.throws(() => runParser(exactLog.replace('Executing op: End', 'Unexpected failure 1603\r\nExecuting op: End')));
+      assert.throws(() => runParser(exactLog.replace('InstallFinalize. Return value 3', 'StartServices. Return value 3')));
+      assert.throws(() => runParser(exactLog, false));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
 
 test('Windows handle-growth proof runs in a dedicated subprocess', () => {
   const source = readFileSync('apps/optimizer-service/tests/physical_user_context.rs', 'utf8');
