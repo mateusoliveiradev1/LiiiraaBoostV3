@@ -4,6 +4,7 @@
 mod service;
 
 use std::{
+    process::Command,
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
@@ -11,6 +12,8 @@ use std::{
     thread,
     time::Duration,
 };
+
+const HANDLE_GROWTH_CHILD: &str = "LIIIRAA_HANDLE_GROWTH_CHILD";
 
 use service::{
     operations::power_scheme::{
@@ -153,6 +156,25 @@ fn error_unwind_and_timeout_drain_restore_before_returning() {
 
 #[test]
 fn repeated_success_failure_unwind_and_timeout_have_zero_handle_growth() {
+    if std::env::var_os(HANDLE_GROWTH_CHILD).is_none() {
+        let output = Command::new(std::env::current_exe().expect("current test executable"))
+            .args([
+                "--exact",
+                "repeated_success_failure_unwind_and_timeout_have_zero_handle_growth",
+                "--nocapture",
+            ])
+            .env(HANDLE_GROWTH_CHILD, "1")
+            .output()
+            .expect("launch isolated handle-growth proof");
+        assert!(
+            output.status.success(),
+            "isolated handle-growth proof failed:\nstdout:\n{}\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        return;
+    }
+
     let before = process_handle_count_for_test().expect("initial process handle count");
 
     for iteration in 0..16 {
