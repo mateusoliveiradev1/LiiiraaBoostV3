@@ -41,6 +41,7 @@ impl BrokerTransport for RecordingTransport {
             "session-0001".to_owned(),
             "server-nonce-0001".to_owned(),
             vec![0x5a; 32],
+            1,
         )
     }
 

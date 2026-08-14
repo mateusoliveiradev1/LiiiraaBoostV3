@@ -479,6 +479,7 @@ impl BrokerTransport for ScriptedBrokerTransport {
             "session-physical-0001".to_owned(),
             "nonce-physical-0001".to_owned(),
             vec![0x31; 32],
+            1,
         )
     }
 

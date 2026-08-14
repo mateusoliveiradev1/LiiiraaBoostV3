@@ -650,6 +650,7 @@ pub struct BrokerSessionMaterial {
     session_id: String,
     server_nonce: String,
     session_key: Vec<u8>,
+    next_counter: u32,
 }
 
 impl BrokerSessionMaterial {
@@ -657,10 +658,12 @@ impl BrokerSessionMaterial {
         session_id: String,
         server_nonce: String,
         session_key: Vec<u8>,
+        next_counter: u32,
     ) -> Result<Self, BrokerClientError> {
         if !bounded_identifier(&session_id)
             || !bounded_identifier(&server_nonce)
             || session_key.len() != 32
+            || next_counter == 0
         {
             return Err(BrokerClientError::AuthenticationFailed);
         }
@@ -668,6 +671,7 @@ impl BrokerSessionMaterial {
             session_id,
             server_nonce,
             session_key,
+            next_counter,
         })
     }
 }
@@ -794,7 +798,12 @@ impl<W: BrokerWire> BrokerTransport for WindowsNamedPipeBrokerTransport<W> {
         let session_key = decode_hex(&accepted.session_key)
             .filter(|key| key.len() == 32)
             .ok_or(BrokerClientError::AuthenticationFailed)?;
-        BrokerSessionMaterial::new(accepted.session_id, accepted.server_nonce, session_key)
+        BrokerSessionMaterial::new(
+            accepted.session_id,
+            accepted.server_nonce,
+            session_key,
+            accepted.next_counter,
+        )
     }
 
     fn exchange(&mut self, frame: &[u8]) -> Result<Vec<u8>, BrokerClientError> {
@@ -812,6 +821,7 @@ struct BrokerHandshakeAccepted {
     session_id: String,
     server_nonce: String,
     session_key: String,
+    next_counter: u32,
 }
 
 fn read_exact_until(
@@ -1162,10 +1172,11 @@ impl<T> fmt::Debug for AuthenticatedBrokerClient<T> {
 impl<T: BrokerTransport> AuthenticatedBrokerClient<T> {
     pub fn connect(mut transport: T) -> Result<Self, BrokerClientError> {
         let session = transport.authenticate()?;
+        let next_counter = session.next_counter;
         Ok(Self {
             transport: RefCell::new(transport),
             session,
-            next_counter: Cell::new(1),
+            next_counter: Cell::new(next_counter),
         })
     }
 

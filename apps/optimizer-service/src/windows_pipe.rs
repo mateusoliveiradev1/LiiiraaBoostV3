@@ -559,6 +559,7 @@ mod windows_host {
                     "sessionId": ticket.session_id,
                     "serverNonce": ticket.server_nonce,
                     "sessionKey": hex(&ticket.session_key),
+                    "nextCounter": ticket.next_counter,
                 }),
                 self.config.max_frame_bytes,
                 self.config.write_timeout,

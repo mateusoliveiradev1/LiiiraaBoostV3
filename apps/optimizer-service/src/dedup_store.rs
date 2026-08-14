@@ -194,6 +194,25 @@ impl DedupStore {
         Ok(Reservation::New)
     }
 
+    pub fn next_counter(&self, principal_id: &str) -> Result<u32, StoreError> {
+        let highest = self
+            .connection
+            .query_row(
+                "SELECT highest_counter FROM broker_replay_counters WHERE principal_id = ?1",
+                params![principal_id],
+                |row| row.get::<_, i64>(0),
+            )
+            .optional()
+            .map_err(|_| StoreError::Database)?;
+        match highest {
+            None => Ok(1),
+            Some(value) => u32::try_from(value)
+                .ok()
+                .and_then(|value| value.checked_add(1))
+                .ok_or(StoreError::Integrity),
+        }
+    }
+
     pub fn mark_unknown_after_dispatch(
         &mut self,
         transaction_id: &str,

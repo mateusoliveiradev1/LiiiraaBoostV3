@@ -69,6 +69,7 @@ pub struct SessionTicket {
     pub session_id: String,
     pub server_nonce: String,
     pub session_key: Vec<u8>,
+    pub next_counter: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -232,15 +233,20 @@ impl Broker {
             format!("key\0{session_id}\0{server_nonce}").as_bytes(),
         )
         .to_vec();
+        let principal_id = format!(
+            "{}:{}:{}",
+            identity.logon_sid, identity.session_id, identity.process_image_hash
+        );
+        let next_counter = self
+            .store
+            .next_counter(&principal_id)
+            .map_err(map_store_error)?;
         self.sessions.insert(
             session_id.clone(),
             SessionState {
                 server_nonce: server_nonce.clone(),
                 session_key: session_key.clone(),
-                principal_id: format!(
-                    "{}:{}:{}",
-                    identity.logon_sid, identity.session_id, identity.process_image_hash
-                ),
+                principal_id,
                 interactive_session_id: identity.session_id,
                 interactive_logon_sid: identity.logon_sid.clone(),
                 process_id: identity.process_id,
@@ -252,6 +258,7 @@ impl Broker {
             session_id,
             server_nonce,
             session_key,
+            next_counter,
         })
     }
 
