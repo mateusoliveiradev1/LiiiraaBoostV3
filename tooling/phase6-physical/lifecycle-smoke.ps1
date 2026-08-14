@@ -19,6 +19,7 @@ $installedRoleNames = @(
 )
 $portableDriverNames = @('tauri-driver.exe', 'msedgedriver.exe')
 $installed = $false
+$brokerProbeSequence = 0
 
 function Write-Result([hashtable]$Value) {
   $json = $Value | ConvertTo-Json -Depth 8
@@ -106,9 +107,19 @@ function Assert-BrokerClientBinding {
     throw 'installed desktop broker client is missing'
   }
   foreach ($attempt in 1..2) {
-    $process = Start-Process -FilePath $desktopPath -ArgumentList @('--phase6-lifecycle-broker-probe') -Wait -PassThru
+    $script:brokerProbeSequence += 1
+    $stdoutPath = Join-Path $OutputRoot "broker-probe-$brokerProbeSequence.stdout.log"
+    $stderrPath = Join-Path $OutputRoot "broker-probe-$brokerProbeSequence.stderr.log"
+    $process = Start-Process -FilePath $desktopPath -ArgumentList @('--phase6-lifecycle-broker-probe') -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -Wait -PassThru
     if ($process.ExitCode -ne 0) {
-      throw "installed desktop broker probe $attempt exited $($process.ExitCode)"
+      $stderr = if (Test-Path -LiteralPath $stderrPath -PathType Leaf) {
+        ([IO.File]::ReadAllText($stderrPath) -replace '[\r\n]+', ' ').Trim()
+      } else { '' }
+      if ($stderr.Length -gt 512) {
+        $stderr = $stderr.Substring(0, 512)
+      }
+      $detail = if ($stderr) { "; stderr: $stderr" } else { '' }
+      throw "installed desktop broker probe $attempt exited $($process.ExitCode)$detail"
     }
     Assert-ServiceRunning
   }

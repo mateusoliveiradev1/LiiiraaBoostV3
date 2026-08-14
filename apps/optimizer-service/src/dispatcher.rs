@@ -247,7 +247,6 @@ where
                     Self::validate_common(context, request_id, POWER_SCHEME_OPERATION_VERSION)?;
                 // Key-link witness: 'with_interactive_user guards WindowsPowrProf'
                 context.with_interactive_user(&client, |client| {
-                    self.power.preflight(client)?;
                     self.power.observe_active(client)?;
                     Ok(())
                 })?;
