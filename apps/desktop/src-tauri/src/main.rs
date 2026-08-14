@@ -81,6 +81,8 @@ use plan_commands::{
     PlanDocumentRequest, command_acceptance, validate_advanced_preference_request,
     validate_export_file_name, validate_plan_document,
 };
+#[cfg(feature = "phase6-physical")]
+use plan_executor::NativePhysicalExecutionAuthority;
 use plan_executor::{
     AdvancedPreferenceAuthority, AdvancedPreferenceSnapshot, AdvancedPreferenceSnapshotState,
     AdvancedPreferenceTransition, AdvancedPreferenceTransitionAction, BindingFreshness,
@@ -93,6 +95,8 @@ use recovery_store::advanced_preference::{
 };
 use recovery_store::{RecoveryStore, integrity_anchor::WindowsIntegrityAnchor};
 
+#[cfg(feature = "phase6-physical")]
+use liiiraa_contracts_rust::TransactionalRecoveryDocument;
 use liiiraa_contracts_rust::{
     HOST_TO_RENDERER_SHELL_EVENT_SCHEMA_ID, HostToRendererShellEvent,
     RENDERER_TO_HOST_SHELL_COMMAND_SCHEMA_ID, RendererToHostShellCommand, SessionProjection,
@@ -128,7 +132,12 @@ use window::{
 
 const FIXTURE_ADAPTER: &str = "fixture";
 const ADAPTER_ENVIRONMENT_VARIABLE: &str = "LIIIRAA_DESKTOP_ADAPTER";
+#[cfg(not(feature = "phase6-physical"))]
 type NativePlanExecutor = PlanExecutor<RecoveryStore>;
+#[cfg(feature = "phase6-physical")]
+type NativePlanExecutor = NativePhysicalExecutionAuthority<RecoveryStore>;
+
+// Key-link witness: 'WindowsNamedPipeBrokerTransport -> NativePhysicalExecutionAuthority'
 
 #[derive(Clone, Debug)]
 struct DesktopRuntimeOrigins {
@@ -504,6 +513,8 @@ fn apply_window_state(
 }
 
 fn focus_main_window(app: &AppHandle) -> Result<(), ShellDispatchError> {
+    #[cfg(feature = "phase6-physical")]
+    reconcile_physical_on_resume(app)?;
     let window = app
         .get_webview_window("main")
         .ok_or(ShellDispatchError::WindowUnavailable)?;
@@ -511,6 +522,23 @@ fn focus_main_window(app: &AppHandle) -> Result<(), ShellDispatchError> {
         .unminimize()
         .and_then(|()| window.show())
         .and_then(|()| window.set_focus())
+        .map_err(|_| ShellDispatchError::HostOperationFailed)
+}
+
+#[cfg(feature = "phase6-physical")]
+fn reconcile_physical_on_resume(app: &AppHandle) -> Result<(), ShellDispatchError> {
+    let context = app.state::<AdvancedPreferenceNativeContext>();
+    let executor = app.state::<Mutex<NativePlanExecutor>>();
+    let mut authority = executor
+        .lock()
+        .map_err(|_| ShellDispatchError::HostOperationFailed)?;
+    if authority.accepts_new_mutation() {
+        return Ok(());
+    }
+    let (_, occurred_at) = native_clock().map_err(|_| ShellDispatchError::HostOperationFailed)?;
+    authority
+        .reconnect_and_reconcile_startup(&context.device_id, &occurred_at)
+        .map(|_| ())
         .map_err(|_| ShellDispatchError::HostOperationFailed)
 }
 
@@ -1198,6 +1226,7 @@ fn approve_plan(request: PlanDocumentRequest) -> Result<AcceptedPlanIntent, Plan
     accept_renderer_plan_intent(PlanCommand::Approve, request)
 }
 
+#[cfg(not(feature = "phase6-physical"))]
 fn reject_unavailable_mutation(
     executor: &Mutex<NativePlanExecutor>,
     context: &AdvancedPreferenceNativeContext,
@@ -1235,6 +1264,51 @@ fn reject_unavailable_mutation(
     Err(PlanExecutorError::BrokerUnavailable)
 }
 
+#[cfg(feature = "phase6-physical")]
+fn execute_physical_plan(
+    executor: &Mutex<NativePlanExecutor>,
+    context: &AdvancedPreferenceNativeContext,
+    command: PlanCommand,
+    request: PlanDocumentRequest,
+    progress: Channel<ExecutionSnapshot>,
+) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    // Key-link witness: 'execute_physical_plan'
+    // The native authority delegates only to PlanExecutor::execute after
+    // rebuilding the closed request from native posture and pipe observation.
+    let document = validate_plan_document(command, &request.document)?;
+    let accepted =
+        command_acceptance(command, &document).ok_or(PlanExecutorError::InvalidRequest)?;
+    let TransactionalRecoveryDocument::PlanTransactionDocument(transaction) = document else {
+        return Err(PlanExecutorError::InvalidRequest);
+    };
+    let (_, occurred_at) = native_clock()?;
+    let posture = current_advanced_device_posture(&context.device_id);
+    let mut authority = executor
+        .lock()
+        .map_err(|_| PlanExecutorError::JournalUnavailable)?;
+    if command == PlanCommand::Apply {
+        let preference = authority.revalidate_advanced_preference(posture, &occurred_at);
+        if matches!(
+            preference.state,
+            AdvancedPreferenceSnapshotState::Invalidated
+                | AdvancedPreferenceSnapshotState::Unavailable
+        ) {
+            return Err(PlanExecutorError::RecoveryRequired);
+        }
+    }
+    progress
+        .send(authority.read_execution())
+        .map_err(|_| PlanExecutorError::InvalidResponse)?;
+    if !authority.accepts_new_mutation() {
+        return Err(PlanExecutorError::RecoveryRequired);
+    }
+    let snapshot = authority.execute_transaction(transaction, &context.device_id, &occurred_at)?;
+    progress
+        .send(snapshot)
+        .map_err(|_| PlanExecutorError::InvalidResponse)?;
+    Ok(accepted)
+}
+
 #[tauri::command]
 fn apply_plan(
     executor: State<'_, Mutex<NativePlanExecutor>>,
@@ -1242,6 +1316,9 @@ fn apply_plan(
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    #[cfg(feature = "phase6-physical")]
+    return execute_physical_plan(&executor, &context, PlanCommand::Apply, request, progress);
+    #[cfg(not(feature = "phase6-physical"))]
     reject_unavailable_mutation(&executor, &context, PlanCommand::Apply, request, progress)
 }
 
@@ -1252,6 +1329,15 @@ fn restore_plan_operation(
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    #[cfg(feature = "phase6-physical")]
+    return execute_physical_plan(
+        &executor,
+        &context,
+        PlanCommand::RestoreOperation,
+        request,
+        progress,
+    );
+    #[cfg(not(feature = "phase6-physical"))]
     reject_unavailable_mutation(
         &executor,
         &context,
@@ -1268,6 +1354,15 @@ fn restore_plan(
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    #[cfg(feature = "phase6-physical")]
+    return execute_physical_plan(
+        &executor,
+        &context,
+        PlanCommand::RestorePlan,
+        request,
+        progress,
+    );
+    #[cfg(not(feature = "phase6-physical"))]
     reject_unavailable_mutation(
         &executor,
         &context,
@@ -1284,6 +1379,15 @@ fn restore_recovery_checkpoint(
     request: PlanDocumentRequest,
     progress: Channel<ExecutionSnapshot>,
 ) -> Result<AcceptedPlanIntent, PlanExecutorError> {
+    #[cfg(feature = "phase6-physical")]
+    return execute_physical_plan(
+        &executor,
+        &context,
+        PlanCommand::RestoreCheckpoint,
+        request,
+        progress,
+    );
+    #[cfg(not(feature = "phase6-physical"))]
     reject_unavailable_mutation(
         &executor,
         &context,
@@ -1423,10 +1527,17 @@ fn run() -> Result<(), String> {
             };
             let mut plan_executor =
                 PlanExecutor::new(recovery_store).with_advanced_preference(Box::new(authority));
+            #[cfg(not(feature = "phase6-physical"))]
             plan_executor.reconcile_startup().map_err(|_| {
                 std::io::Error::other("native recovery authority could not be reconciled")
             })?;
             let _ = plan_executor.revalidate_advanced_preference(posture, &occurred_at);
+            #[cfg(feature = "phase6-physical")]
+            let plan_executor =
+                NativePhysicalExecutionAuthority::connect(plan_executor, &device_id, &occurred_at)
+                    .map_err(|_| {
+                        std::io::Error::other("authenticated optimizer broker unavailable")
+                    })?;
             app.manage(Mutex::new(plan_executor));
             app.manage(AdvancedPreferenceNativeContext { device_id });
             let evidence_root = app.path().app_data_dir()?.join("evidence-authority");

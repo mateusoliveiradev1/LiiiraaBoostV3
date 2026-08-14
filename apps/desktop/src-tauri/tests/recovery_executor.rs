@@ -19,11 +19,13 @@ use plan_commands::{
     validate_advanced_preference_request, validate_plan_document,
 };
 use plan_executor::{
-    DiagnosticConsent, ExecutionState, PlanExecutor, PlanExecutorError, RecoveryDiagnosticSource,
+    AuthenticatedBrokerClient, BrokerClientError, BrokerSessionMaterial, BrokerTransport,
+    DiagnosticConsent, ExecutionState, NativeExecutionContext, NativeExecutionContextSource,
+    NativePhysicalExecutionAuthority, PlanExecutor, PlanExecutorError, RecoveryDiagnosticSource,
 };
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
-use std::{cell::Cell, fs, path::PathBuf};
+use std::{cell::Cell, collections::VecDeque, fs, path::PathBuf, rc::Rc};
 
 const FIXTURE: &str =
     include_str!("../../../../packages/contracts-ts/src/fixtures/transactional-plans/valid.json");
@@ -352,6 +354,8 @@ fn physical_feature_injects_one_serialized_native_authority_into_all_mutation_in
     assert!(main_source.contains("WindowsNamedPipeBrokerTransport"));
     assert!(main_source.contains("NativePhysicalExecutionAuthority"));
     assert!(main_source.contains("fn execute_physical_plan"));
+    assert!(main_source.contains("reconcile_physical_on_resume(app)?"));
+    assert!(executor_source.contains("reconnect_and_reconcile_startup"));
     assert_eq!(main_source.matches("execute_physical_plan(").count(), 5);
     assert!(main_source.contains("PlanExecutor::execute"));
 }
@@ -374,7 +378,10 @@ fn physical_and_nonphysical_mutation_paths_are_distinct_and_never_fallback() {
         "TcpStream",
         "Command::new",
     ] {
-        assert!(!main_source.contains(forbidden), "forbidden fallback: {forbidden}");
+        assert!(
+            !main_source.contains(forbidden),
+            "forbidden fallback: {forbidden}"
+        );
     }
 }
 
@@ -392,6 +399,242 @@ fn physical_recovery_is_observation_first_and_never_redispatches_pending_mutatio
     assert!(reconciliation_body.contains("reconcile_startup"));
     assert!(!reconciliation_body.contains(".mutate("));
     assert!(!reconciliation_body.contains("executor.execute("));
+}
+
+struct PhysicalJournal {
+    recovery: RecoveryLoad,
+    append_count: usize,
+}
+
+impl DurableJournalPort for PhysicalJournal {
+    fn append_prepared(
+        &mut self,
+        _: &PlanTransactionDocument,
+        _: &DurableJournalEvent,
+    ) -> PlanEngineResult<()> {
+        self.append_count += 1;
+        Ok(())
+    }
+
+    fn append(&mut self, append: JournalAppend<'_>) -> PlanEngineResult<TransactionHash> {
+        self.append_count += 1;
+        let value = serde_json::to_value(append.event).unwrap();
+        Ok(value["eventHash"].as_str().unwrap().parse().unwrap())
+    }
+
+    fn store_checkpoint(
+        &mut self,
+        _: &PreparedTransactionIdentity,
+        _: &ExactOperationState,
+        _: &RecoveryCheckpointDocument,
+    ) -> PlanEngineResult<()> {
+        Ok(())
+    }
+
+    fn store_receipt(
+        &mut self,
+        _: &PreparedTransactionIdentity,
+        _: &ExactOperationState,
+        _: &TransactionReceiptDocument,
+    ) -> PlanEngineResult<()> {
+        Ok(())
+    }
+
+    fn load_recovery(&self) -> PlanEngineResult<RecoveryLoad> {
+        Ok(self.recovery.clone())
+    }
+}
+
+impl NativeExecutionContextSource for PhysicalJournal {
+    fn native_execution_context(
+        &self,
+        transaction: &PlanTransactionDocument,
+    ) -> Result<NativeExecutionContext, PlanExecutorError> {
+        let plan: liiiraa_contracts_rust::TransactionalPlanDocument =
+            fixture("transactional plan with complete PLAN-03 metadata");
+        let operation = plan.operations.into_iter().next().unwrap();
+        let (exact_prior_state, exact_requested_state) = match transaction.intent {
+            liiiraa_contracts_rust::TransactionIntent::Apply
+            | liiiraa_contracts_rust::TransactionIntent::RetryAfterObservation => {
+                (operation.previous_value, operation.requested_value)
+            }
+            _ => (operation.requested_value, operation.previous_value),
+        };
+        Ok(NativeExecutionContext::new(
+            operation.operation_version_id,
+            exact_prior_state,
+            exact_requested_state,
+        ))
+    }
+}
+
+struct ScriptedBrokerTransport {
+    responses: VecDeque<Result<Vec<u8>, BrokerClientError>>,
+    exchanges: Rc<Cell<usize>>,
+}
+
+impl BrokerTransport for ScriptedBrokerTransport {
+    fn authenticate(&mut self) -> Result<BrokerSessionMaterial, BrokerClientError> {
+        BrokerSessionMaterial::new(
+            "session-physical-0001".to_owned(),
+            "nonce-physical-0001".to_owned(),
+            vec![0x31; 32],
+        )
+    }
+
+    fn exchange(&mut self, _: &[u8]) -> Result<Vec<u8>, BrokerClientError> {
+        self.exchanges.set(self.exchanges.get() + 1);
+        self.responses
+            .pop_front()
+            .unwrap_or(Err(BrokerClientError::TransportUnavailable))
+    }
+}
+
+fn observation(scheme_id: &str, canonical_hash: &str) -> Vec<u8> {
+    serde_json::to_vec(&json!({
+        "kind":"broker-observation-response", "schemaVersion":"1.0",
+        "responseId":"broker-observation-native", "requestId":"native-observe-scheme",
+        "outcome":"observed",
+        "exactObservedState":{
+            "state":"observed", "schemeId":scheme_id,
+            "canonicalStateHash":canonical_hash, "observedAt":"2030-01-20T00:00:00Z"
+        },
+        "completedAt":"2030-01-20T00:00:00Z"
+    }))
+    .unwrap()
+}
+
+fn accepted() -> Vec<u8> {
+    serde_json::to_vec(&json!({
+        "kind":"broker-accepted-response", "schemaVersion":"1.0",
+        "responseId":"native-broker-response", "requestId":"native-activate-scheme",
+        "outcome":"accepted", "completedAt":"2030-01-20T00:00:00Z"
+    }))
+    .unwrap()
+}
+
+#[test]
+fn physical_apply_and_every_restore_intent_dispatch_exactly_one_mutation() {
+    use liiiraa_contracts_rust::TransactionIntent;
+    for (intent, expected_state) in [
+        (TransactionIntent::Apply, ExecutionState::Verified),
+        (
+            TransactionIntent::RestoreOperation,
+            ExecutionState::Restored,
+        ),
+        (TransactionIntent::RestorePlan, ExecutionState::Restored),
+        (
+            TransactionIntent::RestoreCheckpoint,
+            ExecutionState::Restored,
+        ),
+    ] {
+        let mut transaction = fixture::<PlanTransactionDocument>("auditable apply transaction");
+        transaction.intent = intent;
+        if intent != TransactionIntent::Apply {
+            transaction.parent_transaction_id = Some("transaction-parent-0001".parse().unwrap());
+        }
+        let prior_scheme = if intent == TransactionIntent::Apply {
+            "11111111-1111-4111-8111-111111111111"
+        } else {
+            "22222222-2222-4222-8222-222222222222"
+        };
+        let target_scheme = if intent == TransactionIntent::Apply {
+            "22222222-2222-4222-8222-222222222222"
+        } else {
+            "11111111-1111-4111-8111-111111111111"
+        };
+        let prior_hash = if prior_scheme.starts_with('1') {
+            format!("sha256:{}", "1".repeat(64))
+        } else {
+            format!("sha256:{}", "2".repeat(64))
+        };
+        let target_hash = if target_scheme.starts_with('1') {
+            format!("sha256:{}", "1".repeat(64))
+        } else {
+            format!("sha256:{}", "2".repeat(64))
+        };
+        let transport = ScriptedBrokerTransport {
+            responses: VecDeque::from([
+                Ok(observation(prior_scheme, &prior_hash)),
+                Ok(accepted()),
+                Ok(observation(target_scheme, &target_hash)),
+            ]),
+            exchanges: Rc::new(Cell::new(0)),
+        };
+        let client = AuthenticatedBrokerClient::connect(transport).unwrap();
+        let executor = PlanExecutor::new(PhysicalJournal {
+            recovery: RecoveryLoad::Clear,
+            append_count: 0,
+        });
+        let mut authority = NativePhysicalExecutionAuthority::with_client(executor, client);
+
+        let snapshot = authority
+            .execute_transaction(transaction, "device-0001", "2030-01-20T00:00:00Z")
+            .unwrap();
+
+        assert_eq!(snapshot.state, expected_state);
+        assert_eq!(authority.dispatch_count(), 1);
+    }
+}
+
+#[test]
+fn response_loss_after_dispatch_becomes_unknown_without_mutation_retry() {
+    let transaction = fixture::<PlanTransactionDocument>("auditable apply transaction");
+    let prior_scheme = "11111111-1111-4111-8111-111111111111";
+    let prior_hash = format!("sha256:{}", "1".repeat(64));
+    let transport = ScriptedBrokerTransport {
+        responses: VecDeque::from([
+            Ok(observation(prior_scheme, &prior_hash)),
+            Err(BrokerClientError::TransportUnavailable),
+            Err(BrokerClientError::TransportUnavailable),
+            Err(BrokerClientError::TransportUnavailable),
+        ]),
+        exchanges: Rc::new(Cell::new(0)),
+    };
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let executor = PlanExecutor::new(PhysicalJournal {
+        recovery: RecoveryLoad::Clear,
+        append_count: 0,
+    });
+    let mut authority = NativePhysicalExecutionAuthority::with_client(executor, client);
+
+    let snapshot = authority
+        .execute_transaction(transaction, "device-0001", "2030-01-20T00:00:00Z")
+        .unwrap();
+
+    assert_eq!(snapshot.state, ExecutionState::Unknown);
+    assert!(!snapshot.accepts_new_mutation);
+    assert_eq!(authority.dispatch_count(), 1);
+}
+
+#[test]
+fn restart_reconciliation_observes_pending_transaction_without_redispatch() {
+    let transaction = fixture::<PlanTransactionDocument>("auditable apply transaction");
+    let latest_event = fixture::<DurableJournalEvent>("journal prepared");
+    let target_scheme = "22222222-2222-4222-8222-222222222222";
+    let target_hash = format!("sha256:{}", "2".repeat(64));
+    let exchanges = Rc::new(Cell::new(0));
+    let transport = ScriptedBrokerTransport {
+        responses: VecDeque::from([Ok(observation(target_scheme, &target_hash))]),
+        exchanges: exchanges.clone(),
+    };
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let executor = PlanExecutor::new(PhysicalJournal {
+        recovery: RecoveryLoad::Pending {
+            transaction: Box::new(transaction.clone()),
+            latest_event: Box::new(latest_event),
+        },
+        append_count: 0,
+    });
+    let mut authority = NativePhysicalExecutionAuthority::with_client(executor, client);
+
+    let snapshot = authority
+        .reconcile_transaction(transaction, "device-0001", "2030-01-20T00:00:00Z")
+        .unwrap();
+
+    assert_eq!(snapshot.state, ExecutionState::Verified);
+    assert_eq!(authority.dispatch_count(), 0);
+    assert_eq!(exchanges.get(), 1, "recovery performs one observation only");
 }
 
 fn temporary_export_path() -> PathBuf {

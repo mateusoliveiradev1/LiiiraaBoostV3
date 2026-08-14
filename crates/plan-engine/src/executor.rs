@@ -250,6 +250,17 @@ pub enum NextSafeAction {
 /// native document builder and validated against the reducer decision before
 /// any append or receipt write.
 #[derive(Clone, Debug)]
+pub struct ObservationArtifacts {
+    pub observed: DurableJournalEvent,
+    pub verified: DurableJournalEvent,
+    pub not_applied: DurableJournalEvent,
+    pub unknown: DurableJournalEvent,
+    pub drift: DurableJournalEvent,
+    pub conflict: DurableJournalEvent,
+    pub restored: DurableJournalEvent,
+}
+
+#[derive(Clone, Debug)]
 pub struct ExecutionArtifacts {
     pub prepared: DurableJournalEvent,
     pub dispatch_returned: Option<DurableJournalEvent>,
@@ -260,6 +271,9 @@ pub struct ExecutionArtifacts {
     pub drift: DurableJournalEvent,
     pub conflict: DurableJournalEvent,
     pub restored: DurableJournalEvent,
+    /// Alternate chain whose observation follows `prepared` directly. The
+    /// broker response was lost, so no dispatch-returned event may be claimed.
+    pub uncertain_dispatch: Option<ObservationArtifacts>,
     pub receipt: TransactionReceiptDocument,
     pub restart_checkpoint: Option<RecoveryCheckpointDocument>,
 }
@@ -579,20 +593,44 @@ impl DeterministicTransactionExecutor {
             }
         }
 
+        let mut effective_request = if dispatch_result.is_err() {
+            request
+                .artifacts
+                .uncertain_dispatch
+                .as_ref()
+                .map(|artifacts| {
+                    let mut request = request.clone();
+                    request.artifacts.observed = artifacts.observed.clone();
+                    request.artifacts.verified = artifacts.verified.clone();
+                    request.artifacts.not_applied = artifacts.not_applied.clone();
+                    request.artifacts.unknown = artifacts.unknown.clone();
+                    request.artifacts.drift = artifacts.drift.clone();
+                    request.artifacts.conflict = artifacts.conflict.clone();
+                    request.artifacts.restored = artifacts.restored.clone();
+                    request.artifacts.uncertain_dispatch = None;
+                    request
+                })
+                .unwrap_or_else(|| request.clone())
+        } else {
+            request.clone()
+        };
+
         let post_observation = PreparedObservation::from_parts(
             transaction.clone(),
-            request.operation_version_id.clone(),
-            request.exact_prior_state.clone(),
-            request.observation_command.clone(),
+            effective_request.operation_version_id.clone(),
+            effective_request.exact_prior_state.clone(),
+            effective_request.observation_command.clone(),
         );
         let (observed, post_attempts) =
             observe_bounded(broker, &post_observation, request.read_retry_limit);
         let read_attempts = prior_attempts + post_attempts;
         let observed = observed.unwrap_or_else(|| {
-            event_observed_state(&request.artifacts.observed)
+            event_observed_state(&effective_request.artifacts.observed)
                 .expect("validated observed event")
                 .clone()
         });
+        bind_observation_artifacts(&mut effective_request.artifacts, &observed)?;
+        let request = &effective_request;
 
         if !exact_state_matches(
             event_observed_state(&request.artifacts.observed).expect("validated observed event"),
@@ -688,6 +726,9 @@ impl DeterministicTransactionExecutor {
                 .expect("validated observed event")
                 .clone()
         });
+        let mut effective_request = request.clone();
+        bind_observation_artifacts(&mut effective_request.artifacts, &observed)?;
+        let request = &effective_request;
         if !exact_state_matches(
             event_observed_state(&request.artifacts.observed).expect("validated observed event"),
             &observed,
@@ -948,6 +989,65 @@ fn exact_state_matches(left: &ExactOperationState, right: &ExactOperationState) 
     }
 }
 
+fn bind_observation_artifacts(
+    artifacts: &mut ExecutionArtifacts,
+    observed: &ExactOperationState,
+) -> PlanEngineResult<()> {
+    set_event_observed_state(&mut artifacts.observed, observed)?;
+    for event in [
+        &mut artifacts.verified,
+        &mut artifacts.not_applied,
+        &mut artifacts.unknown,
+        &mut artifacts.drift,
+        &mut artifacts.conflict,
+        &mut artifacts.restored,
+    ] {
+        set_event_observed_state(event, observed)?;
+    }
+    artifacts.receipt.exact_observed_state = observed.clone();
+    artifacts.receipt.verification.exact_observed_state = observed.clone();
+    Ok(())
+}
+
+fn set_event_observed_state(
+    event: &mut DurableJournalEvent,
+    observed: &ExactOperationState,
+) -> PlanEngineResult<()> {
+    match event {
+        DurableJournalEvent::ObservedJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::VerifiedJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::NotAppliedJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::UnknownJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::DriftJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::ConflictJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::RestoredJournalEvent(value) => {
+            value.exact_observed_state = observed.clone();
+        }
+        DurableJournalEvent::PreparedJournalEvent(_)
+        | DurableJournalEvent::DispatchReturnedJournalEvent(_)
+        | DurableJournalEvent::RestorePreparedJournalEvent(_) => {
+            return Err(invalid_artifact(&artifacts_operation_version(event)));
+        }
+    }
+    Ok(())
+}
+
+fn artifacts_operation_version(event: &DurableJournalEvent) -> TransactionIdentifier {
+    event_metadata(event).operation_version_id.clone()
+}
+
 fn gate_for_admission_error(code: PlanEngineErrorCode) -> MutationGateState {
     match code {
         PlanEngineErrorCode::Revoked => MutationGateState::ClosedForRevocation,
@@ -1104,24 +1204,56 @@ fn validate_request_artifacts(request: &ExecutionRequest) -> PlanEngineResult<()
         expected_sequence += 1;
         expected_head = metadata.hash;
     }
-    validate_event_identity(request, &request.artifacts.observed)?;
-    let observed = event_metadata(&request.artifacts.observed);
+    validate_observation_chain(
+        request,
+        &request.artifacts.observed,
+        [
+            &request.artifacts.verified,
+            &request.artifacts.not_applied,
+            &request.artifacts.unknown,
+            &request.artifacts.drift,
+            &request.artifacts.conflict,
+            &request.artifacts.restored,
+        ],
+        expected_sequence,
+        expected_head,
+    )?;
+    if let Some(uncertain) = request.artifacts.uncertain_dispatch.as_ref() {
+        validate_observation_chain(
+            request,
+            &uncertain.observed,
+            [
+                &uncertain.verified,
+                &uncertain.not_applied,
+                &uncertain.unknown,
+                &uncertain.drift,
+                &uncertain.conflict,
+                &uncertain.restored,
+            ],
+            1,
+            prepared.hash,
+        )?;
+    }
+    Ok(())
+}
+
+fn validate_observation_chain(
+    request: &ExecutionRequest,
+    observed_event: &DurableJournalEvent,
+    verdicts: [&DurableJournalEvent; 6],
+    expected_sequence: u32,
+    expected_head: &TransactionHash,
+) -> PlanEngineResult<()> {
+    validate_event_identity(request, observed_event)?;
+    let observed = event_metadata(observed_event);
     if observed.sequence != expected_sequence || observed.previous_hash != expected_head {
         return Err(invalid_artifact(&request.operation_version_id));
     }
-    expected_sequence += 1;
-    expected_head = observed.hash;
-    for verdict in [
-        &request.artifacts.verified,
-        &request.artifacts.not_applied,
-        &request.artifacts.unknown,
-        &request.artifacts.drift,
-        &request.artifacts.conflict,
-        &request.artifacts.restored,
-    ] {
+    let expected_sequence = expected_sequence + 1;
+    for verdict in verdicts {
         validate_event_identity(request, verdict)?;
         let metadata = event_metadata(verdict);
-        if metadata.sequence != expected_sequence || metadata.previous_hash != expected_head {
+        if metadata.sequence != expected_sequence || metadata.previous_hash != observed.hash {
             return Err(invalid_artifact(&request.operation_version_id));
         }
     }

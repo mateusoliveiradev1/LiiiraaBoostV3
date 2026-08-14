@@ -250,6 +250,7 @@ fn artifacts(observed: ExactOperationState, dispatch_recorded: bool) -> Executio
         drift,
         conflict,
         restored,
+        uncertain_dispatch: None,
         receipt,
         restart_checkpoint: Some(fixture("protected recovery checkpoint")),
     }

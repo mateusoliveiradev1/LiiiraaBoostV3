@@ -6,7 +6,7 @@ mod recovery_store;
 use liiiraa_contracts_rust::PrivilegedBrokerResponse;
 use plan_executor::{
     AuthenticatedBrokerClient, BrokerClientError, BrokerSessionMaterial, BrokerTransport,
-    BrokerWire, WindowsNamedPipeBrokerTransport, OPTIMIZER_PIPE_ENDPOINT,
+    BrokerWire, OPTIMIZER_PIPE_ENDPOINT, WindowsNamedPipeBrokerTransport,
 };
 use serde_json::{Value, json};
 use std::{
@@ -56,7 +56,7 @@ fn raw_invalid_or_unknown_broker_messages_are_rejected_before_transport() {
         exchanges: Cell::new(0),
         response: Vec::new(),
     };
-    let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
 
     assert!(matches!(
         client.exchange_validated(
@@ -77,7 +77,7 @@ fn generated_request_is_authenticated_and_response_is_validated_before_mapping()
         exchanges: Cell::new(0),
         response: serde_json::to_vec(&response).unwrap(),
     };
-    let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
 
     let result = client
         .exchange_validated(
@@ -105,7 +105,7 @@ fn malformed_or_oversized_response_never_becomes_native_success() {
             exchanges: Cell::new(0),
             response,
         };
-        let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
+        let client = AuthenticatedBrokerClient::connect(transport).unwrap();
         assert!(matches!(
             client.exchange_validated(
                 "transaction-0001",
@@ -125,7 +125,7 @@ fn session_material_is_native_only_and_counters_are_monotonic() {
         exchanges: Cell::new(0),
         response: serde_json::to_vec(&response).unwrap(),
     };
-    let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
     let request = fixture_value("narrow broker request");
 
     client
@@ -160,7 +160,10 @@ struct ScriptedWire {
 impl Read for ScriptedWire {
     fn read(&mut self, output: &mut [u8]) -> io::Result<usize> {
         let mut chunk = self.reads.pop_front().unwrap_or_else(|| {
-            Err(io::Error::new(io::ErrorKind::UnexpectedEof, "script exhausted"))
+            Err(io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "script exhausted",
+            ))
         })?;
         let count = output.len().min(chunk.len());
         output[..count].copy_from_slice(&chunk[..count]);
@@ -209,7 +212,9 @@ fn framed(value: Value) -> Vec<u8> {
     frame
 }
 
-fn scripted_transport(reads: Vec<io::Result<Vec<u8>>>) -> WindowsNamedPipeBrokerTransport<ScriptedWire> {
+fn scripted_transport(
+    reads: Vec<io::Result<Vec<u8>>>,
+) -> WindowsNamedPipeBrokerTransport<ScriptedWire> {
     WindowsNamedPipeBrokerTransport::from_wire(
         ScriptedWire {
             reads: reads.into(),
@@ -236,7 +241,7 @@ fn fixed_pipe_handshake_is_length_prefixed_partial_io_safe_and_identity_checked(
         .map(|chunk| Ok(chunk.to_vec()))
         .collect();
     let transport = scripted_transport(reads);
-    let mut client = AuthenticatedBrokerClient::connect(transport).unwrap();
+    let client = AuthenticatedBrokerClient::connect(transport).unwrap();
 
     let result = client
         .exchange_validated(
@@ -247,14 +252,22 @@ fn fixed_pipe_handshake_is_length_prefixed_partial_io_safe_and_identity_checked(
         )
         .unwrap();
 
-    assert!(matches!(result, PrivilegedBrokerResponse::ObservationResponse(_)));
-    let wire = client.transport().wire();
+    assert!(matches!(
+        result,
+        PrivilegedBrokerResponse::ObservationResponse(_)
+    ));
+    let transport = client.transport();
+    let wire = transport.wire();
     assert_eq!(wire.connect_count, 1);
     assert_eq!(wire.identity_checks, 1);
     let handshake_length = u32::from_be_bytes(wire.writes[..4].try_into().unwrap()) as usize;
     let handshake: Value = serde_json::from_slice(&wire.writes[4..4 + handshake_length]).unwrap();
     assert_eq!(handshake["kind"], "broker-handshake-v1");
-    assert!(handshake["clientNonce"].as_str().is_some_and(|value| !value.is_empty()));
+    assert!(
+        handshake["clientNonce"]
+            .as_str()
+            .is_some_and(|value| !value.is_empty())
+    );
     assert!(!wire.writes.windows(7).any(|window| window == b"fixture"));
 }
 
@@ -262,32 +275,43 @@ fn fixed_pipe_handshake_is_length_prefixed_partial_io_safe_and_identity_checked(
 fn oversized_partial_timeout_and_disconnect_fail_closed_without_alternate_transport() {
     let oversized = (65_537_u32).to_be_bytes().to_vec();
     let mut transport = scripted_transport(vec![Ok(oversized)]);
-    assert_eq!(
+    assert!(matches!(
         transport.authenticate(),
         Err(BrokerClientError::MessageTooLarge)
-    );
+    ));
     assert!(!transport.wire().connected);
 
     let mut timeout = scripted_transport(vec![Err(io::Error::new(
         io::ErrorKind::TimedOut,
         "deadline",
     ))]);
-    assert_eq!(
+    assert!(matches!(
         timeout.authenticate(),
         Err(BrokerClientError::TransportUnavailable)
-    );
+    ));
     assert!(!timeout.wire().connected);
 
     let source = include_str!("../src/plan_executor.rs");
     assert!(source.contains(r"\\.\pipe\LiiiraaBoost\optimizer-v1"));
-    for forbidden in ["TcpStream", "executePhysicalMutation", "cmd.exe", "powershell"] {
-        assert!(!source.contains(forbidden), "forbidden fallback: {forbidden}");
+    for forbidden in [
+        "TcpStream",
+        "executePhysicalMutation",
+        "cmd.exe",
+        "powershell",
+    ] {
+        assert!(
+            !source.contains(forbidden),
+            "forbidden fallback: {forbidden}"
+        );
     }
 }
 
 #[test]
 fn wrong_endpoint_cannot_be_constructed_and_disconnect_requires_fresh_authentication() {
-    assert_eq!(OPTIMIZER_PIPE_ENDPOINT, r"\\.\pipe\LiiiraaBoost\optimizer-v1");
+    assert_eq!(
+        OPTIMIZER_PIPE_ENDPOINT,
+        r"\\.\pipe\LiiiraaBoost\optimizer-v1"
+    );
     let source = include_str!("../src/plan_executor.rs");
     assert!(!source.contains("pub fn with_endpoint"));
     assert!(!source.contains("pub fn new(endpoint"));
