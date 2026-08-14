@@ -199,3 +199,16 @@ The exact elevated `RunCleanVm` bridge was invoked once. It re-verified the immu
 The immutable blocker record is `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-191211-clean-vm-BLOCKED.json`, SHA-256 `fc7f2fe875daf0f7ad6c5b33fbeaa9c53c2a7b3dcd09690a5836fa216db0c5a0`. Its completed boundaries are exactly `artifact-verifier-pass` and `simulation-admission-pass`, and its reason is `BLOCKED: Hyper-V integration services are not healthy.`
 
 The plan verifier `rtk pnpm phase6:verify -- --mode planned --require-run-evidence clean-windows-vm` exited nonzero as required, with `ok: false`, `runReadyForReview: false`, highest admitted stage `deterministic-simulation`, and diagnostic `PHYSICAL_RUN_EVIDENCE_MISSING`. No physical PASS, reviewer approval, or replacement operation version is claimed. Resume only after the exact VM integration services are healthy; do not reuse this attempt as physical evidence.
+
+### Single retry after the Off-state audit correction — BLOCKED
+
+- **Recorded at:** `2026-08-14T22:27:40.6634655Z`
+- **Result:** `BLOCKED-OBSERVATION-FIRST-CONTINUATION-UNAVAILABLE`
+- **Immutable blocker record:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-192740-clean-vm-BLOCKED.json`
+- **Blocker record SHA-256:** `dcdc9a9dcf01930e403f697c070bb49b83f31db799856304dc3b6fdd5347395c`
+- **Final VM state:** not asserted by the blocker record; no follow-up elevated action was run
+- **Human review:** not presented; Task 2 remains closed
+
+The authorized one-time retry used the same `managed-power-scheme-v43` artifact and deterministic admission. The corrected pre-start audit accepted the legitimate Off state only after checking the exact VM/checkpoint, SecureBoot, TPM, host services, and exactly six enabled integration services. The bridge then restored `Clean-Windows-Ready` and started the VM sequence, but PowerShell Direct did not become available within the fixed 60-second observation-first timeout.
+
+The completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, and `clean-checkpoint-restored`. The failure occurred before integration-health admission, artifact copy, guest runner, installed checkpoint, apply approval, restart, evidence copy, or `physical-writer` ingestion. The persisted reason is `BLOCKED: exact VM did not become available for observation-first continuation.` This retry is append-only evidence and must not be relabeled as a physical PASS.
