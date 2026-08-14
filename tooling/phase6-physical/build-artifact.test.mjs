@@ -348,10 +348,7 @@ test('WiX uses installer tables for coherent service custody and contains no dri
       '    </ComponentGroup>\n  </Fragment>',
       '    </ComponentGroup>\n    </DirectoryRef>\n  </Fragment>',
     );
-  assert.throws(
-    () => validateWixContract(nestedComponentGroup),
-    /ComponentGroup.*DirectoryRef/u,
-  );
+  assert.throws(() => validateWixContract(nestedComponentGroup), /ComponentGroup.*DirectoryRef/u);
   assert.throws(
     () =>
       validateWixContract(
@@ -431,27 +428,21 @@ test('WiX uses installer tables for coherent service custody and contains no dri
       () => validateWixContract(wix().replace('</Fragment>', `${addition}</Fragment>`)),
       pattern,
     );
-  assert.throws(
-    () => {
-      const source = wix();
-      const manifestComponent = source.match(
-        /\s*<Component Id="InstallationManifestComponent"[\s\S]*?<\/Component>/u,
-      )[0];
-      const signatureComponent = source.match(
-        /\s*<Component Id="InstallationManifestSignatureComponent"[\s\S]*?<\/Component>/u,
-      )[0];
-      validateWixContract(
-        source
-          .replace(manifestComponent, '')
-          .replace(signatureComponent, '')
-          .replace(
-            '</DirectoryRef>',
-            `${manifestComponent}${signatureComponent}</DirectoryRef>`,
-          ),
-      );
-    },
-    /manifest.*service/u,
-  );
+  assert.throws(() => {
+    const source = wix();
+    const manifestComponent = source.match(
+      /\s*<Component Id="InstallationManifestComponent"[\s\S]*?<\/Component>/u,
+    )[0];
+    const signatureComponent = source.match(
+      /\s*<Component Id="InstallationManifestSignatureComponent"[\s\S]*?<\/Component>/u,
+    )[0];
+    validateWixContract(
+      source
+        .replace(manifestComponent, '')
+        .replace(signatureComponent, '')
+        .replace('</DirectoryRef>', `${manifestComponent}${signatureComponent}</DirectoryRef>`),
+    );
+  }, /manifest.*service/u);
 });
 
 test('final MSI inspection requires exact runtime files and zero CustomAction authority', () => {
@@ -600,7 +591,10 @@ test('desktop bundle type is patched to MSI before signing and manifest custody'
     );
     assert.equal(patchTauriBundleTypeForMsi(executable), false, 'MSI patch must be idempotent');
 
-    writeFileSync(executable, Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK__TAURI_BUNDLE_TYPE_VAR_UNK'));
+    writeFileSync(
+      executable,
+      Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK__TAURI_BUNDLE_TYPE_VAR_UNK'),
+    );
     assert.throws(() => patchTauriBundleTypeForMsi(executable), /exactly one/u);
   } finally {
     rmSync(directory, { recursive: true, force: true });

@@ -27,8 +27,7 @@ const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 const INSTALLATION_DIRECTORY_SDDL =
   'D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;GRGX;;;BU)(A;OICI;GRGX;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
-const INSTALLATION_DIRECTORY_COMPONENT_GUID =
-  '{3BA41754-6199-4B96-BD9A-613FDBBD270A}';
+const INSTALLATION_DIRECTORY_COMPONENT_GUID = '{3BA41754-6199-4B96-BD9A-613FDBBD270A}';
 
 export const CANONICAL_COMMANDS = Object.freeze({
   composePlan: 'compose_plan',
@@ -167,6 +166,26 @@ const canonicalValue = (value) => {
 };
 const canonicalBytes = (value) =>
   Buffer.from(`${JSON.stringify(canonicalValue(value), null, 2)}\n`, 'utf8');
+
+const TAURI_BUNDLE_TYPE_UNKNOWN = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK', 'ascii');
+const TAURI_BUNDLE_TYPE_MSI = Buffer.from('__TAURI_BUNDLE_TYPE_VAR_MSI', 'ascii');
+
+export const patchTauriBundleTypeForMsi = (path) => {
+  const executable = readFileSync(path);
+  const first = executable.indexOf(TAURI_BUNDLE_TYPE_UNKNOWN);
+  if (first < 0) {
+    if (executable.indexOf(TAURI_BUNDLE_TYPE_MSI) < 0)
+      fail('desktop executable has no recognized Tauri bundle marker');
+    return false;
+  }
+  if (executable.indexOf(TAURI_BUNDLE_TYPE_UNKNOWN, first + 1) >= 0)
+    fail('desktop executable must contain exactly one mutable Tauri bundle marker');
+  TAURI_BUNDLE_TYPE_MSI.copy(executable, first);
+  if (executable.indexOf(TAURI_BUNDLE_TYPE_UNKNOWN) >= 0)
+    fail('desktop executable retained the mutable Tauri bundle marker');
+  writeFileSync(path, executable);
+  return true;
+};
 
 const run = (command, args, options = {}) => {
   const result = spawnSync(command, args, {
@@ -320,8 +339,7 @@ export function validateWebView2RuntimeEvidence(evidence) {
     fail('WebView2 Runtime file version does not match the registry version');
   if (evidence.productName !== 'Microsoft Edge WebView2')
     fail('WebView2 product identity is invalid');
-  if (evidence.signatureStatus !== 'Valid')
-    fail('WebView2 Runtime signature is invalid');
+  if (evidence.signatureStatus !== 'Valid') fail('WebView2 Runtime signature is invalid');
   if (evidence.publisher !== 'Microsoft Corporation')
     fail('WebView2 Runtime is not signed by the Microsoft publisher');
   if (!SHA_PATTERN.test(evidence.executableSha256 || ''))
@@ -413,9 +431,7 @@ export function validateWixContract(xml) {
     stagedSources.length === 0 ||
     stagedSources.some(
       (source) =>
-        !source[1].startsWith(
-          '../../../../../apps/desktop/src-tauri/installer/physical-staging/',
-        ),
+        !source[1].startsWith('../../../../../apps/desktop/src-tauri/installer/physical-staging/'),
     )
   )
     fail('WiX File sources must use the Tauri link working directory staging path');
@@ -624,8 +640,7 @@ foreach ($registration in $registrations) {
 @($results) | ConvertTo-Json -Depth 5 -Compress
 `);
   const candidates = Array.isArray(evidence) ? evidence : evidence ? [evidence] : [];
-  if (candidates.length === 0)
-    fail('Microsoft Edge WebView2 Runtime registration is unavailable');
+  if (candidates.length === 0) fail('Microsoft Edge WebView2 Runtime registration is unavailable');
   const verified = candidates.map(validateWebView2RuntimeEvidence);
   return verified[0];
 };
@@ -658,7 +673,9 @@ $certificates | ConvertTo-Json -Compress
     }))
     .filter((candidate) => candidate.spkiSha256 === expectedSpki);
   if (matches.length !== 1)
-    fail(`expected exactly one CurrentUser development signer matching the compiled SPKI, found ${matches.length}`);
+    fail(
+      `expected exactly one CurrentUser development signer matching the compiled SPKI, found ${matches.length}`,
+    );
   const [{ certificateBase64: _publicCertificate, ...signer }] = matches;
   return signer;
 };
@@ -922,15 +939,18 @@ export function validateMsiInspection(inspection, expected) {
   const actualFiles = (inspection.files || [])
     .map((name) => name.split('|').at(-1).toLowerCase())
     .sort();
-  if (!deepEqual(actualFiles, expectedFiles))
-    fail('MSI must contain the exact installed files');
+  if (!deepEqual(actualFiles, expectedFiles)) fail('MSI must contain the exact installed files');
   if (
     inspection.customActionCount !== 0 ||
     !Array.isArray(inspection.customActions) ||
     inspection.customActions.length !== 0
   )
     fail('MSI must contain zero CustomAction authority');
-  if (/DownloadAndInvokeBootstrapper|powershell(?:\.exe)?|cmd(?:\.exe)?/iu.test(JSON.stringify(inspection)))
+  if (
+    /DownloadAndInvokeBootstrapper|powershell(?:\.exe)?|cmd(?:\.exe)?/iu.test(
+      JSON.stringify(inspection),
+    )
+  )
     fail('MSI inspection contains forbidden bootstrapper or shell authority');
   return true;
 }
@@ -1008,9 +1028,9 @@ if ($process.ExitCode -ne 0) { throw "elevated lifecycle helper exited $($proces
     result.uninstall !== 'passed' ||
     result.recoveryCustodyPreserved !== true ||
     result.forcedReboot !== false ||
-    result.residualsAbsent !== true
-    || result.webView2RuntimeVersion !== webView2Runtime.version
-    || result.webView2RuntimeSha256 !== webView2Runtime.executableSha256
+    result.residualsAbsent !== true ||
+    result.webView2RuntimeVersion !== webView2Runtime.version ||
+    result.webView2RuntimeSha256 !== webView2Runtime.executableSha256
   ) {
     fail('elevated lifecycle result did not satisfy the closed lifecycle contract');
   }
@@ -1153,6 +1173,7 @@ const buildAndSmoke = (options) => {
     };
     for (const path of Object.values(built))
       if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
+    patchTauriBundleTypeForMsi(built.desktop);
     const signatures = {};
     for (const [key, path] of Object.entries(built))
       signatures[key] = signAuthenticode(signtool, signer.thumbprint, path);
