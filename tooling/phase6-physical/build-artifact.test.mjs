@@ -27,6 +27,7 @@ import {
   validateMsiInspection,
   validatePhysicalProfile,
   validatePortableRootAclSnapshot,
+  validateServiceRuntimeDependencies,
   validateWebView2RuntimeEvidence,
   validateWixContract,
   verifyDetachedCmsEvidence,
@@ -587,6 +588,32 @@ test('RED: real v53 MSI 1920 fixture binds service startup to the exact service 
   assert.match(source, new RegExp(`EXPECTED_SERVICE_SID[\\s\\S]{0,96}${exactSid}`, 'u'));
   assert.match(source, /select_expected_service_sid/u);
   assert.doesNotMatch(source, /find\(\|\(_, sid\)\| sid\.starts_with\("S-1-5-80-"\)\)/u);
+});
+
+test('RED: physical service uses static CRT and rejects clean-VM runtime dependencies', () => {
+  const dynamic = [
+    'Image has the following dependencies:',
+    '  kernel32.dll',
+    '  VCRUNTIME140.dll',
+    '  api-ms-win-crt-runtime-l1-1-0.dll',
+  ].join('\r\n');
+  assert.throws(() => validateServiceRuntimeDependencies(dynamic), /dynamic CRT/u);
+  assert.deepEqual(
+    validateServiceRuntimeDependencies(
+      ['Image has the following dependencies:', '  kernel32.dll', '  advapi32.dll'].join('\r\n'),
+    ),
+    ['advapi32.dll', 'kernel32.dll'],
+  );
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  assert.match(source, /STATIC_CRT_RUSTFLAGS\s*=\s*'-C target-feature=\+crt-static'/u);
+  assert.match(
+    source,
+    /liiiraa-optimizer-service[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u,
+  );
+  const dependencyGateIndex = source.lastIndexOf('validateServiceRuntimeDependencies(');
+  const signingIndex = source.indexOf('signAuthenticode(signtool, signer.thumbprint, path)');
+  assert.ok(dependencyGateIndex >= 0 && dependencyGateIndex < signingIndex);
 });
 
 test('physical lifecycle proves the installed desktop owns a read-only broker lease across reconnect', () => {
