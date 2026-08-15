@@ -402,6 +402,85 @@ pub(crate) fn resolve_below_root(
     Ok(canonical)
 }
 
+pub(crate) fn same_closed_windows_path(expected: &Path, actual: &Path) -> bool {
+    #[cfg(windows)]
+    {
+        use std::path::Prefix;
+
+        fn has_closed_shape(path: &Path) -> bool {
+            let Some(text) = path.to_str() else {
+                return false;
+            };
+            if text.contains('/') || text.ends_with('\\') {
+                return false;
+            }
+            let mut components = path.components();
+            let Some(Component::Prefix(prefix)) = components.next() else {
+                return false;
+            };
+            if !matches!(
+                prefix.kind(),
+                Prefix::Disk(_)
+                    | Prefix::VerbatimDisk(_)
+                    | Prefix::UNC(_, _)
+                    | Prefix::VerbatimUNC(_, _)
+            ) || !matches!(components.next(), Some(Component::RootDir))
+            {
+                return false;
+            }
+            let Some(prefix_text) = prefix.as_os_str().to_str() else {
+                return false;
+            };
+            let Some(remainder) = text.get(prefix_text.len()..) else {
+                return false;
+            };
+            let Some(tail) = remainder.strip_prefix('\\') else {
+                return false;
+            };
+            if tail.is_empty()
+                || tail
+                    .split('\\')
+                    .any(|segment| segment.is_empty() || segment == "." || segment == "..")
+            {
+                return false;
+            }
+            components.all(|component| matches!(component, Component::Normal(_)))
+        }
+
+        if !has_closed_shape(expected) || !has_closed_shape(actual) {
+            return false;
+        }
+        if expected == actual {
+            return true;
+        }
+        let mut expected_components = expected.components();
+        let mut actual_components = actual.components();
+        let prefixes_match = match (expected_components.next(), actual_components.next()) {
+            (Some(Component::Prefix(left)), Some(Component::Prefix(right))) => {
+                match (left.kind(), right.kind()) {
+                    (Prefix::Disk(left), Prefix::VerbatimDisk(right))
+                    | (Prefix::VerbatimDisk(left), Prefix::Disk(right)) => left == right,
+                    (
+                        Prefix::UNC(left_server, left_share),
+                        Prefix::VerbatimUNC(right_server, right_share),
+                    )
+                    | (
+                        Prefix::VerbatimUNC(left_server, left_share),
+                        Prefix::UNC(right_server, right_share),
+                    ) => left_server == right_server && left_share == right_share,
+                    _ => false,
+                }
+            }
+            _ => false,
+        };
+        prefixes_match && expected_components.eq(actual_components)
+    }
+    #[cfg(not(windows))]
+    {
+        expected.is_absolute() && expected == actual
+    }
+}
+
 pub(crate) fn canonical_json_bytes(bytes: &[u8]) -> Result<Vec<u8>, CustodyError> {
     let value: Value = serde_json::from_slice(bytes).map_err(|_| CustodyError::schema("json"))?;
     canonical_json_value(&value)
@@ -536,7 +615,8 @@ pub(crate) mod windows_backend {
 
     use super::{
         AuthenticodeEvidence, CustodyBackend, CustodyError, INSTALLATION_MANIFEST_NAME,
-        INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState, SignerEvidence, sha256_prefixed,
+        INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState, SignerEvidence,
+        same_closed_windows_path, sha256_prefixed,
     };
 
     const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
@@ -659,7 +739,7 @@ pub(crate) mod windows_backend {
                     .file_name()
                     .ok_or_else(|| CustodyError::path("last-admitted-name"))?,
             );
-            if canonical != expected {
+            if !same_closed_windows_path(&canonical, &expected) {
                 return Err(CustodyError::path("last-admitted-path"));
             }
             verify_acl(&canonical, true)?;

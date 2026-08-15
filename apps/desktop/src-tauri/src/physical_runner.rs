@@ -27,8 +27,8 @@ use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,
 };
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
-use installation_manifest::verify_installed_manifest;
 use installation_manifest::{CustodyError, CustodyErrorCode};
+use installation_manifest::{same_closed_windows_path, verify_installed_manifest};
 
 // Plan 06-33 key-link witnesses (quoted because verify.key-links preserves YAML scalars):
 // 'compose_plan apply_plan restore_plan'
@@ -1249,39 +1249,7 @@ fn same_canonical_path(expected: &Path, actual: Option<&Path>) -> bool {
     let Some(actual) = actual else {
         return false;
     };
-    if expected == actual {
-        return true;
-    }
-    #[cfg(windows)]
-    {
-        let mut expected_components = expected.components();
-        let mut actual_components = actual.components();
-        let prefixes_match = match (expected_components.next(), actual_components.next()) {
-            (Some(Component::Prefix(left)), Some(Component::Prefix(right))) => {
-                match (left.kind(), right.kind()) {
-                    (std::path::Prefix::Disk(left), std::path::Prefix::VerbatimDisk(right))
-                    | (std::path::Prefix::VerbatimDisk(left), std::path::Prefix::Disk(right)) => {
-                        left == right
-                    }
-                    (
-                        std::path::Prefix::UNC(left_server, left_share),
-                        std::path::Prefix::VerbatimUNC(right_server, right_share),
-                    )
-                    | (
-                        std::path::Prefix::VerbatimUNC(left_server, left_share),
-                        std::path::Prefix::UNC(right_server, right_share),
-                    ) => left_server == right_server && left_share == right_share,
-                    _ => false,
-                }
-            }
-            _ => false,
-        };
-        prefixes_match && expected_components.eq(actual_components)
-    }
-    #[cfg(not(windows))]
-    {
-        false
-    }
+    same_closed_windows_path(expected, actual)
 }
 
 #[cfg(windows)]
