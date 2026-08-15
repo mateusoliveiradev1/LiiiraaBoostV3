@@ -100,9 +100,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v46',
+    'physical-c714ca4c5ad147f4-managed-power-scheme-v46',
+    '1a1dc18ce40beaef2f83cdb3e070386e4d639021',
+    'a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da',
+    'ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229',
+    'd2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da',
     'managed-power-scheme-v45',
     'physical-68bb4f974e23ee26-managed-power-scheme-v45',
-    '7c3525b12ce76619f711ff6f6183ec884c60764f',
     '9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40',
     '0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e',
     '4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6',
@@ -427,7 +432,7 @@ test('dry-run audits the exact immutable v45 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v45');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v46');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
