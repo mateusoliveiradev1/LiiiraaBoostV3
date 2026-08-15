@@ -121,6 +121,7 @@ struct FakeBackend {
     acl_secure: bool,
     last_admitted: Option<InstalledAdmissionState>,
     authenticode_calls: usize,
+    canonical_roles: Vec<CanonicalPathRole>,
 }
 
 impl FakeBackend {
@@ -155,7 +156,12 @@ impl CustodyBackend for FakeBackend {
         Ok(self.root())
     }
 
-    fn canonicalize(&mut self, path: &Path) -> Result<PathBuf, CustodyError> {
+    fn canonicalize(
+        &mut self,
+        path: &Path,
+        role: CanonicalPathRole,
+    ) -> Result<PathBuf, CustodyError> {
+        self.canonical_roles.push(role);
         if self.files.contains_key(path) || path == self.root() {
             Ok(path.to_path_buf())
         } else {
@@ -305,6 +311,17 @@ fn verifies_fixed_program_files_manifest_before_live_installed_bytes() {
     assert_eq!(verified.package_version(), "1.2.0");
     assert_eq!(verified.files().len(), 3);
     assert_eq!(backend.authenticode_calls, 3);
+    assert_eq!(
+        backend.canonical_roles,
+        [
+            CanonicalPathRole::InstalledRoot,
+            CanonicalPathRole::InstalledManifest,
+            CanonicalPathRole::InstalledSignature,
+            CanonicalPathRole::InstalledDesktop,
+            CanonicalPathRole::InstalledService,
+            CanonicalPathRole::InstalledRunner,
+        ]
+    );
 }
 
 #[test]

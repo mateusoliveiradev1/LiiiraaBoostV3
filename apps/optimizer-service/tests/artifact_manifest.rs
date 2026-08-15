@@ -14,8 +14,9 @@ use service::{
         verify_friends_roster_with_backend,
     },
     installation_manifest::{
-        AuthenticodeEvidence, CustodyBackend, CustodyError, InstalledAdmissionState,
-        SignerEvidence, TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_bytes,
+        AuthenticodeEvidence, CanonicalPathRole, CustodyBackend, CustodyError,
+        InstalledAdmissionState, SignerEvidence, TRUSTED_INSTALLER_SPKI_SHA256,
+        canonical_json_bytes,
     },
 };
 use sha2::{Digest, Sha256};
@@ -65,7 +66,11 @@ impl CustodyBackend for FakeBackend {
         Err(CustodyError::path("not-installed"))
     }
 
-    fn canonicalize(&mut self, path: &Path) -> Result<PathBuf, CustodyError> {
+    fn canonicalize(
+        &mut self,
+        path: &Path,
+        _role: CanonicalPathRole,
+    ) -> Result<PathBuf, CustodyError> {
         if path == self.root() || self.files.contains_key(path) {
             Ok(path.to_path_buf())
         } else {

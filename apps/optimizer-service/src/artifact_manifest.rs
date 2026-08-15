@@ -11,9 +11,9 @@ use liiiraa_contracts_rust::{
 use serde_json::{Map, Value};
 
 use super::installation_manifest::{
-    CustodyBackend, CustodyError, TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_value,
-    parse_installation_manifest, resolve_below_root, sha256_prefixed, verify_compiled_spki,
-    verify_live_identity,
+    CanonicalPathRole, CustodyBackend, CustodyError, TRUSTED_INSTALLER_SPKI_SHA256,
+    canonical_json_value, parse_installation_manifest, resolve_below_root, sha256_prefixed,
+    verify_compiled_spki, verify_live_identity,
 };
 use super::numeric_version::equivalent_numeric_version;
 
@@ -145,8 +145,11 @@ pub(crate) fn verify_artifact_manifest_with_backend(
     let requested_root = requested_manifest_path
         .parent()
         .ok_or_else(|| CustodyError::path("artifact-root"))?;
-    let root = backend.canonicalize(requested_root)?;
-    let manifest_path = backend.canonicalize(requested_manifest_path)?;
+    let root = backend.canonicalize(requested_root, CanonicalPathRole::PortableRoot)?;
+    let manifest_path = backend.canonicalize(
+        requested_manifest_path,
+        CanonicalPathRole::PortableManifest,
+    )?;
     if manifest_path != root.join(ARTIFACT_MANIFEST_NAME)
         || backend.is_reparse_point(&root)?
         || backend.is_reparse_point(&manifest_path)?
@@ -155,7 +158,12 @@ pub(crate) fn verify_artifact_manifest_with_backend(
     }
     backend.verify_portable_root_custody(&root)?;
 
-    let signature_path = resolve_below_root(backend, &root, ARTIFACT_SIGNATURE_NAME)?;
+    let signature_path = resolve_below_root(
+        backend,
+        &root,
+        ARTIFACT_SIGNATURE_NAME,
+        CanonicalPathRole::PortableSignature,
+    )?;
     let raw_manifest = backend.read_file(&manifest_path)?;
     let _signature_bytes = backend.read_file(&signature_path)?;
     let (manifest_value, document) = parse_artifact_manifest(&raw_manifest)?;
@@ -187,7 +195,13 @@ pub(crate) fn verify_artifact_manifest_with_backend(
     let mut files = Vec::with_capacity(roles.len());
     for role in roles {
         let identity = identity(identities, role)?;
-        let path = verify_live_identity(backend, &root, identity, false)?;
+        let path = verify_live_identity(
+            backend,
+            &root,
+            identity,
+            false,
+            CanonicalPathRole::PortableFile,
+        )?;
         if !unique.insert(path.clone()) {
             return Err(CustodyError::path("duplicate-portable-path"));
         }
@@ -228,7 +242,12 @@ pub(crate) fn verify_artifact_manifest_with_backend(
 
     for role in ["msi", "runner", "tauriDriver", "msedgeDriver"] {
         let identity = identity(identities, role)?;
-        let path = resolve_below_root(backend, &root, required_str(identity, "relativePath")?)?;
+        let path = resolve_below_root(
+            backend,
+            &root,
+            required_str(identity, "relativePath")?,
+            CanonicalPathRole::PortableFile,
+        )?;
         let authenticode = backend.verify_authenticode(&path)?;
         verify_compiled_spki(&authenticode.spki_sha256)?;
         if role == "tauriDriver" {
@@ -318,8 +337,18 @@ pub(crate) fn verify_friends_roster_with_backend(
     {
         return Err(CustodyError::path("friends-roster-config-path"));
     }
-    let roster_path = resolve_below_root(backend, &artifact.root, &roster_relative)?;
-    let signature_path = resolve_below_root(backend, &artifact.root, &signature_relative)?;
+    let roster_path = resolve_below_root(
+        backend,
+        &artifact.root,
+        &roster_relative,
+        CanonicalPathRole::PortableFile,
+    )?;
+    let signature_path = resolve_below_root(
+        backend,
+        &artifact.root,
+        &signature_relative,
+        CanonicalPathRole::PortableSignature,
+    )?;
     let raw_roster = backend.read_file(&roster_path)?;
     let _signature_bytes = backend.read_file(&signature_path)?;
     let value: Value =
@@ -382,11 +411,13 @@ fn verify_embedded_installation(
         backend,
         root,
         required_str(manifest_identity, "relativePath")?,
+        CanonicalPathRole::PortableManifest,
     )?;
     let signature_path = resolve_below_root(
         backend,
         root,
         required_str(signature_identity, "relativePath")?,
+        CanonicalPathRole::PortableSignature,
     )?;
     let bytes = backend.read_file(&manifest_path)?;
     let (value, document) = parse_installation_manifest(&bytes)?;
@@ -419,7 +450,12 @@ fn verify_config(
     expected_stage: ConfigStage,
     artifact: &ArtifactManifestDocument,
 ) -> Result<Option<VerifiedFriendsConfig>, CustodyError> {
-    let path = resolve_below_root(backend, root, required_str(identity, "relativePath")?)?;
+    let path = resolve_below_root(
+        backend,
+        root,
+        required_str(identity, "relativePath")?,
+        CanonicalPathRole::PortableFile,
+    )?;
     let bytes = backend.read_file(&path)?;
     let value: Value =
         serde_json::from_slice(&bytes).map_err(|_| CustodyError::schema("config-json"))?;

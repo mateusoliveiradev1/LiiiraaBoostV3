@@ -68,6 +68,49 @@ pub enum CustodyErrorCode {
     Version,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CanonicalPathRole {
+    PortableRoot,
+    PortableManifest,
+    PortableSignature,
+    PortableFile,
+    InstalledRoot,
+    InstalledManifest,
+    InstalledSignature,
+    InstalledDesktop,
+    InstalledService,
+    InstalledRunner,
+    LastAdmittedFile,
+    LastAdmittedParent,
+}
+
+impl CanonicalPathRole {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::PortableRoot => "portable-root",
+            Self::PortableManifest => "portable-manifest",
+            Self::PortableSignature => "portable-signature",
+            Self::PortableFile => "portable-file",
+            Self::InstalledRoot => "installed-root",
+            Self::InstalledManifest => "installed-manifest",
+            Self::InstalledSignature => "installed-signature",
+            Self::InstalledDesktop => "installed-desktop",
+            Self::InstalledService => "installed-service",
+            Self::InstalledRunner => "installed-runner",
+            Self::LastAdmittedFile => "last-admitted-file",
+            Self::LastAdmittedParent => "last-admitted-parent",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SafePathDiagnostic {
+    pub role: &'static str,
+    pub path_class: &'static str,
+    pub io_kind: &'static str,
+    pub win32_code: Option<i32>,
+}
+
 impl CustodyErrorCode {
     pub fn as_str(self) -> &'static str {
         match self {
@@ -87,6 +130,7 @@ impl CustodyErrorCode {
 pub struct CustodyError {
     pub code: CustodyErrorCode,
     detail: &'static str,
+    path_diagnostic: Option<SafePathDiagnostic>,
 }
 
 impl CustodyError {
@@ -123,7 +167,35 @@ impl CustodyError {
     }
 
     fn new(code: CustodyErrorCode, detail: &'static str) -> Self {
-        Self { code, detail }
+        Self {
+            code,
+            detail,
+            path_diagnostic: None,
+        }
+    }
+
+    pub fn from_canonicalize_error(
+        role: CanonicalPathRole,
+        path: &Path,
+        error: &std::io::Error,
+    ) -> Self {
+        let win32_code = error
+            .raw_os_error()
+            .filter(|code| (0..=u16::MAX as i32).contains(code));
+        Self {
+            code: CustodyErrorCode::Path,
+            detail: "canonicalize",
+            path_diagnostic: Some(SafePathDiagnostic {
+                role: role.as_str(),
+                path_class: closed_path_class(path),
+                io_kind: bounded_io_kind(error.kind()),
+                win32_code,
+            }),
+        }
+    }
+
+    pub const fn safe_path_diagnostic(&self) -> Option<SafePathDiagnostic> {
+        self.path_diagnostic
     }
 
     /// Returns one stable, redacted diagnostic for portable artifact custody.
@@ -174,6 +246,45 @@ impl std::fmt::Display for CustodyError {
 
 impl std::error::Error for CustodyError {}
 
+fn bounded_io_kind(kind: std::io::ErrorKind) -> &'static str {
+    match kind {
+        std::io::ErrorKind::NotFound => "not-found",
+        std::io::ErrorKind::PermissionDenied => "permission-denied",
+        std::io::ErrorKind::InvalidInput => "invalid-input",
+        std::io::ErrorKind::InvalidData => "invalid-data",
+        std::io::ErrorKind::AlreadyExists => "already-exists",
+        std::io::ErrorKind::Unsupported => "unsupported",
+        _ => "other",
+    }
+}
+
+fn closed_path_class(path: &Path) -> &'static str {
+    #[cfg(windows)]
+    {
+        use std::path::Prefix;
+        match path.components().next() {
+            Some(Component::Prefix(prefix)) => match prefix.kind() {
+                Prefix::Disk(_) => "disk",
+                Prefix::VerbatimDisk(_) => "verbatim-disk",
+                Prefix::UNC(_, _) => "unc",
+                Prefix::VerbatimUNC(_, _) => "verbatim-unc",
+                Prefix::DeviceNS(_) => "device",
+                Prefix::Verbatim(_) => "device-other",
+            },
+            Some(Component::RootDir) => "rooted-other",
+            _ => "relative",
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        if path.is_absolute() {
+            "absolute-other"
+        } else {
+            "relative"
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignerEvidence {
     pub spki_sha256: String,
@@ -197,7 +308,11 @@ pub struct InstalledAdmissionState {
 /// signer selection, trust pin, expected hash, or caller-controlled verification policy.
 pub(crate) trait CustodyBackend {
     fn program_files_root(&mut self) -> Result<PathBuf, CustodyError>;
-    fn canonicalize(&mut self, path: &Path) -> Result<PathBuf, CustodyError>;
+    fn canonicalize(
+        &mut self,
+        path: &Path,
+        role: CanonicalPathRole,
+    ) -> Result<PathBuf, CustodyError>;
     fn read_file(&mut self, path: &Path) -> Result<Vec<u8>, CustodyError>;
     fn is_reparse_point(&mut self, path: &Path) -> Result<bool, CustodyError>;
     fn verify_detached_cms(
@@ -260,13 +375,23 @@ pub(crate) fn verify_installed_manifest_with_backend(
     backend: &mut dyn CustodyBackend,
 ) -> Result<VerifiedInstallationManifest, CustodyError> {
     let requested_root = backend.program_files_root()?;
-    let root = backend.canonicalize(&requested_root)?;
+    let root = backend.canonicalize(&requested_root, CanonicalPathRole::InstalledRoot)?;
     if backend.is_reparse_point(&requested_root)? {
         return Err(CustodyError::path("program-files-reparse"));
     }
 
-    let manifest_path = resolve_below_root(backend, &root, INSTALLATION_MANIFEST_NAME)?;
-    let signature_path = resolve_below_root(backend, &root, INSTALLATION_SIGNATURE_NAME)?;
+    let manifest_path = resolve_below_root(
+        backend,
+        &root,
+        INSTALLATION_MANIFEST_NAME,
+        CanonicalPathRole::InstalledManifest,
+    )?;
+    let signature_path = resolve_below_root(
+        backend,
+        &root,
+        INSTALLATION_SIGNATURE_NAME,
+        CanonicalPathRole::InstalledSignature,
+    )?;
     let raw_manifest = backend.read_file(&manifest_path)?;
     let _signature_bytes = backend.read_file(&signature_path)?;
 
@@ -297,7 +422,13 @@ pub(crate) fn verify_installed_manifest_with_backend(
             .get(role)
             .and_then(Value::as_object)
             .ok_or_else(|| CustodyError::schema("installed-role"))?;
-        let path = verify_live_identity(backend, &root, identity, true)?;
+        let canonical_role = match role {
+            "desktop" => CanonicalPathRole::InstalledDesktop,
+            "service" => CanonicalPathRole::InstalledService,
+            "runner" => CanonicalPathRole::InstalledRunner,
+            _ => return Err(CustodyError::path("installed-role")),
+        };
+        let path = verify_live_identity(backend, &root, identity, true, canonical_role)?;
         if !unique.insert(path.clone()) {
             return Err(CustodyError::path("duplicate-installed-path"));
         }
@@ -334,6 +465,7 @@ pub(crate) fn verify_live_identity(
     root: &Path,
     identity: &Map<String, Value>,
     require_authenticode: bool,
+    canonical_role: CanonicalPathRole,
 ) -> Result<PathBuf, CustodyError> {
     let relative_path = required_str(identity, "relativePath")?;
     let expected_hash = required_str(identity, "sha256")?;
@@ -341,7 +473,7 @@ pub(crate) fn verify_live_identity(
         .get("sizeBytes")
         .and_then(Value::as_u64)
         .ok_or_else(|| CustodyError::schema("size"))?;
-    let path = resolve_below_root(backend, root, relative_path)?;
+    let path = resolve_below_root(backend, root, relative_path, canonical_role)?;
     let bytes = backend.read_file(&path)?;
     if bytes.len() as u64 != expected_size || sha256_prefixed(&bytes) != expected_hash {
         return Err(CustodyError::hash("size-or-sha256"));
@@ -373,6 +505,7 @@ pub(crate) fn resolve_below_root(
     backend: &mut dyn CustodyBackend,
     root: &Path,
     relative: &str,
+    canonical_role: CanonicalPathRole,
 ) -> Result<PathBuf, CustodyError> {
     let relative_path = Path::new(relative);
     if relative_path.is_absolute()
@@ -395,7 +528,7 @@ pub(crate) fn resolve_below_root(
             }
         }
     }
-    let canonical = backend.canonicalize(&candidate)?;
+    let canonical = backend.canonicalize(&candidate, canonical_role)?;
     if !canonical.starts_with(root) || canonical == root {
         return Err(CustodyError::path("root-escape"));
     }
@@ -614,8 +747,9 @@ pub(crate) mod windows_backend {
     };
 
     use super::{
-        AuthenticodeEvidence, CustodyBackend, CustodyError, INSTALLATION_MANIFEST_NAME,
-        INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState, SignerEvidence,
+        AuthenticodeEvidence, CanonicalPathRole, CustodyBackend, CustodyError,
+        INSTALLATION_MANIFEST_NAME, INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState,
+        SignerEvidence,
         same_closed_windows_path, sha256_prefixed,
     };
 
@@ -647,8 +781,13 @@ pub(crate) mod windows_backend {
             Ok(self.program_files_root.clone())
         }
 
-        fn canonicalize(&mut self, path: &Path) -> Result<PathBuf, CustodyError> {
-            std::fs::canonicalize(path).map_err(|_| CustodyError::path("canonicalize"))
+        fn canonicalize(
+            &mut self,
+            path: &Path,
+            role: CanonicalPathRole,
+        ) -> Result<PathBuf, CustodyError> {
+            std::fs::canonicalize(path)
+                .map_err(|error| CustodyError::from_canonicalize_error(role, path, &error))
         }
 
         fn read_file(&mut self, path: &Path) -> Result<Vec<u8>, CustodyError> {
@@ -726,14 +865,24 @@ pub(crate) mod windows_backend {
                 }
                 Ok(_) => {}
             }
-            let canonical = std::fs::canonicalize(&self.last_admitted_path)
-                .map_err(|_| CustodyError::path("last-admitted-canonical"))?;
-            let expected = std::fs::canonicalize(
-                self.last_admitted_path
-                    .parent()
-                    .ok_or_else(|| CustodyError::path("last-admitted-parent"))?,
-            )
-            .map_err(|_| CustodyError::path("last-admitted-parent"))?
+            let canonical = std::fs::canonicalize(&self.last_admitted_path).map_err(|error| {
+                CustodyError::from_canonicalize_error(
+                    CanonicalPathRole::LastAdmittedFile,
+                    &self.last_admitted_path,
+                    &error,
+                )
+            })?;
+            let last_admitted_parent = self
+                .last_admitted_path
+                .parent()
+                .ok_or_else(|| CustodyError::path("last-admitted-parent"))?;
+            let expected = std::fs::canonicalize(last_admitted_parent).map_err(|error| {
+                CustodyError::from_canonicalize_error(
+                    CanonicalPathRole::LastAdmittedParent,
+                    last_admitted_parent,
+                    &error,
+                )
+            })?
             .join(
                 self.last_admitted_path
                     .file_name()
