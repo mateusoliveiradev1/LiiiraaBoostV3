@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    'a46b88f8af85b4621dc19922488d064eb2315267',
-    'physical-487e3c326b5066a0-managed-power-scheme-v50',
+    '9cd80dbda40cf154dee7bbbdd874626f2b978969',
+    'physical-487e3c326b5066a0-managed-power-scheme-v52',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -131,6 +131,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v46-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v47-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v49-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v50-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -267,9 +268,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v52',
+    'physical-487e3c326b5066a0-managed-power-scheme-v52',
+    '9cd80dbda40cf154dee7bbbdd874626f2b978969',
+    'e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3',
+    '1dfaa8be4dac42e9f5c45cba7dea0ffc08606d9828948112cf07ac9df6301644',
+    '9c98b29b9d42539963944bd26e34106e95314ca3ccc26ac856a3ae175720b598',
     'managed-power-scheme-v50',
     'physical-487e3c326b5066a0-managed-power-scheme-v50',
-    'a46b88f8af85b4621dc19922488d064eb2315267',
     'c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b',
     'ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b',
     '41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c',
@@ -334,7 +340,7 @@ const assertSourcePolicy = (source) => {
   const runtime = source.slice(source.indexOf('function Copy-ExactArtifactToGuest'));
   assert.doesNotMatch(
     runtime,
-    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u,
+    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[01])/u,
   );
   assert.doesNotMatch(runtime, /C:\\LiiiraaBoost\\Phase6\\physical-/u);
 
@@ -440,7 +446,7 @@ test('RED: staged artifact receives fixed protected guest custody before any run
   assert.match(setter, /\[Parameter\(Mandatory\)\]\$Authority/u);
   assert.match(setter, /-ArgumentList\s+\$Authority/u);
   assert.match(setter, /\$fixedRoot\s*=\s*\[string\]\$ClosedAuthority\.GuestRoot/u);
-  assert.doesNotMatch(setter, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
+  assert.doesNotMatch(setter, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[01])/u);
   assert.doesNotMatch(setter, /\[string\]\$(?:Path|Root|Sid|Command|Script|Arguments?)/u);
   assert.doesNotMatch(setter, /icacls|takeown|Everyone|S-1-1-0|S-1-5-32-545/iu);
 
@@ -450,7 +456,7 @@ test('RED: staged artifact receives fixed protected guest custody before any run
   );
   assert.match(custodyAssertion, /-ArgumentList\s+\$Authority/u);
   assert.match(custodyAssertion, /\$fixedRoot\s*=\s*\[string\]\$ClosedAuthority\.GuestRoot/u);
-  assert.doesNotMatch(custodyAssertion, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
+  assert.doesNotMatch(custodyAssertion, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[01])/u);
 
   const copyBody = source.slice(
     source.indexOf('function Copy-ExactArtifactToGuest'),
@@ -468,7 +474,7 @@ test('RED: staged artifact receives fixed protected guest custody before any run
   assert.match(runnerBody, /-ArgumentList\s+\$Authority/u);
   assert.match(runnerBody, /\$RunnerPath\s*=\s*\[string\]\$ClosedAuthority\.GuestRunner/u);
   assert.match(runnerBody, /\$ConfigPath\s*=\s*\[string\]\$ClosedAuthority\.GuestConfig/u);
-  assert.doesNotMatch(runnerBody, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
+  assert.doesNotMatch(runnerBody, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[01])/u);
 
   const runBody = source.slice(
     source.indexOf('function Invoke-CleanVmRun'),
@@ -784,7 +790,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v50 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v52 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -796,7 +802,7 @@ test('dry-run audits the exact immutable v50 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v50');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v52');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
