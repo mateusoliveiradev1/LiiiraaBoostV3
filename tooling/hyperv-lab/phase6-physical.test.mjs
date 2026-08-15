@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
@@ -24,7 +33,7 @@ const backupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43';
 const backupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef';
 const installedCheckpoint = 'LiiiraaBoost-Installed';
 
-const runBridge = (extra = []) =>
+const runBridge = (extra = [], authority = {}) =>
   spawnSync(
     'powershell.exe',
     [
@@ -33,7 +42,7 @@ const runBridge = (extra = []) =>
       '-ExecutionPolicy',
       'Bypass',
       '-File',
-      bridgePath,
+      authority.bridgePath ?? bridgePath,
       '-Action',
       'Audit',
       '-DryRun',
@@ -42,13 +51,71 @@ const runBridge = (extra = []) =>
       '-CheckpointName',
       cleanCheckpoint,
       '-ArtifactManifestFromSummary',
-      artifactSummary,
+      authority.artifactSummary ?? artifactSummary,
       '-SimulationAdmissionFromSummary',
-      simulationSummary,
+      authority.simulationSummary ?? simulationSummary,
       ...extra,
     ],
-    { cwd: root, encoding: 'utf8' },
+    { cwd: authority.root ?? root, encoding: 'utf8' },
   );
+
+const createMutationSandbox = () => {
+  const sandbox = mkdtempSync(join(tmpdir(), 'phase6-bridge-authority-'));
+  const sandboxRoot = join(sandbox, 'repo');
+  const copyRelative = (relative) => {
+    const destination = join(sandboxRoot, relative);
+    mkdirSync(dirname(destination), { recursive: true });
+    copyFileSync(join(root, relative), destination);
+    return destination;
+  };
+  const artifactPrefix = join(
+    'target',
+    'phase6-physical',
+    '1a1dc18ce40beaef2f83cdb3e070386e4d639021',
+    'physical-c714ca4c5ad147f4-managed-power-scheme-v46',
+  );
+  const linkArtifactRelative = (relative) => {
+    const artifactRelative = join(artifactPrefix, relative);
+    const destination = join(sandboxRoot, artifactRelative);
+    mkdirSync(dirname(destination), { recursive: true });
+    copyFileSync(join(root, artifactRelative), destination);
+  };
+
+  const sandboxBridge = copyRelative('tooling/hyperv-lab/Invoke-Phase6Physical.ps1');
+  const sandboxArtifactSummary = copyRelative(
+    '.planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md',
+  );
+  const sandboxSimulationSummary = copyRelative(
+    '.planning/phases/06-transactional-plans-and-recovery/06-38-SUMMARY.md',
+  );
+  const sandboxEvidenceManifest = copyRelative('tooling/phase6-evidence/evidence-manifest.json');
+  for (const relative of [
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v43-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v44-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v45-evidence-manifest.json',
+  ]) {
+    copyRelative(relative);
+  }
+  const manifest = JSON.parse(
+    readFileSync(join(root, artifactPrefix, 'artifact-manifest.json'), 'utf8'),
+  );
+  for (const relative of [
+    'artifact-manifest.json',
+    'artifact-manifest.json.p7s',
+    ...Object.values(manifest.files).map((identity) => identity.relativePath),
+  ]) {
+    linkArtifactRelative(relative);
+  }
+  return {
+    sandbox,
+    root: sandboxRoot,
+    bridgePath: sandboxBridge,
+    artifactSummary: sandboxArtifactSummary,
+    simulationSummary: sandboxSimulationSummary,
+    evidenceManifest: sandboxEvidenceManifest,
+  };
+};
 
 const bridgeSource = () => {
   assert.equal(existsSync(bridgePath), true, 'the dedicated Phase 6 bridge must exist');
@@ -584,14 +651,18 @@ test('RED: schema mutation corpus operates only on an isolated authority copy', 
   const source = readFileSync(import.meta.filename, 'utf8');
   const mutationTest = source.slice(
     source.lastIndexOf("test('schema-v3 chain mutations fail closed before any bridge action'"),
-    source.indexOf("test('wrong target, checkpoint, summaries, and generic authority fail closed'"),
+    source.lastIndexOf(
+      "test('wrong target, checkpoint, summaries, and generic authority fail closed'",
+    ),
   );
   assert.match(mutationTest, /createMutationSandbox/u);
   assert.doesNotMatch(mutationTest, /writeFileSync\(evidenceManifest/u);
 });
 
 test('schema-v3 chain mutations fail closed before any bridge action', () => {
-  const original = readFileSync(evidenceManifest);
+  const liveAuthority = readFileSync(evidenceManifest);
+  const sandbox = createMutationSandbox();
+  const original = readFileSync(sandbox.evidenceManifest);
   const mutations = [
     ['schema downgrade', (value) => (value.schemaVersion = 2)],
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
@@ -632,15 +703,15 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     for (const [label, mutate] of mutations) {
       const value = JSON.parse(original.toString('utf8'));
       mutate(value);
-      writeFileSync(evidenceManifest, `${JSON.stringify(value, null, 2)}\n`);
-      const result = runBridge();
+      writeFileSync(sandbox.evidenceManifest, `${JSON.stringify(value, null, 2)}\n`);
+      const result = runBridge([], sandbox);
       assert.notEqual(result.status, 0, `${label} must be rejected`);
-      writeFileSync(evidenceManifest, original);
+      writeFileSync(sandbox.evidenceManifest, original);
     }
   } finally {
-    writeFileSync(evidenceManifest, original);
+    rmSync(sandbox.sandbox, { force: true, recursive: true });
   }
-  assert.deepEqual(readFileSync(evidenceManifest), original);
+  assert.deepEqual(readFileSync(evidenceManifest), liveAuthority);
 });
 
 test('wrong target, checkpoint, summaries, and generic authority fail closed', () => {
