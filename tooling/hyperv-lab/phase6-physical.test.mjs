@@ -212,6 +212,27 @@ const invokeAclSnapshotAssertion = (snapshot, expectedUserSid) => {
   return JSON.parse(result.stdout);
 };
 
+const invokeInstallerSidecarAssertion = (input) => {
+  const encoded = Buffer.from(JSON.stringify(input), 'utf8').toString('base64');
+  const escapedBridgePath = bridgePath.replaceAll("'", "''");
+  const command = [
+    '$tokens = $null; $errors = $null',
+    `$ast = [Management.Automation.Language.Parser]::ParseFile('${escapedBridgePath}', [ref]$tokens, [ref]$errors)`,
+    "$function = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Resolve-InstallerSidecarSummary' }, $true) | Select-Object -First 1",
+    "if ($null -eq $function) { throw 'required bridge function is missing' }",
+    'Invoke-Expression $function.Extent.Text',
+    `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
+    'Resolve-InstallerSidecarSummary -Sidecar $input.sidecar -SidecarStatus ([string]$input.sidecarStatus) -SidecarSha256 $input.sidecarSha256 -SidecarSizeBytes $input.sidecarSizeBytes -FailureCode ([string]$input.failureCode) | ConvertTo-Json -Compress',
+  ].join('; ');
+  const result = spawnSync(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', command],
+    { cwd: root, encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  return JSON.parse(result.stdout);
+};
+
 const guestSid = 'S-1-5-21-111111111-222222222-333333333-1001';
 const exactDirectoryAcl = () => ({
   kind: 'directory',
@@ -682,6 +703,8 @@ test('RED: blocked record persists stage and diagnostics without raw runner outp
     'RunnerFailureStage',
     'RunnerExitCode',
     'RunnerFailureCode',
+    'msi-install.safe.json',
+    'Resolve-InstallerSidecarSummary',
   ])
     assert.match(runnerBody, new RegExp(marker, 'u'));
 
@@ -692,7 +715,9 @@ test('RED: blocked record persists stage and diagnostics without raw runner outp
   assert.match(recordBody, /stage\s*=\s*\$RunnerFailureStage/u);
   assert.match(recordBody, /runnerExitCode\s*=\s*\$RunnerExitCode/u);
   assert.match(recordBody, /runnerFailureCode\s*=\s*\$RunnerFailureCode/u);
+  assert.match(recordBody, /installerDiagnostic\s*=\s*\$InstallerDiagnostic/u);
   assert.doesNotMatch(recordBody, /(?:Output|Stdout|Stderr)\s*=/u);
+  assert.doesNotMatch(runnerBody, /Get-ExactGuestMsiDiagnostic/u);
   assert.match(
     source,
     /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'installed-ready'/u,
@@ -705,6 +730,58 @@ test('RED: blocked record persists stage and diagnostics without raw runner outp
     source,
     /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'completed'/u,
   );
+});
+
+test('RED: same-session MSI sidecar is always a bounded non-null diagnostic', () => {
+  const safeHash = `sha256:${'a'.repeat(64)}`;
+  const sidecarHash = `sha256:${'b'.repeat(64)}`;
+  const present = invokeInstallerSidecarAssertion({
+    sidecarStatus: 'present',
+    sidecarSha256: sidecarHash,
+    sidecarSizeBytes: 320,
+    failureCode: 'BLOCKED:installer-exit-1603',
+    sidecar: {
+      kind: 'phase6-msi-safe-diagnostic',
+      schemaVersion: '1.0',
+      installerExitCode: 1603,
+      logStatus: 'present',
+      logSha256: safeHash,
+      logSizeBytes: 512,
+      returnValue3ActionCode: 'install-files',
+      returnValue3ActionIdentifier: 'InstallFiles',
+    },
+  });
+  assert.deepEqual(present, {
+    DiagnosticStatus: 'present',
+    InstallerExitCode: 1603,
+    LogStatus: 'present',
+    LogSha256: safeHash,
+    LogSizeBytes: 512,
+    ReturnValue3ActionCode: 'install-files',
+    ReturnValue3ActionIdentifier: 'InstallFiles',
+    SidecarSha256: sidecarHash,
+    SidecarSizeBytes: 320,
+  });
+
+  const missing = invokeInstallerSidecarAssertion({
+    sidecarStatus: 'sidecar-missing',
+    sidecarSha256: null,
+    sidecarSizeBytes: null,
+    failureCode: 'BLOCKED:installer-log-create-once',
+    sidecar: null,
+  });
+  assert.deepEqual(missing, {
+    DiagnosticStatus: 'sidecar-missing',
+    InstallerExitCode: null,
+    LogStatus: 'unknown',
+    LogSha256: null,
+    LogSizeBytes: null,
+    ReturnValue3ActionCode: 'unavailable',
+    ReturnValue3ActionIdentifier: null,
+    SidecarSha256: null,
+    SidecarSizeBytes: null,
+  });
+  assert.equal(JSON.stringify(missing).includes('C:\\'), false);
 });
 
 test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', () => {

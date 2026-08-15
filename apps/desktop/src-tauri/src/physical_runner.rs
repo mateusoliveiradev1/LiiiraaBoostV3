@@ -1707,10 +1707,69 @@ mod custody_failure_code_tests {
     #[cfg(windows)]
     use super::msiexec_compatible_path;
     use super::{
-        artifact_custody_failure_code, installation_manifest::CustodyError, installer_exit_failure,
+        artifact_custody_failure_code, installation_manifest::CustodyError,
+        installer_diagnostic_from_log, installer_diagnostic_sidecar_path,
+        installer_exit_failure, write_installer_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
+
+    #[test]
+    fn installer_diagnostic_sidecar_is_bounded_allowlisted_and_secret_free() {
+        let log = b"Action ended 12:00:00: InstallFiles. Return value 3.\r\nProperty(S): USERNAME = secret-user\r\nProperty(S): OriginalDatabase = C:\\Users\\secret-user\\liiiraa-boost.msi";
+        let diagnostic = installer_diagnostic_from_log(1603, Some(log));
+        assert_eq!(diagnostic.installer_exit_code, Some(1603));
+        assert_eq!(diagnostic.log_status, "present");
+        assert_eq!(diagnostic.log_size_bytes, Some(log.len() as u64));
+        assert_eq!(diagnostic.return_value_3_action_code, "install-files");
+        assert_eq!(
+            diagnostic.return_value_3_action_identifier.as_deref(),
+            Some("InstallFiles")
+        );
+        let serialized = serde_json::to_string(&diagnostic).expect("safe sidecar should serialize");
+        for forbidden in ["secret-user", "C:\\Users", "OriginalDatabase", "Product:"] {
+            assert!(!serialized.contains(forbidden));
+        }
+        assert!(serialized.len() <= 1024);
+    }
+
+    #[test]
+    fn missing_and_unparseable_installer_logs_are_explicit_not_null() {
+        let missing = installer_diagnostic_from_log(1603, None);
+        assert_eq!(missing.log_status, "log-missing");
+        assert_eq!(missing.return_value_3_action_code, "unavailable");
+        assert!(missing.log_sha256.is_none());
+
+        let unparseable = installer_diagnostic_from_log(1603, Some(b"bounded but no action"));
+        assert_eq!(unparseable.log_status, "log-unparseable");
+        assert_eq!(unparseable.return_value_3_action_code, "none");
+        assert!(unparseable.log_sha256.is_some());
+        assert_eq!(unparseable.log_size_bytes, Some(21));
+    }
+
+    #[test]
+    fn installer_diagnostic_sidecar_uses_fixed_sibling_and_create_once() {
+        let root = std::env::temp_dir().join(format!(
+            "liiiraa-installer-sidecar-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("clock should be after Unix epoch")
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&root).expect("test root should exist");
+        let log = root.join("msi-install.log");
+        let sidecar = installer_diagnostic_sidecar_path(&log)
+            .expect("fixed log should derive a fixed sidecar");
+        assert_eq!(sidecar, root.join("msi-install.safe.json"));
+        let diagnostic = installer_diagnostic_from_log(1603, None);
+        write_installer_diagnostic_create_once(&sidecar, &diagnostic)
+            .expect("first sidecar write should pass");
+        let error = write_installer_diagnostic_create_once(&sidecar, &diagnostic)
+            .expect_err("sidecar overwrite must fail closed");
+        assert_eq!(error.code(), "installer-diagnostic-create-once");
+        let _ = std::fs::remove_dir_all(root);
+    }
 
     #[test]
     fn typed_custody_failures_map_to_granular_allowlisted_runner_codes() {
