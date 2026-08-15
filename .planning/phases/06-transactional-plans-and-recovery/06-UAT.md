@@ -680,3 +680,52 @@ working directory. It retained the exact v47 artifact/simulation tuple, started 
 read-only integration health observation at 4 GiB, and returned it to `Off`. No `RunCleanVm`,
 guest staging, guest runner, MSI, apply, checkpoint mutation, physical evidence ingestion, or
 v48 mint occurred.
+
+---
+
+## Operation `managed-power-scheme-v47` — CLEAN WINDOWS VM BLOCKED
+
+- **Recorded at:** `2026-08-15T04:59:40.3565897Z`
+- **Operation version:** `managed-power-scheme-v47`
+- **Build ID:** `physical-50796b7236b2889c-managed-power-scheme-v47`
+- **Source commit:** `29827368ebfe92abce6135807af82d58c5b1326a`
+- **Artifact manifest SHA-256:** `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`
+- **Clean config SHA-256:** `6b3388b917e2710bdd7606944df93149637eb5d84fb4af78cf8a6b6463d56cd5`
+- **Runner SHA-256:** `669130f220471a90132e2225a4ee523edb55baa7b7465bf60819fb33d5b80545`
+- **Simulation run SHA-256:** `b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6`
+- **Pre-attempt evidence manifest SHA-256:** `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`
+- **Result:** `BLOCKED-GUEST-INSTALLER-EXIT`
+- **Runner stage:** `installed-ready`
+- **Runner exit code:** `2`
+- **Allowlisted runner failure code:** `BLOCKED:installer-exit`
+- **Guest credential username form:** bare local username `LiiiraaLab`; no password was persisted
+- **Human review:** not presented; Task 2 and Task 3 remain closed
+
+The single authorized v47 `RunCleanVm` attempt reverified the exact artifact and deterministic
+admission, restored `Clean-Windows-Ready` ID `a918f5c0-ade0-4bac-bca3-baa91686777e`, reached
+all six healthy integration services, staged exactly the eleven manifest-bound files, and
+provisioned plus independently verified the protected guest artifact ACL. The signed Rust runner
+then failed closed during `installed-ready` with bounded diagnostic `BLOCKED:installer-exit`.
+
+Completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`,
+`hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`,
+`exact-artifact-staged`, `guest-artifact-acl-provisioned`, and
+`guest-artifact-acl-verified`. No `InstalledReady` record, installed checkpoint, APPLY approval
+prompt, power-scheme mutation, reboot, continuation, raw-envelope copy, physical-writer ingestion,
+physical PASS, reviewer record, Task 2, or Task 3 followed. The evidence manifest remained
+byte-identical at SHA-256 `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`.
+
+The immutable blocker record is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-015940-clean-vm-BLOCKED.json`, SHA-256
+`a8ae718771f2cba630fa0180a55444ddf20e238300916881febe79c844db2642`.
+The bounded elevated console transcript is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-015847-phase6runcleanvm-v47-console.log`, SHA-256
+`42492a21c26562d4542dc4b2747469f15abada690950234916e87d975cf5024c`.
+
+The cleanup-only action then returned the VM from `Running` to `Off` without runner execution,
+credential reuse, checkpoint restore, or checkpoint creation. Cleanup evidence is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-020032-phase6observationcleanup-console.log`,
+SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`, and confirms the exact
+clean checkpoint ID remained `a918f5c0-ade0-4bac-bca3-baa91686777e` with final VM state `Off`.
+This v47 attempt is permanently BLOCKED and must not be relaunched, relabeled as physical
+evidence, advanced to human review, or followed by a v48 remint in this execution.
