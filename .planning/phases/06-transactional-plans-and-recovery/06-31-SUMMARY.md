@@ -281,3 +281,34 @@ deterministic admission.
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
 | `elevated-lifecycle-result.json` | `b6015372ba06bee0555e16bc9622f3659359c7bbff019bfe57b694895baac70a` | 1324 |
+
+## Append-only authority update: v47
+
+The v46 artifact, deterministic admission, read-only Audit PASS, and later
+`BLOCKED:artifact-custody` guest-runner record remain immutable history. The v46 operation must
+never be relaunched. The bounded staging-guest ACL custody and granular safe custody diagnostics
+were committed through RED/GREEN before one new monotonic publication; no v46 artifact,
+evidence, or UAT byte was overwritten.
+
+The single v47 `build-and-smoke` publication passed signed five-role assembly, protected ACL
+custody, install, downgrade rejection, rollback-failure drill, repair/update, broker client
+binding, uninstall, and residual cleanup. The real 06-35 inspection-only verifier then returned
+`verified` for the same live bytes and manifest hash
+`sha256:31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`. This is the latest
+complete artifact authority for deterministic admission.
+
+- **Root:** `target/phase6-physical/29827368ebfe92abce6135807af82d58c5b1326a/physical-50796b7236b2889c-managed-power-scheme-v47`
+- **Build ID:** `physical-50796b7236b2889c-managed-power-scheme-v47`
+- **Operation version:** `managed-power-scheme-v47`
+- **Source commit:** `29827368ebfe92abce6135807af82d58c5b1326a`
+- **Input tree:** `sha256:50796b7236b2889c18e847f3a65b2701af7473506c7a3acbf71ad4414eb7cfa7`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b` | 3241 |
+| `artifact-manifest.json.p7s` | `bb7d88a4ea03505b9839f180fd51071e7084b8bba7015368de992dd9ee7959d4` | 1609 |
+| `liiiraa-boost.msi` | `a1cccae45f82bf480f585f1476d22399b1e4662a5cf50617e37500d4acecd0db` | 15679488 |
+| `phase6-physical-runner.exe` | `669130f220471a90132e2225a4ee523edb55baa7b7465bf60819fb33d5b80545` | 6994728 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
+| `elevated-lifecycle-result.json` | `8caec763f3e4658755ce5855dcb91a127f5932a5d0f09300a499b8e78b48b3a0` | 1324 |
