@@ -17,6 +17,7 @@ import test from 'node:test';
 const root = resolve(import.meta.dirname, '..', '..');
 const bridgePath = resolve(import.meta.dirname, 'Invoke-Phase6Physical.ps1');
 const elevatedLoggerPath = resolve(import.meta.dirname, 'Run-LabElevated.ps1');
+const prepare4GiBPath = resolve(import.meta.dirname, 'Prepare-Phase6Vm4GiB.ps1');
 const artifactSummary = resolve(
   root,
   '.planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md',
@@ -32,6 +33,37 @@ const cleanCheckpointId = 'ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075';
 const backupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43';
 const backupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef';
 const installedCheckpoint = 'LiiiraaBoost-Installed';
+
+test('fixed 4 GiB preparation preserves checkpoints and emits bounded append-only evidence', () => {
+  const source = readFileSync(prepare4GiBPath, 'utf8');
+  for (const literal of [
+    exactVm,
+    cleanCheckpoint,
+    cleanCheckpointId,
+    backupCheckpoint,
+    backupCheckpointId,
+    'Clean-Windows-Ready-Pre4GiB-v47',
+    installedCheckpoint,
+    '107680b1-d9cc-411a-843a-ab72019469cd',
+    'C:\\Users\\Liiiraa\\VM-Lab\\VMs\\LiiiraaBoost-W11-25H2-Clean\\LiiiraaBoost-W11-25H2-Clean.vhdx',
+    'Default Switch',
+    'FileMode]::CreateNew',
+    '65536',
+  ]) {
+    assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'iu'));
+  }
+  assert.match(
+    source,
+    /Set-VMMemory\s+-VMName\s+\$ExpectedVmName\s+-DynamicMemoryEnabled\s+\$true\s+-MinimumBytes\s+4GB\s+-StartupBytes\s+4GB\s+-MaximumBytes\s+12GB/u,
+  );
+  assertInOrder(source, [
+    'Restore-VMSnapshot',
+    'Rename-VMSnapshot',
+    'Set-VMMemory',
+    'Checkpoint-VM',
+  ]);
+  assert.doesNotMatch(source, /Start-VM|Remove-VMSnapshot|Remove-VM|Stop-VM/u);
+});
 
 const runBridge = (extra = [], authority = {}) =>
   spawnSync(
