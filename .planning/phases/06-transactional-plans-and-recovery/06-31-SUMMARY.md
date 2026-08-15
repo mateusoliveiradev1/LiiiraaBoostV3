@@ -365,3 +365,33 @@ This is the latest complete artifact authority for deterministic admission.
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
 | `elevated-lifecycle-result.json` | `790ba83b94bbcb5cf71ebfaf35308bb2b73086fc1077f6977374b05419366715` | 1324 |
 | `lifecycle-report.json` | `f510e998c67895aa59e6bc69dc67513c9ec2c874c9baad737863b37900c7088c` | 2252 |
+
+## Append-only authority update: v50
+
+The physically BLOCKED v49 attempt was not relaunched. Its exact guest-root custody defect was
+corrected through RED `7d842e2` and GREEN `ab5edd8` before the single final v50 publication.
+The v50 `build-and-smoke` passed the complete signed lifecycle, and the real 06-35
+inspection-only verifier returned `verified` for manifest SHA-256
+`c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b`.
+
+- **Root:** `target/phase6-physical/a46b88f8af85b4621dc19922488d064eb2315267/physical-487e3c326b5066a0-managed-power-scheme-v50`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v50`
+- **Operation version:** `managed-power-scheme-v50`
+- **Source commit:** `a46b88f8af85b4621dc19922488d064eb2315267`
+- **Input tree:** `sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b` | 3241 |
+| `artifact-manifest.json.p7s` | `8266773c432415574edfb465815088c5e45c919020e118cf891432cad94ff922` | 1609 |
+| `liiiraa-boost.msi` | `64c146d8070dcb15d265993507a377e90fac89098ed89924b724af3a6c3416a9` | 15679488 |
+| `installation-manifest.json` | `e1f22fa1e9482e11f5983afeb4f787736dd577db4ce6ac28ee2aca019bb0a398` | 1675 |
+| `installation-manifest.json.p7s` | `aecf575dd5263af28da52fe398a98844535a2a0804ce235abfb68562b790d559` | 1609 |
+| `configs/clean-windows-vm.run-config.json` | `f733c5dc38e26ac2c21230a107ce344abf94df5d87892a71764f619f19645d7b` | 1593 |
+| `configs/owner-pc.run-config.json` | `99fb9d1b044e78a54032aa269adc3843151a0a1ac71ac1f1bce2bd5e2ef7e22c` | 1529 |
+| `configs/friends-pc.run-config.json` | `232d2c4604832cd52314951bc0cddcd3cd330990426bb40db3b92e534a05c135` | 1658 |
+| `phase6-physical-runner.exe` | `5a82ca6b90fb1962ef5c1875ad83fea21d390d6b97b490958d13101f28f06701` | 7003944 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+| `elevated-lifecycle-result.json` | `fcb5da7972670deab16f09d162509a5ac61a467949b9e990ee2e7f738ce0c20e` | 1324 |
+| `lifecycle-report.json` | `ffb01def0a248365885f6f9fdac70ed50cb39698cb3481193915639188a98d90` | 2252 |

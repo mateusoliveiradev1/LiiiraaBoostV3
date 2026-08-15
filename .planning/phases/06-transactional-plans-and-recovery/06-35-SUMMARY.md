@@ -205,3 +205,10 @@ None - no external service configuration or private signing material is required
 - Exact verified authority: build `physical-487e3c326b5066a0-managed-power-scheme-v49`, source commit `75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a`, artifact manifest SHA-256 `e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09`, operation `managed-power-scheme-v49`.
 - The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
 - v48 remains a terminal pre-MSI build blocker outside the artifact and deterministic chains; no v48 artifact or evidence authority was created or overwritten.
+
+## Append-Only Revalidation Addendum — v50
+
+- The immutable `managed-power-scheme-v50` artifact was verified by the real inspection-only `phase6-artifact-verifier` immediately after its single lifecycle publication.
+- Exact verified authority: build `physical-487e3c326b5066a0-managed-power-scheme-v50`, source commit `a46b88f8af85b4621dc19922488d064eb2315267`, artifact manifest SHA-256 `c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b`, operation `managed-power-scheme-v50`.
+- The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
+- v49 remains an immutable physically BLOCKED predecessor and is not reusable.
