@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "kind": "phase6-physical-blocked-build",
+  "status": "BLOCKED",
+  "mode": "build-and-smoke",
+  "createdAt": "2026-08-15T05:35:46.291Z",
+  "operationVersionId": "managed-power-scheme-v48",
+  "buildId": "physical-487e3c326b5066a0-managed-power-scheme-v48",
+  "sourceCommit": "28d7579fc9fb8934fa9a05650844dc4bb7e2a115",
+  "inputTreeHash": "sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7",
+  "reason": "msedgedriver 151.0.4129.86 is unavailable; stage the exact official Edge-matched release before the physical build",
+  "msiBuilt": false,
+  "lifecycleVerified": false,
+  "artifactPublished": false
+}

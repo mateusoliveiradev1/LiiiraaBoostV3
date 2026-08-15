@@ -352,3 +352,15 @@ and 51/51 architecture/key-link gate passed. Exactly one subsequent absolute-wra
 
 No `RunCleanVm`, guest runner, guest staging, MSI, apply, physical-evidence ingestion, checkpoint
 mutation during Audit, or v48 mint occurred.
+
+## Append-Only Final v48 Blocked Handoff Addendum
+
+The single v48 `build-and-smoke` stopped before MSI assembly because exact official
+`msedgedriver 151.0.4129.86` was unavailable. Consequently no v48 artifact, deterministic
+admission, bridge Audit, or `RunCleanVm` authority existed, and none of those actions ran.
+The cleanup-only log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-023717-phase6observationcleanup-console.log`,
+`2751` bytes, SHA-256 `08a112e23bd09ef83449318a8672c061bed4627fb1797b0c035444b5fa7f77c3`,
+confirms VM `LiiiraaBoost-W11-25H2-Clean` remained `Off` and exact checkpoint
+`Clean-Windows-Ready` remained ID `a918f5c0-ade0-4bac-bca3-baa91686777e`. Task 2 and Task 3
+remain closed. There is no retry and no v49.

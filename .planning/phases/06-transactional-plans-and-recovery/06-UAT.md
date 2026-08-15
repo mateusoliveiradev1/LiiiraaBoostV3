@@ -729,3 +729,48 @@ SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`, and 
 clean checkpoint ID remained `a918f5c0-ade0-4bac-bca3-baa91686777e` with final VM state `Off`.
 This v47 attempt is permanently BLOCKED and must not be relaunched, relabeled as physical
 evidence, advanced to human review, or followed by a v48 remint in this execution.
+
+---
+
+## Operation `managed-power-scheme-v48` — FINAL BUILD BLOCKED
+
+- **Recorded at:** `2026-08-15T05:35:46.291Z`
+- **Result:** `BLOCKED-BUILD-MISSING-EXACT-EDGE-DRIVER`
+- **Operation version:** `managed-power-scheme-v48`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v48`
+- **Source commit:** `28d7579fc9fb8934fa9a05650844dc4bb7e2a115`
+- **Input tree:** `sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7`
+- **Reason:** exact official Edge-matched `msedgedriver 151.0.4129.86` was unavailable
+- **Artifact published:** `false`
+- **MSI built:** `false`
+- **Lifecycle verified:** `false`
+- **Canonical blocker:** `target/phase6-physical/_blocked/BLOCKED-1786772146291-10488.json`, `599` bytes, SHA-256 `13ba55c7e8e4bc6433e58fcbc8b5876731232131eb1d8a66e82c1ed97f7ae45b`
+- **Tracked blocker mirror:** `.planning/phases/06-transactional-plans-and-recovery/06-26-v48-BLOCKED.json`
+- **TDD:** RED `17432cc7`, GREEN `28d7579f`
+- **Focused verification:** physical runner 20/20 PASS; bridge 22/22 PASS
+- **Broad verification:** artifact builder 27/27, desktop crate 233, optimizer service 86 with 1 ignored, architecture 51/51, key-links 06-31 4/4, 06-34 2/2, 06-35 3/3, and 06-38 2/2 all PASS
+- **MSI diagnostic summary:** unavailable/not applicable; the build stopped before an MSI or fixed guest MSI log existed, so there is no installer exit, MSI-log hash/size, or `Return value 3` action to report
+- **Raw MSI log exported:** no
+- **v48 simulation/admission/Audit/RunCleanVm:** not executed because no v48 artifact authority existed
+- **Human review:** not presented; Task 2 and Task 3 remain closed
+
+The final consolidated correction preserves the canonical custody/live-hash path while deriving
+a narrowly validated DOS/UNC-compatible path only for `msiexec`. It also reserves one protected
+fixed `/l*vx!` guest log, preserves allowlisted numeric installer exit taxonomy, and exports
+only a bounded redacted failure summary. Tests cover normal/verbatim DOS and UNC paths,
+relative/dot/device rejection, reboot exits, unknown exits, oversized logs, and raw secret,
+SID, username, and path non-disclosure.
+
+Exactly one v48 `build-and-smoke` was started. It failed closed before MSI assembly because the
+required exact browser-matched driver was not staged. No v48 artifact directory was published,
+no 06-35 verifier or deterministic simulation could consume v48, and the existing v47 artifact
+and deterministic evidence remain unchanged. There is no retry and no v49.
+
+The cleanup-only action then verified VM `LiiiraaBoost-W11-25H2-Clean` was and remained `Off`.
+Cleanup evidence is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-023717-phase6observationcleanup-console.log`,
+`2751` bytes, SHA-256
+`08a112e23bd09ef83449318a8672c061bed4627fb1797b0c035444b5fa7f77c3`. It confirms the exact
+`Clean-Windows-Ready` checkpoint ID remained `a918f5c0-ade0-4bac-bca3-baa91686777e` and the
+final VM state is `Off`. This is the terminal v48 handoff: do not retry, mint v49, run
+`RunCleanVm`, or advance to human review from this record.

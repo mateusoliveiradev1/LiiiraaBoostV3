@@ -312,3 +312,18 @@ complete artifact authority for deterministic admission.
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
 | `elevated-lifecycle-result.json` | `8caec763f3e4658755ce5855dcb91a127f5932a5d0f09300a499b8e78b48b3a0` | 1324 |
+
+## Append-only authority update: v48 build blocked
+
+The final consolidated v48 TDD correction was committed at source
+`28d7579fc9fb8934fa9a05650844dc4bb7e2a115`, with input tree
+`sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7`.
+Its single `build-and-smoke` invocation failed closed before MSI assembly because the required
+exact official Edge-matched `msedgedriver 151.0.4129.86` was unavailable. The canonical blocker
+is `target/phase6-physical/_blocked/BLOCKED-1786772146291-10488.json`, `599` bytes, SHA-256
+`13ba55c7e8e4bc6433e58fcbc8b5876731232131eb1d8a66e82c1ed97f7ae45b`, with a tracked mirror at
+`.planning/phases/06-transactional-plans-and-recovery/06-26-v48-BLOCKED.json`.
+
+No v48 MSI, lifecycle record, artifact manifest, signature, or artifact root was published.
+Therefore the exact v47 tuple above remains the latest complete artifact authority. There is no
+v48 retry and no v49.

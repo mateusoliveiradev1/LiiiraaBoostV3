@@ -205,6 +205,14 @@ _Completed: 2026-08-14_
 - Current evidence manifest SHA-256: `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
 
+## Append-Only Final v48 Non-Admission Addendum
+
+The sole v48 `build-and-smoke` stopped before MSI assembly because exact official
+`msedgedriver 151.0.4129.86` was unavailable. No v48 artifact manifest existed for 06-35
+verification or deterministic simulation, so no v48 admission was attempted or written. The
+active v47 deterministic manifest and its immutable predecessor chain remain byte-identical.
+There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain closed.
+
 ## Append-Only Deterministic Authority Update — v46
 
 - The physically BLOCKED v45 `run-config-canonical` guest-runner attempt was not relaunched. Its deterministic admission is now the immutable superseded predecessor record at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v45-evidence-manifest.json`, SHA-256 `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
