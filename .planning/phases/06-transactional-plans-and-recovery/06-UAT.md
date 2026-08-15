@@ -363,3 +363,45 @@ The elevated action was only `Audit`. It did not restore or create a checkpoint,
 bytes, invoke PowerShell Direct, run the guest runner, install the MSI, mutate a power scheme,
 or call `RunCleanVm`. The v43 and v44 BLOCKED records and the entire prior UAT prefix remain
 immutable. This v45 tuple is ready for the separately authorized 06-26 clean-VM workflow.
+
+---
+
+## Operation `managed-power-scheme-v45` — CLEAN WINDOWS VM BLOCKED
+
+- **Recorded at:** `2026-08-15T01:10:38.5327060Z`
+- **Operation version:** `managed-power-scheme-v45`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v45`
+- **Artifact manifest SHA-256:** `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`
+- **Clean config SHA-256:** `b760a88bdb909df5431e829db0fcedd72bbbe5ddffb8248b94317a180984e79a`
+- **Runner SHA-256:** `93c0b2d9f80d974bac436e097149de9a540db04dbade2633bf1aff4690a1c6e7`
+- **Simulation run SHA-256:** `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e`
+- **Result:** `BLOCKED-GUEST-RUN-CONFIG-CANONICAL`
+- **Runner exit code:** `2`
+- **Allowlisted runner failure code:** `BLOCKED:run-config-canonical`
+- **Human review:** not presented; Task 2 remains closed
+
+The single authorized v45 `RunCleanVm` attempt reverified the exact artifact and deterministic
+admission, restored checkpoint `Clean-Windows-Ready` ID
+`ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`, reached six healthy integration services, staged
+exactly the eleven manifest-bound files, and invoked the signed runner/config once. The runner
+failed closed at the `installed-ready` boundary before emitting `InstalledReady`. The bridge
+persisted only bounded diagnostics: `runnerExitCode: 2`, the allowlisted code
+`BLOCKED:run-config-canonical`, and reason `runner-failure`; no raw runner output was retained.
+
+Completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`,
+`hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, and
+`exact-artifact-staged`. No installed checkpoint, apply confirmation, VM reboot, continuation,
+bounded run-envelope copy, physical-writer ingestion, physical PASS, or reviewer record followed.
+The evidence manifest therefore remains the exact deterministic-only v45 authority at SHA-256
+`4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
+
+The immutable blocker record is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-221038-clean-vm-BLOCKED.json`, SHA-256
+`50285e3d8d39cc2c3e3d2de02da8175ce19dbd1f0ac18978367cd8d0aae121a6`.
+
+The cleanup-only action then returned the VM from `Running` to `Off` without checkpoint restore,
+checkpoint creation, credential reuse, or guest execution. Cleanup evidence is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260814-221237-phase6observationcleanup-console.log`, SHA-256
+`96860830f089b5504e8c6d4861f122712408bc9bca8bb36613c8e65e351bb11a`, and confirms the exact
+clean checkpoint ID remained present. This v45 attempt is permanently BLOCKED and must not be
+relaunched, relabeled as physical evidence, or advanced to Task 2/Task 3. No v46 was minted.
