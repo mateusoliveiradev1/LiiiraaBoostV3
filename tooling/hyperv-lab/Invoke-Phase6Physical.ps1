@@ -75,6 +75,11 @@ $ExpectedArtifactSignature = Join-Path $ExpectedArtifactRoot 'artifact-manifest.
 $ExpectedEvidenceManifest = Join-Path $RepositoryRoot 'tooling\phase6-evidence\evidence-manifest.json'
 $LabRoot = 'C:\Users\Liiiraa\VM-Lab'
 $CompletedBoundaries = [Collections.Generic.List[string]]::new()
+$MaximumRunnerOutputLines = 32
+$MaximumRunnerOutputChars = 4096
+$RunnerFailureStage = 'preflight'
+$RunnerExitCode = $null
+$RunnerFailureCode = $null
 
 function Get-Sha256Hex {
     param([Parameter(Mandatory)][byte[]]$Bytes)
@@ -513,34 +518,104 @@ function Copy-ExactArtifactToGuest {
     [void]$CompletedBoundaries.Add('exact-artifact-staged')
 }
 
+function Resolve-RunnerFailureDiagnostic {
+    param(
+        [Parameter(Mandatory)][Int64]$ExitCode,
+        [AllowEmptyCollection()][string[]]$Stdout = @(),
+        [AllowEmptyCollection()][string[]]$Stderr = @(),
+        [Parameter(Mandatory)][bool]$BoundsExceeded,
+        [ValidateRange(1, 32)][int]$MaximumLines = 32,
+        [ValidateRange(1, 4096)][int]$MaximumChars = 4096
+    )
+
+    $boundedExitCode = if ($ExitCode -ge 1 -and $ExitCode -le 65535) { [int]$ExitCode } else { $null }
+    $lines = @(@($Stdout) + @($Stderr) | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $characterCount = 0
+    foreach ($line in $lines) { $characterCount += $line.Length }
+    $invalid = $BoundsExceeded -or
+        $null -eq $boundedExitCode -or
+        $lines.Count -ne 1 -or
+        $lines.Count -gt $MaximumLines -or
+        $characterCount -gt $MaximumChars
+    $failureCode = if ($lines.Count -eq 1) { $lines[0].Trim() } else { $null }
+    if (-not $invalid -and
+        $failureCode -cmatch '^BLOCKED:[a-z0-9-]{1,64}$' -and
+        $failureCode -notmatch '(?i)(password|token|bearer|S-1-5-\d|serial(?:number)?\s*[=:])') {
+        return [pscustomobject][ordered]@{
+            Reason = 'runner-failure'
+            RunnerExitCode = $boundedExitCode
+            RunnerFailureCode = $failureCode
+        }
+    }
+    return [pscustomobject][ordered]@{
+        Reason = 'runner-output-redacted'
+        RunnerExitCode = $boundedExitCode
+        RunnerFailureCode = $null
+    }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)][ValidateSet('installed-ready', 'reboot-pending', 'completed')][string]$Stage,
         [string]$ApprovalPhrase
     )
 
+    $script:RunnerFailureStage = $Stage
+    $script:RunnerExitCode = $null
+    $script:RunnerFailureCode = $null
     $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
-        param($RunnerPath, $ConfigPath, $Approval)
+        param($RunnerPath, $ConfigPath, $Approval, $MaximumLines, $MaximumChars)
         if ($RunnerPath -ne 'C:\LiiiraaBoost\Phase6\physical-68bb4f974e23ee26-managed-power-scheme-v44\phase6-physical-runner.exe' -or
             $ConfigPath -ne 'C:\LiiiraaBoost\Phase6\physical-68bb4f974e23ee26-managed-power-scheme-v44\configs\clean-windows-vm.run-config.json') {
             throw 'fixed runner/config path mismatch'
         }
-        $output = if ([string]::IsNullOrEmpty($Approval)) {
-            & $RunnerPath '--run-config' $ConfigPath 2>&1
+        $start = [Diagnostics.ProcessStartInfo]::new()
+        $start.FileName = $RunnerPath
+        $start.Arguments = '"--run-config" "' + $ConfigPath.Replace('"', '\"') + '"'
+        $start.UseShellExecute = $false
+        $start.CreateNoWindow = $true
+        $start.RedirectStandardInput = $true
+        $start.RedirectStandardOutput = $true
+        $start.RedirectStandardError = $true
+        $process = [Diagnostics.Process]::Start($start)
+        $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        if (-not [string]::IsNullOrEmpty($Approval)) {
+            $process.StandardInput.WriteLine($Approval)
         }
-        else {
-            ($Approval + [Environment]::NewLine) | & $RunnerPath '--run-config' $ConfigPath 2>&1
+        $process.StandardInput.Close()
+        $process.WaitForExit()
+        $stdoutText = $stdoutTask.GetAwaiter().GetResult()
+        $stderrText = $stderrTask.GetAwaiter().GetResult()
+        $stdout = @($stdoutText -split '\r?\n' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        $stderr = @($stderrText -split '\r?\n' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        $boundsExceeded = $stdout.Count + $stderr.Count -gt $MaximumLines -or
+            $stdoutText.Length + $stderrText.Length -gt $MaximumChars
+        if ($boundsExceeded) {
+            $stdout = @()
+            $stderr = @()
         }
-        [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = @($output | ForEach-Object { [string]$_ }) }
-    } -ArgumentList $ExpectedGuestRunner, $ExpectedGuestConfig, $ApprovalPhrase
+        [pscustomobject]@{
+            ExitCode = [int64]$process.ExitCode
+            Stdout = $stdout
+            Stderr = $stderr
+            BoundsExceeded = $boundsExceeded
+        }
+    } -ArgumentList $ExpectedGuestRunner, $ExpectedGuestConfig, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
     if ($response.ExitCode -ne 0) {
-        throw 'BLOCKED: exact guest runner failed; no later mutation is authorized.'
+        $diagnostic = Resolve-RunnerFailureDiagnostic -ExitCode ([int64]$response.ExitCode) -Stdout @($response.Stdout) -Stderr @($response.Stderr) -BoundsExceeded ([bool]$response.BoundsExceeded)
+        $script:RunnerExitCode = $diagnostic.RunnerExitCode
+        $script:RunnerFailureCode = $diagnostic.RunnerFailureCode
+        throw $diagnostic.Reason
     }
-    $text = (@($response.Output) -join "`n")
-    if ($text -match '(?i)(password|bearer|token\s*[=:]|S-1-5-\d|serial(?:number)?\s*[=:])') {
-        throw 'BLOCKED: guest runner output contains forbidden secret or identity data.'
+    $text = (@($response.Stdout) -join "`n")
+    if ($response.BoundsExceeded -or @($response.Stderr).Count -ne 0 -or
+        $text -match '(?i)(password|bearer|token\s*[=:]|S-1-5-\d|serial(?:number)?\s*[=:])') {
+        $script:RunnerExitCode = 0
+        throw 'runner-output-redacted'
     }
-    return [pscustomobject]@{ State = (@($response.Output)[-1]).Trim(); Output = $text }
+    return [pscustomobject]@{ State = (@($response.Stdout)[-1]).Trim(); Output = $text }
 }
 
 function Read-ExactGuestBytes {
@@ -723,11 +798,13 @@ function Write-BlockedRecord {
     $directory = Join-Path $LabRoot 'Evidence\phase6'
     [IO.Directory]::CreateDirectory($directory) | Out-Null
     $path = Join-Path $directory ((Get-Date -Format 'yyyyMMdd-HHmmss') + '-clean-vm-BLOCKED.json')
-    $safeReason = if ($Reason -match '(?i)(password|bearer|token\s*[=:]|S-1-5-\d|serial(?:number)?\s*[=:])') { 'redacted-blocker' } else { $Reason }
+    $safeReason = if ($Reason.Length -gt 128 -or $Reason -match '(?i)(password|bearer|token\s*[=:]|S-1-5-\d|serial(?:number)?\s*[=:]|[\r\n])') { 'redacted-blocker' } else { $Reason }
     $record = [ordered]@{
         status = 'BLOCKED'; operationVersion = $ExpectedOperationVersion; buildId = $ExpectedBuildId
         vmName = $ExpectedVmName; cleanCheckpoint = $ExpectedCleanCheckpoint; installedCheckpoint = $ExpectedInstalledCheckpoint
-        completedBoundaries = @($CompletedBoundaries); reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
+        completedBoundaries = @($CompletedBoundaries); stage = $RunnerFailureStage
+        runnerExitCode = $RunnerExitCode; runnerFailureCode = $RunnerFailureCode
+        reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
 }
@@ -750,7 +827,7 @@ function Invoke-CleanVmRun {
     [void]$CompletedBoundaries.Add('integration-services-healthy')
     Copy-ExactArtifactToGuest -Authority $Authority
 
-    $first = Invoke-ExactGuestRunner -Credential $Credential
+    $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready'
     $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
     $installedCheckpoint = New-InstalledCheckpointOnce
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $installedCheckpoint
@@ -758,13 +835,13 @@ function Invoke-CleanVmRun {
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
     $approval = Read-Host "Type this exact phrase to authorize the guest apply: $expectedApproval"
     if ($approval -cne $expectedApproval) { throw 'BLOCKED: exact physical apply approval was refused.' }
-    $second = Invoke-ExactGuestRunner -Credential $Credential -ApprovalPhrase $approval
+    $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -ApprovalPhrase $approval
     [void](Assert-RebootPendingRecord -Credential $Credential -Authority $Authority -RunnerResult $second)
 
     Restart-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
     [void]$CompletedBoundaries.Add('operator-authorized-vm-restart')
     Wait-ExactVmReady -Credential $Credential
-    $third = Invoke-ExactGuestRunner -Credential $Credential
+    $third = Invoke-ExactGuestRunner -Credential $Credential -Stage 'completed'
     if ($third.State -ne 'Completed') { throw 'BLOCKED: post-boot observation-first runner did not complete.' }
     [void]$CompletedBoundaries.Add('post-boot-observation-complete')
     Copy-BoundedEvidenceAndIngest -Credential $Credential -Authority $Authority
