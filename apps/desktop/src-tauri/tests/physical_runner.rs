@@ -388,7 +388,9 @@ fn load_run_config_rejects_symlink_alias_ambiguity() {
             assert!(load_run_config(&alias).is_err());
             fs::remove_file(&alias).expect("test alias should be removed");
         }
-        Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {}
+        Err(error)
+            if error.kind() == std::io::ErrorKind::PermissionDenied
+                || error.raw_os_error() == Some(1314) => {}
         Err(error) => panic!("test symlink should be created or require privilege: {error}"),
     }
     fs::remove_dir_all(root).expect("test artifact root should be removed");

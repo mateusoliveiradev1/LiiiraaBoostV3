@@ -628,8 +628,12 @@ pub fn parse_runner_args(args: &[String]) -> Result<PathBuf, PhysicalRunnerError
     if args.len() != 3 || args[1] != "--run-config" {
         return Err(PhysicalRunnerError::blocked("runner-arguments"));
     }
+    let has_lexical_dot_segment = args[2]
+        .split(['\\', '/'])
+        .any(|segment| matches!(segment, "." | ".."));
     let path = PathBuf::from(&args[2]);
     if !path.is_absolute()
+        || has_lexical_dot_segment
         || path
             .components()
             .any(|component| matches!(component, Component::ParentDir | Component::CurDir))
@@ -643,14 +647,15 @@ pub fn parse_runner_args(args: &[String]) -> Result<PathBuf, PhysicalRunnerError
 pub fn load_run_config(path: &Path) -> Result<PhysicalRunConfig, PhysicalRunnerError> {
     let canonical =
         fs::canonicalize(path).map_err(|_| PhysicalRunnerError::blocked("run-config-canonical"))?;
-    if canonical != path {
+    if !same_canonical_path(path, Some(&canonical)) {
         return Err(PhysicalRunnerError::blocked("run-config-canonical"));
     }
-    let metadata = fs::metadata(path).map_err(|_| PhysicalRunnerError::blocked("run-config"))?;
+    let metadata =
+        fs::metadata(&canonical).map_err(|_| PhysicalRunnerError::blocked("run-config"))?;
     if metadata.len() == 0 || metadata.len() > MAX_CONFIG_BYTES {
         return Err(PhysicalRunnerError::blocked("run-config-bounds"));
     }
-    let bytes = fs::read(path).map_err(|_| PhysicalRunnerError::blocked("run-config"))?;
+    let bytes = fs::read(&canonical).map_err(|_| PhysicalRunnerError::blocked("run-config"))?;
     let value: Value = serde_json::from_slice(&bytes)
         .map_err(|_| PhysicalRunnerError::blocked("run-config-json"))?;
     let validated = validate_transactional_recovery_document(&value)
@@ -658,11 +663,11 @@ pub fn load_run_config(path: &Path) -> Result<PhysicalRunConfig, PhysicalRunnerE
     let TransactionalRecoveryDocument::PhysicalRunConfigDocument(document) = validated else {
         return Err(PhysicalRunnerError::blocked("run-config-kind"));
     };
-    let root = path
+    let root = canonical
         .parent()
         .and_then(Path::parent)
         .ok_or_else(|| PhysicalRunnerError::blocked("artifact-root"))?;
-    physical_config_from_generated(path, root, document, hash_bytes(&bytes))
+    physical_config_from_generated(&canonical, root, document, hash_bytes(&bytes))
 }
 
 fn physical_config_from_generated(
@@ -1161,8 +1166,43 @@ fn resolve_below_root(root: &Path, relative: &str) -> Result<PathBuf, PhysicalRu
     Ok(root.join(relative))
 }
 
-fn same_canonical_path(root: &Path, parent: Option<&Path>) -> bool {
-    parent.is_some_and(|parent| parent == root)
+fn same_canonical_path(expected: &Path, actual: Option<&Path>) -> bool {
+    let Some(actual) = actual else {
+        return false;
+    };
+    if expected == actual {
+        return true;
+    }
+    #[cfg(windows)]
+    {
+        let mut expected_components = expected.components();
+        let mut actual_components = actual.components();
+        let prefixes_match = match (expected_components.next(), actual_components.next()) {
+            (Some(Component::Prefix(left)), Some(Component::Prefix(right))) => {
+                match (left.kind(), right.kind()) {
+                    (std::path::Prefix::Disk(left), std::path::Prefix::VerbatimDisk(right))
+                    | (std::path::Prefix::VerbatimDisk(left), std::path::Prefix::Disk(right)) => {
+                        left == right
+                    }
+                    (
+                        std::path::Prefix::UNC(left_server, left_share),
+                        std::path::Prefix::VerbatimUNC(right_server, right_share),
+                    )
+                    | (
+                        std::path::Prefix::VerbatimUNC(left_server, left_share),
+                        std::path::Prefix::UNC(right_server, right_share),
+                    ) => left_server == right_server && left_share == right_share,
+                    _ => false,
+                }
+            }
+            _ => false,
+        };
+        prefixes_match && expected_components.eq(actual_components)
+    }
+    #[cfg(not(windows))]
+    {
+        false
+    }
 }
 
 fn hash_file(path: &Path) -> Result<String, PhysicalRunnerError> {
