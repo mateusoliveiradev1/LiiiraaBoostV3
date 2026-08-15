@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    '75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a',
-    'physical-487e3c326b5066a0-managed-power-scheme-v49',
+    'a46b88f8af85b4621dc19922488d064eb2315267',
+    'physical-487e3c326b5066a0-managed-power-scheme-v50',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -130,6 +130,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v45-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v46-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v47-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v49-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -266,9 +267,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v50',
+    'physical-487e3c326b5066a0-managed-power-scheme-v50',
+    'a46b88f8af85b4621dc19922488d064eb2315267',
+    'c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b',
+    'ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b',
+    '41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c',
     'managed-power-scheme-v49',
     'physical-487e3c326b5066a0-managed-power-scheme-v49',
-    '75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a',
     'e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09',
     '5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d',
     '2f197d2be921e8c46ca7913c7c76f8b6b2a5acc31f36968cbf1a6188d07fbd24',
@@ -415,7 +421,8 @@ test('RED: staged artifact receives fixed protected guest custody before any run
   );
   assert.match(setter, /\[PSCredential\]\$Credential/u);
   assert.match(setter, /-ArgumentList\s+\$ExpectedGuestRoot/u);
-  assert.match(setter, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v49'/u);
+  assert.match(setter, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v50'/u);
+  assert.doesNotMatch(setter, /physical-487e3c326b5066a0-managed-power-scheme-v49/u);
   assert.doesNotMatch(setter, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
   assert.doesNotMatch(setter, /\[string\]\$(?:Path|Root|Sid|Command|Script|Arguments?)/u);
   assert.doesNotMatch(setter, /icacls|takeown|Everyone|S-1-1-0|S-1-5-32-545/iu);
@@ -425,7 +432,8 @@ test('RED: staged artifact receives fixed protected guest custody before any run
     source.indexOf('function Resolve-RunnerFailureDiagnostic'),
   );
   assert.match(custodyAssertion, /-ArgumentList\s+\$ExpectedGuestRoot/u);
-  assert.match(custodyAssertion, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v49'/u);
+  assert.match(custodyAssertion, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v50'/u);
+  assert.doesNotMatch(custodyAssertion, /physical-487e3c326b5066a0-managed-power-scheme-v49/u);
   assert.doesNotMatch(custodyAssertion, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
 
   const runBody = source.slice(
@@ -739,7 +747,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v49 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v50 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -751,7 +759,7 @@ test('dry-run audits the exact immutable v49 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v49');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v50');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -784,11 +792,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
     [
       'second active',
-      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[6] }),
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[7] }),
     ],
     [
       'missing predecessor',
-      (value) => (value.deterministicAdmissions[6].predecessorEvidenceSha256 = null),
+      (value) => (value.deterministicAdmissions[7].predecessorEvidenceSha256 = null),
     ],
     [
       'fork',
@@ -808,11 +816,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ],
     [
       'active tuple mismatch',
-      (value) => (value.deterministicAdmissions[6].buildId = 'mismatched-build'),
+      (value) => (value.deterministicAdmissions[7].buildId = 'mismatched-build'),
     ],
     [
       'active run hash mismatch',
-      (value) => (value.deterministicAdmissions[6].runEvidenceSha256 = '4'.repeat(64)),
+      (value) => (value.deterministicAdmissions[7].runEvidenceSha256 = '4'.repeat(64)),
     ],
   ];
   try {
