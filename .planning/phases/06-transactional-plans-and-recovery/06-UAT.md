@@ -836,3 +836,39 @@ The causal correction was completed through RED `7d842e2` and GREEN `ab5edd8`: b
 boundaries now receive only the bridge-derived closed guest root and independently compare it to
 the exact bound build literal before ACL inspection or mutation. The full bridge suite remains
 22/22 PASS. v49 is permanently BLOCKED and will not be relaunched.
+
+---
+
+## Operation `managed-power-scheme-v50` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v50`
+- **Artifact manifest SHA-256:** `c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b`
+- **Run evidence SHA-256:** `ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b`
+- **Evidence manifest SHA-256:** `41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v50",
+  "buildId": "physical-487e3c326b5066a0-managed-power-scheme-v50",
+  "artifactManifestSha256": "c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b",
+  "runEvidenceSha256": "ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b",
+  "evidenceManifestSha256": "41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
