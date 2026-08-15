@@ -774,3 +774,39 @@ Cleanup evidence is
 `Clean-Windows-Ready` checkpoint ID remained `a918f5c0-ade0-4bac-bca3-baa91686777e` and the
 final VM state is `Off`. This is the terminal v48 handoff: do not retry, mint v49, run
 `RunCleanVm`, or advance to human review from this record.
+
+---
+
+## Operation `managed-power-scheme-v49` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v49`
+- **Artifact manifest SHA-256:** `e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09`
+- **Run evidence SHA-256:** `5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d`
+- **Evidence manifest SHA-256:** `2f197d2be921e8c46ca7913c7c76f8b6b2a5acc31f36968cbf1a6188d07fbd24`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v49",
+  "buildId": "physical-487e3c326b5066a0-managed-power-scheme-v49",
+  "artifactManifestSha256": "e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09",
+  "runEvidenceSha256": "5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d",
+  "evidenceManifestSha256": "2f197d2be921e8c46ca7913c7c76f8b6b2a5acc31f36968cbf1a6188d07fbd24",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
