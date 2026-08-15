@@ -265,3 +265,22 @@ The one allowed UAC launch passed the wrapper as a relative path; the elevated p
 outside the repository and exited before the wrapper or bridge ran. No new Evidence log was
 created. The Audit was not relaunched under the fail-closed rule, and no v47 was minted. Bridge
 TDD commits: RED `ac9b23a8`, GREEN `27970f33`.
+
+## Append-Only v46 Absolute-Path Audit Readiness Addendum
+
+After a new explicit authorization, exactly one `Phase6Audit` was launched with the absolute
+wrapper path and absolute repository working directory. The bridge revalidated the exact v46
+artifact, deterministic admission, VM, and checkpoint authority, observed all six integration
+services healthy, and returned the initially Off VM to `Off`.
+
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-224214-phase6audit-console.log`
+- **Audit log SHA-256:** `4ccf5602685d78a466891d1aefaf5492c3bee2370b34f1308828ba85e22026a3`
+- **Audit result:** `PASSED`, `readOnly: true`
+- **Clean checkpoint ID:** `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Installed checkpoint present:** `false`
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+- **Final VM state:** `Off`
+
+No build, remint, simulation, `RunCleanVm`, guest runner, checkpoint restore/create, MSI, or
+optimization action ran. The earlier relative-path invocation blocker remains append-only. The
+v46 tuple is ready for the separately authorized single 06-26 physical attempt.

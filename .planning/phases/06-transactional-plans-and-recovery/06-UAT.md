@@ -471,3 +471,30 @@ boundary is claimed for this launch.
 Per the fail-closed instruction, the Audit was not relaunched. The exact v46 artifact and
 deterministic admission remain valid, but 06-26 is BLOCKED before its physical attempt until a
 new explicit authorization permits the corrected absolute-path Audit launch. No v47 was minted.
+
+---
+
+## Operation `managed-power-scheme-v46` — READ-ONLY AUDIT PASSED
+
+- **Recorded at:** `2026-08-15T01:42:32Z`
+- **Operation version:** `managed-power-scheme-v46`
+- **Build ID:** `physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Artifact manifest SHA-256:** `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`
+- **Simulation run SHA-256:** `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`
+- **Clean checkpoint:** `Clean-Windows-Ready`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Installed checkpoint:** `LiiiraaBoost-Installed` absent
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-224214-phase6audit-console.log`
+- **Audit log SHA-256:** `4ccf5602685d78a466891d1aefaf5492c3bee2370b34f1308828ba85e22026a3`
+- **Audit result:** `PASSED`, read-only
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+- **Final VM state:** `Off`, established by the successful `audit-vm-state-restored` boundary
+
+The newly authorized one-time launch used the absolute wrapper path and absolute repository
+working directory. The elevated action was only `Phase6Audit`, delegating only to bridge action
+`Audit`. It did not restore or create a checkpoint, stage guest bytes, invoke PowerShell Direct,
+run the guest runner, install the MSI, mutate a power scheme, or call `RunCleanVm`.
+
+The earlier relative-path invocation blocker remains append-only history. The exact v46 tuple is
+now Audit-ready for the separately authorized single 06-26 physical attempt; no such physical
+attempt was executed here and no v47 was minted.
