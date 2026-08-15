@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    '29827368ebfe92abce6135807af82d58c5b1326a',
-    'physical-50796b7236b2889c-managed-power-scheme-v47',
+    '75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a',
+    'physical-487e3c326b5066a0-managed-power-scheme-v49',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -129,6 +129,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v44-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v45-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v46-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v47-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -265,9 +266,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v49',
+    'physical-487e3c326b5066a0-managed-power-scheme-v49',
+    '75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a',
+    'e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09',
+    '5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d',
+    '2f197d2be921e8c46ca7913c7c76f8b6b2a5acc31f36968cbf1a6188d07fbd24',
     'managed-power-scheme-v47',
     'physical-50796b7236b2889c-managed-power-scheme-v47',
-    '29827368ebfe92abce6135807af82d58c5b1326a',
     '31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b',
     'b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6',
     'b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8',
@@ -722,7 +728,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v47 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v49 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -734,7 +740,7 @@ test('dry-run audits the exact immutable v47 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v47');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v49');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -767,11 +773,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
     [
       'second active',
-      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[5] }),
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[6] }),
     ],
     [
       'missing predecessor',
-      (value) => (value.deterministicAdmissions[5].predecessorEvidenceSha256 = null),
+      (value) => (value.deterministicAdmissions[6].predecessorEvidenceSha256 = null),
     ],
     [
       'fork',
@@ -791,11 +797,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ],
     [
       'active tuple mismatch',
-      (value) => (value.deterministicAdmissions[5].buildId = 'mismatched-build'),
+      (value) => (value.deterministicAdmissions[6].buildId = 'mismatched-build'),
     ],
     [
       'active run hash mismatch',
-      (value) => (value.deterministicAdmissions[5].runEvidenceSha256 = '4'.repeat(64)),
+      (value) => (value.deterministicAdmissions[6].runEvidenceSha256 = '4'.repeat(64)),
     ],
   ];
   try {
