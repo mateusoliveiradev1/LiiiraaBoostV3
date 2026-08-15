@@ -637,3 +637,46 @@ The fail-closed no-retry rule stopped the workflow at the canceled UAC boundary.
 elevation was requested, no v48 was minted, and the deterministic-only v47 authority remains
 unchanged. VM `Off` is the last established state from the failed 8 GiB Audit path; no later
 operation started or mutated the VM.
+
+---
+
+## Operation `managed-power-scheme-v47` — 4 GiB CLEAN CHECKPOINT PREPARATION PASSED
+
+- **New explicit authorization:** one replacement attempt after the earlier canceled UAC
+- **Preparation evidence:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-044525-503-phase6-pre4gib-v47.json`
+- **Evidence size:** `7519` bytes
+- **Evidence SHA-256:** `ec8110d2b9e5ae540ff19bb62b59ebde44f96b67a1d6770f627f8bd76d141c0e`
+- **Result:** `PASSED`
+- **VM:** `LiiiraaBoost-W11-25H2-Clean`, ID `107680b1-d9cc-411a-843a-ab72019469cd`, Generation 2, final state `Off`
+- **Memory:** dynamic enabled; startup `4294967296`, minimum `4294967296`, maximum `12884901888` bytes
+- **New clean checkpoint:** `Clean-Windows-Ready`, Standard, ID `a918f5c0-ade0-4bac-bca3-baa91686777e`
+- **Preserved restored checkpoint:** `Clean-Windows-Ready-Pre4GiB-v47`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved pre-account backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Installed checkpoint:** `LiiiraaBoost-Installed` absent
+
+The create-once operation verified the exact Off/Generation 2/processor/security/storage/DVD/
+network/integration topology, restored the old clean checkpoint to discard staged diagnostic
+residue, preserved both backups, applied only the approved 4/4/12 GiB dynamic-memory envelope,
+and created one new Standard clean checkpoint. It never started the VM or deleted a checkpoint.
+
+---
+
+## Operation `managed-power-scheme-v47` — REBOUND READ-ONLY AUDIT PASSED
+
+- **Checkpoint-rebind TDD:** RED `bb09e34`, GREEN `c3564b0`
+- **Bridge policy suite:** 20/20 PASS
+- **Dry-run:** PASS with clean checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`
+- **Planned evaluator:** `ok: true`, highest admitted stage `deterministic-simulation`
+- **Architecture/key-link gate:** 51/51 PASS
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-014943-phase6audit-console.log`
+- **Audit log size:** `1127` bytes
+- **Audit log SHA-256:** `89ee4e56c77087c642660e5f0404d212f4872e2dc3444e1ca154347d73d4b87c`
+- **Audit result:** `PASSED`, read-only
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+- **Final VM state:** `Off`, established by `audit-vm-state-restored`
+
+Exactly one newly authorized `Phase6Audit` ran through the absolute wrapper and repository
+working directory. It retained the exact v47 artifact/simulation tuple, started the VM only for
+read-only integration health observation at 4 GiB, and returned it to `Off`. No `RunCleanVm`,
+guest staging, guest runner, MSI, apply, checkpoint mutation, physical evidence ingestion, or
+v48 mint occurred.

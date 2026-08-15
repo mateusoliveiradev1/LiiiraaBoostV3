@@ -327,3 +327,28 @@ checkpoint, external preparation evidence, checkpoint-ID rebind, or follow-up Au
 The no-retry rule stopped the workflow without minting v48. The repository-side fixed operation
 remains available for a future separately authorized execution, but the bridge still correctly
 binds the last established clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`.
+
+## Append-Only v47 4 GiB Preparation and Audit Success Addendum
+
+After a new explicit authorization, the fixed create-once preparation passed. External evidence
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-044525-503-phase6-pre4gib-v47.json`
+is `7519` bytes with SHA-256
+`ec8110d2b9e5ae540ff19bb62b59ebde44f96b67a1d6770f627f8bd76d141c0e`.
+It proves final VM state `Off`, Standard checkpoint type, dynamic memory `4`/`4`/`12` GiB,
+new `Clean-Windows-Ready` ID `a918f5c0-ade0-4bac-bca3-baa91686777e`, preserved
+`Clean-Windows-Ready-Pre4GiB-v47` ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`, preserved
+`Clean-Windows-Ready-PreLabAccount-v43` ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`, and absent
+`LiiiraaBoost-Installed`.
+
+The bridge was rebound through TDD (RED `bb09e34`, GREEN `c3564b0`) without reminting the v47
+artifact or deterministic simulation. The 20/20 policy suite, exact dry-run, planned evaluator,
+and 51/51 architecture/key-link gate passed. Exactly one subsequent absolute-wrapper
+`Phase6Audit` passed and restored the VM to `Off`:
+
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-014943-phase6audit-console.log`
+- **Size:** `1127` bytes
+- **SHA-256:** `89ee4e56c77087c642660e5f0404d212f4872e2dc3444e1ca154347d73d4b87c`
+- **Boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+
+No `RunCleanVm`, guest runner, guest staging, MSI, apply, physical-evidence ingestion, checkpoint
+mutation during Audit, or v48 mint occurred.
