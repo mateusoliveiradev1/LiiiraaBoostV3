@@ -169,6 +169,7 @@ $RunnerFailureStage = 'preflight'
 $RunnerExitCode = $null
 $RunnerFailureCode = $null
 $InstallerDiagnostic = $null
+$InstalledCustodyDiagnostic = $null
 
 function Assert-ClosedCurrentAuthority {
     $expectedKeys = @(
@@ -1462,6 +1463,87 @@ function Resolve-InstallerSidecarSummary {
     }
 }
 
+function Resolve-InstalledCustodySidecarSummary {
+    param(
+        $Sidecar,
+        [Parameter(Mandatory)][string]$SidecarStatus,
+        $SidecarSha256,
+        $SidecarSizeBytes,
+        [Parameter(Mandatory)][string]$FailureCode
+    )
+
+    $fallback = [pscustomobject][ordered]@{
+        DiagnosticStatus = if ($SidecarStatus -cin @('sidecar-missing', 'sidecar-unparseable')) { $SidecarStatus } else { 'sidecar-unparseable' }
+        ErrorCode = $null
+        DetailCode = $null
+        Role = $null
+        PathClass = $null
+        IoKind = $null
+        Win32Code = $null
+        SidecarSha256 = $null
+        SidecarSizeBytes = $null
+    }
+    if ($SidecarStatus -cne 'present' -or $null -eq $Sidecar) { return $fallback }
+
+    $allowedErrorCodes = @(
+        'acl-invalid', 'authenticode-invalid', 'live-byte-mismatch', 'required-byte-missing',
+        'canonical-path-invalid', 'generated-schema-invalid', 'signature-invalid', 'version-invalid'
+    )
+    $allowedDetailCodes = @(
+        'unavailable', 'canonicalize', 'program-files-reparse', 'relative-path', 'root-reparse',
+        'reparse-component', 'root-escape', 'duplicate-installed-path', 'installed-role',
+        'last-admitted-reparse', 'last-admitted-parent', 'last-admitted-name',
+        'last-admitted-path', 'other'
+    )
+    $allowedRoles = @(
+        'portable-root', 'portable-manifest', 'portable-signature', 'portable-file',
+        'installed-root', 'installed-manifest', 'installed-signature', 'installed-desktop',
+        'installed-service', 'installed-runner', 'last-admitted-file', 'last-admitted-parent'
+    )
+    $allowedPathClasses = @('disk', 'verbatim-disk', 'unc', 'verbatim-unc', 'device', 'device-other', 'rooted-other', 'relative', 'absolute-other')
+    $allowedIoKinds = @('not-found', 'permission-denied', 'invalid-input', 'invalid-data', 'already-exists', 'unsupported', 'other')
+    $expectedProperties = @('kind', 'schemaVersion', 'errorCode', 'detailCode', 'role', 'pathClass', 'ioKind', 'win32Code')
+    $actualProperties = @($Sidecar.PSObject.Properties | ForEach-Object { $_.Name })
+    $errorCode = [string]$Sidecar.errorCode
+    $detailCode = [string]$Sidecar.detailCode
+    $role = if ($null -eq $Sidecar.role) { $null } else { [string]$Sidecar.role }
+    $pathClass = if ($null -eq $Sidecar.pathClass) { $null } else { [string]$Sidecar.pathClass }
+    $ioKind = if ($null -eq $Sidecar.ioKind) { $null } else { [string]$Sidecar.ioKind }
+    $win32Code = if ($null -eq $Sidecar.win32Code) { $null } else { [int]$Sidecar.win32Code }
+    $sidecarHash = if ($null -eq $SidecarSha256) { $null } else { [string]$SidecarSha256 }
+    $sidecarSize = if ($null -eq $SidecarSizeBytes) { $null } else { [int64]$SidecarSizeBytes }
+    $expectedFailure = "BLOCKED:installed-custody-$errorCode"
+    $diagnosticFields = @($role, $pathClass, $ioKind)
+    $invalid = $actualProperties.Count -ne $expectedProperties.Count -or
+        @($actualProperties | Where-Object { $expectedProperties -cnotcontains $_ }).Count -ne 0 -or
+        [string]$Sidecar.kind -cne 'phase6-installed-custody-safe-diagnostic' -or
+        [string]$Sidecar.schemaVersion -cne '1.0' -or
+        $allowedErrorCodes -notcontains $errorCode -or
+        $allowedDetailCodes -notcontains $detailCode -or
+        $FailureCode -cne $expectedFailure -or
+        ($null -ne $role -and $allowedRoles -notcontains $role) -or
+        ($null -ne $pathClass -and $allowedPathClasses -notcontains $pathClass) -or
+        ($null -ne $ioKind -and $allowedIoKinds -notcontains $ioKind) -or
+        ($null -ne $win32Code -and ($win32Code -lt 0 -or $win32Code -gt 65535)) -or
+        $sidecarHash -cnotmatch '^sha256:[a-f0-9]{64}$' -or
+        $null -eq $sidecarSize -or $sidecarSize -le 0 -or $sidecarSize -gt 4096 -or
+        ($detailCode -ceq 'canonicalize' -and @($diagnosticFields | Where-Object { $null -eq $_ }).Count -ne 0) -or
+        ($detailCode -cne 'canonicalize' -and @($diagnosticFields | Where-Object { $null -ne $_ }).Count -ne 0)
+    if ($invalid) { return $fallback }
+
+    return [pscustomobject][ordered]@{
+        DiagnosticStatus = 'present'
+        ErrorCode = $errorCode
+        DetailCode = $detailCode
+        Role = $role
+        PathClass = $pathClass
+        IoKind = $ioKind
+        Win32Code = $win32Code
+        SidecarSha256 = $sidecarHash
+        SidecarSizeBytes = $sidecarSize
+    }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
@@ -1479,12 +1561,14 @@ function Invoke-ExactGuestRunner {
     $script:RunnerExitCode = $null
     $script:RunnerFailureCode = $null
     $script:InstallerDiagnostic = $null
+    $script:InstalledCustodyDiagnostic = $null
     $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($ClosedAuthority, $Approval, $MaximumLines, $MaximumChars)
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
         $RunnerPath = [string]$ClosedAuthority.GuestRunner
         $ConfigPath = [string]$ClosedAuthority.GuestConfig
         $sidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\msi-install.safe.json'
+        $installedCustodySidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\installed-custody.safe.json'
         if ([string]$ClosedAuthority.GuestRoot -cne $expectedRoot -or
             $RunnerPath -cne (Join-Path $expectedRoot 'phase6-physical-runner.exe') -or
             $ConfigPath -cne (Join-Path $expectedRoot 'configs\clean-windows-vm.run-config.json')) {
@@ -1545,6 +1629,35 @@ function Invoke-ExactGuestRunner {
                 $installerSidecarSizeBytes = $null
             }
         }
+        $installedCustodySidecar = $null
+        $installedCustodySidecarStatus = 'sidecar-missing'
+        $installedCustodySidecarSha256 = $null
+        $installedCustodySidecarSizeBytes = $null
+        if ($process.ExitCode -ne 0 -and (Test-Path -LiteralPath $installedCustodySidecarPath -PathType Leaf)) {
+            try {
+                $installedSidecarItem = Get-Item -LiteralPath $installedCustodySidecarPath -ErrorAction Stop
+                if ($installedSidecarItem.Length -le 0 -or $installedSidecarItem.Length -gt 4096) {
+                    throw 'installed custody sidecar bounds'
+                }
+                $installedSidecarBytes = [IO.File]::ReadAllBytes($installedCustodySidecarPath)
+                $installedCustodySidecar = [Text.Encoding]::UTF8.GetString($installedSidecarBytes) | ConvertFrom-Json -ErrorAction Stop
+                $installedSidecarHasher = [Security.Cryptography.SHA256]::Create()
+                try {
+                    $installedCustodySidecarSha256 = 'sha256:' + ([BitConverter]::ToString($installedSidecarHasher.ComputeHash($installedSidecarBytes))).Replace('-', '').ToLowerInvariant()
+                }
+                finally {
+                    $installedSidecarHasher.Dispose()
+                }
+                $installedCustodySidecarSizeBytes = [int64]$installedSidecarBytes.Length
+                $installedCustodySidecarStatus = 'present'
+            }
+            catch {
+                $installedCustodySidecar = $null
+                $installedCustodySidecarStatus = 'sidecar-unparseable'
+                $installedCustodySidecarSha256 = $null
+                $installedCustodySidecarSizeBytes = $null
+            }
+        }
         [pscustomobject]@{
             ExitCode = [int64]$process.ExitCode
             Stdout = $stdout
@@ -1554,6 +1667,10 @@ function Invoke-ExactGuestRunner {
             InstallerSidecarStatus = $installerSidecarStatus
             InstallerSidecarSha256 = $installerSidecarSha256
             InstallerSidecarSizeBytes = $installerSidecarSizeBytes
+            InstalledCustodySidecar = $installedCustodySidecar
+            InstalledCustodySidecarStatus = $installedCustodySidecarStatus
+            InstalledCustodySidecarSha256 = $installedCustodySidecarSha256
+            InstalledCustodySidecarSizeBytes = $installedCustodySidecarSizeBytes
         }
     } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
     if ($response.ExitCode -ne 0) {
@@ -1566,6 +1683,14 @@ function Invoke-ExactGuestRunner {
                 -SidecarStatus ([string]$response.InstallerSidecarStatus) `
                 -SidecarSha256 $response.InstallerSidecarSha256 `
                 -SidecarSizeBytes $response.InstallerSidecarSizeBytes `
+                -FailureCode $diagnostic.RunnerFailureCode
+        }
+        if ($null -ne $diagnostic.RunnerFailureCode -and $diagnostic.RunnerFailureCode -cmatch '^BLOCKED:installed-custody-') {
+            $script:InstalledCustodyDiagnostic = Resolve-InstalledCustodySidecarSummary `
+                -Sidecar $response.InstalledCustodySidecar `
+                -SidecarStatus ([string]$response.InstalledCustodySidecarStatus) `
+                -SidecarSha256 $response.InstalledCustodySidecarSha256 `
+                -SidecarSizeBytes $response.InstalledCustodySidecarSizeBytes `
                 -FailureCode $diagnostic.RunnerFailureCode
         }
         throw $diagnostic.Reason
@@ -1766,6 +1891,7 @@ function Write-BlockedRecord {
         completedBoundaries = @($CompletedBoundaries); stage = $RunnerFailureStage
         runnerExitCode = $RunnerExitCode; runnerFailureCode = $RunnerFailureCode
         installerDiagnostic = $InstallerDiagnostic
+        installedCustodyDiagnostic = $InstalledCustodyDiagnostic
         reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))

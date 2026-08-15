@@ -198,6 +198,27 @@ impl CustodyError {
         self.path_diagnostic
     }
 
+    pub fn safe_path_detail_code(&self) -> &'static str {
+        if !matches!(self.code, CustodyErrorCode::Path) {
+            return "unavailable";
+        }
+        match self.detail {
+            "canonicalize"
+            | "program-files-reparse"
+            | "relative-path"
+            | "root-reparse"
+            | "reparse-component"
+            | "root-escape"
+            | "duplicate-installed-path"
+            | "installed-role"
+            | "last-admitted-reparse"
+            | "last-admitted-parent"
+            | "last-admitted-name"
+            | "last-admitted-path" => self.detail,
+            _ => "other",
+        }
+    }
+
     /// Returns one stable, redacted diagnostic for portable artifact custody.
     /// Internal Win32, path, identity, and parser details never cross the runner
     /// or verifier boundary.

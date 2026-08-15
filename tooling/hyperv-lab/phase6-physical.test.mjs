@@ -800,6 +800,7 @@ test('RED: same-session installed custody sidecar is bounded and path-free', () 
       kind: 'phase6-installed-custody-safe-diagnostic',
       schemaVersion: '1.0',
       errorCode: 'canonical-path-invalid',
+      detailCode: 'canonicalize',
       role: 'last-admitted-parent',
       pathClass: 'disk',
       ioKind: 'permission-denied',
@@ -809,6 +810,7 @@ test('RED: same-session installed custody sidecar is bounded and path-free', () 
   assert.deepEqual(present, {
     DiagnosticStatus: 'present',
     ErrorCode: 'canonical-path-invalid',
+    DetailCode: 'canonicalize',
     Role: 'last-admitted-parent',
     PathClass: 'disk',
     IoKind: 'permission-denied',
@@ -825,6 +827,7 @@ test('RED: same-session installed custody sidecar is bounded and path-free', () 
       kind: 'phase6-installed-custody-safe-diagnostic',
       schemaVersion: '1.0',
       errorCode: 'canonical-path-invalid',
+      detailCode: 'canonicalize',
       role: 'C:\\Users\\secret-user',
       pathClass: 'disk',
       ioKind: 'permission-denied',

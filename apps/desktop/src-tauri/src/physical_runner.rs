@@ -27,7 +27,7 @@ use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,
 };
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
-use installation_manifest::{CanonicalPathRole, CustodyError, CustodyErrorCode};
+use installation_manifest::{CustodyError, CustodyErrorCode};
 use installation_manifest::{same_closed_windows_path, verify_installed_manifest};
 
 // Plan 06-33 key-link witnesses (quoted because verify.key-links preserves YAML scalars):
@@ -41,6 +41,7 @@ const MAX_RECORD_BYTES: u64 = 256 * 1024;
 const MAX_REDACTED_BYTES: usize = 64 * 1024;
 const MAX_INSTALLER_LOG_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_INSTALLER_DIAGNOSTIC_BYTES: usize = 4 * 1024;
+const MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES: usize = 4 * 1024;
 const ZERO_HASH: &str = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 const SOURCE: &str = "phase6-physical-runner-rust-1";
 
@@ -993,7 +994,17 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
     }
 
     fn verify_installed(&mut self, artifact: &ArtifactCustody) -> Result<(), PhysicalRunnerError> {
-        let verified = verify_installed_manifest().map_err(installed_custody_failure)?;
+        let verified = match verify_installed_manifest() {
+            Ok(verified) => verified,
+            Err(error) => {
+                persist_installed_custody_diagnostic(
+                    &artifact.root,
+                    self.config.stage,
+                    &error,
+                )?;
+                return Err(installed_custody_failure(error));
+            }
+        };
         let runner = verified
             .files()
             .iter()
@@ -1473,6 +1484,60 @@ fn persist_installer_diagnostic(
     write_installer_diagnostic_create_once(&sidecar, &diagnostic)
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct InstalledCustodyDiagnosticSidecar {
+    kind: &'static str,
+    schema_version: &'static str,
+    error_code: &'static str,
+    detail_code: &'static str,
+    role: Option<&'static str>,
+    path_class: Option<&'static str>,
+    io_kind: Option<&'static str>,
+    win32_code: Option<i32>,
+}
+
+fn installed_custody_diagnostic(error: &CustodyError) -> InstalledCustodyDiagnosticSidecar {
+    let diagnostic = error.safe_path_diagnostic();
+    InstalledCustodyDiagnosticSidecar {
+        kind: "phase6-installed-custody-safe-diagnostic",
+        schema_version: "1.0",
+        error_code: error.code.as_str(),
+        detail_code: error.safe_path_detail_code(),
+        role: diagnostic.map(|value| value.role),
+        path_class: diagnostic.map(|value| value.path_class),
+        io_kind: diagnostic.map(|value| value.io_kind),
+        win32_code: diagnostic.and_then(|value| value.win32_code),
+    }
+}
+
+fn persist_installed_custody_diagnostic(
+    artifact_root: &Path,
+    stage: PhysicalStage,
+    error: &CustodyError,
+) -> Result<(), PhysicalRunnerError> {
+    let path = artifact_root
+        .join("state")
+        .join(stage.as_str())
+        .join("diagnostics")
+        .join("installed-custody.safe.json");
+    let bytes = serde_json::to_vec(&installed_custody_diagnostic(error))
+        .map_err(|_| PhysicalRunnerError::blocked("installed-custody-diagnostic-serialize"))?;
+    if bytes.is_empty() || bytes.len() > MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES {
+        return Err(PhysicalRunnerError::blocked(
+            "installed-custody-diagnostic-bounds",
+        ));
+    }
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| PhysicalRunnerError::blocked("installed-custody-diagnostic-create-once"))?;
+    file.write_all(&bytes)
+        .and_then(|()| file.sync_all())
+        .map_err(|_| PhysicalRunnerError::blocked("installed-custody-diagnostic-durable"))
+}
+
 fn hash_file(path: &Path) -> Result<String, PhysicalRunnerError> {
     fs::read(path)
         .map(|bytes| hash_bytes(&bytes))
@@ -1841,9 +1906,10 @@ mod custody_failure_code_tests {
     #[cfg(windows)]
     use super::msiexec_compatible_path;
     use super::{
-        artifact_custody_failure_code, installation_manifest::CustodyError,
-        installer_diagnostic_from_log, installer_diagnostic_sidecar_path, installer_exit_failure,
-        write_installer_diagnostic_create_once,
+        MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES, artifact_custody_failure_code,
+        installation_manifest::{CanonicalPathRole, CustodyError}, installed_custody_diagnostic,
+        installer_diagnostic_from_log, installer_diagnostic_sidecar_path,
+        installer_exit_failure, write_installer_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
@@ -2070,6 +2136,7 @@ mod custody_failure_code_tests {
         assert_eq!(json["kind"], "phase6-installed-custody-safe-diagnostic");
         assert_eq!(json["schemaVersion"], "1.0");
         assert_eq!(json["errorCode"], "canonical-path-invalid");
+        assert_eq!(json["detailCode"], "canonicalize");
         assert_eq!(json["role"], "last-admitted-parent");
         assert_eq!(json["pathClass"], "disk");
         assert_eq!(json["ioKind"], "permission-denied");
