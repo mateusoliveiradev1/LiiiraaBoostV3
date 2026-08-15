@@ -12,6 +12,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import test from 'node:test';
 
 const root = resolve(import.meta.dirname, '..', '..');
@@ -166,7 +167,9 @@ const invokeBridgeFunction = (name, input) => {
     "if ($null -eq $function) { throw 'required bridge function is missing' }",
     'Invoke-Expression $function.Extent.Text',
     `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
-    `${name} -ExitCode ([int64]$input.exitCode) -Stdout @($input.stdout) -Stderr @($input.stderr) -BoundsExceeded ([bool]$input.boundsExceeded) | ConvertTo-Json -Compress`,
+    name === 'Resolve-MsiLogSummary'
+      ? `${name} -ExitCode ([int64]$input.exitCode) -FailureCode ([string]$input.failureCode) -Bytes ([Convert]::FromBase64String([string]$input.bytesBase64)) | ConvertTo-Json -Compress`
+      : `${name} -ExitCode ([int64]$input.exitCode) -Stdout @($input.stdout) -Stderr @($input.stderr) -BoundsExceeded ([bool]$input.boundsExceeded) | ConvertTo-Json -Compress`,
   ].join('; ');
   const result = spawnSync(
     'powershell.exe',
@@ -637,6 +640,60 @@ test('RED: blocked record persists stage and diagnostics without raw runner outp
     source,
     /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'completed'/u,
   );
+});
+
+test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', () => {
+  const safeLog = [
+    'MSI (s) (10:20) [12:00:00:000]: Product: Liiiraa Boost',
+    'Action ended 12:00:00: InstallFiles. Return value 3.',
+    'Property(S): USERNAME = secret-user',
+    'Property(S): OriginalDatabase = C:\\Users\\secret-user\\liiiraa-boost.msi',
+  ].join('\r\n');
+  const summary = invokeBridgeFunction('Resolve-MsiLogSummary', {
+    exitCode: 1603,
+    failureCode: 'BLOCKED:installer-exit-1603',
+    bytesBase64: Buffer.from(safeLog, 'utf8').toString('base64'),
+  });
+  assert.deepEqual(summary, {
+    InstallerExitCode: 1603,
+    LogSha256: `sha256:${createHash('sha256').update(safeLog).digest('hex')}`,
+    LogSizeBytes: Buffer.byteLength(safeLog),
+    ReturnValue3ActionCode: 'install-files',
+    ReturnValue3ActionIdentifier: 'InstallFiles',
+  });
+  const serialized = JSON.stringify(summary);
+  for (const forbidden of ['secret-user', 'C:\\Users', 'OriginalDatabase', 'Product:']) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
+});
+
+test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
+  const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
+    exitCode: 2,
+    failureCode: 'BLOCKED:installer-exit-other',
+    bytesBase64: Buffer.from(
+      'Action ended 12:00:00: AttackerControlled. Return value 3.\r\npassword=hidden',
+      'utf8',
+    ).toString('base64'),
+  });
+  assert.equal(unknown.InstallerExitCode, null);
+  assert.equal(unknown.ReturnValue3ActionCode, 'other');
+  assert.equal(unknown.ReturnValue3ActionIdentifier, null);
+  assert.equal(JSON.stringify(unknown).includes('AttackerControlled'), false);
+  assert.equal(JSON.stringify(unknown).includes('password'), false);
+
+  const oversized = invokeBridgeFunction('Resolve-MsiLogSummary', {
+    exitCode: 1603,
+    failureCode: 'BLOCKED:installer-exit-1603',
+    bytesBase64: Buffer.alloc(16 * 1024 * 1024 + 1, 65).toString('base64'),
+  });
+  assert.deepEqual(oversized, {
+    InstallerExitCode: null,
+    LogSha256: null,
+    LogSizeBytes: null,
+    ReturnValue3ActionCode: 'unavailable',
+    ReturnValue3ActionIdentifier: null,
+  });
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {

@@ -418,7 +418,8 @@ fn first_invocation_installs_with_fixed_array_and_stops_at_installed_ready() {
         .expect("installation boundary should complete");
     assert_eq!(state, PhysicalRunnerState::InstalledReady);
     assert!(io.events.iter().any(|event| {
-        event == "install:msiexec.exe:/i|C:\\phase6\\liiiraa-boost.msi|/qn|/norestart"
+        event
+            == "install:msiexec.exe:/i|C:\\phase6\\liiiraa-boost.msi|/qn|/norestart|/l*vx!|C:\\phase6\\state\\clean-windows-vm\\diagnostics\\msi-install.log"
     }));
     assert!(io.events.contains(&"verify-installed".to_owned()));
     assert!(

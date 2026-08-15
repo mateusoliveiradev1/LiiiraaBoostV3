@@ -1575,7 +1575,14 @@ fn civil_from_days(days_since_epoch: i64) -> (i64, u64, u64) {
 
 #[cfg(test)]
 mod custody_failure_code_tests {
-    use super::{artifact_custody_failure_code, installation_manifest::CustodyError};
+    use super::{
+        artifact_custody_failure_code, installation_manifest::CustodyError,
+        installer_exit_failure,
+    };
+    #[cfg(windows)]
+    use super::msiexec_compatible_path;
+    #[cfg(windows)]
+    use std::path::{Path, PathBuf};
 
     #[test]
     fn typed_custody_failures_map_to_granular_allowlisted_runner_codes() {
@@ -1638,6 +1645,54 @@ mod custody_failure_code_tests {
             assert!(!code.contains("Users"));
             assert!(!code.contains('\\'));
             assert!(code.len() <= 64);
+        }
+    }
+
+    #[test]
+    fn installer_exit_codes_preserve_only_the_numeric_allowlist() {
+        for (code, expected) in [
+            (1601, "installer-exit-1601"),
+            (1603, "installer-exit-1603"),
+            (1618, "installer-exit-1618"),
+            (1641, "installer-exit-1641"),
+            (3010, "installer-exit-3010"),
+            (9999, "installer-exit-other"),
+        ] {
+            assert_eq!(installer_exit_failure(code).code(), expected);
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn msiexec_path_normalization_accepts_only_canonical_dos_or_unc_forms() {
+        assert_eq!(
+            msiexec_compatible_path(Path::new(r"\\?\C:\LiiiraaBoost\liiiraa-boost.msi"))
+                .expect("verbatim disk path should narrow for Windows Installer"),
+            PathBuf::from(r"C:\LiiiraaBoost\liiiraa-boost.msi")
+        );
+        assert_eq!(
+            msiexec_compatible_path(Path::new(r"\\?\UNC\server\share\liiiraa-boost.msi"))
+                .expect("verbatim UNC path should narrow for Windows Installer"),
+            PathBuf::from(r"\\server\share\liiiraa-boost.msi")
+        );
+        assert_eq!(
+            msiexec_compatible_path(Path::new(r"C:\LiiiraaBoost\liiiraa-boost.msi"))
+                .expect("normal DOS path should remain stable"),
+            PathBuf::from(r"C:\LiiiraaBoost\liiiraa-boost.msi")
+        );
+
+        for invalid in [
+            r"liiiraa-boost.msi",
+            r"C:liiiraa-boost.msi",
+            r"C:\LiiiraaBoost\..\liiiraa-boost.msi",
+            r"\\.\C:\LiiiraaBoost\liiiraa-boost.msi",
+            r"\\?\GLOBALROOT\Device\HarddiskVolume1\liiiraa-boost.msi",
+            r"\\server\share\folder\.\liiiraa-boost.msi",
+        ] {
+            assert!(
+                msiexec_compatible_path(Path::new(invalid)).is_err(),
+                "invalid installer path must fail closed: {invalid}"
+            );
         }
     }
 }
