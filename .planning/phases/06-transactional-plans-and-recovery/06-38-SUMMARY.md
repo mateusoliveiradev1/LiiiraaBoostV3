@@ -196,3 +196,11 @@ _Completed: 2026-08-14_
 - The active v44 run binds predecessor evidence SHA-256 `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd` from v43. v41 remains the earlier immutable superseded prefix and rejected v42 remains outside the chain.
 - Current evidence manifest SHA-256: `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending.
+
+## Append-Only Deterministic Authority Update — v45
+
+- The physically BLOCKED v44 guest-runner attempt was not relaunched. Its deterministic admission is now the immutable superseded predecessor record at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v44-evidence-manifest.json`, SHA-256 `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
+- `managed-power-scheme-v45` is the sole active deterministic admission for build `physical-68bb4f974e23ee26-managed-power-scheme-v45`, artifact manifest SHA-256 `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`, and run evidence SHA-256 `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e`.
+- The active v45 run binds predecessor evidence SHA-256 `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e` from v44. v41 and v43 remain the earlier immutable superseded prefix; rejected v42 remains outside the chain.
+- Current evidence manifest SHA-256: `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
