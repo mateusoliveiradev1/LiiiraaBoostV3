@@ -25,6 +25,7 @@ mod numeric_version;
 use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,
 };
+use installation_manifest::CustodyError;
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
 use installation_manifest::verify_installed_manifest;
 
@@ -62,6 +63,10 @@ impl std::fmt::Display for PhysicalRunnerError {
 }
 
 impl std::error::Error for PhysicalRunnerError {}
+
+fn artifact_custody_failure_code(error: &CustodyError) -> &'static str {
+    error.artifact_failure_code()
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -779,7 +784,7 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
             return Err(PhysicalRunnerError::blocked("compiled-spki"));
         }
         let verified = verify_artifact_manifest(&config.artifact_manifest_path)
-            .map_err(|_| PhysicalRunnerError::blocked("artifact-custody"))?;
+            .map_err(|error| PhysicalRunnerError::blocked(artifact_custody_failure_code(&error)))?;
         if verified.operation_version_id() != config.operation_version_id
             || verified.build_id() != config.build_id
         {
@@ -1575,16 +1580,43 @@ mod custody_failure_code_tests {
     #[test]
     fn typed_custody_failures_map_to_granular_allowlisted_runner_codes() {
         let cases = [
-            (CustodyError::schema("artifact-manifest"), "artifact-schema-invalid"),
-            (CustodyError::schema("physical-run-config"), "artifact-config-invalid"),
-            (CustodyError::signature("detached-signature-verify"), "artifact-cms-invalid"),
-            (CustodyError::signature("compiled-spki"), "artifact-spki-invalid"),
-            (CustodyError::hash("portable-live-size-hash"), "artifact-live-hash-invalid"),
-            (CustodyError::version("portable-live-file-version"), "artifact-version-invalid"),
-            (CustodyError::acl("portable-owner-dacl"), "artifact-acl-invalid"),
-            (CustodyError::authenticode("winverifytrust"), "artifact-authenticode-invalid"),
+            (
+                CustodyError::schema("artifact-manifest"),
+                "artifact-schema-invalid",
+            ),
+            (
+                CustodyError::schema("physical-run-config"),
+                "artifact-config-invalid",
+            ),
+            (
+                CustodyError::signature("detached-signature-verify"),
+                "artifact-cms-invalid",
+            ),
+            (
+                CustodyError::signature("compiled-spki"),
+                "artifact-spki-invalid",
+            ),
+            (
+                CustodyError::hash("portable-live-size-hash"),
+                "artifact-live-hash-invalid",
+            ),
+            (
+                CustodyError::version("portable-live-file-version"),
+                "artifact-version-invalid",
+            ),
+            (
+                CustodyError::acl("portable-owner-dacl"),
+                "artifact-acl-invalid",
+            ),
+            (
+                CustodyError::authenticode("winverifytrust"),
+                "artifact-authenticode-invalid",
+            ),
             (CustodyError::missing("read"), "artifact-byte-missing"),
-            (CustodyError::path("portable-root-canonical"), "artifact-path-invalid"),
+            (
+                CustodyError::path("portable-root-canonical"),
+                "artifact-path-invalid",
+            ),
         ];
         for (error, expected) in cases {
             assert_eq!(artifact_custody_failure_code(&error), expected);

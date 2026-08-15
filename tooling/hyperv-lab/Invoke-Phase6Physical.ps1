@@ -618,6 +618,177 @@ function Copy-ExactArtifactToGuest {
     [void]$CompletedBoundaries.Add('exact-artifact-staged')
 }
 
+function Assert-ExactGuestArtifactAclSnapshot {
+    param(
+        [Parameter(Mandatory)]$Snapshot,
+        [Parameter(Mandatory)][string]$ExpectedUserSid
+    )
+
+    if ($ExpectedUserSid -notmatch '^S-1-5-21-(?:[0-9]+-){3}[0-9]+$') {
+        throw 'BLOCKED:guest-acl-principal-mismatch'
+    }
+    if (@('S-1-5-18', 'S-1-5-32-544') -notcontains [string]$Snapshot.ownerSid) {
+        throw 'BLOCKED:guest-acl-owner'
+    }
+    if (-not [bool]$Snapshot.protected) {
+        throw 'BLOCKED:guest-acl-unprotected'
+    }
+    if (@('directory', 'file') -notcontains [string]$Snapshot.kind -or @($Snapshot.rules).Count -ne 3) {
+        throw 'BLOCKED:guest-acl-shape'
+    }
+    $expectedInheritanceFlags = if ($Snapshot.kind -eq 'directory') { 3 } else { 0 }
+    foreach ($rule in @($Snapshot.rules)) {
+        if ([bool]$rule.inherited) {
+            throw 'BLOCKED:guest-acl-inherited-drift'
+        }
+        if ([int]$rule.inheritanceFlags -ne $expectedInheritanceFlags -or [int]$rule.propagationFlags -ne 0) {
+            throw 'BLOCKED:guest-acl-inheritance-drift'
+        }
+        if ([string]$rule.accessType -cne 'Allow') {
+            throw 'BLOCKED:guest-acl-shape'
+        }
+    }
+    $system = @($Snapshot.rules | Where-Object { $_.sid -eq 'S-1-5-18' })
+    $administrators = @($Snapshot.rules | Where-Object { $_.sid -eq 'S-1-5-32-544' })
+    $guest = @($Snapshot.rules | Where-Object { $_.sid -eq $ExpectedUserSid })
+    if ($system.Count -ne 1 -or $administrators.Count -ne 1 -or $guest.Count -ne 1) {
+        throw 'BLOCKED:guest-acl-principal-mismatch'
+    }
+    if ([int]$system[0].rights -ne 2032127) {
+        throw 'BLOCKED:guest-acl-system-full'
+    }
+    if ([int]$administrators[0].rights -ne 2032127) {
+        throw 'BLOCKED:guest-acl-admin-full'
+    }
+    if ([int]$guest[0].rights -ne 1179817) {
+        if ([int]$guest[0].rights -gt 1179817) {
+            throw 'BLOCKED:guest-acl-broad-write'
+        }
+        throw 'BLOCKED:guest-acl-rights-mismatch'
+    }
+}
+
+function Set-ExactGuestArtifactCustody {
+    param([Parameter(Mandatory)][PSCredential]$Credential)
+
+    Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
+        $fixedRoot = 'C:\LiiiraaBoost\Phase6\physical-c714ca4c5ad147f4-managed-power-scheme-v46'
+        $fixedFiles = @(
+            'artifact-manifest.json',
+            'artifact-manifest.json.p7s',
+            'configs\clean-windows-vm.run-config.json',
+            'configs\friends-pc.run-config.json',
+            'installation-manifest.json',
+            'installation-manifest.json.p7s',
+            'msedgedriver.exe',
+            'liiiraa-boost.msi',
+            'configs\owner-pc.run-config.json',
+            'phase6-physical-runner.exe',
+            'tauri-driver.exe'
+        )
+        if (-not (Test-Path -LiteralPath $fixedRoot -PathType Container)) {
+            throw 'BLOCKED:guest-acl-cardinality'
+        }
+        $actualFiles = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -File)
+        if ($actualFiles.Count -ne 11) {
+            throw 'BLOCKED:guest-acl-cardinality'
+        }
+        foreach ($relative in $fixedFiles) {
+            if (-not (Test-Path -LiteralPath (Join-Path $fixedRoot $relative) -PathType Leaf)) {
+                throw 'BLOCKED:guest-acl-cardinality'
+            }
+        }
+        $guestSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+        if ($guestSid -notmatch '^S-1-5-21-(?:[0-9]+-){3}[0-9]+$') {
+            throw 'BLOCKED:guest-acl-principal-mismatch'
+        }
+        function New-FixedDirectorySecurity {
+            $security = [Security.AccessControl.DirectorySecurity]::new()
+            $security.SetSecurityDescriptorSddlForm("O:S-1-5-32-544D:P(A;OICI;FA;;;S-1-5-18)(A;OICI;FA;;;S-1-5-32-544)(A;OICI;0x1200a9;;;$guestSid)")
+            return $security
+        }
+        function New-FixedFileSecurity {
+            $security = [Security.AccessControl.FileSecurity]::new()
+            $security.SetSecurityDescriptorSddlForm("O:S-1-5-32-544D:P(A;;FA;;;S-1-5-18)(A;;FA;;;S-1-5-32-544)(A;;0x1200a9;;;$guestSid)")
+            return $security
+        }
+        foreach ($item in @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse | Sort-Object { $_.FullName.Length } -Descending)) {
+            if ($item.PSIsContainer) {
+                Set-Acl -LiteralPath $item.FullName -AclObject (New-FixedDirectorySecurity)
+            } else {
+                Set-Acl -LiteralPath $item.FullName -AclObject (New-FixedFileSecurity)
+            }
+        }
+        Set-Acl -LiteralPath $fixedRoot -AclObject (New-FixedDirectorySecurity)
+    }
+    [void]$CompletedBoundaries.Add('guest-artifact-acl-provisioned')
+}
+
+function Assert-ExactGuestArtifactCustody {
+    param([Parameter(Mandatory)][PSCredential]$Credential)
+
+    $result = Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
+        $fixedRoot = 'C:\LiiiraaBoost\Phase6\physical-c714ca4c5ad147f4-managed-power-scheme-v46'
+        $fixedFiles = @(
+            'artifact-manifest.json',
+            'artifact-manifest.json.p7s',
+            'configs\clean-windows-vm.run-config.json',
+            'configs\friends-pc.run-config.json',
+            'installation-manifest.json',
+            'installation-manifest.json.p7s',
+            'msedgedriver.exe',
+            'liiiraa-boost.msi',
+            'configs\owner-pc.run-config.json',
+            'phase6-physical-runner.exe',
+            'tauri-driver.exe'
+        )
+        $guestSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+        if ($guestSid -notmatch '^S-1-5-21-(?:[0-9]+-){3}[0-9]+$') {
+            throw 'BLOCKED:guest-acl-principal-mismatch'
+        }
+        $actualFiles = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -File)
+        $actualDirectories = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -Directory)
+        if ($actualFiles.Count -ne 11 -or $actualDirectories.Count -ne 1) {
+            throw 'BLOCKED:guest-acl-cardinality'
+        }
+        foreach ($relative in $fixedFiles) {
+            if (-not (Test-Path -LiteralPath (Join-Path $fixedRoot $relative) -PathType Leaf)) {
+                throw 'BLOCKED:guest-acl-cardinality'
+            }
+        }
+        $items = @([pscustomobject]@{ Item = Get-Item -LiteralPath $fixedRoot; Kind = 'directory' })
+        $items += @($actualDirectories | ForEach-Object { [pscustomobject]@{ Item = $_; Kind = 'directory' } })
+        $items += @($actualFiles | ForEach-Object { [pscustomobject]@{ Item = $_; Kind = 'file' } })
+        $snapshots = foreach ($entry in $items) {
+            $acl = Get-Acl -LiteralPath $entry.Item.FullName
+            $rules = @($acl.GetAccessRules($true, $true, [Security.Principal.SecurityIdentifier]) | ForEach-Object {
+                [pscustomobject]@{
+                    sid = $_.IdentityReference.Value
+                    rights = [int]$_.FileSystemRights
+                    accessType = $_.AccessControlType.ToString()
+                    inherited = [bool]$_.IsInherited
+                    inheritanceFlags = [int]$_.InheritanceFlags
+                    propagationFlags = [int]$_.PropagationFlags
+                }
+            })
+            [pscustomobject]@{
+                kind = $entry.Kind
+                ownerSid = $acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
+                protected = [bool]$acl.AreAccessRulesProtected
+                rules = $rules
+            }
+        }
+        [pscustomobject]@{ guestSid = $guestSid; snapshots = @($snapshots) }
+    }
+    if (@($result.snapshots).Count -ne 13) {
+        throw 'BLOCKED:guest-acl-cardinality'
+    }
+    foreach ($snapshot in @($result.snapshots)) {
+        Assert-ExactGuestArtifactAclSnapshot -Snapshot $snapshot -ExpectedUserSid ([string]$result.guestSid)
+    }
+    [void]$CompletedBoundaries.Add('guest-artifact-acl-verified')
+}
+
 function Resolve-RunnerFailureDiagnostic {
     param(
         [Parameter(Mandatory)][Int64]$ExitCode,
@@ -926,6 +1097,8 @@ function Invoke-CleanVmRun {
     [void](Wait-ExactIntegrationServicesHealthy)
     [void]$CompletedBoundaries.Add('integration-services-healthy')
     Copy-ExactArtifactToGuest -Authority $Authority
+    Set-ExactGuestArtifactCustody -Credential $Credential
+    Assert-ExactGuestArtifactCustody -Credential $Credential
 
     $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready'
     $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first

@@ -125,6 +125,45 @@ impl CustodyError {
     fn new(code: CustodyErrorCode, detail: &'static str) -> Self {
         Self { code, detail }
     }
+
+    /// Returns one stable, redacted diagnostic for portable artifact custody.
+    /// Internal Win32, path, identity, and parser details never cross the runner
+    /// or verifier boundary.
+    pub fn artifact_failure_code(&self) -> &'static str {
+        if matches!(
+            self.detail,
+            "friends-config-variant"
+                | "config-json"
+                | "physical-run-config"
+                | "physical-run-config-kind"
+                | "physical-run-config-stage"
+                | "physical-config-binding"
+        ) {
+            return "artifact-config-invalid";
+        }
+        match self.code {
+            CustodyErrorCode::Acl => "artifact-acl-invalid",
+            CustodyErrorCode::Authenticode => "artifact-authenticode-invalid",
+            CustodyErrorCode::Hash => "artifact-live-hash-invalid",
+            CustodyErrorCode::Missing => "artifact-byte-missing",
+            CustodyErrorCode::Path => "artifact-path-invalid",
+            CustodyErrorCode::Schema => "artifact-schema-invalid",
+            CustodyErrorCode::Signature
+                if matches!(
+                    self.detail,
+                    "compiled-spki"
+                        | "compiled-spki-mismatch"
+                        | "manifest-spki-evidence-mismatch"
+                        | "spki-size"
+                        | "spki-encode"
+                ) =>
+            {
+                "artifact-spki-invalid"
+            }
+            CustodyErrorCode::Signature => "artifact-cms-invalid",
+            CustodyErrorCode::Version => "artifact-version-invalid",
+        }
+    }
 }
 
 impl std::fmt::Display for CustodyError {

@@ -20,7 +20,7 @@ fn main() {
         Err(error) => {
             eprintln!(
                 "{{\"verdict\":\"blocked\",\"code\":\"{}\"}}",
-                error.code.as_str()
+                error.artifact_failure_code()
             );
             std::process::exit(2);
         }

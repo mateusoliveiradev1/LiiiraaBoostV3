@@ -1,12 +1,5 @@
 import assert from 'node:assert/strict';
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -74,10 +67,14 @@ const invokeBridgeFunction = (name, input) => {
     `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
     `${name} -ExitCode ([int64]$input.exitCode) -Stdout @($input.stdout) -Stderr @($input.stderr) -BoundsExceeded ([bool]$input.boundsExceeded) | ConvertTo-Json -Compress`,
   ].join('; ');
-  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
-    cwd: root,
-    encoding: 'utf8',
-  });
+  const result = spawnSync(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', command],
+    {
+      cwd: root,
+      encoding: 'utf8',
+    },
+  );
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   return JSON.parse(result.stdout);
 };
@@ -94,12 +91,16 @@ const invokeAclSnapshotAssertion = (snapshot, expectedUserSid) => {
     "if ($null -eq $function) { throw 'required bridge function is missing' }",
     'Invoke-Expression $function.Extent.Text',
     `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
-    "try { Assert-ExactGuestArtifactAclSnapshot -Snapshot $input.snapshot -ExpectedUserSid $input.expectedUserSid; [pscustomobject]@{ ok = $true; code = $null } | ConvertTo-Json -Compress } catch { [pscustomobject]@{ ok = $false; code = $_.Exception.Message } | ConvertTo-Json -Compress }",
+    'try { Assert-ExactGuestArtifactAclSnapshot -Snapshot $input.snapshot -ExpectedUserSid $input.expectedUserSid; [pscustomobject]@{ ok = $true; code = $null } | ConvertTo-Json -Compress } catch { [pscustomobject]@{ ok = $false; code = $_.Exception.Message } | ConvertTo-Json -Compress }',
   ].join('; ');
-  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
-    cwd: root,
-    encoding: 'utf8',
-  });
+  const result = spawnSync(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', command],
+    {
+      cwd: root,
+      encoding: 'utf8',
+    },
+  );
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   return JSON.parse(result.stdout);
 };
@@ -200,8 +201,14 @@ const assertSourcePolicy = (source) => {
   }
 
   assert.match(source, /ValidateSet\('Audit',\s*'RunCleanVm'\)/u);
-  assert.match(source, /phase6-physical-runner\.exe --run-config configs\\clean-windows-vm\.run-config\.json/u);
-  assert.doesNotMatch(source, /\[string\]\$(?:Command|Script|Executable|Config|Arguments?|RemoteHost|EvidenceLabel)/u);
+  assert.match(
+    source,
+    /phase6-physical-runner\.exe --run-config configs\\clean-windows-vm\.run-config\.json/u,
+  );
+  assert.doesNotMatch(
+    source,
+    /\[string\]\$(?:Command|Script|Executable|Config|Arguments?|RemoteHost|EvidenceLabel)/u,
+  );
   assert.doesNotMatch(source, /Restart-Computer|Stop-Computer|Set-VMHost|Set-VMHostCluster/u);
   assert.doesNotMatch(source, /(?:npm|pnpm|node|tsx|ts-node|typescript)\.exe.*Invoke-Command/iu);
 
@@ -512,9 +519,18 @@ test('RED: blocked record persists stage and diagnostics without raw runner outp
   assert.match(recordBody, /runnerExitCode\s*=\s*\$RunnerExitCode/u);
   assert.match(recordBody, /runnerFailureCode\s*=\s*\$RunnerFailureCode/u);
   assert.doesNotMatch(recordBody, /(?:Output|Stdout|Stderr)\s*=/u);
-  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'installed-ready'/u);
-  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'reboot-pending'/u);
-  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'completed'/u);
+  assert.match(
+    source,
+    /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'installed-ready'/u,
+  );
+  assert.match(
+    source,
+    /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'reboot-pending'/u,
+  );
+  assert.match(
+    source,
+    /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'completed'/u,
+  );
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
