@@ -1027,3 +1027,39 @@ imported `VCRUNTIME140.dll` plus `api-ms-win-crt-*`, while no broker-specific ev
 RED `b35b674` and GREEN `8900122` make only the service release build use static CRT and reject
 dynamic CRT imports before signing or packaging. The v53 attempt remains immutable and was not
 reused.
+
+---
+
+## Operation `managed-power-scheme-v54` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v54`
+- **Artifact manifest SHA-256:** `07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40`
+- **Run evidence SHA-256:** `bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965`
+- **Evidence manifest SHA-256:** `681e2c64cc0ee154149753e07fe4d78398d3eac79237b371b87a0d4d5da21e63`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v54",
+  "buildId": "physical-0fb27dbbc1f09383-managed-power-scheme-v54",
+  "artifactManifestSha256": "07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40",
+  "runEvidenceSha256": "bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965",
+  "evidenceManifestSha256": "681e2c64cc0ee154149753e07fe4d78398d3eac79237b371b87a0d4d5da21e63",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
