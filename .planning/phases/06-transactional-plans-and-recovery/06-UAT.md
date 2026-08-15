@@ -906,3 +906,39 @@ physical-writer ingestion, physical PASS, or review followed.
 The cleanup-only action returned the running VM to `Off` and preserved the exact clean checkpoint.
 This is the terminal Phase 6 physical blocker: v50 is not reusable, no v51 is authorized, and
 the workflow must not advance to Task 2 or Task 3 from this evidence.
+
+---
+
+## Operation `managed-power-scheme-v52` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v52`
+- **Artifact manifest SHA-256:** `e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3`
+- **Run evidence SHA-256:** `1dfaa8be4dac42e9f5c45cba7dea0ffc08606d9828948112cf07ac9df6301644`
+- **Evidence manifest SHA-256:** `9c98b29b9d42539963944bd26e34106e95314ca3ccc26ac856a3ae175720b598`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v52",
+  "buildId": "physical-487e3c326b5066a0-managed-power-scheme-v52",
+  "artifactManifestSha256": "e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3",
+  "runEvidenceSha256": "1dfaa8be4dac42e9f5c45cba7dea0ffc08606d9828948112cf07ac9df6301644",
+  "evidenceManifestSha256": "9c98b29b9d42539963944bd26e34106e95314ca3ccc26ac856a3ae175720b598",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```

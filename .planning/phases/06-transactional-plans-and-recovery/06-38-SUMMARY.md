@@ -245,3 +245,11 @@ There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain
 - The active v50 run binds predecessor evidence SHA-256 `5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d` from v49. Rejected v42 and pre-artifact v48 remain outside the linear chain.
 - Current evidence manifest SHA-256: `41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v52
+
+- The pre-MSI v51 orchestration-timeout blocker has no artifact and remains outside the deterministic chain.
+- `managed-power-scheme-v52` is the sole active deterministic admission for build `physical-487e3c326b5066a0-managed-power-scheme-v52`, artifact manifest SHA-256 `e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3`, and run evidence SHA-256 `1dfaa8be4dac42e9f5c45cba7dea0ffc08606d9828948112cf07ac9df6301644`.
+- The active v52 run binds predecessor evidence SHA-256 `ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b` from v50. Pre-artifact v48 and v51 remain outside the linear chain.
+- Current evidence manifest SHA-256: `9c98b29b9d42539963944bd26e34106e95314ca3ccc26ac856a3ae175720b598`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
