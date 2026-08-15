@@ -27,7 +27,7 @@ use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,
 };
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
-use installation_manifest::{CustodyError, CustodyErrorCode};
+use installation_manifest::{CanonicalPathRole, CustodyError, CustodyErrorCode};
 use installation_manifest::{same_closed_windows_path, verify_installed_manifest};
 
 // Plan 06-33 key-link witnesses (quoted because verify.key-links preserves YAML scalars):
@@ -2055,5 +2055,28 @@ mod custody_failure_code_tests {
                 "invalid installer path must fail closed: {invalid}"
             );
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn installed_custody_sidecar_exposes_only_bounded_canonicalization_fields() {
+        let error = CustodyError::from_canonicalize_error(
+            CanonicalPathRole::LastAdmittedParent,
+            Path::new(r"C:\Users\secret-user\custody"),
+            &std::io::Error::from_raw_os_error(5),
+        );
+        let diagnostic = installed_custody_diagnostic(&error);
+        let json = serde_json::to_value(diagnostic).unwrap();
+        assert_eq!(json["kind"], "phase6-installed-custody-safe-diagnostic");
+        assert_eq!(json["schemaVersion"], "1.0");
+        assert_eq!(json["errorCode"], "canonical-path-invalid");
+        assert_eq!(json["role"], "last-admitted-parent");
+        assert_eq!(json["pathClass"], "disk");
+        assert_eq!(json["ioKind"], "permission-denied");
+        assert_eq!(json["win32Code"], 5);
+        let text = json.to_string();
+        assert!(!text.contains("secret-user"));
+        assert!(!text.contains(r"C:\"));
+        assert!(text.len() <= MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES);
     }
 }
