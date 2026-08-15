@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    '9cd80dbda40cf154dee7bbbdd874626f2b978969',
-    'physical-487e3c326b5066a0-managed-power-scheme-v52',
+    '29296bbc8c809ec571d3f171edddb1568708f2f6',
+    'physical-468a05974898514d-managed-power-scheme-v53',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -132,6 +132,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v47-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v49-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v50-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v52-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -289,6 +290,12 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v53',
+    'physical-468a05974898514d-managed-power-scheme-v53',
+    '29296bbc8c809ec571d3f171edddb1568708f2f6',
+    '6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271',
+    '01666800658d5aac14e99b46a14e0a23497c937710f38168e9559e92d2bee7ba',
+    '513ce2511f826316a2851c109bd7d433d5ade7b2c003d07d48b74cfd497a5833',
     'managed-power-scheme-v52',
     'physical-487e3c326b5066a0-managed-power-scheme-v52',
     '9cd80dbda40cf154dee7bbbdd874626f2b978969',
@@ -361,7 +368,7 @@ const assertSourcePolicy = (source) => {
   const runtime = source.slice(source.indexOf('function Copy-ExactArtifactToGuest'));
   assert.doesNotMatch(
     runtime,
-    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[01])/u,
+    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[0-2])/u,
   );
   assert.doesNotMatch(runtime, /C:\\LiiiraaBoost\\Phase6\\physical-/u);
 
@@ -899,7 +906,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v52 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v53 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -911,7 +918,7 @@ test('dry-run audits the exact immutable v52 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v52');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v53');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -944,11 +951,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
     [
       'second active',
-      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[7] }),
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[9] }),
     ],
     [
       'missing predecessor',
-      (value) => (value.deterministicAdmissions[7].predecessorEvidenceSha256 = null),
+      (value) => (value.deterministicAdmissions[9].predecessorEvidenceSha256 = null),
     ],
     [
       'fork',
@@ -968,11 +975,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ],
     [
       'active tuple mismatch',
-      (value) => (value.deterministicAdmissions[7].buildId = 'mismatched-build'),
+      (value) => (value.deterministicAdmissions[9].buildId = 'mismatched-build'),
     ],
     [
       'active run hash mismatch',
-      (value) => (value.deterministicAdmissions[7].runEvidenceSha256 = '4'.repeat(64)),
+      (value) => (value.deterministicAdmissions[9].runEvidenceSha256 = '4'.repeat(64)),
     ],
   ];
   try {
