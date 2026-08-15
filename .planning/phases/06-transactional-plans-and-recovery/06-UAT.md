@@ -942,3 +942,30 @@ the workflow must not advance to Task 2 or Task 3 from this evidence.
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v52` — CLEAN VM BLOCKED
+
+- **Physical result:** BLOCKED at `installed-ready`
+- **Runner:** exit `2`, code `BLOCKED:installer-exit-1603`
+- **Immutable blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-035332-clean-vm-BLOCKED.json`
+- **Blocker SHA-256 / size:** `e87d5a439b112fb143e8324babb0ebe113c21cf84d639bd992d6567a6aa17c29` / `1110` bytes
+- **Audit log SHA-256 / size:** `006bec91ac2bd208904bee1f0c6b00008699579d5c97b5e74d996e93cae8bcb5` / `1127` bytes
+- **Cleanup log SHA-256 / size:** `08a112e23bd09ef83449318a8672c061bed4627fb1797b0c035444b5fa7f77c3` / `2751` bytes
+- **Final VM state:** `Off`
+- **Human review:** not presented; Task 2 and Task 3 remain closed
+
+The sole v52 `RunCleanVm` passed artifact verification, deterministic admission, Hyper-V audit,
+clean restore, integration health, exact staging, and protected ACL provisioning/verification.
+The runner then returned MSI exit `1603` before any apply, reboot, installed checkpoint, evidence
+ingestion, or review. The blocker truthfully retained `installerDiagnostic: null`: the bridge
+attempted to fetch the MSI log through a second PowerShell Direct session after the failed runner,
+but that session did not reopen. The read-only diagnostic attempt exported no raw log and cleanup
+restored the VM to `Off`.
+
+RED `9d62fce` and GREEN `5c649f5` replace that cross-session dependency with a fixed create-once,
+bounded safe sidecar produced by the runner and collected before the original guest session
+returns. The sidecar exposes only numeric exit, log presence/hash/size, an allowlisted final
+`Return value 3` action, and its own hash/size; malformed, missing, or unwritable diagnostics
+remain explicit bounded codes and never export raw log, path, user, SID, or secret material.

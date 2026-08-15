@@ -408,3 +408,26 @@ Cleanup log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-032525-phase6observationc
 `2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`,
 proves final VM `Off` and unchanged checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`.
 This is terminal: no v51, no retry, and Task 2/Task 3 remain closed.
+
+## Append-Only v52 Audit, Physical Blocker, and Same-Session Diagnostic Repair
+
+The v52 read-only Audit passed and restored the VM to `Off`; immutable log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-035102-phase6audit-console.log` is `1127` bytes with
+SHA-256 `006bec91ac2bd208904bee1f0c6b00008699579d5c97b5e74d996e93cae8bcb5`.
+
+The sole v52 `RunCleanVm` reached `installed-ready` after artifact, simulation, Hyper-V, restore,
+integration, staging, and ACL boundaries, then failed closed with runner exit `2` and
+`BLOCKED:installer-exit-1603`. Its immutable blocker is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-035332-clean-vm-BLOCKED.json`, `1110` bytes,
+SHA-256 `e87d5a439b112fb143e8324babb0ebe113c21cf84d639bd992d6567a6aa17c29`.
+No apply, reboot, installed checkpoint, evidence ingestion, or review followed. Cleanup log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-040016-phase6observationcleanup-console.log`, `2751`
+bytes, SHA-256 `08a112e23bd09ef83449318a8672c061bed4627fb1797b0c035444b5fa7f77c3`, proves final VM `Off` and
+the unchanged clean checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`.
+
+The blocker carried `installerDiagnostic: null` because the bridge attempted diagnostic access in
+a second PowerShell Direct session after runner failure; that session did not reopen. RED
+`9d62fce` and GREEN `5c649f5` now make the runner write a fixed, bounded, create-once safe sidecar
+for numeric MSI failures and make the bridge hash, validate, and collect it inside the same guest
+session. Missing, unparseable, or unwritable log/sidecar states remain non-null bounded diagnostics;
+raw MSI log, path, username, SID, and secret content never cross the guest boundary.
