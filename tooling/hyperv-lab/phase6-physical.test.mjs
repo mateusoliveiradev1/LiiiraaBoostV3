@@ -82,6 +82,66 @@ const invokeBridgeFunction = (name, input) => {
   return JSON.parse(result.stdout);
 };
 
+const invokeAclSnapshotAssertion = (snapshot, expectedUserSid) => {
+  const encoded = Buffer.from(JSON.stringify({ snapshot, expectedUserSid }), 'utf8').toString(
+    'base64',
+  );
+  const escapedBridgePath = bridgePath.replaceAll("'", "''");
+  const command = [
+    '$tokens = $null; $errors = $null',
+    `$ast = [Management.Automation.Language.Parser]::ParseFile('${escapedBridgePath}', [ref]$tokens, [ref]$errors)`,
+    "$function = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Assert-ExactGuestArtifactAclSnapshot' }, $true) | Select-Object -First 1",
+    "if ($null -eq $function) { throw 'required bridge function is missing' }",
+    'Invoke-Expression $function.Extent.Text',
+    `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
+    "try { Assert-ExactGuestArtifactAclSnapshot -Snapshot $input.snapshot -ExpectedUserSid $input.expectedUserSid; [pscustomobject]@{ ok = $true; code = $null } | ConvertTo-Json -Compress } catch { [pscustomobject]@{ ok = $false; code = $_.Exception.Message } | ConvertTo-Json -Compress }",
+  ].join('; ');
+  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  return JSON.parse(result.stdout);
+};
+
+const guestSid = 'S-1-5-21-111111111-222222222-333333333-1001';
+const exactDirectoryAcl = () => ({
+  kind: 'directory',
+  ownerSid: 'S-1-5-32-544',
+  protected: true,
+  rules: [
+    {
+      sid: 'S-1-5-18',
+      rights: 2032127,
+      accessType: 'Allow',
+      inherited: false,
+      inheritanceFlags: 3,
+      propagationFlags: 0,
+    },
+    {
+      sid: 'S-1-5-32-544',
+      rights: 2032127,
+      accessType: 'Allow',
+      inherited: false,
+      inheritanceFlags: 3,
+      propagationFlags: 0,
+    },
+    {
+      sid: guestSid,
+      rights: 1179817,
+      accessType: 'Allow',
+      inherited: false,
+      inheritanceFlags: 3,
+      propagationFlags: 0,
+    },
+  ],
+});
+const exactFileAcl = () => ({
+  ...exactDirectoryAcl(),
+  kind: 'file',
+  rules: exactDirectoryAcl().rules.map((rule) => ({ ...rule, inheritanceFlags: 0 })),
+});
+
 const assertInOrder = (source, markers) => {
   let cursor = -1;
   for (const marker of markers) {
@@ -212,6 +272,66 @@ test('RED: RunCleanVm waits boundedly for six healthy services before guest copy
     'Copy-ExactArtifactToGuest',
     'Invoke-ExactGuestRunner',
   ]);
+});
+
+test('RED: staged artifact receives fixed protected guest custody before any runner call', () => {
+  const source = bridgeSource();
+  for (const marker of [
+    'function Set-ExactGuestArtifactCustody',
+    'function Assert-ExactGuestArtifactCustody',
+    'function Assert-ExactGuestArtifactAclSnapshot',
+    'O:S-1-5-32-544D:P',
+    'S-1-5-18',
+    'S-1-5-32-544',
+    '0x1200a9',
+  ]) {
+    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  const setter = source.slice(
+    source.indexOf('function Set-ExactGuestArtifactCustody'),
+    source.indexOf('function Assert-ExactGuestArtifactCustody'),
+  );
+  assert.match(setter, /\[PSCredential\]\$Credential/u);
+  assert.doesNotMatch(setter, /\[string\]\$(?:Path|Root|Sid|Command|Script|Arguments?)/u);
+  assert.doesNotMatch(setter, /icacls|takeown|Everyone|S-1-1-0|S-1-5-32-545/iu);
+
+  const runBody = source.slice(
+    source.indexOf('function Invoke-CleanVmRun'),
+    source.indexOf('Assert-ExactInvocation\n'),
+  );
+  assertInOrder(runBody, [
+    'Copy-ExactArtifactToGuest',
+    'Set-ExactGuestArtifactCustody',
+    'Assert-ExactGuestArtifactCustody',
+    'Invoke-ExactGuestRunner',
+  ]);
+});
+
+test('RED: exact normal directory and staged file ACL snapshots are accepted', () => {
+  assert.deepEqual(invokeAclSnapshotAssertion(exactDirectoryAcl(), guestSid), {
+    ok: true,
+    code: null,
+  });
+  assert.deepEqual(invokeAclSnapshotAssertion(exactFileAcl(), guestSid), {
+    ok: true,
+    code: null,
+  });
+});
+
+test('RED: wrong owner, unprotected DACL, broad write, inherited drift, and principal mismatch fail closed', () => {
+  const cases = [
+    ['BLOCKED:guest-acl-owner', (value) => (value.ownerSid = guestSid)],
+    ['BLOCKED:guest-acl-unprotected', (value) => (value.protected = false)],
+    ['BLOCKED:guest-acl-broad-write', (value) => (value.rules[2].rights = 2032127)],
+    ['BLOCKED:guest-acl-inherited-drift', (value) => (value.rules[0].inherited = true)],
+    ['BLOCKED:guest-acl-principal-mismatch', (value) => (value.rules[2].sid = 'S-1-5-11')],
+    ['BLOCKED:guest-acl-inheritance-drift', (value) => (value.rules[1].inheritanceFlags = 0)],
+  ];
+  for (const [code, mutate] of cases) {
+    const snapshot = structuredClone(exactDirectoryAcl());
+    mutate(snapshot);
+    assert.deepEqual(invokeAclSnapshotAssertion(snapshot, guestSid), { ok: false, code });
+  }
 });
 
 test('RED: read-only Audit restores an initially Off VM after bounded health observation', () => {

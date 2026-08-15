@@ -1567,3 +1567,45 @@ fn civil_from_days(days_since_epoch: i64) -> (i64, u64, u64) {
     year += i64::from(month <= 2);
     (year, month as u64, day as u64)
 }
+
+#[cfg(test)]
+mod custody_failure_code_tests {
+    use super::{artifact_custody_failure_code, installation_manifest::CustodyError};
+
+    #[test]
+    fn typed_custody_failures_map_to_granular_allowlisted_runner_codes() {
+        let cases = [
+            (CustodyError::schema("artifact-manifest"), "artifact-schema-invalid"),
+            (CustodyError::schema("physical-run-config"), "artifact-config-invalid"),
+            (CustodyError::signature("detached-signature-verify"), "artifact-cms-invalid"),
+            (CustodyError::signature("compiled-spki"), "artifact-spki-invalid"),
+            (CustodyError::hash("portable-live-size-hash"), "artifact-live-hash-invalid"),
+            (CustodyError::version("portable-live-file-version"), "artifact-version-invalid"),
+            (CustodyError::acl("portable-owner-dacl"), "artifact-acl-invalid"),
+            (CustodyError::authenticode("winverifytrust"), "artifact-authenticode-invalid"),
+            (CustodyError::missing("read"), "artifact-byte-missing"),
+            (CustodyError::path("portable-root-canonical"), "artifact-path-invalid"),
+        ];
+        for (error, expected) in cases {
+            assert_eq!(artifact_custody_failure_code(&error), expected);
+        }
+    }
+
+    #[test]
+    fn custody_runner_codes_never_expose_internal_details_or_secret_shaped_values() {
+        for error in [
+            CustodyError::schema("password=hidden"),
+            CustodyError::signature("S-1-5-21-111-222-333-1001"),
+            CustodyError::path("C:\\Users\\secret\\artifact-manifest.json"),
+        ] {
+            let code = artifact_custody_failure_code(&error);
+            assert!(code.starts_with("artifact-"));
+            assert!(code.ends_with("-invalid"));
+            assert!(!code.contains("password"));
+            assert!(!code.contains("S-1-5-"));
+            assert!(!code.contains("Users"));
+            assert!(!code.contains('\\'));
+            assert!(code.len() <= 64);
+        }
+    }
+}
