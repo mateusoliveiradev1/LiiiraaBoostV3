@@ -130,6 +130,7 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 ```
 
 
+
 ---
 
 ## Operation `managed-power-scheme-v54` — READ-ONLY AUDIT PASSED, CLEAN VM BLOCKED
@@ -210,6 +211,7 @@ The create-once v42 bytes and CMS evidence remain historical and unchanged. The 
   ]
 }
 ```
+
 
 ---
 
@@ -1129,3 +1131,23 @@ reused.
   ]
 }
 ```
+---
+
+## Operation `managed-power-scheme-v55` — AUDIT PASSED, CLEAN VM BLOCKED
+
+- **Audit:** PASSED, read-only; log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-170051-phase6audit-console.log`, SHA-256 `e564af9b75bf252a7bbc8dd31c8fb64d9b4a9565522da48db5b1a9fd6699b395`, `1127` bytes
+- **Physical result:** BLOCKED at `installed-ready`
+- **Runner:** exit `2`, code `BLOCKED:installed-custody-canonical-path-invalid`
+- **Immutable blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-170231-clean-vm-BLOCKED.json`, SHA-256 `1c533e9d1d8501aed20b02732be7bf417ec1b5e3bcb9d9a80a758bc85d0393a0`, `1129` bytes
+- **Tracked blocker mirror:** `.planning/phases/06-transactional-plans-and-recovery/06-26-v55-BLOCKED.json`
+- **MSI status:** completed; `installerDiagnostic` is null because the failure occurred in installed-custody canonicalization
+- **APPLY prompt / installed checkpoint / reboot / ingestion / review:** not reached
+- **Cleanup:** PASSED; log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-170259-phase6observationcleanup-console.log`, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`, `2755` bytes
+- **Final VM state:** `Off`; clean checkpoint unchanged
+
+The v54 ACL repair proved the admission record was now reachable, and the typed v55 failure isolated
+the next exact boundary: Rust canonicalization requires `FILE_READ_ATTRIBUTES` on each protected
+directory, while the prior interactive ACE granted only traverse. RED `6df924f` and GREEN
+`5937be4` replace it with the minimum `SYNCHRONIZE | FILE_READ_ATTRIBUTES | FILE_TRAVERSE` mask
+(`0x001000A0`), without directory listing, DB/secret read, or write. Full gates passed before any
+subsequent reservation. The immutable v55 attempt was not reused.

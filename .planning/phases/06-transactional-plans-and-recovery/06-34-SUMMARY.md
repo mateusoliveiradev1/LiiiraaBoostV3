@@ -484,3 +484,28 @@ admission read only, and service-only database/secret. All eight typed custody f
 stable allowlisted runner codes with no raw detail. Full gates passed before any subsequent mint:
 optimizer 100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/51, keylinks 11/11,
 and bridge 25/25.
+
+## Append-Only v55 Audit, Physical Blocker, and Canonicalization Repair
+
+The v55 read-only Audit passed and restored the VM to `Off`; immutable log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-170051-phase6audit-console.log` is `1127` bytes with
+SHA-256 `e564af9b75bf252a7bbc8dd31c8fb64d9b4a9565522da48db5b1a9fd6699b395`.
+
+The sole v55 `RunCleanVm` passed artifact verification, deterministic admission, Hyper-V audit,
+clean restore, integration health, exact staging, and guest ACL provisioning/verification. It
+failed closed at `installed-ready` with runner exit `2` and
+`BLOCKED:installed-custody-canonical-path-invalid`. The immutable blocker is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-170231-clean-vm-BLOCKED.json`, `1129` bytes,
+SHA-256 `1c533e9d1d8501aed20b02732be7bf417ec1b5e3bcb9d9a80a758bc85d0393a0`; the tracked mirror is
+`06-26-v55-BLOCKED.json`. MSI completed, no APPLY prompt appeared, and no installed checkpoint,
+reboot, ingestion, or review followed.
+
+Cleanup log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-170259-phase6observationcleanup-console.log`,
+`2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`, proves final VM `Off`
+and unchanged clean checkpoint.
+
+The granular error proved admission-file read access was fixed but protected-directory
+canonicalization still lacked `FILE_READ_ATTRIBUTES`. RED `6df924f` and GREEN `5937be4` grant
+only `SYNCHRONIZE | FILE_READ_ATTRIBUTES | FILE_TRAVERSE` (`0x001000A0`) to interactive users on
+the two directories. Directory listing, DB/secret reads, and writes remain denied. Full gates:
+optimizer 100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/51.

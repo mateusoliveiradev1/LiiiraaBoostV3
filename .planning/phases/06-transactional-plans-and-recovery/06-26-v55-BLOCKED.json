@@ -1,0 +1,26 @@
+{
+  "status": "BLOCKED",
+  "operationVersion": "managed-power-scheme-v55",
+  "buildId": "physical-4c88acfffc6c9dc2-managed-power-scheme-v55",
+  "vmName": "LiiiraaBoost-W11-25H2-Clean",
+  "cleanCheckpoint": "Clean-Windows-Ready",
+  "installedCheckpoint": "LiiiraaBoost-Installed",
+  "completedBoundaries": [
+    "artifact-verifier-pass",
+    "simulation-admission-pass",
+    "hyper-v-prestart-audit-pass",
+    "clean-checkpoint-restored",
+    "integration-services-healthy",
+    "exact-artifact-staged",
+    "guest-artifact-acl-provisioned",
+    "guest-artifact-acl-verified"
+  ],
+  "stage": "installed-ready",
+  "runnerExitCode": 2,
+  "runnerFailureCode": "BLOCKED:installed-custody-canonical-path-invalid",
+  "installerDiagnostic": null,
+  "reason": "runner-failure",
+  "recordedAt": "2026-08-15T20:02:31.0881182Z",
+  "canonicalRecordSha256": "sha256:1c533e9d1d8501aed20b02732be7bf417ec1b5e3bcb9d9a80a758bc85d0393a0",
+  "canonicalRecordSizeBytes": 1129
+}
