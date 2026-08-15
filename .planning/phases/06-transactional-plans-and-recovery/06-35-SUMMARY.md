@@ -223,6 +223,13 @@ None - no external service configuration or private signing material is required
 ## Append-Only Revalidation Addendum — v53
 
 - The immutable `managed-power-scheme-v53` artifact was verified by the real inspection-only `phase6-artifact-verifier` immediately after its single lifecycle publication.
+
+## Append-Only Revalidation Addendum — v54
+
+- The immutable `managed-power-scheme-v54` artifact was verified by the real inspection-only `phase6-artifact-verifier` immediately after its single lifecycle publication.
+- Exact verified authority: build `physical-0fb27dbbc1f09383-managed-power-scheme-v54`, source commit `8900122f37ae8c412439de190e3e1f38b232fb2c`, artifact manifest SHA-256 `07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40`, operation `managed-power-scheme-v54`.
+- The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
+- The service artifact also passed the new pre-signing static-runtime import gate; no VCRUNTIME, MSVCP, UCRT, or `api-ms-win-crt-*` dependency remained.
 - Exact verified authority: build `physical-468a05974898514d-managed-power-scheme-v53`, source commit `29296bbc8c809ec571d3f171edddb1568708f2f6`, artifact manifest SHA-256 `6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271`, operation `managed-power-scheme-v53`.
 - The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
 - v52 remains the immutable deterministic predecessor until the v53 simulation admission is written; the v52 physical blocker remains append-only and is never reused.

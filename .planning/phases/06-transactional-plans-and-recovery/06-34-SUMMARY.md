@@ -431,3 +431,28 @@ a second PowerShell Direct session after runner failure; that session did not re
 for numeric MSI failures and make the bridge hash, validate, and collect it inside the same guest
 session. Missing, unparseable, or unwritable log/sidecar states remain non-null bounded diagnostics;
 raw MSI log, path, username, SID, and secret content never cross the guest boundary.
+
+## Append-Only v53 Physical Blocker and Root-Cause Addendum
+
+The sole v53 `RunCleanVm` passed artifact verification, deterministic admission, Hyper-V audit,
+clean restore, integration health, exact staging, and protected ACL provisioning/verification.
+It failed closed at `installed-ready` with runner exit `2` and
+`BLOCKED:installer-exit-1603`. The immutable blocker is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-042855-clean-vm-BLOCKED.json`, `1832` bytes,
+SHA-256 `fc859dd361e2b1ad46b8c06940b97ab9269f206a4d4e88472ca3cf0d1e3359c4`;
+the bounded tracked mirror is `06-26-v53-BLOCKED.json`. No APPLY prompt, installed checkpoint,
+reboot, evidence ingestion, or review occurred, and cleanup left the VM `Off`.
+
+The create-once MSI log was UTF-16LE with BOM, `138200` bytes, SHA-256
+`bca766b5884f090ffb35756e64343165c6e22e568dafcdceac12604bb238b073`.
+Bounded read-only summaries proved exit `1603`, final `Return value 3` action `INSTALL`, MSI
+error `1920`, SCM event `7000`, and Win32 code `1053`; no internal service-specific `63101`–`63109`
+event existed, so the process failed before broker status reporting. The final sanitized summary
+is `20260815-161152-506-v53-msi-sanitized-fixture.json`, `409` bytes, SHA-256
+`c300485b66a4d6fe9639a9ec95f41c3de310be760afae1bba625b1a6e8c0e5f8`.
+
+Exact PE inspection found the v53 service dynamically depended on `VCRUNTIME140.dll` and the
+Universal CRT API set, absent from the clean VM. RED `b35b674` and GREEN `8900122` changed only
+the service release build to static CRT and added a pre-signing dependency gate. Cargo 100/1
+ignored, builder 29/29, architecture 51/51, 06-35 keylinks 3/3, and bridge 25/25 all passed
+before v54 publication.

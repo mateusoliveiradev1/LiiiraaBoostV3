@@ -1005,3 +1005,25 @@ remain explicit bounded codes and never export raw log, path, user, SID, or secr
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v53` — CLEAN VM BLOCKED, ROOT CAUSE CONFIRMED
+
+- **Physical result:** BLOCKED at `installed-ready`
+- **Runner:** exit `2`, code `BLOCKED:installer-exit-1603`
+- **Immutable blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-042855-clean-vm-BLOCKED.json`
+- **Blocker SHA-256 / size:** `fc859dd361e2b1ad46b8c06940b97ab9269f206a4d4e88472ca3cf0d1e3359c4` / `1832` bytes
+- **Tracked blocker mirror:** `.planning/phases/06-transactional-plans-and-recovery/06-26-v53-BLOCKED.json`
+- **MSI log identity:** SHA-256 `bca766b5884f090ffb35756e64343165c6e22e568dafcdceac12604bb238b073`, `138200` bytes, UTF-16LE BOM
+- **Bounded failure:** exit `1603`; `Return value 3` action `INSTALL`; MSI error `1920`; SCM event `7000`; Win32 code `1053`; no service-specific `63101`–`63109` event
+- **Final sanitized summary:** `20260815-161152-506-v53-msi-sanitized-fixture.json`, SHA-256 `c300485b66a4d6fe9639a9ec95f41c3de310be760afae1bba625b1a6e8c0e5f8`, `409` bytes
+- **Raw MSI log exported:** no
+- **APPLY prompt / installed checkpoint / reboot / ingestion / review:** not reached
+- **Final VM state:** `Off`
+
+The exact root cause was a missing Microsoft C/C++ runtime on the clean guest: the v53 service
+imported `VCRUNTIME140.dll` plus `api-ms-win-crt-*`, while no broker-specific event was emitted.
+RED `b35b674` and GREEN `8900122` make only the service release build use static CRT and reject
+dynamic CRT imports before signing or packaging. The v53 attempt remains immutable and was not
+reused.

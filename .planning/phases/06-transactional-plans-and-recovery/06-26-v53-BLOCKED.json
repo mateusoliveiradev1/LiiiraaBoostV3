@@ -1,0 +1,36 @@
+{
+  "status": "BLOCKED",
+  "operationVersion": "managed-power-scheme-v53",
+  "buildId": "physical-468a05974898514d-managed-power-scheme-v53",
+  "vmName": "LiiiraaBoost-W11-25H2-Clean",
+  "cleanCheckpoint": "Clean-Windows-Ready",
+  "installedCheckpoint": "LiiiraaBoost-Installed",
+  "completedBoundaries": [
+    "artifact-verifier-pass",
+    "simulation-admission-pass",
+    "hyper-v-prestart-audit-pass",
+    "clean-checkpoint-restored",
+    "integration-services-healthy",
+    "exact-artifact-staged",
+    "guest-artifact-acl-provisioned",
+    "guest-artifact-acl-verified"
+  ],
+  "stage": "installed-ready",
+  "runnerExitCode": 2,
+  "runnerFailureCode": "BLOCKED:installer-exit-1603",
+  "installerDiagnostic": {
+    "diagnosticStatus": "present",
+    "installerExitCode": 1603,
+    "logStatus": "log-unparseable",
+    "logSha256": "sha256:bca766b5884f090ffb35756e64343165c6e22e568dafcdceac12604bb238b073",
+    "logSizeBytes": 138200,
+    "returnValue3ActionCode": "none",
+    "returnValue3ActionIdentifier": null,
+    "sidecarSha256": "sha256:b50deb192c58ed1cac3901c32b0cdb78ac56cdf88b10c9673a79bc3c7fde2409",
+    "sidecarSizeBytes": 290
+  },
+  "reason": "runner-failure",
+  "recordedAt": "2026-08-15T07:28:55.5960802Z",
+  "canonicalRecordSha256": "sha256:fc859dd361e2b1ad46b8c06940b97ab9269f206a4d4e88472ca3cf0d1e3359c4",
+  "canonicalRecordSizeBytes": 1832
+}

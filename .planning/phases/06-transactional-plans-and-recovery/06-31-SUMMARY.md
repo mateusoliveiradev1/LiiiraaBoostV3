@@ -444,3 +444,31 @@ The immutable publication is:
 | File | SHA-256 | Bytes |
 |---|---|---:|
 | `artifact-manifest.json` | `6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271` | 3241 |
+
+## Append-only authority update: v54 PASSED
+
+The v53 clean-VM failure remains immutable BLOCKED evidence and was not relaunched. Safe guest
+diagnostics reduced MSI `1603` to error `1920`, SCM event `7000`, and Win32 service-start code
+`1053`. Host PE inspection then proved that the v53 service dynamically imported
+`VCRUNTIME140.dll` and `api-ms-win-crt-*`, while the clean VM did not provide that runtime.
+
+RED `b35b674` and GREEN `8900122` make the service-only release build use
+`-C target-feature=+crt-static` and add a pre-signing `dumpbin /dependents` gate that rejects
+VCRUNTIME, MSVCP, UCRT, and `api-ms-win-crt-*` imports. A non-mint release witness imported only
+Windows system DLLs. The single monotonic v54 `build-and-smoke` then completed install,
+downgrade rejection, rollback-failure drill, repair/update, broker-client binding, uninstall,
+and residual cleanup with lifecycle `PASSED`. The immutable publication is:
+
+- **Root:** `target/phase6-physical/8900122f37ae8c412439de190e3e1f38b232fb2c/physical-0fb27dbbc1f09383-managed-power-scheme-v54`
+- **Build ID:** `physical-0fb27dbbc1f09383-managed-power-scheme-v54`
+- **Operation version:** `managed-power-scheme-v54`
+- **Source commit:** `8900122f37ae8c412439de190e3e1f38b232fb2c`
+- **Input tree:** `sha256:0fb27dbbc1f0938303cececdae3641e796e94fc6b7c8517aa6591336a998bb30`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40` | 3241 |
+| `liiiraa-boost.msi` | `2a338388bb220746df3dcc2ef4690700935fcd77fc598bd1f770380dce3f0a96` | 15761408 |
+| `configs/clean-windows-vm.run-config.json` | `684564fc431a3523f95937443925c3c20429f89aab1be6a371309e7e7c6dc730` | 1593 |
+| `phase6-physical-runner.exe` | `44d561a01ad17c542fa0aea380ff53b89af45436610db8edc16b23967f1e84d2` | 7016232 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
