@@ -283,3 +283,20 @@ This is environment and authority readiness evidence only. It is not clean-VM ru
 does not satisfy 06-26 Task 1, and creates no physical PASS or human review. `RunCleanVm`, the
 guest runner, MSI installation, checkpoint restore/create, and optimization were not executed.
 The v43 BLOCKED records above remain unchanged and cannot be relaunched or reactivated.
+
+### Clean Windows VM RunCleanVm for v44 — BLOCKED
+
+- **Recorded at:** `2026-08-15T00:08:06.9390745Z`
+- **Operation version:** `managed-power-scheme-v44`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v44`
+- **Artifact manifest SHA-256:** `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f`
+- **Clean config SHA-256:** `dd41f2154e3a28f2a67b14f86598f7bc425520f315d3e4ef1e9c3f70a564c597`
+- **Simulation run SHA-256:** `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e`
+- **Result:** `BLOCKED-GUEST-RUNNER-FAILED-BEFORE-INSTALLED-READY`
+- **Human review:** not presented; Task 2 remains closed
+
+The single authorized v44 `RunCleanVm` attempt verified the artifact and deterministic admission, validated the exact prepared checkpoint topology, restored `Clean-Windows-Ready`, reached six healthy integration services, staged only the eleven manifest-bound files, and invoked the exact signed guest runner/config once. The runner exited nonzero before `InstalledReady`; no installed checkpoint, apply approval, reboot continuation, bounded evidence copy, or `physical-writer` ingestion followed.
+
+The immutable blocker record is `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-210806-clean-vm-BLOCKED.json`, SHA-256 `6b597bec6d4c14d04574720f20918919b0d8d2728172d84c60167c8a13a99c30`. Its completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, and `exact-artifact-staged`. Its persisted reason is `BLOCKED: exact guest runner failed; no later mutation is authorized.`
+
+The authorized cleanup-only action then returned the VM from `Running` to `Off` without restore, checkpoint creation, credential use, or guest execution. Cleanup evidence is `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-210919-phase6observationcleanup-console.log`, SHA-256 `96860830f089b5504e8c6d4861f122712408bc9bca8bb36613c8e65e351bb11a`, and confirms `Clean-Windows-Ready` ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075` remained present. This v44 attempt is permanently BLOCKED and must not be relaunched or relabeled as physical evidence.
