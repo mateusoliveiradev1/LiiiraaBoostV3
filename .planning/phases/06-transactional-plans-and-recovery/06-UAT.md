@@ -498,3 +498,50 @@ run the guest runner, install the MSI, mutate a power scheme, or call `RunCleanV
 The earlier relative-path invocation blocker remains append-only history. The exact v46 tuple is
 now Audit-ready for the separately authorized single 06-26 physical attempt; no such physical
 attempt was executed here and no v47 was minted.
+
+---
+
+## Operation `managed-power-scheme-v46` — CLEAN WINDOWS VM BLOCKED
+
+- **Recorded at:** `2026-08-15T01:50:35.3005257Z`
+- **Operation version:** `managed-power-scheme-v46`
+- **Build ID:** `physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Source commit:** `1a1dc18ce40beaef2f83cdb3e070386e4d639021`
+- **Artifact manifest SHA-256:** `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`
+- **Clean config SHA-256:** `1e90866dbd21404606bcca716279f09b46b41be54fbf52c81d6f713242ae2942`
+- **Runner SHA-256:** `d42c7499539cc43942d8b14ff4c0b854cd77e1d1929ea3ffea5b27cebfaf511f`
+- **Simulation run SHA-256:** `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`
+- **Evidence manifest SHA-256:** `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`
+- **Result:** `BLOCKED-GUEST-ARTIFACT-CUSTODY`
+- **Runner stage:** `installed-ready`
+- **Runner exit code:** `2`
+- **Allowlisted runner failure code:** `BLOCKED:artifact-custody`
+- **Guest credential username form:** bare local username `LiiiraaLab`; no password was persisted
+- **Human review:** not presented; Task 2 remains closed
+
+The single authorized v46 `RunCleanVm` attempt reverified the exact artifact and deterministic
+admission, restored checkpoint `Clean-Windows-Ready` ID
+`ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`, reached all six healthy integration services, and
+staged exactly the eleven manifest-bound files. The signed runner then failed closed at the
+`installed-ready` boundary with the bounded allowlisted diagnostic `BLOCKED:artifact-custody`.
+No `InstalledReady` record or `LiiiraaBoost-Installed` checkpoint was created, and the APPLY
+confirmation phrase was never requested.
+
+Completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`,
+`hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, and
+`exact-artifact-staged`. No apply, power-scheme mutation, reboot, continuation, raw-envelope
+copy, physical-writer ingestion, physical PASS, reviewer record, Task 2, or Task 3 followed.
+The evidence manifest therefore remains the exact deterministic-only v46 authority at SHA-256
+`d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`.
+
+The immutable blocker record is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-225035-clean-vm-BLOCKED.json`, SHA-256
+`b2e54c0df4c1572178d51e1f713a9f5af508977c4986bbde31e95ade3bee3eb7`.
+
+The cleanup-only action returned the VM from `Running` to `Off` without runner execution,
+credential reuse, checkpoint restore, or checkpoint creation. Cleanup evidence is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260814-225134-phase6observationcleanup-console.log`, SHA-256
+`96860830f089b5504e8c6d4861f122712408bc9bca8bb36613c8e65e351bb11a`, and confirms the exact
+clean checkpoint ID remained `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075` with final VM state `Off`.
+This v46 attempt is permanently BLOCKED and must not be relaunched, relabeled as physical
+evidence, or advanced to Task 2/Task 3. No v47 was minted.
