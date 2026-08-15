@@ -327,3 +327,41 @@ is `target/phase6-physical/_blocked/BLOCKED-1786772146291-10488.json`, `599` byt
 No v48 MSI, lifecycle record, artifact manifest, signature, or artifact root was published.
 Therefore the exact v47 tuple above remains the latest complete artifact authority. There is no
 v48 retry and no v49.
+
+## Append-only authority update: v49
+
+The terminal v48 build blocker was resolved without changing the host Edge: the exact official
+Microsoft download for `msedgedriver 151.0.4129.86` was staged create-once after validating
+version output, file version, Microsoft Authenticode, and live SHA-256
+`05ed38890b3a0739369beb2dc9136ef8c3d7bfd9c083d215a1bd072b9a59b3e1`. The downloaded official
+ZIP was `20657590` bytes with SHA-256
+`e3408fc15fae8f8a02a0c6034335a66a556085b144e00d1cad1e42a49491763b`.
+
+The single monotonic v49 `build-and-smoke` publication passed signed five-role assembly,
+protected ACL custody, install, downgrade rejection, rollback-failure drill, repair/update,
+broker client binding, uninstall, and residual cleanup. The real 06-35 inspection-only verifier
+returned `verified` for the same live bytes and manifest hash
+`sha256:e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09`.
+This is the latest complete artifact authority for deterministic admission.
+
+- **Root:** `target/phase6-physical/75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a/physical-487e3c326b5066a0-managed-power-scheme-v49`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v49`
+- **Operation version:** `managed-power-scheme-v49`
+- **Source commit:** `75a0bc0a8f020a292dd1e9c04fbdb6853ef4169a`
+- **Input tree:** `sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09` | 3241 |
+| `artifact-manifest.json.p7s` | `fc96bce90f6fe62a7a352647e4a7505d090600ac08762f7afbead29eae7ede13` | 1609 |
+| `liiiraa-boost.msi` | `7403205ac8a7d183529852296af93704eb0450b030c498e3f203c8eb5cb7c2ce` | 15679488 |
+| `installation-manifest.json` | `7d8e5ac3c15ede842f1e3bac1a76ba03031c619b6e9e3d2e469cd51d3a1b377a` | 1675 |
+| `installation-manifest.json.p7s` | `12eb00da84cef5db50f701e35774a4f2c757f3edbb3cd70aff7a947b8bc3bae9` | 1609 |
+| `configs/clean-windows-vm.run-config.json` | `abfd6098a0c269855ea9477a42d3b34d97ae37e5e9a4a7833f379addeaf3465d` | 1593 |
+| `configs/owner-pc.run-config.json` | `fcd9300fe9fce6ba71896f49a2c75909cbca97d63885b74afa310eb41628bc29` | 1529 |
+| `configs/friends-pc.run-config.json` | `9fcceec5ef79cbae0690366362cf913c6339cd7fc4de46dc871cb499a3888493` | 1658 |
+| `phase6-physical-runner.exe` | `2639a4cf4387e4ecc41bd6920dc2426a8ef905179da4f16276d55f0bdde17b51` | 7003944 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+| `elevated-lifecycle-result.json` | `790ba83b94bbcb5cf71ebfaf35308bb2b73086fc1077f6977374b05419366715` | 1324 |
+| `lifecycle-report.json` | `f510e998c67895aa59e6bc69dc67513c9ec2c874c9baad737863b37900c7088c` | 2252 |
