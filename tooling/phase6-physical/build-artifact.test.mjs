@@ -621,7 +621,8 @@ test('RED: installed admission is readable without exposing service-only storage
   const host = readFileSync('apps/optimizer-service/src/windows_pipe.rs', 'utf8');
   const runner = readFileSync('apps/desktop/src-tauri/src/physical_runner.rs', 'utf8');
 
-  assert.match(ipc, /service_storage_directory_sddl[\s\S]{0,256}\(A;;GX;;;IU\)/u);
+  assert.match(ipc, /service_storage_directory_sddl[\s\S]{0,256}\(A;;0x001000A0;;;IU\)/u);
+  assert.doesNotMatch(ipc, /service_storage_directory_sddl[\s\S]{0,256}\(A;;G[RW];;;IU\)/u);
   assert.match(ipc, /service_admission_sddl[\s\S]{0,256}\(A;;GR;;;IU\)/u);
   assert.match(host, /create_protected_directory\(&root,\s*&directory_security\)/u);
   assert.match(host, /ensure_protected_file\(&database_path,\s*&storage_security\)/u);

@@ -157,7 +157,8 @@ fn ipc_pipe_policy_is_local_only_and_has_an_explicit_service_dacl() {
     assert!(!storage_sddl.contains("S-1-5-5-7-42"));
 
     let directory_sddl = PipeSecurityPolicy::service_storage_directory_sddl("S-1-5-80-424242");
-    assert!(directory_sddl.contains("(A;;GX;;;IU)"));
+    assert!(directory_sddl.contains("(A;;0x001000A0;;;IU)"));
+    assert!(!directory_sddl.contains("(A;;GX;;;IU)"));
     assert!(!directory_sddl.contains("(A;;GR;;;IU)"));
     assert!(!directory_sddl.contains("(A;;GW;;;IU)"));
 
