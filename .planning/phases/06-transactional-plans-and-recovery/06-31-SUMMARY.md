@@ -419,3 +419,7 @@ publication is:
 - **MSI:** `sha256:dda57a509958c48085f309c0fd1c024b9d22a46c421bfbc4ac0ec321a83a83cc` (`15679488` bytes)
 - **Clean-VM config:** `sha256:1caa037270bac1f800a22d215008b06b5ad00834da1e4b110b9adab316095163`
 - **Runner:** `sha256:d89b703f1d944808ac8195d477ceb189a5d8c7b6098a4d69f51f9c4527582110`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3` | 3241 |
