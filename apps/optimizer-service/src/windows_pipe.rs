@@ -1375,7 +1375,35 @@ mod windows_host {
         use super::super::super::operations::power_scheme::{
             PowerSchemePort, VerifiedClientContext,
         };
-        use super::{PIPE_REJECT_REMOTE_CLIENTS, WindowsPowrProf, authenticate_pipe_client, wide};
+        use super::{
+            PIPE_REJECT_REMOTE_CLIENTS, WindowsPowrProf, authenticate_pipe_client,
+            select_expected_service_sid, wide,
+        };
+
+        #[test]
+        fn service_sid_selection_ignores_all_services_and_binds_exact_optimizer_sid() {
+            let groups = vec![
+                (0_u32, "S-1-5-80-0".to_owned()),
+                (
+                    0_u32,
+                    "S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564"
+                        .to_owned(),
+                ),
+            ];
+            assert_eq!(
+                select_expected_service_sid(groups).as_deref(),
+                Some("S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564")
+            );
+        }
+
+        #[test]
+        fn service_sid_selection_rejects_generic_and_foreign_service_sids() {
+            let groups = vec![
+                (0_u32, "S-1-5-80-0".to_owned()),
+                (0_u32, "S-1-5-80-424242".to_owned()),
+            ];
+            assert!(select_expected_service_sid(groups).is_none());
+        }
 
         #[test]
         fn real_named_pipe_impersonation_yields_client_bound_token() {

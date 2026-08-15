@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -564,6 +564,29 @@ test('WiX provisions the protected ProgramData root before restricted service st
   const directoryIndex = source.indexOf('Id="PhysicalProgramDataAclComponent"');
   const serviceStartIndex = source.indexOf('<ServiceControl');
   assert.ok(directoryIndex >= 0 && directoryIndex < serviceStartIndex);
+});
+
+test('RED: real v53 MSI 1920 fixture binds service startup to the exact service SID', () => {
+  const fixturePath = 'tooling/phase6-physical/fixtures/v53-msi-safe-summary.json';
+  assert.equal(existsSync(fixturePath), true, 'sanitized v53 MSI fixture must be retained');
+  const fixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
+  assert.deepEqual(fixture, {
+    kind: 'phase6-v53-sanitized-msi-fixture',
+    schemaVersion: '1.0',
+    sourceLogSha256: 'sha256:bca766b5884f090ffb35756e64343165c6e22e568dafcdceac12604bb238b073',
+    sourceLogSizeBytes: 138200,
+    encodingCode: 'utf16le-bom',
+    installerExitCode: 1603,
+    returnValue3ActionCode: 'install',
+    returnValue3ActionIdentifier: 'INSTALL',
+    msiErrorCode: 1920,
+  });
+
+  const source = readFileSync('apps/optimizer-service/src/windows_pipe.rs', 'utf8');
+  const exactSid = 'S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564';
+  assert.match(source, new RegExp(`EXPECTED_SERVICE_SID[^\\n]+${exactSid}`, 'u'));
+  assert.match(source, /select_expected_service_sid/u);
+  assert.doesNotMatch(source, /find\(\|\(_, sid\)\| sid\.starts_with\("S-1-5-80-"\)\)/u);
 });
 
 test('physical lifecycle proves the installed desktop owns a read-only broker lease across reconnect', () => {
