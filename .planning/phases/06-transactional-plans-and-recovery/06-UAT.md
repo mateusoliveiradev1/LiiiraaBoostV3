@@ -129,8 +129,6 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 }
 ```
 
----
-
 ## Operation `managed-power-scheme-v42` — BLOCKED AT PORTABLE CUSTODY
 
 - **Recorded at:** `2026-08-14T15:52:26.5614342Z`
@@ -266,3 +264,20 @@ The prior clean checkpoint was renamed create-once and was not deleted. A distin
   ]
 }
 ```
+
+### Read-only Hyper-V Audit for v44 — PASSED
+
+- **Recorded at:** `2026-08-14T23:59:27Z`
+- **Action:** `Audit` only
+- **VM before/after:** `Off` / `Off`
+- **Clean checkpoint:** `Clean-Windows-Ready`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **`LiiiraaBoost-Installed`:** absent
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-205903-phase6audit-console.log`
+- **Audit log SHA-256:** `0d05dc9125b175de33943ede394dd211a9f7773d16ed41bec1f282c7548862ee`
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+
+This is environment and authority readiness evidence only. It is not clean-VM run evidence,
+does not satisfy 06-26 Task 1, and creates no physical PASS or human review. `RunCleanVm`, the
+guest runner, MSI installation, checkpoint restore/create, and optimization were not executed.
+The v43 BLOCKED records above remain unchanged and cannot be relaunched or reactivated.

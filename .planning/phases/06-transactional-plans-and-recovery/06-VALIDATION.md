@@ -148,3 +148,11 @@ Manual gates cannot be converted into automated PASS by deterministic fixtures. 
 - The deterministic writer admitted v43 exactly once under schema v3 with run SHA-256 `dee8f3c8f6dc117a1d14ee60aa3dfd50e943e9cb2e960c9aaa4e8e62422e44bd` and exact PLAN-01 through PLAN-08 coverage.
 - The prior v41 evidence manifest remains byte-identical at SHA-256 `ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a` as the sole historical `superseded` predecessor; the active record points back to its exact deterministic run hash. v42 remains permanently rejected and outside the chain.
 - Planned evaluation passes with v43 current and all physical stages pending. No clean-VM, owner-PC, friends-PC, consent, review, or physical PASS is inferred from deterministic supersession.
+
+## Append-Only v44 Remint and Audit Addendum — 2026-08-14
+
+- The v43 clean-VM attempt remains physically BLOCKED and was not relaunched. Its exact schema-v3 manifest is preserved as the superseded record with SHA-256 `89c029cbe96f3a7822b0c842668e1bb27bbb22576ca5f017cef0598ddc55ca48`.
+- The single monotonic v44 artifact passed build-and-smoke and the real 06-35 verifier: build `physical-68bb4f974e23ee26-managed-power-scheme-v44`, artifact manifest SHA-256 `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f`.
+- Deterministic admission advanced append-only to v44 with run SHA-256 `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e` and evidence manifest SHA-256 `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
+- The exact v44 bridge passed its 12-case policy suite, dry-run, planned evaluator, key-link gate, and one elevated read-only Audit against clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`; the backup checkpoint ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef` remained present, `LiiiraaBoost-Installed` remained absent, and the VM returned to `Off`.
+- Audit log SHA-256: `0d05dc9125b175de33943ede394dd211a9f7773d16ed41bec1f282c7548862ee`. No guest runner, `RunCleanVm`, checkpoint mutation, MSI installation, optimization, physical PASS, or human review occurred.

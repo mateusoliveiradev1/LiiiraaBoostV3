@@ -183,3 +183,31 @@ It still requires new explicit physical-run authority and must not be inferred f
 ---
 *Phase: 06-transactional-plans-and-recovery*
 *Completed: 2026-08-14*
+
+## Append-Only v44 Bridge and Read-Only Audit Addendum
+
+The physically BLOCKED `managed-power-scheme-v43` attempt remains immutable history and was
+not relaunched. After the owner prepared the local `LiiiraaLab` account and created a distinct
+clean checkpoint, the bridge was rebound to the new monotonic v44 artifact and deterministic
+admission. The bridge now validates the exact three-link v41 -> v43 -> v44 deterministic chain,
+with v43 permanently superseded and v44 the sole active authority.
+
+- **Operation version:** `managed-power-scheme-v44`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v44`
+- **Source commit:** `5f29bb71d1eba1425be2c6b549c40f8dbef41cf1`
+- **Artifact manifest SHA-256:** `71274d04fbdffc1e2444a7c8771c5f767b8ce1f04c6fa1f6988f23a192b63e6f`
+- **Simulation run SHA-256:** `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e`
+- **Evidence manifest SHA-256:** `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`
+- **Clean checkpoint:** `Clean-Windows-Ready`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Installed checkpoint:** `LiiiraaBoost-Installed` absent
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-205903-phase6audit-console.log`
+- **Audit log SHA-256:** `0d05dc9125b175de33943ede394dd211a9f7773d16ed41bec1f282c7548862ee`
+- **Audit result:** `PASSED`, boundaries `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, and `hyper-v-audit-pass`
+- **Final VM state:** `Off`
+
+The elevated action was only `Audit`. It did not restore or create a checkpoint, stage guest
+bytes, invoke PowerShell Direct, run the guest runner, install the MSI, mutate a power scheme,
+or call `RunCleanVm`. The exact v44 tuple is ready for a separately authorized 06-26 run.
+
+Commits: RED `a3cebc7d`, checkpoint-identity RED `d3d1adca`, GREEN `605cd707`.
