@@ -601,3 +601,39 @@ or executing `Run-LabElevated.ps1`. The fail-closed rule forbids a retry in this
 No `RunCleanVm`, checkpoint restore/create, guest staging, runner, MSI, apply, reboot, or physical
 evidence boundary executed. The deterministic-only v47 evidence manifest remains unchanged at
 SHA-256 `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`.
+
+---
+
+## Operation `managed-power-scheme-v47` — READ-ONLY AUDIT BLOCKED BY HOST MEMORY
+
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-000927-phase6audit-console.log`
+- **Audit log size:** `1256` bytes
+- **Audit log SHA-256:** `cf17d3d425de203551b774a4be315e125b2292c40de1ea5eec3a9164f6773c62`
+- **Requested action:** one elevated `Phase6Audit`, delegating only to bridge action `Audit`
+- **Result:** `BLOCKED-AUDIT-HOST-MEMORY`
+- **Failure:** Hyper-V `Start-VM` returned `0x8007000E` because the configured `8192` MiB startup memory was unavailable
+- **VM mutation:** none; the Audit did not restore/create/rename a checkpoint or change VM memory/configuration
+- **Physical mutation:** none; no `RunCleanVm`, guest staging, runner, MSI, apply, reboot, or evidence ingestion ran
+
+The audit authenticated the existing fixed route far enough to reach the read-only integration
+health start. `Start-VM` failed before the VM entered a started state. The v47 artifact and
+deterministic evidence were not reminted, and the exact clean checkpoint remained the bridge
+authority at ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`.
+
+---
+
+## Operation `managed-power-scheme-v47` — 4 GiB PREPARATION ELEVATION CANCELED
+
+- **Approved intent:** restore the existing clean checkpoint while Off, preserve it as `Clean-Windows-Ready-Pre4GiB-v47`, set dynamic memory to `4`/`4`/`12` GiB, and create a new Standard `Clean-Windows-Ready`
+- **Safety TDD:** RED `70c5604`, GREEN `4fc00b0`; 20/20 bridge and preparation policy tests passed
+- **Result:** `BLOCKED-PREPARATION-UAC-CANCELED`
+- **Elevated child:** not started; Windows returned `A operação foi cancelada pelo usuário`
+- **External preparation evidence:** none created because the fixed elevated script did not execute
+- **VM/checkpoint/memory mutation:** none executed by this launch
+- **Bridge rebind:** not performed
+- **v47 Audit after preparation:** not performed
+
+The fail-closed no-retry rule stopped the workflow at the canceled UAC boundary. No second
+elevation was requested, no v48 was minted, and the deterministic-only v47 authority remains
+unchanged. VM `Off` is the last established state from the failed 8 GiB Audit path; no later
+operation started or mutated the VM.

@@ -310,3 +310,20 @@ restore/create, guest staging, guest runner, MSI, optimization, or `RunCleanVm` 
 started by the rejected command. v47 remains valid through deterministic admission and bridge
 dry-run, but it is BLOCKED before Audit readiness and before any separately authorized 06-26
 physical attempt.
+
+## Append-Only v47 Host-Memory and Preparation Blocker Addendum
+
+A later explicitly authorized v47 `Phase6Audit` reached the exact bridge but failed when
+Hyper-V could not allocate the configured 8192 MiB startup memory. The immutable log is
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-000927-phase6audit-console.log`, size `1256` bytes,
+SHA-256 `cf17d3d425de203551b774a4be315e125b2292c40de1ea5eec3a9164f6773c62`.
+`Start-VM` returned `0x8007000E`; no checkpoint, configuration, guest, MSI, apply, or physical
+evidence mutation followed.
+
+The approved fixed 4 GiB preparation was implemented with a TDD safety contract (RED
+`70c5604`, GREEN `4fc00b0`; 20/20 PASS). Its sole `Start-Process -Verb RunAs` launch was canceled
+at UAC before the elevated child started. Therefore no restore, rename, memory update, new
+checkpoint, external preparation evidence, checkpoint-ID rebind, or follow-up Audit occurred.
+The no-retry rule stopped the workflow without minting v48. The repository-side fixed operation
+remains available for a future separately authorized execution, but the bridge still correctly
+binds the last established clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`.
