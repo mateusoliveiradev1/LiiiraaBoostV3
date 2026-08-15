@@ -63,7 +63,10 @@ fn installed_custody_path_equivalence_is_closed_to_normal_and_verbatim_roots() {
         r"\\.\C:\Program Files\Liiiraa Boost\installation-manifest.json",
         r"\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\installation-manifest.json",
     ] {
-        assert!(!same_closed_windows_path(Path::new(invalid), Path::new(invalid)));
+        assert!(!same_closed_windows_path(
+            Path::new(invalid),
+            Path::new(invalid)
+        ));
     }
     assert!(!same_closed_windows_path(
         Path::new(r"C:\Program Files\Liiiraa Boost\installation-manifest.json"),
