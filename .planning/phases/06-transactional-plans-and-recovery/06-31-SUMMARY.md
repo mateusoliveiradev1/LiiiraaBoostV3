@@ -363,6 +363,7 @@ This is the latest complete artifact authority for deterministic admission.
 | `phase6-physical-runner.exe` | `2639a4cf4387e4ecc41bd6920dc2426a8ef905179da4f16276d55f0bdde17b51` | 7003944 |
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
 | `elevated-lifecycle-result.json` | `790ba83b94bbcb5cf71ebfaf35308bb2b73086fc1077f6977374b05419366715` | 1324 |
 | `lifecycle-report.json` | `f510e998c67895aa59e6bc69dc67513c9ec2c874c9baad737863b37900c7088c` | 2252 |
 
@@ -393,6 +394,7 @@ inspection-only verifier returned `verified` for manifest SHA-256
 | `phase6-physical-runner.exe` | `5a82ca6b90fb1962ef5c1875ad83fea21d390d6b97b490958d13101f28f06701` | 7003944 |
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
 | `elevated-lifecycle-result.json` | `fcb5da7972670deab16f09d162509a5ac61a467949b9e990ee2e7f738ce0c20e` | 1324 |
 | `lifecycle-report.json` | `ffb01def0a248365885f6f9fdac70ed50cb39698cb3481193915639188a98d90` | 2252 |
 
@@ -471,4 +473,29 @@ and residual cleanup with lifecycle `PASSED`. The immutable publication is:
 | `liiiraa-boost.msi` | `2a338388bb220746df3dcc2ef4690700935fcd77fc598bd1f770380dce3f0a96` | 15761408 |
 | `configs/clean-windows-vm.run-config.json` | `684564fc431a3523f95937443925c3c20429f89aab1be6a371309e7e7c6dc730` | 1593 |
 | `phase6-physical-runner.exe` | `44d561a01ad17c542fa0aea380ff53b89af45436610db8edc16b23967f1e84d2` | 7016232 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v55 PASSED
+
+The immutable v54 clean-VM failure remained BLOCKED and was not relaunched. RED `6401f1e` and
+GREEN `be5319a` separated the service-only database/secret ACL from the minimum interactive
+directory-traverse and bounded admission-record read ACLs. Full source, Windows, architecture,
+keylink, and bridge gates passed before reservation.
+
+The single monotonic v55 `build-and-smoke` completed install, downgrade rejection,
+rollback-failure drill, repair/update, broker-client binding, uninstall, and residual cleanup with
+lifecycle `PASSED`. The immutable publication is:
+
+- **Root:** `target/phase6-physical/b3751da5155683a312239e71bafe3ee8969b5446/physical-4c88acfffc6c9dc2-managed-power-scheme-v55`
+- **Build ID:** `physical-4c88acfffc6c9dc2-managed-power-scheme-v55`
+- **Operation version:** `managed-power-scheme-v55`
+- **Source commit:** `b3751da5155683a312239e71bafe3ee8969b5446`
+- **Input tree:** `sha256:4c88acfffc6c9dc2546da5318f6365eba4b7b012bce7004bad53ce0c56c6fcd5`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a` | 3241 |
+| `liiiraa-boost.msi` | `d8dca19011c04a3330aec5147eb6110c1dfa6600a55557429144ad30a55606d9` | 15761408 |
+| `configs/clean-windows-vm.run-config.json` | `3a63c331bea8033dff93ac7c64c06c5dea25d2e979bdadfe57cdbc9a7dac65b6` | 1593 |
+| `phase6-physical-runner.exe` | `92e789474b5af6d55819da5fe14f82c0c93c3f12985cc2addb0424e844490db8` | 7016744 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
