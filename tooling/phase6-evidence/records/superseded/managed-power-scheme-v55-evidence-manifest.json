@@ -1,15 +1,15 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-08-15T20:15:51.683Z",
-  "operationVersion": "managed-power-scheme-v56",
+  "generatedAt": "2026-08-15T19:47:48.234Z",
+  "operationVersion": "managed-power-scheme-v55",
   "immutableBuild": {
-    "id": "physical-c013840c872b6f81-managed-power-scheme-v56",
-    "commit": "b6270f1b935cc3fd55dfd3d55f1847ffdf988db9",
+    "id": "physical-4c88acfffc6c9dc2-managed-power-scheme-v55",
+    "commit": "b3751da5155683a312239e71bafe3ee8969b5446",
     "artifact": {
-      "path": "target/phase6-physical/b6270f1b935cc3fd55dfd3d55f1847ffdf988db9/physical-c013840c872b6f81-managed-power-scheme-v56/artifact-manifest.json",
-      "sha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f"
+      "path": "target/phase6-physical/b3751da5155683a312239e71bafe3ee8969b5446/physical-4c88acfffc6c9dc2-managed-power-scheme-v55/artifact-manifest.json",
+      "sha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a"
     },
-    "artifactManifestSha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f"
+    "artifactManifestSha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a"
   },
   "promotionStage": "deterministic-simulation",
   "requirementsCoverage": [
@@ -221,27 +221,13 @@
       }
     },
     {
-      "status": "superseded",
+      "status": "active",
       "operationVersion": "managed-power-scheme-v55",
       "buildId": "physical-4c88acfffc6c9dc2-managed-power-scheme-v55",
       "artifactManifestSha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a",
       "runEvidenceId": "phase6-deterministic-simulation-managed-power-scheme-v55-e38830867eff",
       "runEvidenceSha256": "a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb",
       "predecessorEvidenceSha256": "bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965",
-      "successorEvidenceSha256": "858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940",
-      "manifestRecord": {
-        "path": "tooling/phase6-evidence/records/superseded/managed-power-scheme-v55-evidence-manifest.json",
-        "sha256": "eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8"
-      }
-    },
-    {
-      "status": "active",
-      "operationVersion": "managed-power-scheme-v56",
-      "buildId": "physical-c013840c872b6f81-managed-power-scheme-v56",
-      "artifactManifestSha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f",
-      "runEvidenceId": "phase6-deterministic-simulation-managed-power-scheme-v56-4bffc0516079",
-      "runEvidenceSha256": "858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940",
-      "predecessorEvidenceSha256": "a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb",
       "successorEvidenceSha256": null,
       "manifestRecord": null
     }
@@ -253,26 +239,26 @@
       "friendsRoster": null,
       "runs": [
         {
-          "id": "phase6-deterministic-simulation-managed-power-scheme-v56-4bffc0516079",
+          "id": "phase6-deterministic-simulation-managed-power-scheme-v55-e38830867eff",
           "source": "phase6-deterministic-rust-1",
           "stage": "deterministic-simulation",
           "evidenceKind": "deterministic",
           "status": "PASS",
-          "operationVersion": "managed-power-scheme-v56",
-          "buildId": "physical-c013840c872b6f81-managed-power-scheme-v56",
+          "operationVersion": "managed-power-scheme-v55",
+          "buildId": "physical-4c88acfffc6c9dc2-managed-power-scheme-v55",
           "participantId": "deterministic-simulation-runner",
           "machineSlot": null,
-          "artifactManifestSha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f",
-          "configSha256": "2367ae8468d9aa3ca1632fc8c8d569cae3d7c43078f4d2a1d1ee56fa16b2373d",
+          "artifactManifestSha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a",
+          "configSha256": "10ce041f0f0007c1143b2c8f80d3e7b71b767d3a9ed92e7a3f0a4480ebf37e0e",
           "friendsRosterSha256": null,
-          "predecessorRunEvidenceSha256": "a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb",
-          "recordedAt": "2026-08-15T20:15:51.683Z",
+          "predecessorRunEvidenceSha256": "bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965",
+          "recordedAt": "2026-08-15T19:47:48.234Z",
           "exportedAt": null,
           "expiresAt": "2099-12-31T23:59:59.999Z",
           "artifacts": [
             {
-              "path": "target/phase6-physical/b6270f1b935cc3fd55dfd3d55f1847ffdf988db9/physical-c013840c872b6f81-managed-power-scheme-v56/artifact-manifest.json",
-              "sha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f"
+              "path": "target/phase6-physical/b3751da5155683a312239e71bafe3ee8969b5446/physical-4c88acfffc6c9dc2-managed-power-scheme-v55/artifact-manifest.json",
+              "sha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a"
             },
             {
               "path": "packages/desktop-simulator/src/transactional-plans.ts",
@@ -296,7 +282,7 @@
             "resumed-observation",
             "restored-complete"
           ],
-          "journalSha256": "67e37edfae5fbe0e5ce3f8d9650c8836c7d43eac388f5f9fc6d1b6f1be00b655",
+          "journalSha256": "de9adec97a895ce391e70caa42fc7d00d7911fd27bbc5076f7da51bde3824a10",
           "receiptSha256": "78cef6d3d622538fce874c4b7e3cb6d60ea514177416121a64d4755c76a29608",
           "security": {
             "ipcAdversarial": "PASS",

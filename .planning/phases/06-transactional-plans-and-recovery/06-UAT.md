@@ -1151,3 +1151,39 @@ directory, while the prior interactive ACE granted only traverse. RED `6df924f` 
 `5937be4` replace it with the minimum `SYNCHRONIZE | FILE_READ_ATTRIBUTES | FILE_TRAVERSE` mask
 (`0x001000A0`), without directory listing, DB/secret read, or write. Full gates passed before any
 subsequent reservation. The immutable v55 attempt was not reused.
+
+---
+
+## Operation `managed-power-scheme-v56` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v56`
+- **Artifact manifest SHA-256:** `4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f`
+- **Run evidence SHA-256:** `858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940`
+- **Evidence manifest SHA-256:** `29d024104cc942ef34e5d5dd8ae0bb906b9375341818587e9e102320fd359be4`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v56",
+  "buildId": "physical-c013840c872b6f81-managed-power-scheme-v56",
+  "artifactManifestSha256": "4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f",
+  "runEvidenceSha256": "858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940",
+  "evidenceManifestSha256": "29d024104cc942ef34e5d5dd8ae0bb906b9375341818587e9e102320fd359be4",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
