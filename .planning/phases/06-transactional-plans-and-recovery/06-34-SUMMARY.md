@@ -456,3 +456,31 @@ Universal CRT API set, absent from the clean VM. RED `b35b674` and GREEN `890012
 the service release build to static CRT and added a pre-signing dependency gate. Cargo 100/1
 ignored, builder 29/29, architecture 51/51, 06-35 keylinks 3/3, and bridge 25/25 all passed
 before v54 publication.
+
+## Append-Only v54 Audit, Physical Blocker, and Installed-Custody Repair
+
+The v54 read-only Audit passed and restored the VM to `Off`; immutable log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-163324-phase6audit-console.log` is `1067` bytes with
+SHA-256 `c801207ff3eea54352e475b28abb105b732403c9511ae087a0233f92f1d2e6f4`.
+
+The sole v54 `RunCleanVm` passed artifact verification, deterministic admission, Hyper-V audit,
+clean restore, integration health, exact staging, and guest ACL provisioning/verification. It
+failed closed at `installed-ready` with runner exit `2` and `BLOCKED:installed-custody`. The
+immutable blocker is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-163519-clean-vm-BLOCKED.json`, `1106` bytes,
+SHA-256 `efe706f91cba362930f1c546e13916d13b26695d16b6fbae3c6bbf9a80ffef8a`; the bounded tracked
+mirror is `06-26-v54-BLOCKED.json`. MSI had completed, so `installerDiagnostic` is correctly null.
+No APPLY prompt, installed checkpoint, reboot, evidence ingestion, or review occurred.
+
+Cleanup log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-163557-phase6observationcleanup-console.log`,
+`2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`, proves final VM `Off`
+and the unchanged clean checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`.
+
+Source audit proved the service successfully created the bounded admission record, then the
+interactive runner could not traverse/read it because `prepare_storage` applied the service-only
+storage SDDL to the custody directories and admission file as well as the database and secret.
+RED `6401f1e` and GREEN `be5319a` split those authorities: directory traverse only, bounded
+admission read only, and service-only database/secret. All eight typed custody failures now map to
+stable allowlisted runner codes with no raw detail. Full gates passed before any subsequent mint:
+optimizer 100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/51, keylinks 11/11,
+and bridge 25/25.

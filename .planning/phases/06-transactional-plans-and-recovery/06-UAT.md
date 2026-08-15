@@ -131,6 +131,35 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 
 ---
 
+## Operation `managed-power-scheme-v54` — READ-ONLY AUDIT PASSED, CLEAN VM BLOCKED
+
+- **Audit:** PASSED, read-only; exact clean checkpoint `a918f5c0-ade0-4bac-bca3-baa91686777e`
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-163324-phase6audit-console.log`
+- **Audit SHA-256 / size:** `c801207ff3eea54352e475b28abb105b732403c9511ae087a0233f92f1d2e6f4` / `1067` bytes
+- **Physical result:** BLOCKED at `installed-ready`
+- **Runner:** exit `2`, code `BLOCKED:installed-custody`
+- **Immutable blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-163519-clean-vm-BLOCKED.json`
+- **Blocker SHA-256 / size:** `efe706f91cba362930f1c546e13916d13b26695d16b6fbae3c6bbf9a80ffef8a` / `1106` bytes
+- **Tracked blocker mirror:** `.planning/phases/06-transactional-plans-and-recovery/06-26-v54-BLOCKED.json`
+- **Completed boundaries:** artifact verification, deterministic admission, Hyper-V prestart audit, clean restore, integration health, exact staging, and guest ACL provisioning/verification
+- **MSI status:** install completed; `installerDiagnostic` is null because the failure occurred in installed-custody verification, not in MSI
+- **APPLY prompt / installed checkpoint / reboot / ingestion / review:** not reached
+- **Cleanup log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-163557-phase6observationcleanup-console.log`
+- **Cleanup SHA-256 / size:** `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9` / `2755` bytes
+- **Final VM state:** `Off`; clean checkpoint unchanged
+
+The service successfully created the bounded admission record after static-CRT startup, but the
+single service-only SDDL was also applied to the custody directories and admission record. The
+interactive runner therefore could neither traverse those directories nor read the bounded record.
+RED `6401f1e` and GREEN `be5319a` separate the ACLs: only traverse (`GX`) for interactive users
+on the custody directories, only read (`GR`) on the admission record, and no interactive grant on
+the database or secret. The runner now maps all eight typed custody failures to stable allowlisted
+codes without exporting detail, raw path, user, SID, or secret data. Gates passed: optimizer
+100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/51, keylinks 11/11, and
+bridge 25/25. The immutable v54 attempt was not reused.
+
+---
+
 ## Operation `managed-power-scheme-v42` — BLOCKED AT PORTABLE CUSTODY
 
 - **Recorded at:** `2026-08-14T15:52:26.5614342Z`
