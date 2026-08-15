@@ -1853,6 +1853,53 @@ mod custody_failure_code_tests {
     }
 
     #[test]
+    fn installer_diagnostic_decodes_real_msi_utf16le_with_or_without_bom() {
+        let safe_fixture = concat!(
+            "MSI (s) (10:20) [12:00:00:000]: Product: REDACTED\r\n",
+            "Action ended 12:00:00: InstallFiles. Return value 3.\r\n",
+            "Property(S): USERNAME = REDACTED\r\n",
+            "Property(S): OriginalDatabase = C:\\REDACTED\\liiiraa-boost.msi"
+        );
+        let utf16_body: Vec<u8> = safe_fixture
+            .encode_utf16()
+            .flat_map(u16::to_le_bytes)
+            .collect();
+        for bytes in [
+            [vec![0xff, 0xfe], utf16_body.clone()].concat(),
+            utf16_body,
+        ] {
+            let diagnostic = installer_diagnostic_from_log(1603, Some(&bytes));
+            assert_eq!(diagnostic.log_status, "present");
+            assert_eq!(diagnostic.log_size_bytes, Some(bytes.len() as u64));
+            assert_eq!(diagnostic.return_value_3_action_code, "install-files");
+            assert_eq!(
+                diagnostic.return_value_3_action_identifier,
+                Some("InstallFiles")
+            );
+            let serialized = serde_json::to_string(&diagnostic).unwrap();
+            for forbidden in ["REDACTED", "OriginalDatabase", "Product:"] {
+                assert!(!serialized.contains(forbidden));
+            }
+        }
+    }
+
+    #[test]
+    fn installer_diagnostic_rejects_malformed_utf16le_without_lossy_recovery() {
+        let malformed = [
+            0xff, 0xfe, b'A', 0, b'c', 0, b't', 0, b'i', 0, b'o', 0, b'n', 0, 0x00,
+            0xd8, b'X',
+        ];
+        let diagnostic = installer_diagnostic_from_log(1603, Some(&malformed));
+        assert_eq!(diagnostic.log_status, "log-unparseable");
+        assert_eq!(diagnostic.return_value_3_action_code, "none");
+        assert!(diagnostic.log_sha256.is_some());
+        assert_eq!(
+            diagnostic.log_size_bytes,
+            Some(malformed.len() as u64)
+        );
+    }
+
+    #[test]
     fn missing_and_unparseable_installer_logs_are_explicit_not_null() {
         let missing = installer_diagnostic_from_log(1603, None);
         assert_eq!(missing.log_status, "log-missing");

@@ -848,6 +848,51 @@ test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', ()
   }
 });
 
+test('RED: MSI failure summary decodes UTF-16LE with BOM and preserves byte identity', () => {
+  const safeFixture = [
+    'MSI (s) (10:20) [12:00:00:000]: Product: REDACTED',
+    'Action ended 12:00:00: InstallFiles. Return value 3.',
+    'Property(S): USERNAME = REDACTED',
+  ].join('\r\n');
+  const bytes = Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(safeFixture, 'utf16le')]);
+  const summary = invokeBridgeFunction('Resolve-MsiLogSummary', {
+    exitCode: 1603,
+    failureCode: 'BLOCKED:installer-exit-1603',
+    bytesBase64: bytes.toString('base64'),
+    maximumBytes: 16 * 1024 * 1024,
+  });
+  assert.deepEqual(summary, {
+    InstallerExitCode: 1603,
+    LogSha256: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+    LogSizeBytes: bytes.length,
+    ReturnValue3ActionCode: 'install-files',
+    ReturnValue3ActionIdentifier: 'InstallFiles',
+  });
+  assert.equal(JSON.stringify(summary).includes('REDACTED'), false);
+});
+
+test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary', () => {
+  const source = bridgeSource();
+  for (const literal of [
+    'Write-ApplyPromptReadyRecordOnce',
+    'apply-prompt-ready',
+    'FileMode]::CreateNew',
+    'PHASE6_APPLY_PROMPT_READY',
+  ]) {
+    assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  assertInOrder(source, [
+    'Write-CheckpointReadyRecordOnce',
+    'Write-ApplyPromptReadyRecordOnce',
+    'PHASE6_APPLY_PROMPT_READY',
+    'Read-Host',
+  ]);
+  assert.match(
+    source,
+    /kind\s*=\s*'phase6-apply-prompt-ready'[\s\S]*operationVersion\s*=\s*\$ExpectedOperationVersion[\s\S]*buildId\s*=\s*\$ExpectedBuildId/u,
+  );
+});
+
 test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
   const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 2,
