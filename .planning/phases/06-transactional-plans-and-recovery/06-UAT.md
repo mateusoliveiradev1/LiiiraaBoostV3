@@ -129,6 +129,8 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 }
 ```
 
+---
+
 ## Operation `managed-power-scheme-v42` — BLOCKED AT PORTABLE CUSTODY
 
 - **Recorded at:** `2026-08-14T15:52:26.5614342Z`
