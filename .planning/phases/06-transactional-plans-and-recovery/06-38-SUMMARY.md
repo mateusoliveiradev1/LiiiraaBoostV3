@@ -205,6 +205,7 @@ _Completed: 2026-08-14_
 - Current evidence manifest SHA-256: `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
 
+
 ## Append-Only Final v48 Non-Admission Addendum
 
 The sole v48 `build-and-smoke` stopped before MSI assembly because exact official
@@ -269,3 +270,11 @@ There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain
 - The active v54 run binds predecessor evidence SHA-256 `01666800658d5aac14e99b46a14e0a23497c937710f38168e9559e92d2bee7ba` from v53. Pre-artifact v48 and v51 remain outside the linear chain.
 - Current evidence manifest SHA-256: `681e2c64cc0ee154149753e07fe4d78398d3eac79237b371b87a0d4d5da21e63`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v55
+
+- The physically BLOCKED v54 clean-VM attempt was not relaunched; its deterministic admission is now the immutable immediate predecessor at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v54-evidence-manifest.json`, SHA-256 `681e2c64cc0ee154149753e07fe4d78398d3eac79237b371b87a0d4d5da21e63`.
+- `managed-power-scheme-v55` is the sole active deterministic admission for build `physical-4c88acfffc6c9dc2-managed-power-scheme-v55`, artifact manifest SHA-256 `e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a`, and run evidence SHA-256 `a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb`.
+- The active v55 run binds predecessor evidence SHA-256 `bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965` from v54. Pre-artifact v48 and v51 remain outside the linear chain.
+- Current evidence manifest SHA-256: `eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created. The focused evidence suite passed 103/103.

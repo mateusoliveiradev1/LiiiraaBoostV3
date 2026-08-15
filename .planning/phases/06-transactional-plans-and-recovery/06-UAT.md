@@ -129,6 +129,7 @@ Both the plan-authored command `rtk pnpm phase6:verify -- --mode final --stage c
 }
 ```
 
+
 ---
 
 ## Operation `managed-power-scheme-v54` — READ-ONLY AUDIT PASSED, CLEAN VM BLOCKED
@@ -1079,6 +1080,42 @@ reused.
   "artifactManifestSha256": "07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40",
   "runEvidenceSha256": "bc06bea9da9baa679e10c82703d4cf9588220fc8f0e976082fd438e8e5914965",
   "evidenceManifestSha256": "681e2c64cc0ee154149753e07fe4d78398d3eac79237b371b87a0d4d5da21e63",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
+
+---
+
+## Operation `managed-power-scheme-v55` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v55`
+- **Artifact manifest SHA-256:** `e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a`
+- **Run evidence SHA-256:** `a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb`
+- **Evidence manifest SHA-256:** `eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v55",
+  "buildId": "physical-4c88acfffc6c9dc2-managed-power-scheme-v55",
+  "artifactManifestSha256": "e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a",
+  "runEvidenceSha256": "a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb",
+  "evidenceManifestSha256": "eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8",
   "highestAdmittedStage": "deterministic-simulation",
   "requirementsCoverage": [
     "PLAN-01",
