@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsString,
     fs::{self, OpenOptions},
     io::{self, BufRead, Write},
     net::TcpListener,
@@ -299,11 +300,19 @@ impl PhysicalGuestRunner {
 
         let installed = io.read_record(RecordKind::InstalledReady)?;
         if installed.is_none() {
+            let installer_log = artifact
+                .root
+                .join("state")
+                .join(self.config.stage.as_str())
+                .join("diagnostics")
+                .join("msi-install.log");
             let install_args = vec![
                 "/i".to_owned(),
                 artifact.msi_path.clone(),
                 "/qn".to_owned(),
                 "/norestart".to_owned(),
+                "/l*vx!".to_owned(),
+                installer_log.to_string_lossy().into_owned(),
             ];
             io.install_msi("msiexec.exe", &install_args)?;
             io.verify_installed(&artifact)?;
@@ -897,24 +906,71 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
         args: &[String],
     ) -> Result<(), PhysicalRunnerError> {
         if executable != "msiexec.exe"
-            || args.len() != 4
+            || args.len() != 6
             || args[0] != "/i"
             || args[2] != "/qn"
             || args[3] != "/norestart"
+            || args[4] != "/l*vx!"
         {
             return Err(PhysicalRunnerError::blocked("installer-arguments"));
         }
+
+        let custody_msi = Path::new(&args[1]);
+        let canonical_msi = fs::canonicalize(custody_msi)
+            .map_err(|_| PhysicalRunnerError::blocked("installer-path"))?;
+        if !same_canonical_path(custody_msi, Some(&canonical_msi)) {
+            return Err(PhysicalRunnerError::blocked("installer-path"));
+        }
+        let invocation_msi = msiexec_compatible_path(&canonical_msi)?;
+
+        let artifact_root = canonical_msi
+            .parent()
+            .ok_or_else(|| PhysicalRunnerError::blocked("installer-path"))?;
+        let expected_log = artifact_root
+            .join("state")
+            .join(self.config.stage.as_str())
+            .join("diagnostics")
+            .join("msi-install.log");
+        let supplied_log = Path::new(&args[5]);
+        if !same_canonical_path(&expected_log, Some(supplied_log)) {
+            return Err(PhysicalRunnerError::blocked("installer-log-path"));
+        }
+        let invocation_log = msiexec_compatible_path(&expected_log)?;
+        let parent = expected_log
+            .parent()
+            .ok_or_else(|| PhysicalRunnerError::blocked("installer-log-path"))?;
+        fs::create_dir_all(parent)
+            .map_err(|_| PhysicalRunnerError::blocked("installer-log-parent"))?;
+        let reservation = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&expected_log)
+            .map_err(|_| PhysicalRunnerError::blocked("installer-log-create-once"))?;
+        reservation
+            .sync_all()
+            .map_err(|_| PhysicalRunnerError::blocked("installer-log-durable"))?;
+        drop(reservation);
+
+        let invocation_args = [
+            OsString::from("/i"),
+            invocation_msi.into_os_string(),
+            OsString::from("/qn"),
+            OsString::from("/norestart"),
+            OsString::from("/l*vx!"),
+            invocation_log.into_os_string(),
+        ];
         let status = Command::new(executable)
-            .args(args)
+            .args(invocation_args)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status()
             .map_err(|_| PhysicalRunnerError::blocked("installer-launch"))?;
-        status
-            .success()
-            .then_some(())
-            .ok_or_else(|| PhysicalRunnerError::blocked("installer-exit"))
+        match status.code() {
+            Some(0) => Ok(()),
+            Some(code) => Err(installer_exit_failure(code)),
+            None => Err(PhysicalRunnerError::blocked("installer-exit-other")),
+        }
     }
 
     fn verify_installed(&mut self, artifact: &ArtifactCustody) -> Result<(), PhysicalRunnerError> {
@@ -1208,6 +1264,79 @@ fn same_canonical_path(expected: &Path, actual: Option<&Path>) -> bool {
     {
         false
     }
+}
+
+#[cfg(windows)]
+fn msiexec_compatible_path(path: &Path) -> Result<PathBuf, PhysicalRunnerError> {
+    use std::path::Prefix;
+
+    if path
+        .as_os_str()
+        .to_string_lossy()
+        .split(['\\', '/'])
+        .any(|segment| matches!(segment, "." | ".."))
+    {
+        return Err(PhysicalRunnerError::blocked("installer-path"));
+    }
+    let mut components = path.components();
+    let prefix = match components.next() {
+        Some(Component::Prefix(prefix)) => prefix.kind(),
+        _ => return Err(PhysicalRunnerError::blocked("installer-path")),
+    };
+    if !matches!(components.next(), Some(Component::RootDir)) {
+        return Err(PhysicalRunnerError::blocked("installer-path"));
+    }
+    let tail = components.collect::<Vec<_>>();
+    if tail.is_empty()
+        || tail
+            .iter()
+            .any(|component| !matches!(component, Component::Normal(_)))
+    {
+        return Err(PhysicalRunnerError::blocked("installer-path"));
+    }
+
+    let mut normalized = match prefix {
+        Prefix::Disk(letter) => PathBuf::from(format!("{}:\\", char::from(letter))),
+        Prefix::VerbatimDisk(letter) => PathBuf::from(format!("{}:\\", char::from(letter))),
+        Prefix::UNC(server, share) | Prefix::VerbatimUNC(server, share) => {
+            let mut root = PathBuf::from(r"\\");
+            root.push(server);
+            root.push(share);
+            root
+        }
+        _ => return Err(PhysicalRunnerError::blocked("installer-path")),
+    };
+    for component in tail {
+        if let Component::Normal(segment) = component {
+            normalized.push(segment);
+        }
+    }
+    Ok(normalized)
+}
+
+#[cfg(not(windows))]
+fn msiexec_compatible_path(_path: &Path) -> Result<PathBuf, PhysicalRunnerError> {
+    Err(PhysicalRunnerError::blocked("installer-platform"))
+}
+
+fn installer_exit_failure(code: i32) -> PhysicalRunnerError {
+    let code = match code {
+        5 => "installer-exit-5",
+        87 => "installer-exit-87",
+        1601 => "installer-exit-1601",
+        1602 => "installer-exit-1602",
+        1603 => "installer-exit-1603",
+        1605 => "installer-exit-1605",
+        1618 => "installer-exit-1618",
+        1619 => "installer-exit-1619",
+        1620 => "installer-exit-1620",
+        1625 => "installer-exit-1625",
+        1638 => "installer-exit-1638",
+        1641 => "installer-exit-1641",
+        3010 => "installer-exit-3010",
+        _ => "installer-exit-other",
+    };
+    PhysicalRunnerError::blocked(code)
 }
 
 fn hash_file(path: &Path) -> Result<String, PhysicalRunnerError> {
@@ -1575,12 +1704,11 @@ fn civil_from_days(days_since_epoch: i64) -> (i64, u64, u64) {
 
 #[cfg(test)]
 mod custody_failure_code_tests {
-    use super::{
-        artifact_custody_failure_code, installation_manifest::CustodyError,
-        installer_exit_failure,
-    };
     #[cfg(windows)]
     use super::msiexec_compatible_path;
+    use super::{
+        artifact_custody_failure_code, installation_manifest::CustodyError, installer_exit_failure,
+    };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
 

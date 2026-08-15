@@ -101,6 +101,7 @@ $MaximumRunnerOutputChars = 4096
 $RunnerFailureStage = 'preflight'
 $RunnerExitCode = $null
 $RunnerFailureCode = $null
+$InstallerDiagnostic = $null
 
 function Get-Sha256Hex {
     param([Parameter(Mandatory)][byte[]]$Bytes)
@@ -878,6 +879,134 @@ function Resolve-RunnerFailureDiagnostic {
     }
 }
 
+function Resolve-MsiLogSummary {
+    param(
+        [Parameter(Mandatory)][Int64]$ExitCode,
+        [Parameter(Mandatory)][string]$FailureCode,
+        [Parameter(Mandatory)][byte[]]$Bytes,
+        [ValidateRange(1, 16777216)][int]$MaximumBytes = 16777216
+    )
+
+    $unavailable = [pscustomobject][ordered]@{
+        InstallerExitCode = $null
+        LogSha256 = $null
+        LogSizeBytes = $null
+        ReturnValue3ActionCode = 'unavailable'
+        ReturnValue3ActionIdentifier = $null
+    }
+    if ($Bytes.Length -eq 0 -or $Bytes.Length -gt $MaximumBytes) { return $unavailable }
+
+    $knownExit = $null
+    if ($FailureCode -cmatch '^BLOCKED:installer-exit-(?<code>5|87|1601|1602|1603|1605|1618|1619|1620|1625|1638|1641|3010)$') {
+        $knownExit = [int]$Matches.code
+    }
+    elseif ($FailureCode -cne 'BLOCKED:installer-exit-other') {
+        return $unavailable
+    }
+
+    $tailLength = [Math]::Min($Bytes.Length, 262144)
+    $tail = [Text.Encoding]::UTF8.GetString($Bytes, $Bytes.Length - $tailLength, $tailLength)
+    $matches = [regex]::Matches($tail, '(?m)^Action ended [^\r\n]*: (?<action>[A-Za-z][A-Za-z0-9]{0,63})\. Return value 3\.\r?$')
+    $actionIdentifier = $null
+    $actionCode = 'none'
+    if ($matches.Count -gt 0) {
+        $candidate = $matches[$matches.Count - 1].Groups['action'].Value
+        $actions = @{
+            'LaunchConditions' = 'launch-conditions'
+            'CostFinalize' = 'cost-finalize'
+            'InstallValidate' = 'install-validate'
+            'InstallFiles' = 'install-files'
+            'InstallServices' = 'install-services'
+            'StartServices' = 'start-services'
+            'InstallFinalize' = 'install-finalize'
+            'INSTALL' = 'install'
+        }
+        if ($actions.ContainsKey($candidate)) {
+            $actionIdentifier = $candidate
+            $actionCode = $actions[$candidate]
+        }
+        else {
+            $actionCode = 'other'
+        }
+    }
+
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try {
+        $logSha256 = 'sha256:' + ([BitConverter]::ToString($sha.ComputeHash($Bytes))).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $sha.Dispose()
+    }
+    return [pscustomobject][ordered]@{
+        InstallerExitCode = $knownExit
+        LogSha256 = $logSha256
+        LogSizeBytes = $Bytes.Length
+        ReturnValue3ActionCode = $actionCode
+        ReturnValue3ActionIdentifier = $actionIdentifier
+    }
+}
+
+function Get-ExactGuestMsiDiagnostic {
+    param(
+        [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)][string]$FailureCode
+    )
+
+    $resolver = ${function:Resolve-MsiLogSummary}
+    $fixedPath = Join-Path $ExpectedGuestRoot 'state\clean-windows-vm\diagnostics\msi-install.log'
+    $remote = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
+        param($LogPath, $Code, $Resolver)
+        if (-not (Test-Path -LiteralPath $LogPath -PathType Leaf)) {
+            return [pscustomobject][ordered]@{
+                InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
+                ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
+            }
+        }
+        $item = Get-Item -LiteralPath $LogPath
+        if ($item.Length -le 0 -or $item.Length -gt 16777216) {
+            return [pscustomobject][ordered]@{
+                InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
+                ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
+            }
+        }
+        $bytes = [IO.File]::ReadAllBytes($LogPath)
+        & $Resolver -ExitCode 2 -FailureCode $Code -Bytes $bytes -MaximumBytes 16777216
+    } -ArgumentList $fixedPath, $FailureCode, $resolver
+    $allowedExitCodes = @(5, 87, 1601, 1602, 1603, 1605, 1618, 1619, 1620, 1625, 1638, 1641, 3010)
+    $allowedActionCodes = @(
+        'unavailable', 'none', 'other', 'launch-conditions', 'cost-finalize',
+        'install-validate', 'install-files', 'install-services', 'start-services',
+        'install-finalize', 'install'
+    )
+    $allowedIdentifiers = @(
+        'LaunchConditions', 'CostFinalize', 'InstallValidate', 'InstallFiles',
+        'InstallServices', 'StartServices', 'InstallFinalize', 'INSTALL'
+    )
+    $exit = if ($null -eq $remote.InstallerExitCode) { $null } else { [int]$remote.InstallerExitCode }
+    $hash = if ($null -eq $remote.LogSha256) { $null } else { [string]$remote.LogSha256 }
+    $size = if ($null -eq $remote.LogSizeBytes) { $null } else { [int64]$remote.LogSizeBytes }
+    $actionCode = [string]$remote.ReturnValue3ActionCode
+    $actionIdentifier = if ($null -eq $remote.ReturnValue3ActionIdentifier) { $null } else { [string]$remote.ReturnValue3ActionIdentifier }
+    $invalid = ($null -ne $exit -and $allowedExitCodes -notcontains $exit) -or
+        ($null -ne $hash -and $hash -cnotmatch '^sha256:[a-f0-9]{64}$') -or
+        ($null -ne $size -and ($size -le 0 -or $size -gt 16777216)) -or
+        ($allowedActionCodes -notcontains $actionCode) -or
+        ($null -ne $actionIdentifier -and $allowedIdentifiers -notcontains $actionIdentifier)
+    if ($invalid) {
+        return [pscustomobject][ordered]@{
+            InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
+            ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
+        }
+    }
+    return [pscustomobject][ordered]@{
+        InstallerExitCode = $exit
+        LogSha256 = $hash
+        LogSizeBytes = $size
+        ReturnValue3ActionCode = $actionCode
+        ReturnValue3ActionIdentifier = $actionIdentifier
+    }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
@@ -888,6 +1017,7 @@ function Invoke-ExactGuestRunner {
     $script:RunnerFailureStage = $Stage
     $script:RunnerExitCode = $null
     $script:RunnerFailureCode = $null
+    $script:InstallerDiagnostic = $null
     $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($RunnerPath, $ConfigPath, $Approval, $MaximumLines, $MaximumChars)
         if ($RunnerPath -ne 'C:\LiiiraaBoost\Phase6\physical-50796b7236b2889c-managed-power-scheme-v47\phase6-physical-runner.exe' -or
@@ -931,6 +1061,10 @@ function Invoke-ExactGuestRunner {
         $diagnostic = Resolve-RunnerFailureDiagnostic -ExitCode ([int64]$response.ExitCode) -Stdout @($response.Stdout) -Stderr @($response.Stderr) -BoundsExceeded ([bool]$response.BoundsExceeded)
         $script:RunnerExitCode = $diagnostic.RunnerExitCode
         $script:RunnerFailureCode = $diagnostic.RunnerFailureCode
+        if ($null -ne $diagnostic.RunnerFailureCode -and
+            $diagnostic.RunnerFailureCode -cmatch '^BLOCKED:installer-exit-(?:5|87|1601|1602|1603|1605|1618|1619|1620|1625|1638|1641|3010|other)$') {
+            $script:InstallerDiagnostic = Get-ExactGuestMsiDiagnostic -Credential $Credential -FailureCode $diagnostic.RunnerFailureCode
+        }
         throw $diagnostic.Reason
     }
     $text = (@($response.Stdout) -join "`n")
@@ -1128,6 +1262,7 @@ function Write-BlockedRecord {
         vmName = $ExpectedVmName; cleanCheckpoint = $ExpectedCleanCheckpoint; installedCheckpoint = $ExpectedInstalledCheckpoint
         completedBoundaries = @($CompletedBoundaries); stage = $RunnerFailureStage
         runnerExitCode = $RunnerExitCode; runnerFailureCode = $RunnerFailureCode
+        installerDiagnostic = $InstallerDiagnostic
         reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))

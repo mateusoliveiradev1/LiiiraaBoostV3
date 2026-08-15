@@ -168,7 +168,7 @@ const invokeBridgeFunction = (name, input) => {
     'Invoke-Expression $function.Extent.Text',
     `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
     name === 'Resolve-MsiLogSummary'
-      ? `${name} -ExitCode ([int64]$input.exitCode) -FailureCode ([string]$input.failureCode) -Bytes ([Convert]::FromBase64String([string]$input.bytesBase64)) | ConvertTo-Json -Compress`
+      ? `${name} -ExitCode ([int64]$input.exitCode) -FailureCode ([string]$input.failureCode) -Bytes ([Convert]::FromBase64String([string]$input.bytesBase64)) -MaximumBytes ([int]$input.maximumBytes) | ConvertTo-Json -Compress`
       : `${name} -ExitCode ([int64]$input.exitCode) -Stdout @($input.stdout) -Stderr @($input.stderr) -BoundsExceeded ([bool]$input.boundsExceeded) | ConvertTo-Json -Compress`,
   ].join('; ');
   const result = spawnSync(
@@ -653,6 +653,7 @@ test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', ()
     exitCode: 1603,
     failureCode: 'BLOCKED:installer-exit-1603',
     bytesBase64: Buffer.from(safeLog, 'utf8').toString('base64'),
+    maximumBytes: 16 * 1024 * 1024,
   });
   assert.deepEqual(summary, {
     InstallerExitCode: 1603,
@@ -675,6 +676,7 @@ test('RED: MSI summary fails closed for unknown actions, secrets, and oversized 
       'Action ended 12:00:00: AttackerControlled. Return value 3.\r\npassword=hidden',
       'utf8',
     ).toString('base64'),
+    maximumBytes: 16 * 1024 * 1024,
   });
   assert.equal(unknown.InstallerExitCode, null);
   assert.equal(unknown.ReturnValue3ActionCode, 'other');
@@ -685,7 +687,8 @@ test('RED: MSI summary fails closed for unknown actions, secrets, and oversized 
   const oversized = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 1603,
     failureCode: 'BLOCKED:installer-exit-1603',
-    bytesBase64: Buffer.alloc(16 * 1024 * 1024 + 1, 65).toString('base64'),
+    bytesBase64: Buffer.alloc(5, 65).toString('base64'),
+    maximumBytes: 4,
   });
   assert.deepEqual(oversized, {
     InstallerExitCode: null,
