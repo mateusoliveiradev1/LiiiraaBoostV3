@@ -395,3 +395,27 @@ inspection-only verifier returned `verified` for manifest SHA-256
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
 | `elevated-lifecycle-result.json` | `fcb5da7972670deab16f09d162509a5ac61a467949b9e990ee2e7f738ce0c20e` | 1324 |
 | `lifecycle-report.json` | `ffb01def0a248365885f6f9fdac70ed50cb39698cb3481193915639188a98d90` | 2252 |
+
+## Append-only authority update: v51 BLOCKED and v52 PASSED
+
+The single v51 invocation was terminated by the host orchestration wrapper during its first
+Cargo child because the wrapper carried an incorrect one-second timeout. The builder failed
+closed before MSI assembly and recorded
+`target/phase6-physical/_blocked/BLOCKED-1786776040410-14848.json`; its record states
+`artifactPublished=false`, `msiBuilt=false`, and `lifecycleVerified=false`. v51 was never
+relaunched or reused.
+
+After correcting only the orchestration timeout, the single monotonic v52 `build-and-smoke`
+completed the signed lifecycle with install, downgrade rejection, rollback-failure drill,
+repair/update, broker-client binding, uninstall, and residual cleanup all PASS. The immutable
+publication is:
+
+- **Root:** `target/phase6-physical/9cd80dbda40cf154dee7bbbdd874626f2b978969/physical-487e3c326b5066a0-managed-power-scheme-v52`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v52`
+- **Operation version:** `managed-power-scheme-v52`
+- **Source commit:** `9cd80dbda40cf154dee7bbbdd874626f2b978969`
+- **Input tree:** `sha256:487e3c326b5066a01dc88a1b91262ce965b89219eddb75097e4c2c9853cd26d7`
+- **Artifact manifest:** `sha256:e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3` (`3241` bytes)
+- **MSI:** `sha256:dda57a509958c48085f309c0fd1c024b9d22a46c421bfbc4ac0ec321a83a83cc` (`15679488` bytes)
+- **Clean-VM config:** `sha256:1caa037270bac1f800a22d215008b06b5ad00834da1e4b110b9adab316095163`
+- **Runner:** `sha256:d89b703f1d944808ac8195d477ceb189a5d8c7b6098a4d69f51f9c4527582110`
