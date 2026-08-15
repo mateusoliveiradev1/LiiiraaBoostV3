@@ -62,6 +62,26 @@ const bridgeSource = () => {
   return readFileSync(bridgePath, 'utf8');
 };
 
+const invokeBridgeFunction = (name, input) => {
+  const encoded = Buffer.from(JSON.stringify(input), 'utf8').toString('base64');
+  const escapedBridgePath = bridgePath.replaceAll("'", "''");
+  const command = [
+    '$tokens = $null; $errors = $null',
+    `$ast = [Management.Automation.Language.Parser]::ParseFile('${escapedBridgePath}', [ref]$tokens, [ref]$errors)`,
+    `$function = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq '${name}' }, $true) | Select-Object -First 1`,
+    "if ($null -eq $function) { throw 'required bridge function is missing' }",
+    'Invoke-Expression $function.Extent.Text',
+    `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
+    `${name} -ExitCode ([int64]$input.exitCode) -Stdout @($input.stdout) -Stderr @($input.stderr) -BoundsExceeded ([bool]$input.boundsExceeded) | ConvertTo-Json -Compress`,
+  ].join('; ');
+  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  return JSON.parse(result.stdout);
+};
+
 const assertInOrder = (source, markers) => {
   let cursor = -1;
   for (const marker of markers) {
@@ -268,6 +288,103 @@ test('RED: failed observation exposes cleanup-only authority for the exact VM', 
   assert.match(cleanup, /Stop-VM\s+-Name\s+\$expectedVmName\s+-Force/u);
   assert.match(cleanup, /AddSeconds\(120\)/u);
   assert.doesNotMatch(cleanup, /Start-VM|Phase6Audit|Invoke-Command|TurnOff|Save/u);
+});
+
+test('RED: runner failures retain only a bounded exit code and one allowlisted code', () => {
+  const diagnostic = invokeBridgeFunction('Resolve-RunnerFailureDiagnostic', {
+    exitCode: 27,
+    stdout: ['BLOCKED:msi-install-failed'],
+    stderr: [],
+    boundsExceeded: false,
+  });
+  assert.deepEqual(diagnostic, {
+    Reason: 'runner-failure',
+    RunnerExitCode: 27,
+    RunnerFailureCode: 'BLOCKED:msi-install-failed',
+  });
+
+  const outOfRange = invokeBridgeFunction('Resolve-RunnerFailureDiagnostic', {
+    exitCode: 70_000,
+    stdout: ['BLOCKED:msi-install-failed'],
+    stderr: [],
+    boundsExceeded: false,
+  });
+  assert.deepEqual(outOfRange, {
+    Reason: 'runner-output-redacted',
+    RunnerExitCode: null,
+    RunnerFailureCode: null,
+  });
+});
+
+test('RED: secrets, arbitrary text, excess output, and multiple codes are fully redacted', () => {
+  const cases = [
+    ['password=not-for-evidence'],
+    ['token=not-for-evidence'],
+    ['bearer not-for-evidence'],
+    ['S-1-5-21-111-222-333-1001'],
+    ['serial=ABC123'],
+    ['fatal: arbitrary runner text'],
+    ['BLOCKED:first-code', 'BLOCKED:second-code'],
+    ['BLOCKED:UPPERCASE-FORBIDDEN'],
+  ];
+  for (const stdout of cases) {
+    const diagnostic = invokeBridgeFunction('Resolve-RunnerFailureDiagnostic', {
+      exitCode: 9,
+      stdout,
+      stderr: [],
+      boundsExceeded: false,
+    });
+    assert.deepEqual(diagnostic, {
+      Reason: 'runner-output-redacted',
+      RunnerExitCode: 9,
+      RunnerFailureCode: null,
+    });
+    const serialized = JSON.stringify(diagnostic);
+    for (const value of stdout) assert.equal(serialized.includes(value), false);
+  }
+
+  const bounded = invokeBridgeFunction('Resolve-RunnerFailureDiagnostic', {
+    exitCode: 9,
+    stdout: ['BLOCKED:valid-but-oversized-transport'],
+    stderr: [],
+    boundsExceeded: true,
+  });
+  assert.deepEqual(bounded, {
+    Reason: 'runner-output-redacted',
+    RunnerExitCode: 9,
+    RunnerFailureCode: null,
+  });
+});
+
+test('RED: blocked record persists stage and diagnostics without raw runner output', () => {
+  const source = bridgeSource();
+  const runnerBody = source.slice(
+    source.indexOf('function Invoke-ExactGuestRunner'),
+    source.indexOf('function Read-ExactGuestBytes'),
+  );
+  for (const marker of [
+    'RedirectStandardOutput',
+    'RedirectStandardError',
+    'MaximumRunnerOutputLines',
+    'MaximumRunnerOutputChars',
+    'Resolve-RunnerFailureDiagnostic',
+    'RunnerFailureStage',
+    'RunnerExitCode',
+    'RunnerFailureCode',
+  ])
+    assert.match(runnerBody, new RegExp(marker, 'u'));
+
+  const recordBody = source.slice(
+    source.indexOf('function Write-BlockedRecord'),
+    source.indexOf('function Invoke-CleanVmRun'),
+  );
+  assert.match(recordBody, /stage\s*=\s*\$RunnerFailureStage/u);
+  assert.match(recordBody, /runnerExitCode\s*=\s*\$RunnerExitCode/u);
+  assert.match(recordBody, /runnerFailureCode\s*=\s*\$RunnerFailureCode/u);
+  assert.doesNotMatch(recordBody, /(?:Output|Stdout|Stderr)\s*=/u);
+  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'installed-ready'/u);
+  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'reboot-pending'/u);
+  assert.match(source, /Invoke-ExactGuestRunner\s+-Credential\s+\$Credential\s+-Stage\s+'completed'/u);
 });
 
 test('mutation corpus detects target, custody, lifecycle, command, and evidence widening', () => {
