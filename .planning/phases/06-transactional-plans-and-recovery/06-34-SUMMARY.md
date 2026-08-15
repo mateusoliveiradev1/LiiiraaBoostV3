@@ -364,3 +364,27 @@ The cleanup-only log
 confirms VM `LiiiraaBoost-W11-25H2-Clean` remained `Off` and exact checkpoint
 `Clean-Windows-Ready` remained ID `a918f5c0-ade0-4bac-bca3-baa91686777e`. Task 2 and Task 3
 remain closed. There is no retry and no v49.
+
+## Append-Only v49 Audit and Physical Blocker Addendum
+
+The bridge was rebound to the exact seven-entry v41 -> v43 -> v44 -> v45 -> v46 -> v47 -> v49
+deterministic chain through RED `16bd529` and GREEN `7d46778`; pre-artifact v48 remains outside
+the chain. The 22/22 suite and exact v49 dry-run passed. One read-only Audit then passed and
+restored the VM to `Off`:
+
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-030819-phase6audit-console.log`
+- **Audit log size:** `1127` bytes
+- **Audit log SHA-256:** `e46e98f9d4bf694e3fb499bcafc78e09c7cb28ca86296dd5427775ea3ae3b593`
+- **Audit boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+
+The single v49 `RunCleanVm` later failed closed at `preflight` with
+`BLOCKED:guest-acl-cardinality` after exact staging but before runner execution. The immutable
+blocker is `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-031038-clean-vm-BLOCKED.json`,
+`964` bytes, SHA-256 `257ac884ed7f3b93ef3c93f255d980c83e7625103d67f38c7a659d6b2d5e0f61`.
+Cleanup log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-031127-phase6observationcleanup-console.log`,
+`2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`,
+proves final VM `Off` and unchanged checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`.
+
+The cause was a stale v47 root literal in both ACL custody functions. RED `7d842e2` and GREEN
+`ab5edd8` now pass only the closed bridge-derived guest root and assert the exact bound build
+literal before guest ACL access. v49 remains permanently BLOCKED and is not reusable.

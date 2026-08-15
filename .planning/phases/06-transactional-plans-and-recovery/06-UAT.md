@@ -810,3 +810,29 @@ final VM state is `Off`. This is the terminal v48 handoff: do not retry, mint v4
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v49` — CLEAN WINDOWS VM BLOCKED
+
+- **Operation version:** `managed-power-scheme-v49`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v49`
+- **Artifact manifest SHA-256:** `e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09`
+- **Simulation run SHA-256:** `5fa130be15b8cc0e3da89b2825e791fd2d5e725f3bc2f296341f4a54d4daf92d`
+- **Result:** `BLOCKED:guest-acl-cardinality`
+- **Stage:** `preflight`
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, `exact-artifact-staged`
+- **Runner/MSI/apply:** not started
+- **Blocker record:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-031038-clean-vm-BLOCKED.json`, `964` bytes, SHA-256 `257ac884ed7f3b93ef3c93f255d980c83e7625103d67f38c7a659d6b2d5e0f61`
+- **Cleanup evidence:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-031127-phase6observationcleanup-console.log`, `2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`
+- **Cleanup result:** `PASSED`, VM `Off`, exact clean checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`
+
+The one v49 physical attempt failed before ACL provisioning because the two closed guest-custody
+functions still named the prior v47 staging root while the authenticated copy correctly staged
+v49. No runner, MSI, installed checkpoint, approval phrase, power mutation, reboot, evidence
+ingestion, or human review followed. The cleanup-only action returned the running VM to `Off`.
+
+The causal correction was completed through RED `7d842e2` and GREEN `ab5edd8`: both custody
+boundaries now receive only the bridge-derived closed guest root and independently compare it to
+the exact bound build literal before ACL inspection or mutation. The full bridge suite remains
+22/22 PASS. v49 is permanently BLOCKED and will not be relaunched.
