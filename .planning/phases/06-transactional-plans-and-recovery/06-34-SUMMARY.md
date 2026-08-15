@@ -388,3 +388,23 @@ proves final VM `Off` and unchanged checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91
 The cause was a stale v47 root literal in both ACL custody functions. RED `7d842e2` and GREEN
 `ab5edd8` now pass only the closed bridge-derived guest root and assert the exact bound build
 literal before guest ACL access. v49 remains permanently BLOCKED and is not reusable.
+
+## Append-Only Final v50 Audit and Physical Blocker Addendum
+
+The final v50 bridge rebind passed RED `9aaccde`, GREEN `042f31f`, the 22/22 policy suite, and
+the exact dry-run. Its single read-only Audit passed and restored the VM to `Off`; immutable log
+`C:\Users\Liiiraa\VM-Lab\Evidence\20260815-032307-phase6audit-console.log` is `1127` bytes with
+SHA-256 `acec533e814b01854a37e72152a7970e5ea2e3f72f553f1c10cebb4cc06050e8`.
+
+The sole v50 `RunCleanVm` passed exact artifact, deterministic, Hyper-V, restore, integration,
+staging, ACL provisioning, and ACL verification boundaries. It then failed closed before runner
+spawn with `fixed runner/config path mismatch`; the runner/config pair assertion still named the
+historical v47 paths. The immutable blocker is
+`C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-032451-clean-vm-BLOCKED.json`, `1105` bytes,
+SHA-256 `08863181745d88b5fa385ae5c4252ed733331f6cf97951fbcbbabe88cadeb0e8`.
+
+No runner, MSI, apply, reboot, installed checkpoint, evidence ingestion, or human review ran.
+Cleanup log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-032525-phase6observationcleanup-console.log`,
+`2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`,
+proves final VM `Off` and unchanged checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`.
+This is terminal: no v51, no retry, and Task 2/Task 3 remain closed.

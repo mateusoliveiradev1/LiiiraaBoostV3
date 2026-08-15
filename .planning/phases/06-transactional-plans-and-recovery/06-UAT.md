@@ -872,3 +872,37 @@ the exact bound build literal before ACL inspection or mutation. The full bridge
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v50` — FINAL CLEAN WINDOWS VM BLOCKED
+
+- **Operation version:** `managed-power-scheme-v50`
+- **Build ID:** `physical-487e3c326b5066a0-managed-power-scheme-v50`
+- **Artifact manifest SHA-256:** `c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b`
+- **Simulation run SHA-256:** `ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b`
+- **Evidence manifest SHA-256 before physical run:** `41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c`
+- **Audit:** `PASSED`, read-only; log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-032307-phase6audit-console.log`, `1127` bytes, SHA-256 `acec533e814b01854a37e72152a7970e5ea2e3f72f553f1c10cebb4cc06050e8`
+- **Result:** `BLOCKED:fixed-runner-config-path-mismatch`
+- **Stage:** `installed-ready`
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, `exact-artifact-staged`, `guest-artifact-acl-provisioned`, `guest-artifact-acl-verified`
+- **Runner exit/failure code:** unavailable; the runner process did not start
+- **MSI diagnostic:** unavailable/not applicable; no MSI invocation or guest MSI log occurred
+- **Raw runner/MSI output exported:** no
+- **Canonical blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260815-032451-clean-vm-BLOCKED.json`, `1105` bytes, SHA-256 `08863181745d88b5fa385ae5c4252ed733331f6cf97951fbcbbabe88cadeb0e8`
+- **Tracked blocker mirror:** `.planning/phases/06-transactional-plans-and-recovery/06-26-v50-BLOCKED.json`
+- **Cleanup:** `PASSED`; log `C:\Users\Liiiraa\VM-Lab\Evidence\20260815-032525-phase6observationcleanup-console.log`, `2755` bytes, SHA-256 `fed4b585c4bb98369b4821107ec20b04390e035a9e3bef20ec1d3f5aa70dc2f9`
+- **Final VM state:** `Off`; exact clean checkpoint ID `a918f5c0-ade0-4bac-bca3-baa91686777e`
+- **Installed checkpoint/apply/reboot/ingestion:** not reached
+- **Human review:** not presented; Task 2 and Task 3 remain closed
+
+The final v50 bridge authenticated the exact eight-entry deterministic chain, restored the clean
+checkpoint, staged only the manifest-bound artifact, and both provisioned and independently
+verified the protected guest ACL. It then failed closed before spawning the runner because the
+runner/config pair assertion still contained the historical v47 literal. No MSI, installed-ready
+record, installed checkpoint, approval phrase, optimization, reboot, raw-envelope collection,
+physical-writer ingestion, physical PASS, or review followed.
+
+The cleanup-only action returned the running VM to `Off` and preserved the exact clean checkpoint.
+This is the terminal Phase 6 physical blocker: v50 is not reusable, no v51 is authorized, and
+the workflow must not advance to Task 2 or Task 3 from this evidence.
