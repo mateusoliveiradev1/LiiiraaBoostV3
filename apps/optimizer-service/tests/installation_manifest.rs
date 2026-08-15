@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use service::installation_manifest::{
     AuthenticodeEvidence, CustodyBackend, CustodyError, InstalledAdmissionState, SignerEvidence,
     TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_bytes, local_msi_database_path,
-    verify_installed_manifest_with_backend,
+    same_closed_windows_path, verify_installed_manifest_with_backend,
 };
 use sha2::{Digest, Sha256};
 
@@ -43,6 +43,36 @@ fn msi_database_view_accepts_only_canonical_local_verbatim_disk_paths() {
             "MSI database path {rejected:?} must fail closed"
         );
     }
+}
+
+#[cfg(windows)]
+#[test]
+fn installed_custody_path_equivalence_is_closed_to_normal_and_verbatim_roots() {
+    assert!(same_closed_windows_path(
+        Path::new(r"C:\Program Files\Liiiraa Boost\installation-manifest.json"),
+        Path::new(r"\\?\C:\Program Files\Liiiraa Boost\installation-manifest.json"),
+    ));
+    assert!(same_closed_windows_path(
+        Path::new(r"\\server\share\Liiiraa Boost\installation-manifest.json"),
+        Path::new(r"\\?\UNC\server\share\Liiiraa Boost\installation-manifest.json"),
+    ));
+    for invalid in [
+        r"installation-manifest.json",
+        r"C:\Program Files\Liiiraa Boost\.\installation-manifest.json",
+        r"C:\Program Files\Liiiraa Boost\..\installation-manifest.json",
+        r"\\.\C:\Program Files\Liiiraa Boost\installation-manifest.json",
+        r"\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\installation-manifest.json",
+    ] {
+        assert!(!same_closed_windows_path(Path::new(invalid), Path::new(invalid)));
+    }
+    assert!(!same_closed_windows_path(
+        Path::new(r"C:\Program Files\Liiiraa Boost\installation-manifest.json"),
+        Path::new(r"\\?\D:\Program Files\Liiiraa Boost\installation-manifest.json"),
+    ));
+    assert!(!same_closed_windows_path(
+        Path::new(r"\\server\share\Liiiraa Boost\installation-manifest.json"),
+        Path::new(r"\\?\UNC\server\other\Liiiraa Boost\installation-manifest.json"),
+    ));
 }
 
 #[derive(Default)]
