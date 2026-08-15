@@ -784,7 +784,10 @@ function Set-ExactGuestArtifactCustody {
     param([Parameter(Mandatory)][PSCredential]$Credential)
 
     Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        $fixedRoot = 'C:\LiiiraaBoost\Phase6\physical-50796b7236b2889c-managed-power-scheme-v47'
+        param($fixedRoot)
+        if ($fixedRoot -cne 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v49') {
+            throw 'BLOCKED:guest-root-mismatch'
+        }
         $fixedFiles = @(
             'artifact-manifest.json',
             'artifact-manifest.json.p7s',
@@ -832,7 +835,7 @@ function Set-ExactGuestArtifactCustody {
             }
         }
         Set-Acl -LiteralPath $fixedRoot -AclObject (New-FixedDirectorySecurity)
-    }
+    } -ArgumentList $ExpectedGuestRoot
     [void]$CompletedBoundaries.Add('guest-artifact-acl-provisioned')
 }
 
@@ -840,7 +843,10 @@ function Assert-ExactGuestArtifactCustody {
     param([Parameter(Mandatory)][PSCredential]$Credential)
 
     $result = Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        $fixedRoot = 'C:\LiiiraaBoost\Phase6\physical-50796b7236b2889c-managed-power-scheme-v47'
+        param($fixedRoot)
+        if ($fixedRoot -cne 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v49') {
+            throw 'BLOCKED:guest-root-mismatch'
+        }
         $fixedFiles = @(
             'artifact-manifest.json',
             'artifact-manifest.json.p7s',
@@ -891,7 +897,7 @@ function Assert-ExactGuestArtifactCustody {
             }
         }
         [pscustomobject]@{ guestSid = $guestSid; snapshots = @($snapshots) }
-    }
+    } -ArgumentList $ExpectedGuestRoot
     if (@($result.snapshots).Count -ne 13) {
         throw 'BLOCKED:guest-acl-cardinality'
     }
