@@ -22,7 +22,7 @@ $ErrorActionPreference = 'Stop'
 
 $ExpectedVmName = 'LiiiraaBoost-W11-25H2-Clean'
 $ExpectedCleanCheckpoint = 'Clean-Windows-Ready'
-$ExpectedCleanCheckpointId = 'ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075'
+$ExpectedCleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $ExpectedBackupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43'
 $ExpectedBackupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef'
 $ExpectedInstalledCheckpoint = 'LiiiraaBoost-Installed'
