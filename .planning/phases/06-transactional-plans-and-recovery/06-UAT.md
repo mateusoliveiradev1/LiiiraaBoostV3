@@ -581,3 +581,23 @@ evidence, or advanced to Task 2/Task 3. No v47 was minted.
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v47` — AUDIT LAUNCH BLOCKED
+
+- **Artifact authority:** verified, manifest SHA-256 `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`
+- **Deterministic authority:** admitted, run SHA-256 `b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6`
+- **Bridge:** 19/19 PASS and exact v47 dry-run PASS
+- **Requested action:** one absolute-wrapper `Phase6Audit`
+- **Result:** `BLOCKED-AUDIT-COMMAND-PARSE`
+- **Wrapper/bridge execution:** not started
+- **Durable v47 Audit log:** none created
+- **VM state:** not asserted; non-elevated Hyper-V read access was denied
+- **Physical mutation:** none observed or claimed
+
+The outer PowerShell parser rejected the fixed `Start-Process` argument list before opening UAC
+or executing `Run-LabElevated.ps1`. The fail-closed rule forbids a retry in this preparation.
+No `RunCleanVm`, checkpoint restore/create, guest staging, runner, MSI, apply, reboot, or physical
+evidence boundary executed. The deterministic-only v47 evidence manifest remains unchanged at
+SHA-256 `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`.

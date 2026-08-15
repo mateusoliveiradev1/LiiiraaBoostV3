@@ -284,3 +284,29 @@ services healthy, and returned the initially Off VM to `Off`.
 No build, remint, simulation, `RunCleanVm`, guest runner, checkpoint restore/create, MSI, or
 optimization action ran. The earlier relative-path invocation blocker remains append-only. The
 v46 tuple is ready for the separately authorized single 06-26 physical attempt.
+
+## Append-Only v47 Bridge and Blocked Audit Launch Addendum
+
+The v46 `BLOCKED:artifact-custody` attempt remains immutable and was not relaunched. The staging
+ACL and bounded custody diagnostics were corrected through TDD before the single monotonic v47
+publication. The exact six-link v41 -> v43 -> v44 -> v45 -> v46 -> v47 bridge passed all 19
+policy tests and its non-elevated dry-run against clean checkpoint
+`ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`.
+
+- **Operation version:** `managed-power-scheme-v47`
+- **Build ID:** `physical-50796b7236b2889c-managed-power-scheme-v47`
+- **Source commit:** `29827368ebfe92abce6135807af82d58c5b1326a`
+- **Artifact manifest SHA-256:** `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`
+- **Simulation run SHA-256:** `b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6`
+- **Evidence manifest SHA-256:** `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`
+- **Bridge TDD:** RED `46f7c79`, GREEN `0064398`; full suite 19/19 PASS
+- **Dry-run:** PASS with the exact v47 tuple, fixed VM, checkpoint, artifact, and deterministic chain
+- **Audit launch:** `BLOCKED-AUDIT-COMMAND-PARSE`; PowerShell rejected the fixed argument list before `Start-Process`, UAC, wrapper, or bridge execution
+- **New Audit log:** none; the newest pre-existing `phase6audit` log predates the v47 build
+- **Final VM state:** not asserted because the non-elevated read-only Hyper-V query was denied
+
+The Audit was not relaunched under the fail-closed instruction. No Hyper-V command, checkpoint
+restore/create, guest staging, guest runner, MSI, optimization, or `RunCleanVm` action was
+started by the rejected command. v47 remains valid through deterministic admission and bridge
+dry-run, but it is BLOCKED before Audit readiness and before any separately authorized 06-26
+physical attempt.

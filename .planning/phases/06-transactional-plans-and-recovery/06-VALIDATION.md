@@ -165,3 +165,12 @@ Manual gates cannot be converted into automated PASS by deterministic fixtures. 
 - Deterministic admission advanced append-only to v45 with run SHA-256 `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e` and evidence manifest SHA-256 `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
 - The exact v45 bridge passed its 15-case policy suite, dry-run, planned evaluator, and one elevated read-only Audit against clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`; the backup checkpoint ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef` remained present, `LiiiraaBoost-Installed` remained absent, and the VM returned to `Off`.
 - Audit log SHA-256: `f66211a08104d3165e91aa099cb8def2964385f0ca3972aac0c233b27d4cae1e`. No guest runner, `RunCleanVm`, checkpoint mutation, MSI installation, optimization, physical PASS, or human review occurred.
+
+## Append-Only v47 Preparation Addendum — 2026-08-15
+
+- The v46 clean-VM attempt remains permanently BLOCKED at `artifact-custody` and was not relaunched.
+- The single v47 artifact passed build-and-smoke and the real custody verifier: build `physical-50796b7236b2889c-managed-power-scheme-v47`, artifact manifest SHA-256 `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`.
+- Deterministic admission advanced append-only to v47 with run SHA-256 `b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6` and evidence manifest SHA-256 `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`; v46 is preserved byte-for-byte at SHA-256 `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`.
+- Guest ACL custody and granular redacted custody diagnostics passed TDD, Windows Cargo checks, builder/architecture/key-link gates, the bridge's 19-case suite, and the exact v47 dry-run.
+- The one Audit launch command failed in the outer PowerShell parser before `Start-Process`, UAC, wrapper, bridge, or Hyper-V execution. It was not retried. No new Audit log, `RunCleanVm`, guest runner, checkpoint action, MSI, apply, physical PASS, or human review exists for v47.
+- v47 is therefore valid only through deterministic simulation and bridge dry-run; physical readiness remains BLOCKED before the read-only Audit.
