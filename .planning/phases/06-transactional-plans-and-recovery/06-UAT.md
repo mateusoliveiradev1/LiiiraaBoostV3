@@ -405,3 +405,39 @@ checkpoint creation, credential reuse, or guest execution. Cleanup evidence is
 `96860830f089b5504e8c6d4861f122712408bc9bca8bb36613c8e65e351bb11a`, and confirms the exact
 clean checkpoint ID remained present. This v45 attempt is permanently BLOCKED and must not be
 relaunched, relabeled as physical evidence, or advanced to Task 2/Task 3. No v46 was minted.
+
+---
+
+## Operation `managed-power-scheme-v46` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v46`
+- **Artifact manifest SHA-256:** `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`
+- **Run evidence SHA-256:** `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`
+- **Evidence manifest SHA-256:** `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v46",
+  "buildId": "physical-c714ca4c5ad147f4-managed-power-scheme-v46",
+  "artifactManifestSha256": "a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da",
+  "runEvidenceSha256": "ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229",
+  "evidenceManifestSha256": "d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```

@@ -204,3 +204,12 @@ _Completed: 2026-08-14_
 - The active v45 run binds predecessor evidence SHA-256 `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e` from v44. v41 and v43 remain the earlier immutable superseded prefix; rejected v42 remains outside the chain.
 - Current evidence manifest SHA-256: `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v46
+
+- The physically BLOCKED v45 `run-config-canonical` guest-runner attempt was not relaunched. Its deterministic admission is now the immutable superseded predecessor record at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v45-evidence-manifest.json`, SHA-256 `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
+- `managed-power-scheme-v46` is the sole active deterministic admission for build `physical-c714ca4c5ad147f4-managed-power-scheme-v46`, artifact manifest SHA-256 `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`, and run evidence SHA-256 `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`.
+- The active v46 run binds predecessor evidence SHA-256 `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e` from v45. v41, v43, and v44 remain the earlier immutable superseded prefix; rejected v42 remains outside the chain.
+- Current evidence manifest SHA-256: `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+- The superseded PLAN command naming a removed desktop-local Vitest file returned no test files; the established fixture-owner gate from this summary (`@liiiraa/desktop-simulator`, 13/13) and the phase6-evidence gate (64/64) both passed. Simulation was invoked exactly once and was not retried.
