@@ -336,3 +336,30 @@ The authorized cleanup-only action then returned the VM from `Running` to `Off` 
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v45` — READ-ONLY AUDIT PASSED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v45`
+- **Artifact manifest SHA-256:** `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`
+- **Clean config SHA-256:** `b760a88bdb909df5431e829db0fcedd72bbbe5ddffb8248b94317a180984e79a`
+- **Simulation run SHA-256:** `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e`
+- **Evidence manifest SHA-256:** `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`
+- **Clean checkpoint:** `Clean-Windows-Ready`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Installed checkpoint:** `LiiiraaBoost-Installed` absent
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-215636-phase6audit-console.log`
+- **Audit log SHA-256:** `f66211a08104d3165e91aa099cb8def2964385f0ca3972aac0c233b27d4cae1e`
+- **Audit result:** `PASSED`
+- **Completed boundaries:** `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`
+- **Final VM state:** `Off`
+
+The elevated action was only `Audit`. It did not restore or create a checkpoint, stage guest
+bytes, invoke PowerShell Direct, run the guest runner, install the MSI, mutate a power scheme,
+or call `RunCleanVm`. The v43 and v44 BLOCKED records and the entire prior UAT prefix remain
+immutable. This v45 tuple is ready for the separately authorized 06-26 clean-VM workflow.

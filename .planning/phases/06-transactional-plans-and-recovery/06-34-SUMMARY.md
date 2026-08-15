@@ -211,3 +211,29 @@ bytes, invoke PowerShell Direct, run the guest runner, install the MSI, mutate a
 or call `RunCleanVm`. The exact v44 tuple is ready for a separately authorized 06-26 run.
 
 Commits: RED `a3cebc7d`, checkpoint-identity RED `d3d1adca`, GREEN `605cd707`.
+
+## Append-Only v45 Bridge and Read-Only Audit Addendum
+
+The v44 guest-runner failure remains append-only BLOCKED history and was not relaunched. Before
+the monotonic remint, the bridge gained TDD coverage for bounded runner failure diagnostics:
+only exit codes 1–65535 and one exact `BLOCKED:[a-z0-9-]{1,64}` code may be persisted; secret,
+oversized, multi-line, or arbitrary output becomes `runner-output-redacted` with no raw content.
+The v45 bridge validates the exact four-link v41 -> v43 -> v44 -> v45 deterministic chain.
+
+- **Operation version:** `managed-power-scheme-v45`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v45`
+- **Source commit:** `7c3525b12ce76619f711ff6f6183ec884c60764f`
+- **Artifact manifest SHA-256:** `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`
+- **Simulation run SHA-256:** `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e`
+- **Evidence manifest SHA-256:** `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`
+- **Clean checkpoint:** `Clean-Windows-Ready`, ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Preserved backup:** `Clean-Windows-Ready-PreLabAccount-v43`, ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef`
+- **Installed checkpoint:** `LiiiraaBoost-Installed` absent
+- **Audit log:** `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-215636-phase6audit-console.log`
+- **Audit log SHA-256:** `f66211a08104d3165e91aa099cb8def2964385f0ca3972aac0c233b27d4cae1e`
+- **Audit result:** `PASSED`, boundaries `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, and `hyper-v-audit-pass`
+- **Final VM state:** `Off`
+
+The elevated action was only `Audit`. It did not invoke the guest runner or `RunCleanVm`, stage
+guest bytes, install the MSI, create/restore a checkpoint, or optimize the guest. Runner
+diagnostic RED `08ace3cd`, GREEN `7c3525b1`; v45 bridge RED `cad519d4`, GREEN `960ff2ea`.

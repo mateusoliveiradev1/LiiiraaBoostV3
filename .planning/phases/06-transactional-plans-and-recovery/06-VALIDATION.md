@@ -156,3 +156,12 @@ Manual gates cannot be converted into automated PASS by deterministic fixtures. 
 - Deterministic admission advanced append-only to v44 with run SHA-256 `a4a906c3e350a5d1c1d98a936ca350b67c76deb3b96b69646ae285d195852a9e` and evidence manifest SHA-256 `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
 - The exact v44 bridge passed its 12-case policy suite, dry-run, planned evaluator, key-link gate, and one elevated read-only Audit against clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`; the backup checkpoint ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef` remained present, `LiiiraaBoost-Installed` remained absent, and the VM returned to `Off`.
 - Audit log SHA-256: `0d05dc9125b175de33943ede394dd211a9f7773d16ed41bec1f282c7548862ee`. No guest runner, `RunCleanVm`, checkpoint mutation, MSI installation, optimization, physical PASS, or human review occurred.
+
+## Append-Only v45 Remint and Audit Addendum — 2026-08-14
+
+- v44 remains physically BLOCKED after its single guest-runner attempt and was not relaunched; its exact evidence manifest is preserved as the superseded record with SHA-256 `da004988b19b58dc423894138919de9577d340322ebbaeb02ae3f7db2393e026`.
+- Runner failure persistence now has RED/GREEN proof that only a bounded exit code and one exact allowlisted `BLOCKED:[a-z0-9-]{1,64}` code survive; sensitive, arbitrary, oversized, multi-line, or malformed output is replaced by `runner-output-redacted`, and external BLOCKED records expose only `stage`, `runnerExitCode`, and `runnerFailureCode`.
+- The single monotonic v45 artifact passed build-and-smoke and the real 06-35 verifier: build `physical-68bb4f974e23ee26-managed-power-scheme-v45`, artifact manifest SHA-256 `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`.
+- Deterministic admission advanced append-only to v45 with run SHA-256 `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e` and evidence manifest SHA-256 `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`.
+- The exact v45 bridge passed its 15-case policy suite, dry-run, planned evaluator, and one elevated read-only Audit against clean checkpoint ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`; the backup checkpoint ID `ebccd5f3-5645-4089-b469-fa4d851fc6ef` remained present, `LiiiraaBoost-Installed` remained absent, and the VM returned to `Off`.
+- Audit log SHA-256: `f66211a08104d3165e91aa099cb8def2964385f0ca3972aac0c233b27d4cae1e`. No guest runner, `RunCleanVm`, checkpoint mutation, MSI installation, optimization, physical PASS, or human review occurred.
