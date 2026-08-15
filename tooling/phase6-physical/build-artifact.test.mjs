@@ -584,7 +584,7 @@ test('RED: real v53 MSI 1920 fixture binds service startup to the exact service 
 
   const source = readFileSync('apps/optimizer-service/src/windows_pipe.rs', 'utf8');
   const exactSid = 'S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564';
-  assert.match(source, new RegExp(`EXPECTED_SERVICE_SID[^\\n]+${exactSid}`, 'u'));
+  assert.match(source, new RegExp(`EXPECTED_SERVICE_SID[\\s\\S]{0,96}${exactSid}`, 'u'));
   assert.match(source, /select_expected_service_sid/u);
   assert.doesNotMatch(source, /find\(\|\(_, sid\)\| sid\.starts_with\("S-1-5-80-"\)\)/u);
 });

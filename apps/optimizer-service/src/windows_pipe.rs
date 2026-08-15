@@ -375,6 +375,8 @@ mod windows_host {
     const SECRET_FILE: &str = "broker-install-secret.dpapi";
     const DATABASE_FILE: &str = "broker.sqlite3";
     const ADMISSION_FILE: &str = "last-admitted-installation.json";
+    const EXPECTED_SERVICE_SID: &str =
+        "S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564";
 
     #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     pub enum HostErrorCode {
@@ -997,11 +999,15 @@ mod windows_host {
         unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) }
             .map_err(|_| host_error(HostErrorCode::Authentication))?;
         let token = NativeHandle::new(token)?;
-        token_group_sids(token.raw())?
-            .into_iter()
-            .find(|(_, sid)| sid.starts_with("S-1-5-80-"))
-            .map(|(_, sid)| sid)
+        select_expected_service_sid(token_group_sids(token.raw())?)
             .ok_or_else(|| host_error(HostErrorCode::Authentication))
+    }
+
+    fn select_expected_service_sid(groups: Vec<(u32, String)>) -> Option<String> {
+        groups
+            .into_iter()
+            .find(|(_, sid)| sid == EXPECTED_SERVICE_SID)
+            .map(|(_, sid)| sid)
     }
 
     fn logon_sid(token: HANDLE) -> Result<String, HostError> {
@@ -1386,8 +1392,7 @@ mod windows_host {
                 (0_u32, "S-1-5-80-0".to_owned()),
                 (
                     0_u32,
-                    "S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564"
-                        .to_owned(),
+                    "S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564".to_owned(),
                 ),
             ];
             assert_eq!(

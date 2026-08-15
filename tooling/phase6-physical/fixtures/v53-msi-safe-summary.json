@@ -1,0 +1,11 @@
+{
+  "kind": "phase6-v53-sanitized-msi-fixture",
+  "schemaVersion": "1.0",
+  "sourceLogSha256": "sha256:bca766b5884f090ffb35756e64343165c6e22e568dafcdceac12604bb238b073",
+  "sourceLogSizeBytes": 138200,
+  "encodingCode": "utf16le-bom",
+  "installerExitCode": 1603,
+  "returnValue3ActionCode": "install",
+  "returnValue3ActionIdentifier": "INSTALL",
+  "msiErrorCode": 1920
+}
