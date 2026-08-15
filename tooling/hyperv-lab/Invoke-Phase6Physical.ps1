@@ -1154,32 +1154,38 @@ function Resolve-MsiLogSummary {
     }
 }
 
-function Get-ExactGuestMsiDiagnostic {
+function Resolve-InstallerSidecarSummary {
     param(
-        [Parameter(Mandatory)][PSCredential]$Credential,
+        $Sidecar,
+        [Parameter(Mandatory)][string]$SidecarStatus,
+        $SidecarSha256,
+        $SidecarSizeBytes,
         [Parameter(Mandatory)][string]$FailureCode
     )
 
-    $resolver = ${function:Resolve-MsiLogSummary}
-    $fixedPath = Join-Path $CurrentAuthority.GuestRoot 'state\clean-windows-vm\diagnostics\msi-install.log'
-    $remote = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
-        param($LogPath, $Code, $Resolver)
-        if (-not (Test-Path -LiteralPath $LogPath -PathType Leaf)) {
-            return [pscustomobject][ordered]@{
-                InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
-                ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
-            }
-        }
-        $item = Get-Item -LiteralPath $LogPath
-        if ($item.Length -le 0 -or $item.Length -gt 16777216) {
-            return [pscustomobject][ordered]@{
-                InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
-                ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
-            }
-        }
-        $bytes = [IO.File]::ReadAllBytes($LogPath)
-        & $Resolver -ExitCode 2 -FailureCode $Code -Bytes $bytes -MaximumBytes 16777216
-    } -ArgumentList $fixedPath, $FailureCode, $resolver
+    $fallbackStatus = if ($SidecarStatus -cin @('sidecar-missing', 'sidecar-unparseable')) {
+        $SidecarStatus
+    }
+    else {
+        'sidecar-unparseable'
+    }
+    $fallbackExit = $null
+    if ($FailureCode -cmatch '^BLOCKED:installer-exit-(?<code>5|87|1601|1602|1603|1605|1618|1619|1620|1625|1638|1641|3010)$') {
+        $fallbackExit = [int]$Matches.code
+    }
+    $fallback = [pscustomobject][ordered]@{
+        DiagnosticStatus = $fallbackStatus
+        InstallerExitCode = $fallbackExit
+        LogStatus = 'unknown'
+        LogSha256 = $null
+        LogSizeBytes = $null
+        ReturnValue3ActionCode = 'unavailable'
+        ReturnValue3ActionIdentifier = $null
+        SidecarSha256 = $null
+        SidecarSizeBytes = $null
+    }
+    if ($SidecarStatus -cne 'present' -or $null -eq $Sidecar) { return $fallback }
+
     $allowedExitCodes = @(5, 87, 1601, 1602, 1603, 1605, 1618, 1619, 1620, 1625, 1638, 1641, 3010)
     $allowedActionCodes = @(
         'unavailable', 'none', 'other', 'launch-conditions', 'cost-finalize',
@@ -1190,28 +1196,47 @@ function Get-ExactGuestMsiDiagnostic {
         'LaunchConditions', 'CostFinalize', 'InstallValidate', 'InstallFiles',
         'InstallServices', 'StartServices', 'InstallFinalize', 'INSTALL'
     )
-    $exit = if ($null -eq $remote.InstallerExitCode) { $null } else { [int]$remote.InstallerExitCode }
-    $hash = if ($null -eq $remote.LogSha256) { $null } else { [string]$remote.LogSha256 }
-    $size = if ($null -eq $remote.LogSizeBytes) { $null } else { [int64]$remote.LogSizeBytes }
-    $actionCode = [string]$remote.ReturnValue3ActionCode
-    $actionIdentifier = if ($null -eq $remote.ReturnValue3ActionIdentifier) { $null } else { [string]$remote.ReturnValue3ActionIdentifier }
-    $invalid = ($null -ne $exit -and $allowedExitCodes -notcontains $exit) -or
+    $expectedProperties = @(
+        'kind', 'schemaVersion', 'installerExitCode', 'logStatus', 'logSha256',
+        'logSizeBytes', 'returnValue3ActionCode', 'returnValue3ActionIdentifier'
+    )
+    $actualProperties = @($Sidecar.PSObject.Properties | ForEach-Object { $_.Name })
+    $exit = if ($null -eq $Sidecar.installerExitCode) { $null } else { [int]$Sidecar.installerExitCode }
+    $hash = if ($null -eq $Sidecar.logSha256) { $null } else { [string]$Sidecar.logSha256 }
+    $size = if ($null -eq $Sidecar.logSizeBytes) { $null } else { [int64]$Sidecar.logSizeBytes }
+    $actionCode = [string]$Sidecar.returnValue3ActionCode
+    $actionIdentifier = if ($null -eq $Sidecar.returnValue3ActionIdentifier) { $null } else { [string]$Sidecar.returnValue3ActionIdentifier }
+    $sidecarHash = if ($null -eq $SidecarSha256) { $null } else { [string]$SidecarSha256 }
+    $sidecarSize = if ($null -eq $SidecarSizeBytes) { $null } else { [int64]$SidecarSizeBytes }
+    $expectedFailure = if ($null -eq $exit) { $null } else { "BLOCKED:installer-exit-$exit" }
+    $invalid = $actualProperties.Count -ne $expectedProperties.Count -or
+        @($actualProperties | Where-Object { $expectedProperties -cnotcontains $_ }).Count -ne 0 -or
+        [string]$Sidecar.kind -cne 'phase6-msi-safe-diagnostic' -or
+        [string]$Sidecar.schemaVersion -cne '1.0' -or
+        $null -eq $exit -or $allowedExitCodes -notcontains $exit -or
+        $FailureCode -cne $expectedFailure -or
+        [string]$Sidecar.logStatus -cnotin @('present', 'log-missing', 'log-unparseable') -or
         ($null -ne $hash -and $hash -cnotmatch '^sha256:[a-f0-9]{64}$') -or
         ($null -ne $size -and ($size -le 0 -or $size -gt 16777216)) -or
         ($allowedActionCodes -notcontains $actionCode) -or
-        ($null -ne $actionIdentifier -and $allowedIdentifiers -notcontains $actionIdentifier)
-    if ($invalid) {
-        return [pscustomobject][ordered]@{
-            InstallerExitCode = $null; LogSha256 = $null; LogSizeBytes = $null
-            ReturnValue3ActionCode = 'unavailable'; ReturnValue3ActionIdentifier = $null
-        }
-    }
+        ($null -ne $actionIdentifier -and $allowedIdentifiers -notcontains $actionIdentifier) -or
+        $sidecarHash -cnotmatch '^sha256:[a-f0-9]{64}$' -or
+        $null -eq $sidecarSize -or $sidecarSize -le 0 -or $sidecarSize -gt 4096 -or
+        ([string]$Sidecar.logStatus -ceq 'present' -and ($null -eq $hash -or $null -eq $size)) -or
+        ([string]$Sidecar.logStatus -ceq 'log-missing' -and ($null -ne $hash -or $null -ne $size)) -or
+        ([string]$Sidecar.logStatus -ceq 'log-unparseable' -and $actionCode -cnotin @('none', 'unavailable'))
+    if ($invalid) { return $fallback }
+
     return [pscustomobject][ordered]@{
+        DiagnosticStatus = 'present'
         InstallerExitCode = $exit
+        LogStatus = [string]$Sidecar.logStatus
         LogSha256 = $hash
         LogSizeBytes = $size
         ReturnValue3ActionCode = $actionCode
         ReturnValue3ActionIdentifier = $actionIdentifier
+        SidecarSha256 = $sidecarHash
+        SidecarSizeBytes = $sidecarSize
     }
 }
 
@@ -1237,6 +1262,7 @@ function Invoke-ExactGuestRunner {
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
         $RunnerPath = [string]$ClosedAuthority.GuestRunner
         $ConfigPath = [string]$ClosedAuthority.GuestConfig
+        $sidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\msi-install.safe.json'
         if ([string]$ClosedAuthority.GuestRoot -cne $expectedRoot -or
             $RunnerPath -cne (Join-Path $expectedRoot 'phase6-physical-runner.exe') -or
             $ConfigPath -cne (Join-Path $expectedRoot 'configs\clean-windows-vm.run-config.json')) {
@@ -1268,20 +1294,57 @@ function Invoke-ExactGuestRunner {
             $stdout = @()
             $stderr = @()
         }
+        $installerSidecar = $null
+        $installerSidecarStatus = 'sidecar-missing'
+        $installerSidecarSha256 = $null
+        $installerSidecarSizeBytes = $null
+        if ($process.ExitCode -ne 0 -and (Test-Path -LiteralPath $sidecarPath -PathType Leaf)) {
+            try {
+                $sidecarItem = Get-Item -LiteralPath $sidecarPath -ErrorAction Stop
+                if ($sidecarItem.Length -le 0 -or $sidecarItem.Length -gt 4096) {
+                    throw 'sidecar bounds'
+                }
+                $sidecarBytes = [IO.File]::ReadAllBytes($sidecarPath)
+                $installerSidecar = [Text.Encoding]::UTF8.GetString($sidecarBytes) | ConvertFrom-Json -ErrorAction Stop
+                $sidecarHasher = [Security.Cryptography.SHA256]::Create()
+                try {
+                    $installerSidecarSha256 = 'sha256:' + ([BitConverter]::ToString($sidecarHasher.ComputeHash($sidecarBytes))).Replace('-', '').ToLowerInvariant()
+                }
+                finally {
+                    $sidecarHasher.Dispose()
+                }
+                $installerSidecarSizeBytes = [int64]$sidecarBytes.Length
+                $installerSidecarStatus = 'present'
+            }
+            catch {
+                $installerSidecar = $null
+                $installerSidecarStatus = 'sidecar-unparseable'
+                $installerSidecarSha256 = $null
+                $installerSidecarSizeBytes = $null
+            }
+        }
         [pscustomobject]@{
             ExitCode = [int64]$process.ExitCode
             Stdout = $stdout
             Stderr = $stderr
             BoundsExceeded = $boundsExceeded
+            InstallerSidecar = $installerSidecar
+            InstallerSidecarStatus = $installerSidecarStatus
+            InstallerSidecarSha256 = $installerSidecarSha256
+            InstallerSidecarSizeBytes = $installerSidecarSizeBytes
         }
     } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
     if ($response.ExitCode -ne 0) {
         $diagnostic = Resolve-RunnerFailureDiagnostic -ExitCode ([int64]$response.ExitCode) -Stdout @($response.Stdout) -Stderr @($response.Stderr) -BoundsExceeded ([bool]$response.BoundsExceeded)
         $script:RunnerExitCode = $diagnostic.RunnerExitCode
         $script:RunnerFailureCode = $diagnostic.RunnerFailureCode
-        if ($null -ne $diagnostic.RunnerFailureCode -and
-            $diagnostic.RunnerFailureCode -cmatch '^BLOCKED:installer-exit-(?:5|87|1601|1602|1603|1605|1618|1619|1620|1625|1638|1641|3010|other)$') {
-            $script:InstallerDiagnostic = Get-ExactGuestMsiDiagnostic -Credential $Credential -FailureCode $diagnostic.RunnerFailureCode
+        if ($null -ne $diagnostic.RunnerFailureCode -and $diagnostic.RunnerFailureCode -cmatch '^BLOCKED:installer-') {
+            $script:InstallerDiagnostic = Resolve-InstallerSidecarSummary `
+                -Sidecar $response.InstallerSidecar `
+                -SidecarStatus ([string]$response.InstallerSidecarStatus) `
+                -SidecarSha256 $response.InstallerSidecarSha256 `
+                -SidecarSizeBytes $response.InstallerSidecarSizeBytes `
+                -FailureCode $diagnostic.RunnerFailureCode
         }
         throw $diagnostic.Reason
     }

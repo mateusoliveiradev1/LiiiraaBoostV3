@@ -782,6 +782,38 @@ test('RED: same-session MSI sidecar is always a bounded non-null diagnostic', ()
     SidecarSizeBytes: null,
   });
   assert.equal(JSON.stringify(missing).includes('C:\\'), false);
+
+  const malformed = invokeInstallerSidecarAssertion({
+    sidecarStatus: 'present',
+    sidecarSha256: sidecarHash,
+    sidecarSizeBytes: 320,
+    failureCode: 'BLOCKED:installer-exit-1603',
+    sidecar: {
+      kind: 'phase6-msi-safe-diagnostic',
+      schemaVersion: '1.0',
+      installerExitCode: 1603,
+      logStatus: 'present',
+      logSha256: safeHash,
+      logSizeBytes: 512,
+      returnValue3ActionCode: 'install-files',
+      returnValue3ActionIdentifier: 'InstallFiles',
+      rawLog: 'C:\\Users\\secret-user\\installer.log S-1-5-21-1 token=secret',
+    },
+  });
+  assert.deepEqual(malformed, {
+    DiagnosticStatus: 'sidecar-unparseable',
+    InstallerExitCode: 1603,
+    LogStatus: 'unknown',
+    LogSha256: null,
+    LogSizeBytes: null,
+    ReturnValue3ActionCode: 'unavailable',
+    ReturnValue3ActionIdentifier: null,
+    SidecarSha256: null,
+    SidecarSizeBytes: null,
+  });
+  for (const forbidden of ['secret-user', 'S-1-5-21', 'token=secret', 'C:\\Users']) {
+    assert.equal(JSON.stringify(malformed).includes(forbidden), false);
+  }
 });
 
 test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', () => {

@@ -39,6 +39,8 @@ use installation_manifest::verify_installed_manifest;
 const MAX_CONFIG_BYTES: u64 = 64 * 1024;
 const MAX_RECORD_BYTES: u64 = 256 * 1024;
 const MAX_REDACTED_BYTES: usize = 64 * 1024;
+const MAX_INSTALLER_LOG_BYTES: u64 = 16 * 1024 * 1024;
+const MAX_INSTALLER_DIAGNOSTIC_BYTES: usize = 4 * 1024;
 const ZERO_HASH: &str = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 const SOURCE: &str = "phase6-physical-runner-rust-1";
 
@@ -968,7 +970,10 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
             .map_err(|_| PhysicalRunnerError::blocked("installer-launch"))?;
         match status.code() {
             Some(0) => Ok(()),
-            Some(code) => Err(installer_exit_failure(code)),
+            Some(code) => {
+                persist_installer_diagnostic(code, &expected_log)?;
+                Err(installer_exit_failure(code))
+            }
             None => Err(PhysicalRunnerError::blocked("installer-exit-other")),
         }
     }
@@ -1337,6 +1342,120 @@ fn installer_exit_failure(code: i32) -> PhysicalRunnerError {
         _ => "installer-exit-other",
     };
     PhysicalRunnerError::blocked(code)
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct InstallerDiagnosticSidecar {
+    kind: &'static str,
+    schema_version: &'static str,
+    installer_exit_code: Option<i32>,
+    log_status: &'static str,
+    log_sha256: Option<String>,
+    log_size_bytes: Option<u64>,
+    return_value_3_action_code: &'static str,
+    return_value_3_action_identifier: Option<&'static str>,
+}
+
+fn installer_diagnostic_from_log(
+    exit_code: i32,
+    log_bytes: Option<&[u8]>,
+) -> InstallerDiagnosticSidecar {
+    let base = |log_status, log_sha256, log_size_bytes, action_code, action_identifier| {
+        InstallerDiagnosticSidecar {
+            kind: "phase6-msi-safe-diagnostic",
+            schema_version: "1.0",
+            installer_exit_code: Some(exit_code),
+            log_status,
+            log_sha256,
+            log_size_bytes,
+            return_value_3_action_code: action_code,
+            return_value_3_action_identifier: action_identifier,
+        }
+    };
+    let Some(bytes) = log_bytes else {
+        return base("log-missing", None, None, "unavailable", None);
+    };
+    if bytes.is_empty() || bytes.len() as u64 > MAX_INSTALLER_LOG_BYTES {
+        return base("log-unparseable", None, None, "none", None);
+    }
+
+    let log_sha256 = Some(hash_bytes(bytes));
+    let log_size_bytes = Some(bytes.len() as u64);
+    let text = String::from_utf8_lossy(bytes);
+    let action = text.lines().rev().find_map(|line| {
+        let marker = ". Return value 3.";
+        let before = line.strip_suffix(marker)?;
+        let (_, identifier) = before.rsplit_once(": ")?;
+        Some(identifier.trim())
+    });
+    let (action_code, action_identifier) = match action {
+        Some("LaunchConditions") => ("launch-conditions", Some("LaunchConditions")),
+        Some("CostFinalize") => ("cost-finalize", Some("CostFinalize")),
+        Some("InstallValidate") => ("install-validate", Some("InstallValidate")),
+        Some("InstallFiles") => ("install-files", Some("InstallFiles")),
+        Some("InstallServices") => ("install-services", Some("InstallServices")),
+        Some("StartServices") => ("start-services", Some("StartServices")),
+        Some("InstallFinalize") => ("install-finalize", Some("InstallFinalize")),
+        Some("INSTALL") => ("install", Some("INSTALL")),
+        Some(_) => ("other", None),
+        None => {
+            return base("log-unparseable", log_sha256, log_size_bytes, "none", None);
+        }
+    };
+    base(
+        "present",
+        log_sha256,
+        log_size_bytes,
+        action_code,
+        action_identifier,
+    )
+}
+
+fn installer_diagnostic_sidecar_path(installer_log: &Path) -> Result<PathBuf, PhysicalRunnerError> {
+    if installer_log.file_name().and_then(|name| name.to_str()) != Some("msi-install.log") {
+        return Err(PhysicalRunnerError::blocked("installer-diagnostic-path"));
+    }
+    let parent = installer_log
+        .parent()
+        .ok_or_else(|| PhysicalRunnerError::blocked("installer-diagnostic-path"))?;
+    Ok(parent.join("msi-install.safe.json"))
+}
+
+fn write_installer_diagnostic_create_once(
+    path: &Path,
+    diagnostic: &InstallerDiagnosticSidecar,
+) -> Result<(), PhysicalRunnerError> {
+    if path.file_name().and_then(|name| name.to_str()) != Some("msi-install.safe.json") {
+        return Err(PhysicalRunnerError::blocked("installer-diagnostic-path"));
+    }
+    let bytes = serde_json::to_vec(diagnostic)
+        .map_err(|_| PhysicalRunnerError::blocked("installer-diagnostic-serialize"))?;
+    if bytes.is_empty() || bytes.len() > MAX_INSTALLER_DIAGNOSTIC_BYTES {
+        return Err(PhysicalRunnerError::blocked("installer-diagnostic-bounds"));
+    }
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| PhysicalRunnerError::blocked("installer-diagnostic-create-once"))?;
+    file.write_all(&bytes)
+        .and_then(|()| file.sync_all())
+        .map_err(|_| PhysicalRunnerError::blocked("installer-diagnostic-durable"))
+}
+
+fn persist_installer_diagnostic(
+    exit_code: i32,
+    installer_log: &Path,
+) -> Result<(), PhysicalRunnerError> {
+    let log_bytes = match fs::metadata(installer_log) {
+        Ok(metadata) if metadata.len() > MAX_INSTALLER_LOG_BYTES => None,
+        Ok(_) => fs::read(installer_log).ok(),
+        Err(_) => None,
+    };
+    let diagnostic = installer_diagnostic_from_log(exit_code, log_bytes.as_deref());
+    let sidecar = installer_diagnostic_sidecar_path(installer_log)?;
+    write_installer_diagnostic_create_once(&sidecar, &diagnostic)
 }
 
 fn hash_file(path: &Path) -> Result<String, PhysicalRunnerError> {
@@ -1708,8 +1827,8 @@ mod custody_failure_code_tests {
     use super::msiexec_compatible_path;
     use super::{
         artifact_custody_failure_code, installation_manifest::CustodyError,
-        installer_diagnostic_from_log, installer_diagnostic_sidecar_path,
-        installer_exit_failure, write_installer_diagnostic_create_once,
+        installer_diagnostic_from_log, installer_diagnostic_sidecar_path, installer_exit_failure,
+        write_installer_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
