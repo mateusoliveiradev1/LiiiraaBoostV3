@@ -320,6 +320,23 @@ const assertSourcePolicy = (source) => {
   ]) {
     assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
   }
+  for (const marker of [
+    '$CurrentAuthority = [pscustomobject][ordered]',
+    'function Assert-ClosedCurrentAuthority',
+    '$Authority.ArtifactManifest',
+    '$Authority.ArtifactSignature',
+    '$Authority.GuestRoot',
+    '$Authority.GuestRunner',
+    '$Authority.GuestConfig',
+  ]) {
+    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  const runtime = source.slice(source.indexOf('function Copy-ExactArtifactToGuest'));
+  assert.doesNotMatch(
+    runtime,
+    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u,
+  );
+  assert.doesNotMatch(runtime, /C:\\LiiiraaBoost\\Phase6\\physical-/u);
 
   assert.match(source, /ValidateSet\('Audit',\s*'RunCleanVm'\)/u);
   assert.match(
@@ -420,10 +437,10 @@ test('RED: staged artifact receives fixed protected guest custody before any run
     source.indexOf('function Assert-ExactGuestArtifactCustody'),
   );
   assert.match(setter, /\[PSCredential\]\$Credential/u);
-  assert.match(setter, /-ArgumentList\s+\$ExpectedGuestRoot/u);
-  assert.match(setter, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v50'/u);
-  assert.doesNotMatch(setter, /physical-487e3c326b5066a0-managed-power-scheme-v49/u);
-  assert.doesNotMatch(setter, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
+  assert.match(setter, /\[Parameter\(Mandatory\)\]\$Authority/u);
+  assert.match(setter, /-ArgumentList\s+\$Authority/u);
+  assert.match(setter, /\$fixedRoot\s*=\s*\[string\]\$ClosedAuthority\.GuestRoot/u);
+  assert.doesNotMatch(setter, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
   assert.doesNotMatch(setter, /\[string\]\$(?:Path|Root|Sid|Command|Script|Arguments?)/u);
   assert.doesNotMatch(setter, /icacls|takeown|Everyone|S-1-1-0|S-1-5-32-545/iu);
 
@@ -431,10 +448,27 @@ test('RED: staged artifact receives fixed protected guest custody before any run
     source.indexOf('function Assert-ExactGuestArtifactCustody'),
     source.indexOf('function Resolve-RunnerFailureDiagnostic'),
   );
-  assert.match(custodyAssertion, /-ArgumentList\s+\$ExpectedGuestRoot/u);
-  assert.match(custodyAssertion, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v50'/u);
-  assert.doesNotMatch(custodyAssertion, /physical-487e3c326b5066a0-managed-power-scheme-v49/u);
-  assert.doesNotMatch(custodyAssertion, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
+  assert.match(custodyAssertion, /-ArgumentList\s+\$Authority/u);
+  assert.match(custodyAssertion, /\$fixedRoot\s*=\s*\[string\]\$ClosedAuthority\.GuestRoot/u);
+  assert.doesNotMatch(custodyAssertion, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
+
+  const copyBody = source.slice(
+    source.indexOf('function Copy-ExactArtifactToGuest'),
+    source.indexOf('function Assert-ExactGuestArtifactAclSnapshot'),
+  );
+  for (const marker of ['$Authority.ArtifactManifest', '$Authority.ArtifactSignature', '$Authority.GuestRoot']) {
+    assert.match(copyBody, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+
+  const runnerBody = source.slice(
+    source.indexOf('function Invoke-ExactGuestRunner'),
+    source.indexOf('function Read-ExactGuestBytes'),
+  );
+  assert.match(runnerBody, /\[Parameter\(Mandatory\)\]\$Authority/u);
+  assert.match(runnerBody, /-ArgumentList\s+\$Authority/u);
+  assert.match(runnerBody, /\$RunnerPath\s*=\s*\[string\]\$ClosedAuthority\.GuestRunner/u);
+  assert.match(runnerBody, /\$ConfigPath\s*=\s*\[string\]\$ClosedAuthority\.GuestConfig/u);
+  assert.doesNotMatch(runnerBody, /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|50)/u);
 
   const runBody = source.slice(
     source.indexOf('function Invoke-CleanVmRun'),
@@ -739,6 +773,9 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
     ['Write-CheckpointReadyRecordOnce', 'OverwriteLifecycleBoundary'],
     ['Assert-RebootPendingRecord', 'TrustRequestedState'],
     ['physical-writer.ts', 'relabel-physical-output.ts'],
+    ['$Authority.GuestRoot', 'C:\\LiiiraaBoost\\Phase6\\physical-deadbeefdeadbeef-managed-power-scheme-v49'],
+    ['$Authority.GuestRunner', 'powershell.exe'],
+    ['$Authority.GuestConfig', 'configs\\attacker.json'],
     ['64KB', '1GB'],
   ];
   for (const [expected, replacement] of mutations) {
