@@ -441,3 +441,33 @@ relaunched, relabeled as physical evidence, or advanced to Task 2/Task 3. No v46
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v46` — READ-ONLY AUDIT INVOCATION BLOCKED
+
+- **Recorded at:** `2026-08-15T01:39:46Z`
+- **Operation version:** `managed-power-scheme-v46`
+- **Build ID:** `physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Artifact manifest SHA-256:** `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`
+- **Simulation run SHA-256:** `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`
+- **Evidence manifest SHA-256:** `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`
+- **Clean checkpoint authority:** `Clean-Windows-Ready`, expected ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Requested action:** elevated `Phase6Audit`, which delegates only to bridge action `Audit`
+- **Result:** `BLOCKED-AUDIT-PROCESS-INVOCATION`
+- **Elevated child exit code:** `-196608`
+- **Durable Audit log:** none created
+- **Final VM state:** not asserted; the non-elevated read-only `Get-VM` verification was denied by Hyper-V authorization
+- **Physical mutation status:** none observed or claimed
+- **Human review:** not presented; Task 2 remains closed
+
+The first and only elevated v46 Audit launch used a relative wrapper path. The elevated child
+opened outside the repository working directory and exited before `Run-LabElevated.ps1` could
+create its per-action Evidence log or delegate to `Invoke-Phase6Physical.ps1`. The Evidence
+directory remained unchanged, so no artifact verifier, simulation admission, Hyper-V audit,
+checkpoint action, guest staging, guest runner, MSI, power-scheme operation, or `RunCleanVm`
+boundary is claimed for this launch.
+
+Per the fail-closed instruction, the Audit was not relaunched. The exact v46 artifact and
+deterministic admission remain valid, but 06-26 is BLOCKED before its physical attempt until a
+new explicit authorization permits the corrected absolute-path Audit launch. No v47 was minted.

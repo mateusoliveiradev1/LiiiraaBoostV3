@@ -237,3 +237,31 @@ The v45 bridge validates the exact four-link v41 -> v43 -> v44 -> v45 determinis
 The elevated action was only `Audit`. It did not invoke the guest runner or `RunCleanVm`, stage
 guest bytes, install the MSI, create/restore a checkpoint, or optimize the guest. Runner
 diagnostic RED `08ace3cd`, GREEN `7c3525b1`; v45 bridge RED `cad519d4`, GREEN `960ff2ea`.
+
+## Append-Only v46 Bridge and Blocked Read-Only Audit Addendum
+
+The v45 `BLOCKED:run-config-canonical` record remains immutable and was not relaunched. The
+runner path comparison was corrected through TDD, and the v46 bridge now validates the exact
+five-link v41 -> v43 -> v44 -> v45 -> v46 deterministic chain while preserving the exact clean
+checkpoint authority.
+
+- **Operation version:** `managed-power-scheme-v46`
+- **Build ID:** `physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Source commit:** `1a1dc18ce40beaef2f83cdb3e070386e4d639021`
+- **Artifact manifest SHA-256:** `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`
+- **Simulation run SHA-256:** `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229`
+- **Evidence manifest SHA-256:** `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`
+- **Clean checkpoint authority:** `Clean-Windows-Ready`, expected ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075`
+- **Bridge suite:** 15/15 PASS
+- **Bridge dry-run:** PASS with exact v46 tuple; elevation required for live Audit
+- **Planned evidence evaluator:** `ok: true`, deterministic simulation admitted, physical stages pending
+- **Architecture gate:** 51/51 PASS; runner/config and verifier/runner/writer key-links present
+- **Audit launch result:** `BLOCKED-AUDIT-PROCESS-INVOCATION`, elevated child exit `-196608`
+- **Durable Audit log:** none created
+- **Final VM state:** not asserted because non-elevated Hyper-V access was denied
+- **Physical mutation:** none claimed; `RunCleanVm`, guest runner, MSI, and optimization were not executed
+
+The one allowed UAC launch passed the wrapper as a relative path; the elevated process opened
+outside the repository and exited before the wrapper or bridge ran. No new Evidence log was
+created. The Audit was not relaunched under the fail-closed rule, and no v47 was minted. Bridge
+TDD commits: RED `ac9b23a8`, GREEN `27970f33`.
