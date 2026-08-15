@@ -580,6 +580,16 @@ test('dry-run audits the exact immutable v46 tuple without elevation or mutation
   assert.doesNotMatch(result.stdout, /password|S-1-5-|serial(?:number)?|bearer|token/iu);
 });
 
+test('RED: schema mutation corpus operates only on an isolated authority copy', () => {
+  const source = readFileSync(import.meta.filename, 'utf8');
+  const mutationTest = source.slice(
+    source.lastIndexOf("test('schema-v3 chain mutations fail closed before any bridge action'"),
+    source.indexOf("test('wrong target, checkpoint, summaries, and generic authority fail closed'"),
+  );
+  assert.match(mutationTest, /createMutationSandbox/u);
+  assert.doesNotMatch(mutationTest, /writeFileSync\(evidenceManifest/u);
+});
+
 test('schema-v3 chain mutations fail closed before any bridge action', () => {
   const original = readFileSync(evidenceManifest);
   const mutations = [
