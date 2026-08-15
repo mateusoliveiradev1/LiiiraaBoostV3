@@ -213,3 +213,11 @@ _Completed: 2026-08-14_
 - Current evidence manifest SHA-256: `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
 - The superseded PLAN command naming a removed desktop-local Vitest file returned no test files; the established fixture-owner gate from this summary (`@liiiraa/desktop-simulator`, 13/13) and the phase6-evidence gate (64/64) both passed. Simulation was invoked exactly once and was not retried.
+
+## Append-Only Deterministic Authority Update — v47
+
+- The physically BLOCKED v46 `artifact-custody` guest-runner attempt was not relaunched. Its deterministic admission is now the immutable superseded predecessor record at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v46-evidence-manifest.json`, SHA-256 `d2091f8cc9d7a827bdc8c857799f391ee4840d3ea15740e6034450fa162546da`.
+- `managed-power-scheme-v47` is the sole active deterministic admission for build `physical-50796b7236b2889c-managed-power-scheme-v47`, artifact manifest SHA-256 `31a039f7a4e3d1a4ca6c431aace3778edb6d018e6a00db6e7f35f77eebf60a7b`, and run evidence SHA-256 `b9d29c44b13dd23b113413c5c64315783b2b176d3dfaa72ec76b096e163608f6`.
+- The active v47 run binds predecessor evidence SHA-256 `ab98b0858a82d4436b032b6427560c20d8dfca673b03c53dcf1e74e62b786229` from v46. v41, v43, v44, and v45 remain the earlier immutable superseded prefix; rejected v42 remains outside the chain.
+- Current evidence manifest SHA-256: `b15aaf5068bc0f248bc426252afa6fb3b53d8ddf5ade3482abf2076f5d9675c8`.
+- `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
