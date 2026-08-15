@@ -300,3 +300,39 @@ The single authorized v44 `RunCleanVm` attempt verified the artifact and determi
 The immutable blocker record is `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260814-210806-clean-vm-BLOCKED.json`, SHA-256 `6b597bec6d4c14d04574720f20918919b0d8d2728172d84c60167c8a13a99c30`. Its completed boundaries are exactly `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `clean-checkpoint-restored`, `integration-services-healthy`, and `exact-artifact-staged`. Its persisted reason is `BLOCKED: exact guest runner failed; no later mutation is authorized.`
 
 The authorized cleanup-only action then returned the VM from `Running` to `Off` without restore, checkpoint creation, credential use, or guest execution. Cleanup evidence is `C:\Users\Liiiraa\VM-Lab\Evidence\20260814-210919-phase6observationcleanup-console.log`, SHA-256 `96860830f089b5504e8c6d4861f122712408bc9bca8bb36613c8e65e351bb11a`, and confirms `Clean-Windows-Ready` ID `ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075` remained present. This v44 attempt is permanently BLOCKED and must not be relaunched or relabeled as physical evidence.
+
+---
+
+## Operation `managed-power-scheme-v45` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v45`
+- **Artifact manifest SHA-256:** `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`
+- **Run evidence SHA-256:** `0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e`
+- **Evidence manifest SHA-256:** `4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v45",
+  "buildId": "physical-68bb4f974e23ee26-managed-power-scheme-v45",
+  "artifactManifestSha256": "9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40",
+  "runEvidenceSha256": "0eb8f328e9a007d3247c3095c5805011268430be1f936d0520e2e60db36c8f1e",
+  "evidenceManifestSha256": "4293127293aadc9e7a006c61673953b6cacd37fe4e74809de9d6c7f06e8fbca6",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
