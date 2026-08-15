@@ -225,3 +225,30 @@ the same live bytes. This is the latest complete artifact authority for determin
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
 | `elevated-lifecycle-result.json` | `8edb951ef0c2b6446dad8243c7bb72a5c12381236f5d6b2e63449928d540d601` | 1324 |
+
+## Append-only authority update: v45
+
+The v44 artifact, deterministic admission, Audit PASS, and later guest-runner BLOCKED record
+remain immutable history. The v44 operation must never be relaunched. The bounded diagnostic
+correction was committed before a single new monotonic publication; no v44 byte or evidence
+record was overwritten.
+
+The single v45 `build-and-smoke` publication passed signed five-role assembly, protected ACL
+custody, install, downgrade rejection, rollback-failure drill, repair/update, broker client
+binding, uninstall, and residual cleanup. The real 06-35 verifier then returned `verified` for
+the same live bytes. This is the latest complete artifact authority for deterministic admission.
+
+- **Root:** `target/phase6-physical/7c3525b12ce76619f711ff6f6183ec884c60764f/physical-68bb4f974e23ee26-managed-power-scheme-v45`
+- **Build ID:** `physical-68bb4f974e23ee26-managed-power-scheme-v45`
+- **Operation version:** `managed-power-scheme-v45`
+- **Source commit:** `7c3525b12ce76619f711ff6f6183ec884c60764f`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40` | 3241 |
+| `artifact-manifest.json.p7s` | `6ce86b40c0c063df31bb037b3c7be59d8977c12dd262b748ddc73a1dee254d16` | 1609 |
+| `liiiraa-boost.msi` | `76cdaa7a6a5a95cfedd14035f12129eab3e170a9b8c82bb584eec80804b3de04` | 15675392 |
+| `phase6-physical-runner.exe` | `93c0b2d9f80d974bac436e097149de9a540db04dbade2633bf1aff4690a1c6e7` | 6992168 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
+| `elevated-lifecycle-result.json` | `b377d8a93552b5cc4732a01f5febc6cdc1d4de1d047f4032ba88af5c35c87b59` | 1324 |
