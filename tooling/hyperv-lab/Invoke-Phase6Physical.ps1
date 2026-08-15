@@ -26,13 +26,27 @@ $ExpectedCleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $ExpectedBackupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43'
 $ExpectedBackupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef'
 $ExpectedInstalledCheckpoint = 'LiiiraaBoost-Installed'
-$ExpectedOperationVersion = 'managed-power-scheme-v50'
-$ExpectedBuildId = 'physical-487e3c326b5066a0-managed-power-scheme-v50'
-$ExpectedSourceCommit = 'a46b88f8af85b4621dc19922488d064eb2315267'
-$ExpectedArtifactManifestSha256 = 'c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b'
-$ExpectedSimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v50-c02d03102056'
-$ExpectedSimulationRunSha256 = 'ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b'
-$ExpectedEvidenceManifestSha256 = '41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c'
+$CurrentAuthority = [pscustomobject][ordered]@{
+    OperationVersion = 'managed-power-scheme-v50'
+    BuildId = 'physical-487e3c326b5066a0-managed-power-scheme-v50'
+    SourceCommit = 'a46b88f8af85b4621dc19922488d064eb2315267'
+    ArtifactManifestSha256 = 'c02d0310205662e0d9e3a8fc9b5240bd954d82b4e28924f4a9c30c10c8b5516b'
+    SimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v50-c02d03102056'
+    SimulationRunSha256 = 'ceba27bb8e17dd0bf333300e29bbdab9bfbcf2b3bdf45854f2d7bd6cc95ac36b'
+    EvidenceManifestSha256 = '41260143ac410eeef9133a7a7b79ec5354e1278d2491c6c2a036eacfe727735c'
+    RunnerRelativePath = 'phase6-physical-runner.exe'
+    ConfigRelativePath = 'configs\clean-windows-vm.run-config.json'
+    GuestRoot = 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v50'
+    GuestRunner = 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v50\phase6-physical-runner.exe'
+    GuestConfig = 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v50\configs\clean-windows-vm.run-config.json'
+}
+$ExpectedOperationVersion = $CurrentAuthority.OperationVersion
+$ExpectedBuildId = $CurrentAuthority.BuildId
+$ExpectedSourceCommit = $CurrentAuthority.SourceCommit
+$ExpectedArtifactManifestSha256 = $CurrentAuthority.ArtifactManifestSha256
+$ExpectedSimulationRunId = $CurrentAuthority.SimulationRunId
+$ExpectedSimulationRunSha256 = $CurrentAuthority.SimulationRunSha256
+$ExpectedEvidenceManifestSha256 = $CurrentAuthority.EvidenceManifestSha256
 $ExpectedLatestPredecessorOperationVersion = 'managed-power-scheme-v49'
 $ExpectedLatestPredecessorBuildId = 'physical-487e3c326b5066a0-managed-power-scheme-v49'
 $ExpectedLatestPredecessorArtifactManifestSha256 = 'e3c904651333c0ac22b0706ffed4fc932a0ac18db76a87f02e863693ae78be09'
@@ -82,11 +96,11 @@ $ExpectedHistoricalRunId = 'phase6-deterministic-simulation-managed-power-scheme
 $ExpectedHistoricalRunSha256 = '626b9793c70f1271d28eff8f3a3e4bba37956c9138b08c345b72e2b22f7f02b7'
 $ExpectedHistoricalManifestSha256 = 'ead808d8fb26a01183d6522b0698f785daa0d25cbe9d7337bb662c13b53c5f7a'
 $ExpectedHistoricalManifestRelativePath = 'tooling/phase6-evidence/records/superseded/managed-power-scheme-v41-evidence-manifest.json'
-$ExpectedRunnerRelativePath = 'phase6-physical-runner.exe'
-$ExpectedConfigRelativePath = 'configs\clean-windows-vm.run-config.json'
-$ExpectedGuestRoot = "C:\LiiiraaBoost\Phase6\$ExpectedBuildId"
-$ExpectedGuestRunner = "$ExpectedGuestRoot\phase6-physical-runner.exe"
-$ExpectedGuestConfig = "$ExpectedGuestRoot\configs\clean-windows-vm.run-config.json"
+$ExpectedRunnerRelativePath = $CurrentAuthority.RunnerRelativePath
+$ExpectedConfigRelativePath = $CurrentAuthority.ConfigRelativePath
+$ExpectedGuestRoot = $CurrentAuthority.GuestRoot
+$ExpectedGuestRunner = $CurrentAuthority.GuestRunner
+$ExpectedGuestConfig = $CurrentAuthority.GuestConfig
 $RunnerKeyLink = 'phase6-physical-runner.exe --run-config'
 [void]$RunnerKeyLink
 $ExpectedManifestRoles = @(
@@ -108,6 +122,10 @@ $ExpectedArtifactRoot = Join-Path $RepositoryRoot "target\phase6-physical\$Expec
 $ExpectedArtifactManifest = Join-Path $ExpectedArtifactRoot 'artifact-manifest.json'
 $ExpectedArtifactSignature = Join-Path $ExpectedArtifactRoot 'artifact-manifest.json.p7s'
 $ExpectedEvidenceManifest = Join-Path $RepositoryRoot 'tooling\phase6-evidence\evidence-manifest.json'
+$CurrentAuthority | Add-Member -NotePropertyName ArtifactRoot -NotePropertyValue $ExpectedArtifactRoot
+$CurrentAuthority | Add-Member -NotePropertyName ArtifactManifest -NotePropertyValue $ExpectedArtifactManifest
+$CurrentAuthority | Add-Member -NotePropertyName ArtifactSignature -NotePropertyValue $ExpectedArtifactSignature
+$CurrentAuthority | Add-Member -NotePropertyName EvidenceManifest -NotePropertyValue $ExpectedEvidenceManifest
 $LabRoot = 'C:\Users\Liiiraa\VM-Lab'
 $CompletedBoundaries = [Collections.Generic.List[string]]::new()
 $MaximumRunnerOutputLines = 32
@@ -116,6 +134,38 @@ $RunnerFailureStage = 'preflight'
 $RunnerExitCode = $null
 $RunnerFailureCode = $null
 $InstallerDiagnostic = $null
+
+function Assert-ClosedCurrentAuthority {
+    $expectedKeys = @(
+        'OperationVersion', 'BuildId', 'SourceCommit', 'ArtifactManifestSha256',
+        'SimulationRunId', 'SimulationRunSha256', 'EvidenceManifestSha256',
+        'RunnerRelativePath', 'ConfigRelativePath', 'GuestRoot', 'GuestRunner',
+        'GuestConfig', 'ArtifactRoot', 'ArtifactManifest', 'ArtifactSignature',
+        'EvidenceManifest'
+    ) | Sort-Object
+    $actualKeys = @($CurrentAuthority.PSObject.Properties.Name | Sort-Object)
+    $escapedOperation = [regex]::Escape([string]$CurrentAuthority.OperationVersion)
+    $expectedGuestRoot = "C:\LiiiraaBoost\Phase6\$($CurrentAuthority.BuildId)"
+    $expectedArtifactRoot = Join-Path $RepositoryRoot "target\phase6-physical\$($CurrentAuthority.SourceCommit)\$($CurrentAuthority.BuildId)"
+    if (@(Compare-Object -ReferenceObject $expectedKeys -DifferenceObject $actualKeys).Count -ne 0 -or
+        $CurrentAuthority.OperationVersion -notmatch '^managed-power-scheme-v[0-9]+$' -or
+        $CurrentAuthority.BuildId -notmatch "^physical-[0-9a-f]{16}-$escapedOperation$" -or
+        $CurrentAuthority.SourceCommit -notmatch '^[0-9a-f]{40}$' -or
+        $CurrentAuthority.ArtifactManifestSha256 -notmatch '^[0-9a-f]{64}$' -or
+        $CurrentAuthority.SimulationRunSha256 -notmatch '^[0-9a-f]{64}$' -or
+        $CurrentAuthority.EvidenceManifestSha256 -notmatch '^[0-9a-f]{64}$' -or
+        $CurrentAuthority.RunnerRelativePath -cne 'phase6-physical-runner.exe' -or
+        $CurrentAuthority.ConfigRelativePath -cne 'configs\clean-windows-vm.run-config.json' -or
+        $CurrentAuthority.GuestRoot -cne $expectedGuestRoot -or
+        $CurrentAuthority.GuestRunner -cne (Join-Path $expectedGuestRoot $CurrentAuthority.RunnerRelativePath) -or
+        $CurrentAuthority.GuestConfig -cne (Join-Path $expectedGuestRoot $CurrentAuthority.ConfigRelativePath) -or
+        $CurrentAuthority.ArtifactRoot -cne $expectedArtifactRoot -or
+        $CurrentAuthority.ArtifactManifest -cne (Join-Path $expectedArtifactRoot 'artifact-manifest.json') -or
+        $CurrentAuthority.ArtifactSignature -cne (Join-Path $expectedArtifactRoot 'artifact-manifest.json.p7s') -or
+        $CurrentAuthority.EvidenceManifest -cne (Join-Path $RepositoryRoot 'tooling\phase6-evidence\evidence-manifest.json')) {
+        throw 'BLOCKED: current physical authority is widened or internally inconsistent.'
+    }
+}
 
 function Get-Sha256Hex {
     param([Parameter(Mandatory)][byte[]]$Bytes)
@@ -590,14 +640,10 @@ function Get-Authority {
         throw 'BLOCKED: deterministic simulation admission is not the exact active v50 authority.'
     }
 
-    return [pscustomobject]@{
-        Manifest = $manifest
-        ArtifactRoot = $ExpectedArtifactRoot
-        ArtifactManifest = $ExpectedArtifactManifest
-        ArtifactManifestSha256 = $actualManifestSha256
-        ConfigSha256 = ([string]$manifest.files.cleanWindowsVmConfig.sha256).Replace('sha256:', '')
-        RunnerSha256 = ([string]$manifest.files.runner.sha256).Replace('sha256:', '')
-    }
+    $CurrentAuthority | Add-Member -NotePropertyName Manifest -NotePropertyValue $manifest -Force
+    $CurrentAuthority | Add-Member -NotePropertyName ConfigSha256 -NotePropertyValue (([string]$manifest.files.cleanWindowsVmConfig.sha256).Replace('sha256:', '')) -Force
+    $CurrentAuthority | Add-Member -NotePropertyName RunnerSha256 -NotePropertyValue (([string]$manifest.files.runner.sha256).Replace('sha256:', '')) -Force
+    return $CurrentAuthority
 }
 
 function Test-IsAdministrator {
@@ -752,8 +798,8 @@ function Copy-ExactArtifactToGuest {
     param([Parameter(Mandatory)]$Authority)
 
     $copies = [Collections.Generic.List[object]]::new()
-    [void]$copies.Add([pscustomobject]@{ Source = $ExpectedArtifactManifest; Relative = 'artifact-manifest.json' })
-    [void]$copies.Add([pscustomobject]@{ Source = $ExpectedArtifactSignature; Relative = 'artifact-manifest.json.p7s' })
+    [void]$copies.Add([pscustomobject]@{ Source = $Authority.ArtifactManifest; Relative = 'artifact-manifest.json' })
+    [void]$copies.Add([pscustomobject]@{ Source = $Authority.ArtifactSignature; Relative = 'artifact-manifest.json.p7s' })
     foreach ($role in $ExpectedManifestRoles) {
         $relative = ([string]$Authority.Manifest.files.$role.relativePath).Replace('/', '\')
         [void]$copies.Add([pscustomobject]@{ Source = (Join-Path $Authority.ArtifactRoot $relative); Relative = $relative })
@@ -762,7 +808,7 @@ function Copy-ExactArtifactToGuest {
         throw 'BLOCKED: exact staged file cardinality changed.'
     }
     foreach ($copy in $copies) {
-        Copy-VMFile -VMName $ExpectedVmName -SourcePath $copy.Source -DestinationPath (Join-Path $ExpectedGuestRoot $copy.Relative) -FileSource Host -CreateFullPath -ErrorAction Stop
+        Copy-VMFile -VMName $ExpectedVmName -SourcePath $copy.Source -DestinationPath (Join-Path $Authority.GuestRoot $copy.Relative) -FileSource Host -CreateFullPath -ErrorAction Stop
     }
     [void]$CompletedBoundaries.Add('exact-artifact-staged')
 }
@@ -818,11 +864,18 @@ function Assert-ExactGuestArtifactAclSnapshot {
 }
 
 function Set-ExactGuestArtifactCustody {
-    param([Parameter(Mandatory)][PSCredential]$Credential)
+    param(
+        [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)]$Authority
+    )
 
     Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        param($fixedRoot)
-        if ($fixedRoot -cne 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v50') {
+        param($ClosedAuthority)
+        $fixedRoot = [string]$ClosedAuthority.GuestRoot
+        $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
+        if ($fixedRoot -cne $expectedRoot -or
+            [string]$ClosedAuthority.GuestRunner -cne (Join-Path $fixedRoot 'phase6-physical-runner.exe') -or
+            [string]$ClosedAuthority.GuestConfig -cne (Join-Path $fixedRoot 'configs\clean-windows-vm.run-config.json')) {
             throw 'BLOCKED:guest-root-mismatch'
         }
         $fixedFiles = @(
@@ -872,16 +925,23 @@ function Set-ExactGuestArtifactCustody {
             }
         }
         Set-Acl -LiteralPath $fixedRoot -AclObject (New-FixedDirectorySecurity)
-    } -ArgumentList $ExpectedGuestRoot
+    } -ArgumentList $Authority
     [void]$CompletedBoundaries.Add('guest-artifact-acl-provisioned')
 }
 
 function Assert-ExactGuestArtifactCustody {
-    param([Parameter(Mandatory)][PSCredential]$Credential)
+    param(
+        [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)]$Authority
+    )
 
     $result = Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        param($fixedRoot)
-        if ($fixedRoot -cne 'C:\LiiiraaBoost\Phase6\physical-487e3c326b5066a0-managed-power-scheme-v50') {
+        param($ClosedAuthority)
+        $fixedRoot = [string]$ClosedAuthority.GuestRoot
+        $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
+        if ($fixedRoot -cne $expectedRoot -or
+            [string]$ClosedAuthority.GuestRunner -cne (Join-Path $fixedRoot 'phase6-physical-runner.exe') -or
+            [string]$ClosedAuthority.GuestConfig -cne (Join-Path $fixedRoot 'configs\clean-windows-vm.run-config.json')) {
             throw 'BLOCKED:guest-root-mismatch'
         }
         $fixedFiles = @(
@@ -934,7 +994,7 @@ function Assert-ExactGuestArtifactCustody {
             }
         }
         [pscustomobject]@{ guestSid = $guestSid; snapshots = @($snapshots) }
-    } -ArgumentList $ExpectedGuestRoot
+    } -ArgumentList $Authority
     if (@($result.snapshots).Count -ne 13) {
         throw 'BLOCKED:guest-acl-cardinality'
     }
@@ -1054,7 +1114,7 @@ function Get-ExactGuestMsiDiagnostic {
     )
 
     $resolver = ${function:Resolve-MsiLogSummary}
-    $fixedPath = Join-Path $ExpectedGuestRoot 'state\clean-windows-vm\diagnostics\msi-install.log'
+    $fixedPath = Join-Path $CurrentAuthority.GuestRoot 'state\clean-windows-vm\diagnostics\msi-install.log'
     $remote = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($LogPath, $Code, $Resolver)
         if (-not (Test-Path -LiteralPath $LogPath -PathType Leaf)) {
@@ -1111,18 +1171,28 @@ function Get-ExactGuestMsiDiagnostic {
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)]$Authority,
         [Parameter(Mandatory)][ValidateSet('installed-ready', 'reboot-pending', 'completed')][string]$Stage,
         [string]$ApprovalPhrase
     )
 
+    if ($Authority.GuestRoot -cne $CurrentAuthority.GuestRoot -or
+        $Authority.GuestRunner -cne $CurrentAuthority.GuestRunner -or
+        $Authority.GuestConfig -cne $CurrentAuthority.GuestConfig) {
+        throw 'BLOCKED: current runner authority mismatch.'
+    }
     $script:RunnerFailureStage = $Stage
     $script:RunnerExitCode = $null
     $script:RunnerFailureCode = $null
     $script:InstallerDiagnostic = $null
     $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
-        param($RunnerPath, $ConfigPath, $Approval, $MaximumLines, $MaximumChars)
-        if ($RunnerPath -ne 'C:\LiiiraaBoost\Phase6\physical-50796b7236b2889c-managed-power-scheme-v47\phase6-physical-runner.exe' -or
-            $ConfigPath -ne 'C:\LiiiraaBoost\Phase6\physical-50796b7236b2889c-managed-power-scheme-v47\configs\clean-windows-vm.run-config.json') {
+        param($ClosedAuthority, $Approval, $MaximumLines, $MaximumChars)
+        $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
+        $RunnerPath = [string]$ClosedAuthority.GuestRunner
+        $ConfigPath = [string]$ClosedAuthority.GuestConfig
+        if ([string]$ClosedAuthority.GuestRoot -cne $expectedRoot -or
+            $RunnerPath -cne (Join-Path $expectedRoot 'phase6-physical-runner.exe') -or
+            $ConfigPath -cne (Join-Path $expectedRoot 'configs\clean-windows-vm.run-config.json')) {
             throw 'fixed runner/config path mismatch'
         }
         $start = [Diagnostics.ProcessStartInfo]::new()
@@ -1157,7 +1227,7 @@ function Invoke-ExactGuestRunner {
             Stderr = $stderr
             BoundsExceeded = $boundsExceeded
         }
-    } -ArgumentList $ExpectedGuestRunner, $ExpectedGuestConfig, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
+    } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
     if ($response.ExitCode -ne 0) {
         $diagnostic = Resolve-RunnerFailureDiagnostic -ExitCode ([int64]$response.ExitCode) -Stdout @($response.Stdout) -Stderr @($response.Stderr) -BoundsExceeded ([bool]$response.BoundsExceeded)
         $script:RunnerExitCode = $diagnostic.RunnerExitCode
@@ -1189,7 +1259,7 @@ function Read-ExactGuestBytes {
         'continuation' { 'state\clean-windows-vm\physical-continuation.json' }
         'raw-envelope' { 'evidence\clean-windows-vm\raw-run-envelope.json' }
     }
-    $path = Join-Path $ExpectedGuestRoot $relative
+    $path = Join-Path $CurrentAuthority.GuestRoot $relative
     return [byte[]](Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($FixedPath)
         $bytes = [IO.File]::ReadAllBytes($FixedPath)
@@ -1272,7 +1342,7 @@ function Write-CheckpointReadyRecordOnce {
         recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     $bytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Compress))
-    $path = Join-Path $ExpectedGuestRoot 'state\clean-windows-vm\checkpoint-ready.json'
+    $path = Join-Path $Authority.GuestRoot 'state\clean-windows-vm\checkpoint-ready.json'
     Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($FixedPath, [byte[]]$FixedBytes)
         $parent = [IO.Path]::GetDirectoryName($FixedPath)
@@ -1386,10 +1456,10 @@ function Invoke-CleanVmRun {
     [void](Wait-ExactIntegrationServicesHealthy)
     [void]$CompletedBoundaries.Add('integration-services-healthy')
     Copy-ExactArtifactToGuest -Authority $Authority
-    Set-ExactGuestArtifactCustody -Credential $Credential
-    Assert-ExactGuestArtifactCustody -Credential $Credential
+    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
 
-    $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready'
+    $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
     $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
     $installedCheckpoint = New-InstalledCheckpointOnce
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $installedCheckpoint
@@ -1397,19 +1467,20 @@ function Invoke-CleanVmRun {
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
     $approval = Read-Host "Type this exact phrase to authorize the guest apply: $expectedApproval"
     if ($approval -cne $expectedApproval) { throw 'BLOCKED: exact physical apply approval was refused.' }
-    $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -ApprovalPhrase $approval
+    $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -Authority $Authority -ApprovalPhrase $approval
     [void](Assert-RebootPendingRecord -Credential $Credential -Authority $Authority -RunnerResult $second)
 
     Restart-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
     [void]$CompletedBoundaries.Add('operator-authorized-vm-restart')
     Wait-ExactVmReady -Credential $Credential
-    $third = Invoke-ExactGuestRunner -Credential $Credential -Stage 'completed'
+    $third = Invoke-ExactGuestRunner -Credential $Credential -Stage 'completed' -Authority $Authority
     if ($third.State -ne 'Completed') { throw 'BLOCKED: post-boot observation-first runner did not complete.' }
     [void]$CompletedBoundaries.Add('post-boot-observation-complete')
     Copy-BoundedEvidenceAndIngest -Credential $Credential -Authority $Authority
 }
 
 Assert-ExactInvocation
+Assert-ClosedCurrentAuthority
 $authority = Get-Authority
 
 if ($DryRun) {
