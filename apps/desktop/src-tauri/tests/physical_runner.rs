@@ -3,14 +3,18 @@ mod physical_runner;
 
 use std::{
     collections::{BTreeMap, VecDeque},
-    path::PathBuf,
+    fs,
+    path::{Path, PathBuf},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use physical_runner::{
     ArtifactCustody, FriendsRosterBinding, PhysicalGuestRunner, PhysicalRunConfig,
     PhysicalRunnerError, PhysicalRunnerIo, PhysicalRunnerState, PhysicalStage, RecordKind,
-    RunPaths, TRUSTED_INSTALLER_SPKI_SHA256, TauriCommandSet, parse_runner_args,
+    RunPaths, TRUSTED_INSTALLER_SPKI_SHA256, TauriCommandSet, load_run_config, parse_runner_args,
 };
+use serde_json::json;
+use sha2::{Digest, Sha256};
 
 #[derive(Default)]
 struct FakeIo {
@@ -213,6 +217,64 @@ fn config(stage: PhysicalStage) -> PhysicalRunConfig {
     }
 }
 
+fn unique_artifact_root(test_name: &str) -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock should follow the Unix epoch")
+        .as_nanos();
+    std::env::temp_dir().join(format!(
+        "liiiraa-phase6-physical-runner-{test_name}-{}-{nonce}",
+        std::process::id()
+    ))
+}
+
+fn valid_clean_vm_config_bytes() -> Vec<u8> {
+    serde_json::to_vec(&json!({
+        "kind": "physical-run-config",
+        "schemaVersion": "1.0",
+        "configId": "clean-windows-vm-config-0001",
+        "stage": "clean-windows-vm",
+        "configPath": "configs/clean-windows-vm.run-config.json",
+        "artifactManifestPath": "artifact-manifest.json",
+        "operationVersionId": "managed-power-scheme-v46",
+        "buildId": "physical-build-v46",
+        "sourceCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "participantIdentityMode": "purpose-bound-local-hash",
+        "scenarios": {
+            "prepareRecovery": true,
+            "apply": true,
+            "verifyApplied": true,
+            "rebootWhenRequired": true,
+            "restore": true,
+            "verifyRestored": true
+        },
+        "paths": {
+            "runRecordPath": "state/clean-windows-vm/run-record.json",
+            "installedReadyRecordPath": "state/clean-windows-vm/installed-ready.json",
+            "checkpointReadyRecordPath": "state/clean-windows-vm/checkpoint-ready.json",
+            "continuationPath": "state/clean-windows-vm/physical-continuation.json",
+            "rawEnvelopePath": "evidence/clean-windows-vm/raw-run-envelope.json"
+        },
+        "tauriCommands": {
+            "composePlan": "compose_plan",
+            "revisePlan": "revise_plan",
+            "approvePlan": "approve_plan",
+            "applyPlan": "apply_plan",
+            "restorePlanOperation": "restore_plan_operation",
+            "restorePlan": "restore_plan",
+            "restoreRecoveryCheckpoint": "restore_recovery_checkpoint",
+            "readPlanExecution": "read_plan_execution",
+            "subscribePlanExecution": "subscribe_plan_execution",
+            "previewPlanDiagnostic": "preview_plan_diagnostic",
+            "exportPlanDiagnostic": "export_plan_diagnostic",
+            "readAdvancedPreference": "read_advanced_preference",
+            "enableAdvancedPreference": "enable_advanced_preference",
+            "revokeAdvancedPreference": "revoke_advanced_preference"
+        }
+    }))
+    .expect("valid config fixture should serialize")
+}
+
 #[test]
 fn cli_accepts_only_one_absolute_run_config_argument() {
     let parsed = parse_runner_args(&[
@@ -226,6 +288,21 @@ fn cli_accepts_only_one_absolute_run_config_argument() {
     for args in [
         vec!["runner.exe", "--stage", "owner-pc"],
         vec!["runner.exe", "--run-config", r"relative\config.json"],
+        vec![
+            "runner.exe",
+            "--run-config",
+            r"C:\phase6\configs\.\owner-pc.run-config.json",
+        ],
+        vec![
+            "runner.exe",
+            "--run-config",
+            r"C:\phase6\configs\..\owner-pc.run-config.json",
+        ],
+        vec![
+            "runner.exe",
+            "--run-config",
+            r"C:\phase6\configs\owner-pc.run-config.txt",
+        ],
         vec![
             "runner.exe",
             "--run-config",
@@ -245,6 +322,76 @@ fn cli_accepts_only_one_absolute_run_config_argument() {
             parse_runner_args(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).is_err()
         );
     }
+}
+
+#[cfg(windows)]
+#[test]
+fn load_run_config_accepts_normal_windows_path_but_uses_canonical_io_and_exact_bytes() {
+    let root = unique_artifact_root("normal-extended");
+    let configs = root.join("configs");
+    fs::create_dir_all(&configs).expect("test config directory should be created");
+    let path = configs.join("clean-windows-vm.run-config.json");
+    let bytes = valid_clean_vm_config_bytes();
+    fs::write(&path, &bytes).expect("test config should be written");
+    let canonical = fs::canonicalize(&path).expect("test config should canonicalize");
+    assert_ne!(
+        canonical, path,
+        "Windows should expose the extended canonical form"
+    );
+
+    let loaded = load_run_config(&path).expect("normal and extended forms identify the same file");
+    assert_eq!(loaded.config_path, canonical);
+    assert_eq!(
+        loaded.artifact_manifest_path,
+        loaded
+            .config_path
+            .parent()
+            .and_then(Path::parent)
+            .expect("canonical config should retain its artifact root")
+            .join("artifact-manifest.json")
+    );
+    assert_eq!(
+        loaded.config_sha256,
+        format!("sha256:{:x}", Sha256::digest(&bytes))
+    );
+
+    fs::remove_dir_all(root).expect("test artifact root should be removed");
+}
+
+#[cfg(windows)]
+#[test]
+fn load_run_config_rejects_a_different_existing_config_path() {
+    let root = unique_artifact_root("different-existing-path");
+    let configs = root.join("configs");
+    fs::create_dir_all(&configs).expect("test config directory should be created");
+    let different = configs.join("different.run-config.json");
+    fs::write(&different, valid_clean_vm_config_bytes()).expect("test config should be written");
+
+    assert!(load_run_config(&different).is_err());
+
+    fs::remove_dir_all(root).expect("test artifact root should be removed");
+}
+
+#[cfg(windows)]
+#[test]
+fn load_run_config_rejects_symlink_alias_ambiguity() {
+    use std::os::windows::fs::symlink_file;
+
+    let root = unique_artifact_root("symlink-alias");
+    let configs = root.join("configs");
+    fs::create_dir_all(&configs).expect("test config directory should be created");
+    let target = configs.join("clean-windows-vm.run-config.json");
+    let alias = configs.join("alias.run-config.json");
+    fs::write(&target, valid_clean_vm_config_bytes()).expect("test config should be written");
+    match symlink_file(&target, &alias) {
+        Ok(()) => {
+            assert!(load_run_config(&alias).is_err());
+            fs::remove_file(&alias).expect("test alias should be removed");
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {}
+        Err(error) => panic!("test symlink should be created or require privilege: {error}"),
+    }
+    fs::remove_dir_all(root).expect("test artifact root should be removed");
 }
 
 #[test]
