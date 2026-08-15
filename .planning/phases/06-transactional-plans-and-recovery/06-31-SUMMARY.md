@@ -499,3 +499,26 @@ lifecycle `PASSED`. The immutable publication is:
 | `configs/clean-windows-vm.run-config.json` | `3a63c331bea8033dff93ac7c64c06c5dea25d2e979bdadfe57cdbc9a7dac65b6` | 1593 |
 | `phase6-physical-runner.exe` | `92e789474b5af6d55819da5fe14f82c0c93c3f12985cc2addb0424e844490db8` | 7016744 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v56 PASSED
+
+The immutable v55 clean-VM attempt remained BLOCKED and was not relaunched. RED `42114dd`, GREEN
+`d4802a3`, and refactor `b6270f1` centralized closed Disk/VerbatimDisk and UNC/VerbatimUNC path
+equivalence across installed custody and runner consumers while rejecting relative, dot, device,
+and root-drift paths. The minimum directory metadata/traverse ACL from `5937be4` remains enforced.
+
+The single monotonic v56 `build-and-smoke` completed the full lifecycle with status `PASSED`:
+
+- **Root:** `target/phase6-physical/b6270f1b935cc3fd55dfd3d55f1847ffdf988db9/physical-c013840c872b6f81-managed-power-scheme-v56`
+- **Build ID:** `physical-c013840c872b6f81-managed-power-scheme-v56`
+- **Operation version:** `managed-power-scheme-v56`
+- **Source commit:** `b6270f1b935cc3fd55dfd3d55f1847ffdf988db9`
+- **Input tree:** `sha256:c013840c872b6f81dd169db0840f5fa49b18d6d6e3cb086e0e99d0ffd59e0c8b`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f` | 3241 |
+| `liiiraa-boost.msi` | `313bf0ded1fe704d22e6c5769bacd50a642fcd790d2b09bb2650360cee8981c7` | 15761408 |
+| `configs/clean-windows-vm.run-config.json` | `2632e956ff1f0b145312ad696cdaf2bc7502c7dd17a2aee9bfdea3701017892f` | 1593 |
+| `phase6-physical-runner.exe` | `081e7328466fb6c724401a5ad1525b357e0ea1847e786b3990ce01cd62215524` | 7018792 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
