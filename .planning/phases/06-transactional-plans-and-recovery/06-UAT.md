@@ -969,3 +969,39 @@ bounded safe sidecar produced by the runner and collected before the original gu
 returns. The sidecar exposes only numeric exit, log presence/hash/size, an allowlisted final
 `Return value 3` action, and its own hash/size; malformed, missing, or unwritable diagnostics
 remain explicit bounded codes and never export raw log, path, user, SID, or secret material.
+
+---
+
+## Operation `managed-power-scheme-v53` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v53`
+- **Artifact manifest SHA-256:** `6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271`
+- **Run evidence SHA-256:** `01666800658d5aac14e99b46a14e0a23497c937710f38168e9559e92d2bee7ba`
+- **Evidence manifest SHA-256:** `513ce2511f826316a2851c109bd7d433d5ade7b2c003d07d48b74cfd497a5833`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v53",
+  "buildId": "physical-468a05974898514d-managed-power-scheme-v53",
+  "artifactManifestSha256": "6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271",
+  "runEvidenceSha256": "01666800658d5aac14e99b46a14e0a23497c937710f38168e9559e92d2bee7ba",
+  "evidenceManifestSha256": "513ce2511f826316a2851c109bd7d433d5ade7b2c003d07d48b74cfd497a5833",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
