@@ -165,10 +165,14 @@ const invokeBridgeFunction = (name, input) => {
   const encoded = Buffer.from(JSON.stringify(input), 'utf8').toString('base64');
   const escapedBridgePath = bridgePath.replaceAll("'", "''");
   const command = [
+    "$ErrorActionPreference = 'Stop'",
     '$tokens = $null; $errors = $null',
     `$ast = [Management.Automation.Language.Parser]::ParseFile('${escapedBridgePath}', [ref]$tokens, [ref]$errors)`,
     `$function = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq '${name}' }, $true) | Select-Object -First 1`,
     "if ($null -eq $function) { throw 'required bridge function is missing' }",
+    name === 'Resolve-MsiLogSummary'
+      ? "$dependency = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'ConvertFrom-ExactMsiLogBytes' }, $true) | Select-Object -First 1; if ($null -eq $dependency) { throw 'required MSI decoder is missing' }; Invoke-Expression $dependency.Extent.Text"
+      : '',
     'Invoke-Expression $function.Extent.Text',
     `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
     name === 'Resolve-MsiLogSummary'
@@ -555,14 +559,21 @@ test('RED: read-only Audit restores an initially Off VM after bounded health obs
   assert.match(auditBody, /AddSeconds\(120\)/u);
 });
 
-test('elevated logger records only the fixed Phase 6 Audit action', () => {
+test('elevated logger records fixed Phase 6 Audit and interactive RunCleanVm actions', () => {
   const source = readFileSync(elevatedLoggerPath, 'utf8');
   assert.match(source, /'Phase6Audit'/u);
+  assert.match(source, /'Phase6RunCleanVm'/u);
   assert.match(source, /Invoke-Phase6Physical\.ps1/u);
   assert.match(source, /'Audit'/u);
+  assert.match(source, /-Action RunCleanVm/u);
   assert.match(source, /06-31-SUMMARY\.md/u);
   assert.match(source, /06-38-SUMMARY\.md/u);
-  assert.doesNotMatch(source, /RunCleanVm/u);
+  const runStart = source.indexOf("if ($Action -eq 'Phase6RunCleanVm')");
+  const runBody = source.slice(runStart);
+  assert.ok(runStart >= 0);
+  assert.match(runBody, /Get-Credential\s+-UserName\s+'LiiiraaLab'/u);
+  assert.match(runBody, /Tee-Object\s+-FilePath\s+\$outputPath/u);
+  assert.doesNotMatch(runBody, /-NonInteractive|CreateNoWindow|RedirectStandardInput/u);
 });
 
 test('elevated logger persists the exact child verdict and exit code', () => {
@@ -848,27 +859,44 @@ test('RED: MSI failure summary exposes only bounded allowlisted diagnostics', ()
   }
 });
 
-test('RED: MSI failure summary decodes UTF-16LE with BOM and preserves byte identity', () => {
+test('RED: MSI failure summary decodes bounded UTF-16LE and preserves byte identity', () => {
   const safeFixture = [
     'MSI (s) (10:20) [12:00:00:000]: Product: REDACTED',
     'Action ended 12:00:00: InstallFiles. Return value 3.',
     'Property(S): USERNAME = REDACTED',
   ].join('\r\n');
-  const bytes = Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(safeFixture, 'utf16le')]);
-  const summary = invokeBridgeFunction('Resolve-MsiLogSummary', {
+  const body = Buffer.from(safeFixture, 'utf16le');
+  for (const bytes of [Buffer.concat([Buffer.from([0xff, 0xfe]), body]), body]) {
+    const summary = invokeBridgeFunction('Resolve-MsiLogSummary', {
+      exitCode: 1603,
+      failureCode: 'BLOCKED:installer-exit-1603',
+      bytesBase64: bytes.toString('base64'),
+      maximumBytes: 16 * 1024 * 1024,
+    });
+    assert.deepEqual(summary, {
+      InstallerExitCode: 1603,
+      LogSha256: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+      LogSizeBytes: bytes.length,
+      ReturnValue3ActionCode: 'install-files',
+      ReturnValue3ActionIdentifier: 'InstallFiles',
+    });
+    assert.equal(JSON.stringify(summary).includes('REDACTED'), false);
+  }
+
+  const malformed = Buffer.from([0xff, 0xfe, 0x41, 0x00, 0x00, 0xd8, 0x58]);
+  const rejected = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 1603,
     failureCode: 'BLOCKED:installer-exit-1603',
-    bytesBase64: bytes.toString('base64'),
+    bytesBase64: malformed.toString('base64'),
     maximumBytes: 16 * 1024 * 1024,
   });
-  assert.deepEqual(summary, {
+  assert.deepEqual(rejected, {
     InstallerExitCode: 1603,
-    LogSha256: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
-    LogSizeBytes: bytes.length,
-    ReturnValue3ActionCode: 'install-files',
-    ReturnValue3ActionIdentifier: 'InstallFiles',
+    LogSha256: `sha256:${createHash('sha256').update(malformed).digest('hex')}`,
+    LogSizeBytes: malformed.length,
+    ReturnValue3ActionCode: 'none',
+    ReturnValue3ActionIdentifier: null,
   });
-  assert.equal(JSON.stringify(summary).includes('REDACTED'), false);
 });
 
 test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary', () => {

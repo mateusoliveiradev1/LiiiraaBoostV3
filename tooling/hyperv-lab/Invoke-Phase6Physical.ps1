@@ -1134,6 +1134,40 @@ function Resolve-RunnerFailureDiagnostic {
     }
 }
 
+function ConvertFrom-ExactMsiLogBytes {
+    param([Parameter(Mandatory)][byte[]]$Bytes)
+
+    if ($Bytes.Length -eq 0 -or ($Bytes.Length -ge 2 -and $Bytes[0] -eq 0xfe -and $Bytes[1] -eq 0xff)) {
+        return $null
+    }
+    $hasUtf16LeBom = $Bytes.Length -ge 2 -and $Bytes[0] -eq 0xff -and $Bytes[1] -eq 0xfe
+    $offset = if ($hasUtf16LeBom) { 2 } else { 0 }
+    $bodyLength = $Bytes.Length - $offset
+    $zeroHighBytes = 0
+    if ($bodyLength -gt 0 -and $bodyLength % 2 -eq 0) {
+        for ($index = $offset + 1; $index -lt $Bytes.Length; $index += 2) {
+            if ($Bytes[$index] -eq 0) { $zeroHighBytes++ }
+        }
+    }
+    $looksUtf16Le = $bodyLength -gt 0 -and $bodyLength % 2 -eq 0 -and ($zeroHighBytes * 4) -ge $bodyLength
+    try {
+        if ($hasUtf16LeBom -or $looksUtf16Le) {
+            if ($bodyLength -le 0 -or $bodyLength % 2 -ne 0) { return $null }
+            $encoding = [Text.UnicodeEncoding]::new($false, $false, $true)
+            $text = $encoding.GetString($Bytes, $offset, $bodyLength)
+        }
+        else {
+            $encoding = [Text.UTF8Encoding]::new($false, $true)
+            $text = $encoding.GetString($Bytes)
+        }
+    }
+    catch [Text.DecoderFallbackException] {
+        return $null
+    }
+    if ($text.Contains([char]0)) { return $null }
+    return $text
+}
+
 function Resolve-MsiLogSummary {
     param(
         [Parameter(Mandatory)][Int64]$ExitCode,
@@ -1159,8 +1193,8 @@ function Resolve-MsiLogSummary {
         return $unavailable
     }
 
-    $tailLength = [Math]::Min($Bytes.Length, 262144)
-    $tail = [Text.Encoding]::UTF8.GetString($Bytes, $Bytes.Length - $tailLength, $tailLength)
+    $text = ConvertFrom-ExactMsiLogBytes -Bytes $Bytes
+    $tail = if ($null -eq $text) { '' } else { $text.Substring([Math]::Max(0, $text.Length - 262144)) }
     $matches = [regex]::Matches($tail, '(?m)^Action ended [^\r\n]*: (?<action>[A-Za-z][A-Za-z0-9]{0,63})\. Return value 3\.\r?$')
     $actionIdentifier = $null
     $actionCode = 'none'
@@ -1596,6 +1630,43 @@ function Write-BlockedRecord {
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
 }
 
+function Write-ApplyPromptReadyRecordOnce {
+    param(
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)]$InstalledCheckpoint
+    )
+
+    if ($Authority.OperationVersion -cne $ExpectedOperationVersion -or
+        $Authority.BuildId -cne $ExpectedBuildId -or
+        [string]$InstalledCheckpoint.Name -cne $ExpectedInstalledCheckpoint -or
+        [string]$InstalledCheckpoint.Id -notmatch '^[0-9a-fA-F-]{36}$') {
+        throw 'BLOCKED: apply prompt boundary checkpoint binding mismatch.'
+    }
+    $directory = Join-Path $LabRoot 'Evidence\phase6'
+    [IO.Directory]::CreateDirectory($directory) | Out-Null
+    $record = [ordered]@{
+        kind = 'phase6-apply-prompt-ready'
+        schemaVersion = '1.0'
+        operationVersion = $ExpectedOperationVersion
+        buildId = $ExpectedBuildId
+        vmName = $ExpectedVmName
+        installedCheckpoint = $ExpectedInstalledCheckpoint
+        installedCheckpointId = ([string]$InstalledCheckpoint.Id).ToLowerInvariant()
+        stage = 'approval-prompt-ready'
+        recordedAt = [DateTime]::UtcNow.ToString('o')
+    }
+    $bytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Compress))
+    if ($bytes.Length -eq 0 -or $bytes.Length -gt 4096) {
+        throw 'BLOCKED: apply prompt boundary exceeds fixed bounds.'
+    }
+    $fileName = (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + "-$ExpectedOperationVersion-APPLY-PROMPT-READY.json"
+    $path = Join-Path $directory $fileName
+    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
+    try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+    [void]$CompletedBoundaries.Add('apply-prompt-ready')
+    return $fileName
+}
+
 function Invoke-CleanVmRun {
     param(
         [Parameter(Mandatory)]$Authority,
@@ -1622,6 +1693,8 @@ function Invoke-CleanVmRun {
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $installedCheckpoint
 
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
+    $promptReadyRecord = Write-ApplyPromptReadyRecordOnce -Authority $Authority -InstalledCheckpoint $installedCheckpoint
+    Write-Output "PHASE6_APPLY_PROMPT_READY:$($ExpectedOperationVersion):$promptReadyRecord"
     $approval = Read-Host "Type this exact phrase to authorize the guest apply: $expectedApproval"
     if ($approval -cne $expectedApproval) { throw 'BLOCKED: exact physical apply approval was refused.' }
     $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -Authority $Authority -ApprovalPhrase $approval

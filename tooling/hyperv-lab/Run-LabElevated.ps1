@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint', 'Phase6Audit', 'Phase6ObservedAudit', 'Phase6ObservationCleanup')]
+    [ValidateSet('Audit', 'RepairHost', 'Create', 'Status', 'Open', 'StageGuest', 'Checkpoint', 'Phase6Audit', 'Phase6RunCleanVm', 'Phase6ObservedAudit', 'Phase6ObservationCleanup')]
     [string]$Action = 'Status',
 
     [string]$LabRoot = (Join-Path $env:USERPROFILE 'VM-Lab'),
@@ -268,6 +268,31 @@ if ($Action -eq 'Phase6Audit') {
     [IO.File]::WriteAllText($outputPath, $combined, [Text.UTF8Encoding]::new($false))
     Write-Output $combined.TrimEnd()
     exit $process.ExitCode
+}
+
+if ($Action -eq 'Phase6RunCleanVm') {
+    $expectedVmName = 'LiiiraaBoost-W11-25H2-Clean'
+    $expectedCheckpointName = 'Clean-Windows-Ready'
+    $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+    if ($VmName -cne $expectedVmName -or $CheckpointName -cne $expectedCheckpointName) {
+        throw 'BLOCKED: physical RunCleanVm target or checkpoint override rejected.'
+    }
+    $credential = Get-Credential -UserName 'LiiiraaLab' -Message 'Senha local da VM; mantida somente neste processo elevado'
+    if ($null -eq $credential) { throw 'BLOCKED: in-memory guest credential is required.' }
+    try {
+        & $phase6Script `
+            -Action RunCleanVm `
+            -VmName $expectedVmName `
+            -CheckpointName $expectedCheckpointName `
+            -ArtifactManifestFromSummary (Join-Path $repositoryRoot '.planning\phases\06-transactional-plans-and-recovery\06-31-SUMMARY.md') `
+            -SimulationAdmissionFromSummary (Join-Path $repositoryRoot '.planning\phases\06-transactional-plans-and-recovery\06-38-SUMMARY.md') `
+            -GuestCredential $credential *>&1 | Tee-Object -FilePath $outputPath
+        exit 0
+    }
+    catch {
+        $_ | Format-List * -Force | Out-String | Tee-Object -FilePath $outputPath
+        exit 1
+    }
 }
 
 $arguments = @{

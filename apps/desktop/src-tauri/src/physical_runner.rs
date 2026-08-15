@@ -1382,7 +1382,9 @@ fn installer_diagnostic_from_log(
 
     let log_sha256 = Some(hash_bytes(bytes));
     let log_size_bytes = Some(bytes.len() as u64);
-    let text = String::from_utf8_lossy(bytes);
+    let Some(text) = decode_installer_log_text(bytes) else {
+        return base("log-unparseable", log_sha256, log_size_bytes, "none", None);
+    };
     let action = text.lines().rev().find_map(|line| {
         let marker = ". Return value 3.";
         let before = line.strip_suffix(marker)?;
@@ -1410,6 +1412,38 @@ fn installer_diagnostic_from_log(
         action_code,
         action_identifier,
     )
+}
+
+fn decode_installer_log_text(bytes: &[u8]) -> Option<String> {
+    if bytes.is_empty() {
+        return None;
+    }
+    if bytes.starts_with(&[0xfe, 0xff]) {
+        return None;
+    }
+
+    let has_utf16le_bom = bytes.starts_with(&[0xff, 0xfe]);
+    let body = if has_utf16le_bom { &bytes[2..] } else { bytes };
+    let looks_utf16le = !body.is_empty()
+        && body.len().is_multiple_of(2)
+        && body.chunks_exact(2).filter(|pair| pair[1] == 0).count() * 4 >= body.len();
+    if has_utf16le_bom || looks_utf16le {
+        if body.is_empty() || !body.len().is_multiple_of(2) {
+            return None;
+        }
+        let units = body
+            .chunks_exact(2)
+            .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+            .collect::<Vec<_>>();
+        return String::from_utf16(&units)
+            .ok()
+            .filter(|text| !text.contains('\0'));
+    }
+
+    std::str::from_utf8(bytes)
+        .ok()
+        .filter(|text| !text.contains('\0'))
+        .map(str::to_owned)
 }
 
 fn installer_diagnostic_sidecar_path(installer_log: &Path) -> Result<PathBuf, PhysicalRunnerError> {
@@ -1864,10 +1898,7 @@ mod custody_failure_code_tests {
             .encode_utf16()
             .flat_map(u16::to_le_bytes)
             .collect();
-        for bytes in [
-            [vec![0xff, 0xfe], utf16_body.clone()].concat(),
-            utf16_body,
-        ] {
+        for bytes in [[vec![0xff, 0xfe], utf16_body.clone()].concat(), utf16_body] {
             let diagnostic = installer_diagnostic_from_log(1603, Some(&bytes));
             assert_eq!(diagnostic.log_status, "present");
             assert_eq!(diagnostic.log_size_bytes, Some(bytes.len() as u64));
@@ -1886,17 +1917,13 @@ mod custody_failure_code_tests {
     #[test]
     fn installer_diagnostic_rejects_malformed_utf16le_without_lossy_recovery() {
         let malformed = [
-            0xff, 0xfe, b'A', 0, b'c', 0, b't', 0, b'i', 0, b'o', 0, b'n', 0, 0x00,
-            0xd8, b'X',
+            0xff, 0xfe, b'A', 0, b'c', 0, b't', 0, b'i', 0, b'o', 0, b'n', 0, 0x00, 0xd8, b'X',
         ];
         let diagnostic = installer_diagnostic_from_log(1603, Some(&malformed));
         assert_eq!(diagnostic.log_status, "log-unparseable");
         assert_eq!(diagnostic.return_value_3_action_code, "none");
         assert!(diagnostic.log_sha256.is_some());
-        assert_eq!(
-            diagnostic.log_size_bytes,
-            Some(malformed.len() as u64)
-        );
+        assert_eq!(diagnostic.log_size_bytes, Some(malformed.len() as u64));
     }
 
     #[test]
