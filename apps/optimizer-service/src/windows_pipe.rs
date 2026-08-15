@@ -1133,19 +1133,29 @@ mod windows_host {
         let program_data = known_program_data()?;
         let root = program_data.join("Liiiraa Boost");
         let custody = root.join("custody");
-        let sddl = format!(
+        let directory_sddl = format!(
+            "O:SY{}",
+            PipeSecurityPolicy::service_storage_directory_sddl(service_sid)
+        );
+        let directory_security = SecurityDescriptor::new(&directory_sddl)?;
+        let storage_sddl = format!(
             "O:SY{}",
             PipeSecurityPolicy::service_storage_sddl(service_sid)
         );
-        let security = SecurityDescriptor::new(&sddl)?;
-        create_protected_directory(&root, &security)?;
-        create_protected_directory(&custody, &security)?;
+        let storage_security = SecurityDescriptor::new(&storage_sddl)?;
+        let admission_sddl = format!(
+            "O:SY{}",
+            PipeSecurityPolicy::service_admission_sddl(service_sid)
+        );
+        let admission_security = SecurityDescriptor::new(&admission_sddl)?;
+        create_protected_directory(&root, &directory_security)?;
+        create_protected_directory(&custody, &directory_security)?;
 
         let database_path = custody.join(DATABASE_FILE);
-        ensure_protected_file(&database_path, &security)?;
+        ensure_protected_file(&database_path, &storage_security)?;
         let secret_path = custody.join(SECRET_FILE);
-        let install_secret = load_or_create_secret(&secret_path, &security)?;
-        record_admission(&custody, manifest, &security)?;
+        let install_secret = load_or_create_secret(&secret_path, &storage_security)?;
+        record_admission(&custody, manifest, &admission_security)?;
         Ok(Storage {
             database_path,
             install_secret,

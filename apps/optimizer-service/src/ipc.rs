@@ -40,6 +40,14 @@ impl PipeSecurityPolicy {
     pub fn service_storage_sddl(service_sid: &str) -> String {
         format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;{service_sid})")
     }
+
+    pub fn service_storage_directory_sddl(service_sid: &str) -> String {
+        format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;{service_sid})(A;;GX;;;IU)")
+    }
+
+    pub fn service_admission_sddl(service_sid: &str) -> String {
+        format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;{service_sid})(A;;GR;;;IU)")
+    }
 }
 
 #[derive(Clone, Debug)]

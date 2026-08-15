@@ -26,9 +26,9 @@ mod numeric_version;
 use artifact_manifest::{
     VerifiedArtifactManifest, verify_artifact_manifest, verify_friends_roster,
 };
-use installation_manifest::CustodyError;
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
 use installation_manifest::verify_installed_manifest;
+use installation_manifest::{CustodyError, CustodyErrorCode};
 
 // Plan 06-33 key-link witnesses (quoted because verify.key-links preserves YAML scalars):
 // 'compose_plan apply_plan restore_plan'
@@ -66,6 +66,20 @@ impl std::fmt::Display for PhysicalRunnerError {
 }
 
 impl std::error::Error for PhysicalRunnerError {}
+
+fn installed_custody_failure(error: CustodyError) -> PhysicalRunnerError {
+    let code = match error.code {
+        CustodyErrorCode::Acl => "installed-custody-acl-invalid",
+        CustodyErrorCode::Authenticode => "installed-custody-authenticode-invalid",
+        CustodyErrorCode::Hash => "installed-custody-live-byte-mismatch",
+        CustodyErrorCode::Missing => "installed-custody-required-byte-missing",
+        CustodyErrorCode::Path => "installed-custody-canonical-path-invalid",
+        CustodyErrorCode::Schema => "installed-custody-generated-schema-invalid",
+        CustodyErrorCode::Signature => "installed-custody-signature-invalid",
+        CustodyErrorCode::Version => "installed-custody-version-invalid",
+    };
+    PhysicalRunnerError::blocked(code)
+}
 
 fn artifact_custody_failure_code(error: &CustodyError) -> &'static str {
     error.artifact_failure_code()
@@ -979,8 +993,7 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
     }
 
     fn verify_installed(&mut self, artifact: &ArtifactCustody) -> Result<(), PhysicalRunnerError> {
-        let verified = verify_installed_manifest()
-            .map_err(|_| PhysicalRunnerError::blocked("installed-custody"))?;
+        let verified = verify_installed_manifest().map_err(installed_custody_failure)?;
         let runner = verified
             .files()
             .iter()
