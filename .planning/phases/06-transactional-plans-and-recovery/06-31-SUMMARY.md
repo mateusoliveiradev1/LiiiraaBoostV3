@@ -423,3 +423,24 @@ publication is:
 | File | SHA-256 | Bytes |
 |---|---|---:|
 | `artifact-manifest.json` | `e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3` | 3241 |
+
+## Append-only authority update: v53 PASSED
+
+After the v52 clean-VM attempt was retained as immutable BLOCKED evidence, the single monotonic
+v53 `build-and-smoke` completed install, downgrade rejection, rollback-failure drill,
+repair/update, broker-client binding, uninstall, and residual cleanup with lifecycle `PASSED`.
+The immutable publication is:
+
+- **Root:** `target/phase6-physical/29296bbc8c809ec571d3f171edddb1568708f2f6/physical-468a05974898514d-managed-power-scheme-v53`
+- **Build ID:** `physical-468a05974898514d-managed-power-scheme-v53`
+- **Operation version:** `managed-power-scheme-v53`
+- **Source commit:** `29296bbc8c809ec571d3f171edddb1568708f2f6`
+- **Input tree:** `sha256:468a05974898514df2d72da21a08e3acb7cf149f0b0f40807fed6a6038dea900`
+- **Artifact manifest:** `sha256:6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271` (`3241` bytes)
+- **MSI:** `sha256:6d4218482158e28cab327a121e17752d5e22bd24a98a4484f48f599c492de132` (`15683584` bytes)
+- **Clean-VM config:** `sha256:8fe269e5ad445206613df7286f83604f9bcbb87fe9ef67d7aa5e2e32481f7eb8`
+- **Runner:** `sha256:7ec7f79339e5c85546dbc465c55723711f19efc02f3ede743b6cb71ef64859d9`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271` | 3241 |

@@ -219,3 +219,10 @@ None - no external service configuration or private signing material is required
 - Exact verified authority: build `physical-487e3c326b5066a0-managed-power-scheme-v52`, source commit `9cd80dbda40cf154dee7bbbdd874626f2b978969`, artifact manifest SHA-256 `e11d36a6285af09417d397681692e9e65bce959ff87047686d435401c52b66b3`, operation `managed-power-scheme-v52`.
 - The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
 - v51 remains an append-only pre-MSI orchestration-timeout blocker with no published artifact; v50 remains the immutable deterministic predecessor until v52 simulation admission is written.
+
+## Append-Only Revalidation Addendum — v53
+
+- The immutable `managed-power-scheme-v53` artifact was verified by the real inspection-only `phase6-artifact-verifier` immediately after its single lifecycle publication.
+- Exact verified authority: build `physical-468a05974898514d-managed-power-scheme-v53`, source commit `29296bbc8c809ec571d3f171edddb1568708f2f6`, artifact manifest SHA-256 `6d2e76a71014ea056c4fd0027d46f5fe26c500616885e1153b326d9dbf024271`, operation `managed-power-scheme-v53`.
+- The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
+- v52 remains the immutable deterministic predecessor until the v53 simulation admission is written; the v52 physical blocker remains append-only and is never reused.
