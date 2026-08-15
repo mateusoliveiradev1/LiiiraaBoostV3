@@ -252,3 +252,32 @@ the same live bytes. This is the latest complete artifact authority for determin
 | `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
 | `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
 | `elevated-lifecycle-result.json` | `b377d8a93552b5cc4732a01f5febc6cdc1d4de1d047f4032ba88af5c35c87b59` | 1324 |
+
+## Append-only authority update: v46
+
+The v45 artifact, deterministic admission, read-only Audit PASS, and later
+`BLOCKED:run-config-canonical` guest-runner record remain immutable history. The v45 operation
+must never be relaunched. The Windows normal-versus-extended canonical-path correction was
+committed through RED/GREEN before one new monotonic publication; no v45 artifact, evidence, or
+UAT byte was overwritten.
+
+The single v46 `build-and-smoke` publication passed signed five-role assembly, protected ACL
+custody, install, downgrade rejection, rollback-failure drill, repair/update, broker client
+binding, uninstall, and residual cleanup. The real 06-35 inspection-only verifier then returned
+`verified` for the same live bytes. This is the latest complete artifact authority for
+deterministic admission.
+
+- **Root:** `target/phase6-physical/1a1dc18ce40beaef2f83cdb3e070386e4d639021/physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Build ID:** `physical-c714ca4c5ad147f4-managed-power-scheme-v46`
+- **Operation version:** `managed-power-scheme-v46`
+- **Source commit:** `1a1dc18ce40beaef2f83cdb3e070386e4d639021`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da` | 3241 |
+| `artifact-manifest.json.p7s` | `7e9c8e03b10c310417ca90bbd089e546d2cd06c0c9c9322ee1d4606e9bee638b` | 1609 |
+| `liiiraa-boost.msi` | `f4c24a9608a4931963c0dd457203788e4d8c7fbac48a68149a1cb42fad76b89c` | 15675392 |
+| `phase6-physical-runner.exe` | `d42c7499539cc43942d8b14ff4c0b854cd77e1d1929ea3ffea5b27cebfaf511f` | 6993192 |
+| `tauri-driver.exe` | `a361947741da6ff184d04a1c589c1bac02b4bc80e2ea3626414441e446af92cf` | 1531176 |
+| `msedgedriver.exe` | `be51c3d0c4cda2b3fe67ef528f14e2877e3f2a530a8f0b03ddcedcbf7231dbb2` | 41818920 |
+| `elevated-lifecycle-result.json` | `b6015372ba06bee0555e16bc9622f3659359c7bbff019bfe57b694895baac70a` | 1324 |

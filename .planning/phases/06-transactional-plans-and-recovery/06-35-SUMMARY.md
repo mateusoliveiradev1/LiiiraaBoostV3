@@ -191,3 +191,10 @@ None - no external service configuration or private signing material is required
 - Exact verified authority: build `physical-68bb4f974e23ee26-managed-power-scheme-v45`, source commit `7c3525b12ce76619f711ff6f6183ec884c60764f`, artifact manifest SHA-256 `9c80d1f216eacf0416731fb859a951e766cc4214150d39de8cbf34e1f2a7bc40`, operation `managed-power-scheme-v45`.
 - The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
 - v44 remains the immutable deterministic predecessor with Audit PASS and a later physically BLOCKED guest-runner attempt; neither v44 artifacts nor its append-only UAT/evidence prefix were overwritten or relaunched.
+
+## Append-Only Revalidation Addendum — v46
+
+- The immutable `managed-power-scheme-v46` artifact was verified by the real inspection-only `phase6-artifact-verifier` immediately after its single lifecycle publication.
+- Exact verified authority: build `physical-c714ca4c5ad147f4-managed-power-scheme-v46`, source commit `1a1dc18ce40beaef2f83cdb3e070386e4d639021`, artifact manifest SHA-256 `a2be09354be854fe9d010a6108d7199341593876779517bb6976a02c5255e4da`, operation `managed-power-scheme-v46`.
+- The verifier returned `verified` with CMS/SPKI, Authenticode, native versions, Cargo receipt, ACL custody, sizes, hashes, and live bytes exact. It did not install, launch, ingest, or mutate referenced bytes.
+- v45 remains the immutable deterministic predecessor with Audit PASS and a later physically BLOCKED `run-config-canonical` guest-runner attempt; neither v45 artifacts nor its append-only UAT/evidence prefix were overwritten or relaunched.
