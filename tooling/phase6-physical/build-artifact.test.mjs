@@ -616,6 +616,31 @@ test('RED: physical service uses static CRT and rejects clean-VM runtime depende
   assert.ok(dependencyGateIndex >= 0 && dependencyGateIndex < signingIndex);
 });
 
+test('RED: installed admission is readable without exposing service-only storage', () => {
+  const ipc = readFileSync('apps/optimizer-service/src/ipc.rs', 'utf8');
+  const host = readFileSync('apps/optimizer-service/src/windows_pipe.rs', 'utf8');
+  const runner = readFileSync('apps/desktop/src-tauri/src/physical_runner.rs', 'utf8');
+
+  assert.match(ipc, /service_storage_directory_sddl[\s\S]{0,256}\(A;;GX;;;IU\)/u);
+  assert.match(ipc, /service_admission_sddl[\s\S]{0,256}\(A;;GR;;;IU\)/u);
+  assert.match(host, /create_protected_directory\(&root,\s*&directory_security\)/u);
+  assert.match(host, /ensure_protected_file\(&database_path,\s*&storage_security\)/u);
+  assert.match(host, /record_admission\(&custody,\s*manifest,\s*&admission_security\)/u);
+  assert.match(runner, /installed_custody_failure/u);
+  for (const code of [
+    'installed-custody-acl-invalid',
+    'installed-custody-authenticode-invalid',
+    'installed-custody-live-byte-mismatch',
+    'installed-custody-required-byte-missing',
+    'installed-custody-canonical-path-invalid',
+    'installed-custody-generated-schema-invalid',
+    'installed-custody-signature-invalid',
+    'installed-custody-version-invalid',
+  ])
+    assert.match(runner, new RegExp(code, 'u'));
+  assert.doesNotMatch(runner, /installed-custody-\{.*detail/iu);
+});
+
 test('physical lifecycle proves the installed desktop owns a read-only broker lease across reconnect', () => {
   const lifecycle = readFileSync('tooling/phase6-physical/lifecycle-smoke.ps1', 'utf8');
   const desktop = readFileSync('apps/desktop/src-tauri/src/main.rs', 'utf8');
