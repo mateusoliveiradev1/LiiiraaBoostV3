@@ -8,15 +8,48 @@ use std::{
 
 use serde_json::{Value, json};
 use service::installation_manifest::{
-    AuthenticodeEvidence, CustodyBackend, CustodyError, InstalledAdmissionState, SignerEvidence,
-    TRUSTED_INSTALLER_SPKI_SHA256, canonical_json_bytes, local_msi_database_path,
-    same_closed_windows_path, verify_installed_manifest_with_backend,
+    AuthenticodeEvidence, CanonicalPathRole, CustodyBackend, CustodyError,
+    InstalledAdmissionState, SignerEvidence, TRUSTED_INSTALLER_SPKI_SHA256,
+    canonical_json_bytes, local_msi_database_path, same_closed_windows_path,
+    verify_installed_manifest_with_backend,
 };
 use sha2::{Digest, Sha256};
 
 const ROOT: &str = r"C:\Program Files\Liiiraa Boost";
 const PUBLISHER: &str = "Liiiraa Boost Local Development";
 const THUMBPRINT: &str = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+#[cfg(windows)]
+#[test]
+fn canonicalize_diagnostic_retains_only_bounded_role_class_and_io_code() {
+    let error = CustodyError::from_canonicalize_error(
+        CanonicalPathRole::InstalledManifest,
+        Path::new(r"C:\Users\secret-user\payload.json"),
+        &std::io::Error::from_raw_os_error(5),
+    );
+    let diagnostic = error
+        .safe_path_diagnostic()
+        .expect("canonicalize errors must retain bounded diagnostics");
+    assert_eq!(diagnostic.role, "installed-manifest");
+    assert_eq!(diagnostic.path_class, "disk");
+    assert_eq!(diagnostic.io_kind, "permission-denied");
+    assert_eq!(diagnostic.win32_code, Some(5));
+    let serialized = format!(
+        "{}:{}:{}:{:?}",
+        diagnostic.role, diagnostic.path_class, diagnostic.io_kind, diagnostic.win32_code
+    );
+    assert!(!serialized.contains("secret-user"));
+    assert!(!serialized.contains(r"C:\"));
+
+    let unbounded = CustodyError::from_canonicalize_error(
+        CanonicalPathRole::InstalledRoot,
+        Path::new(r"\\?\GLOBALROOT\Device\HarddiskVolume1"),
+        &std::io::Error::from_raw_os_error(999_999),
+    );
+    let diagnostic = unbounded.safe_path_diagnostic().unwrap();
+    assert_eq!(diagnostic.path_class, "device-other");
+    assert_eq!(diagnostic.win32_code, None);
+}
 
 #[test]
 fn msi_database_view_accepts_only_canonical_local_verbatim_disk_paths() {
