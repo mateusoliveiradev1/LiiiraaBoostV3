@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    'b3751da5155683a312239e71bafe3ee8969b5446',
-    'physical-4c88acfffc6c9dc2-managed-power-scheme-v55',
+    'b6270f1b935cc3fd55dfd3d55f1847ffdf988db9',
+    'physical-c013840c872b6f81-managed-power-scheme-v56',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -135,6 +135,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v52-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v53-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v54-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v55-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -296,9 +297,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v56',
+    'physical-c013840c872b6f81-managed-power-scheme-v56',
+    'b6270f1b935cc3fd55dfd3d55f1847ffdf988db9',
+    '4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f',
+    '858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940',
+    '29d024104cc942ef34e5d5dd8ae0bb906b9375341818587e9e102320fd359be4',
     'managed-power-scheme-v55',
     'physical-4c88acfffc6c9dc2-managed-power-scheme-v55',
-    'b3751da5155683a312239e71bafe3ee8969b5446',
     'e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a',
     'a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb',
     'eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8',
@@ -383,7 +389,7 @@ const assertSourcePolicy = (source) => {
   const runtime = source.slice(source.indexOf('function Copy-ExactArtifactToGuest'));
   assert.doesNotMatch(
     runtime,
-    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[0-2])/u,
+    /physical-[0-9a-f]{16}-managed-power-scheme-v(?:4[1-9]|5[0-5])/u,
   );
   assert.doesNotMatch(runtime, /C:\\LiiiraaBoost\\Phase6\\physical-/u);
 
@@ -990,7 +996,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v55 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v56 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -1002,7 +1008,7 @@ test('dry-run audits the exact immutable v55 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v55');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v56');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
@@ -1035,11 +1041,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ['v41 reactivation', (value) => (value.deterministicAdmissions[0].status = 'active')],
     [
       'second active',
-      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[9] }),
+      (value) => value.deterministicAdmissions.push({ ...value.deterministicAdmissions[12] }),
     ],
     [
       'missing predecessor',
-      (value) => (value.deterministicAdmissions[9].predecessorEvidenceSha256 = null),
+      (value) => (value.deterministicAdmissions[12].predecessorEvidenceSha256 = null),
     ],
     [
       'fork',
@@ -1059,11 +1065,11 @@ test('schema-v3 chain mutations fail closed before any bridge action', () => {
     ],
     [
       'active tuple mismatch',
-      (value) => (value.deterministicAdmissions[9].buildId = 'mismatched-build'),
+      (value) => (value.deterministicAdmissions[12].buildId = 'mismatched-build'),
     ],
     [
       'active run hash mismatch',
-      (value) => (value.deterministicAdmissions[9].runEvidenceSha256 = '4'.repeat(64)),
+      (value) => (value.deterministicAdmissions[12].runEvidenceSha256 = '4'.repeat(64)),
     ],
   ];
   try {
