@@ -42,7 +42,9 @@ impl PipeSecurityPolicy {
     }
 
     pub fn service_storage_directory_sddl(service_sid: &str) -> String {
-        format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;{service_sid})(A;;GX;;;IU)")
+        // SYNCHRONIZE | FILE_READ_ATTRIBUTES | FILE_TRAVERSE: enough for
+        // std::fs::canonicalize without granting directory listing or file reads.
+        format!("D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;{service_sid})(A;;0x001000A0;;;IU)")
     }
 
     pub fn service_admission_sddl(service_sid: &str) -> String {
