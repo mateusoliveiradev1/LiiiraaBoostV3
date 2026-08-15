@@ -414,8 +414,19 @@ test('RED: staged artifact receives fixed protected guest custody before any run
     source.indexOf('function Assert-ExactGuestArtifactCustody'),
   );
   assert.match(setter, /\[PSCredential\]\$Credential/u);
+  assert.match(setter, /-ArgumentList\s+\$ExpectedGuestRoot/u);
+  assert.match(setter, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v49'/u);
+  assert.doesNotMatch(setter, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
   assert.doesNotMatch(setter, /\[string\]\$(?:Path|Root|Sid|Command|Script|Arguments?)/u);
   assert.doesNotMatch(setter, /icacls|takeown|Everyone|S-1-1-0|S-1-5-32-545/iu);
+
+  const custodyAssertion = source.slice(
+    source.indexOf('function Assert-ExactGuestArtifactCustody'),
+    source.indexOf('function Resolve-RunnerFailureDiagnostic'),
+  );
+  assert.match(custodyAssertion, /-ArgumentList\s+\$ExpectedGuestRoot/u);
+  assert.match(custodyAssertion, /\$fixedRoot\s+-cne\s+'C:\\LiiiraaBoost\\Phase6\\physical-487e3c326b5066a0-managed-power-scheme-v49'/u);
+  assert.doesNotMatch(custodyAssertion, /physical-50796b7236b2889c-managed-power-scheme-v47/u);
 
   const runBody = source.slice(
     source.indexOf('function Invoke-CleanVmRun'),
