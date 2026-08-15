@@ -31,6 +31,7 @@ export const TAURI_DRIVER_CARGO_INSTALL_RECEIPT = Object.freeze({
   binaryName: 'tauri-driver.exe',
 });
 export const PHYSICAL_PRODUCT_CODE = '72696290-c079-44db-9fdd-6e7cc11aa2c2';
+export const STATIC_CRT_RUSTFLAGS = '-C target-feature=+crt-static';
 const INSTALLATION_MANIFEST_SDDL =
   'D:P(A;;FA;;;SY)(A;;FR;;;S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564)';
 const INSTALLATION_DIRECTORY_SDDL =
@@ -688,6 +689,47 @@ const findSignTool = () => {
       .find(existsSync) || null
   );
 };
+
+const findDumpbin = () => {
+  const root = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022';
+  if (!existsSync(root)) return null;
+  for (const edition of readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))) {
+    const tools = join(root, edition.name, 'VC', 'Tools', 'MSVC');
+    if (!existsSync(tools)) continue;
+    const versions = readdirSync(tools, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+    for (const version of versions) {
+      const candidate = join(tools, version.name, 'bin', 'Hostx64', 'x64', 'dumpbin.exe');
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+};
+
+export function validateServiceRuntimeDependencies(output) {
+  if (typeof output !== 'string' || output.length === 0 || output.length > 256 * 1024)
+    fail('service dependency inspection output is missing or exceeds fixed bounds');
+  const dependencies = [
+    ...new Set(
+      output
+        .split(/\r?\n/gu)
+        .map((line) => line.trim().toLowerCase())
+        .filter((line) => /^[a-z0-9._-]+\.dll$/u.test(line)),
+    ),
+  ].sort();
+  if (dependencies.length === 0 || !dependencies.includes('kernel32.dll'))
+    fail('service dependency inspection did not expose a bounded Windows import set');
+  const dynamicCrt = dependencies.filter(
+    (name) =>
+      /^(?:vcruntime|msvcp|ucrtbase)/u.test(name) || name.startsWith('api-ms-win-crt-'),
+  );
+  if (dynamicCrt.length > 0)
+    fail(`service retains forbidden dynamic CRT dependencies: ${dynamicCrt.join(', ')}`);
+  return dependencies;
+}
 
 const powershellJson = (script) => {
   const output = run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
@@ -1405,6 +1447,8 @@ const buildAndSmoke = (options) => {
     const webView2Runtime = detectWebView2Runtime();
     const signtool = findSignTool();
     if (!signtool) fail('Windows SDK signtool.exe is unavailable');
+    const dumpbin = findDumpbin();
+    if (!dumpbin) fail('Visual Studio dumpbin.exe is unavailable');
     const signer = signerIdentity(TRUSTED_INSTALLER_SPKI_SHA256);
     if (signer.spkiSha256 !== TRUSTED_INSTALLER_SPKI_SHA256)
       fail(`certificate SPKI mismatch: ${signer.spkiSha256}`);
@@ -1456,6 +1500,7 @@ const buildAndSmoke = (options) => {
         env: {
           ...process.env,
           LIIIRAA_PHYSICAL_PACKAGE_VERSION: packageVersion,
+          RUSTFLAGS: STATIC_CRT_RUSTFLAGS,
         },
       },
     );
@@ -1495,6 +1540,7 @@ const buildAndSmoke = (options) => {
     };
     for (const path of Object.values(built))
       if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
+    validateServiceRuntimeDependencies(run(dumpbin, ['/dependents', built.service], { capture: true }));
     patchTauriBundleTypeForMsi(built.desktop);
     const signatures = {};
     for (const [key, path] of Object.entries(built))
