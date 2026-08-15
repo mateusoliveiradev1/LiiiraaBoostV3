@@ -29,7 +29,8 @@ const simulationSummary = resolve(
 const evidenceManifest = resolve(root, 'tooling/phase6-evidence/evidence-manifest.json');
 const exactVm = 'LiiiraaBoost-W11-25H2-Clean';
 const cleanCheckpoint = 'Clean-Windows-Ready';
-const cleanCheckpointId = 'ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075';
+const previousCleanCheckpointId = 'ab2bc9c7-e0f7-49a7-84d7-5fb6a486f075';
+const cleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e';
 const backupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43';
 const backupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef';
 const installedCheckpoint = 'LiiiraaBoost-Installed';
@@ -39,7 +40,7 @@ test('fixed 4 GiB preparation preserves checkpoints and emits bounded append-onl
   for (const literal of [
     exactVm,
     cleanCheckpoint,
-    cleanCheckpointId,
+    previousCleanCheckpointId,
     backupCheckpoint,
     backupCheckpointId,
     'Clean-Windows-Ready-Pre4GiB-v47',
