@@ -650,6 +650,10 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
 
   const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   assert.match(source, /cargo[\s\S]{0,512}install[\s\S]{0,512}tauri-driver[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u);
+  assert.match(
+    source,
+    /@liiiraa\/desktop[\s\S]{0,512}'tauri'[\s\S]{0,256}'build'[\s\S]{0,768}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u,
+  );
   assert.doesNotMatch(source, /locateTauriDriver/u);
   for (const runtime of ['built.service', 'built.runner', 'portableDrivers.tauriDriver']) {
     assert.match(
