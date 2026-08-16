@@ -294,3 +294,11 @@ There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain
 - The active v57 run binds predecessor evidence SHA-256 `858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940` from v56. Pre-artifact v48 and v51 remain outside the linear chain.
 - Current evidence manifest SHA-256: `0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1`.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v58
+
+- The physically BLOCKED v57 clean-VM attempt was not relaunched; its deterministic admission is now the immutable immediate predecessor at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v57-evidence-manifest.json`, SHA-256 `0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1`.
+- `managed-power-scheme-v58` is the sole active deterministic admission for build `physical-9f5464923978c943-managed-power-scheme-v58`, artifact manifest SHA-256 `2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888`, and run evidence SHA-256 `ee3f5275a39982715f5e38a731ed9a1617de9163f05963e68a0a5a23c1ff0e5f`.
+- The active v58 run binds predecessor evidence SHA-256 `62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762` from v57. Pre-artifact v48 and v51 remain outside the linear chain.
+- Current evidence manifest SHA-256: `c74c3dd1bbe10949597fa938f4330856f6e6b3e18515468bf8ee4c84c772d90e`.
+- `rtk pnpm phase6:verify -- --mode planned` returns `ok: true`, highest stage `deterministic-simulation`, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.

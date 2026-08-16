@@ -1245,3 +1245,39 @@ subsequent reservation. The immutable v55 attempt was not reused.
 
 The blocked v57 operation was not retried. Its immutable artifact, deterministic admission, and
 both physical blockers remain historical evidence; only the next monotonic version may proceed.
+
+---
+
+## Operation `managed-power-scheme-v58` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v58`
+- **Artifact manifest SHA-256:** `2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888`
+- **Run evidence SHA-256:** `ee3f5275a39982715f5e38a731ed9a1617de9163f05963e68a0a5a23c1ff0e5f`
+- **Evidence manifest SHA-256:** `c74c3dd1bbe10949597fa938f4330856f6e6b3e18515468bf8ee4c84c772d90e`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v58",
+  "buildId": "physical-9f5464923978c943-managed-power-scheme-v58",
+  "artifactManifestSha256": "2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888",
+  "runEvidenceSha256": "ee3f5275a39982715f5e38a731ed9a1617de9163f05963e68a0a5a23c1ff0e5f",
+  "evidenceManifestSha256": "c74c3dd1bbe10949597fa938f4330856f6e6b3e18515468bf8ee4c84c772d90e",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
