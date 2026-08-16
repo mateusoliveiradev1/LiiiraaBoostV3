@@ -26,22 +26,19 @@ $ExpectedCleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $ExpectedBackupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43'
 $ExpectedBackupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef'
 $ExpectedInstalledCheckpoint = 'LiiiraaBoost-Installed'
-$ExpectedLateVisibleCheckpointBlocker = '20260816-015122-clean-vm-BLOCKED.json'
-$ExpectedLateVisibleCheckpointBlockerSha256 = '23765fcf6356c426c09810b0c0283f0fc87dfcebff47ffadcc6e7b81d88ce319'
-$ExpectedPromptReadySuffix = 'managed-power-scheme-v57-APPLY-PROMPT-READY.json'
 $CurrentAuthority = [pscustomobject][ordered]@{
-    OperationVersion = 'managed-power-scheme-v57'
-    BuildId = 'physical-9f5464923978c943-managed-power-scheme-v57'
-    SourceCommit = '9e3001ca2f9f50154696c8aca86c4d7f5284b988'
-    ArtifactManifestSha256 = '4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3'
-    SimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v57-4f291830874f'
-    SimulationRunSha256 = '62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762'
-    EvidenceManifestSha256 = '0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1'
+    OperationVersion = 'managed-power-scheme-v58'
+    BuildId = 'physical-9f5464923978c943-managed-power-scheme-v58'
+    SourceCommit = 'ed529a1c61d4d1b7d8dc59979db7058815a3814e'
+    ArtifactManifestSha256 = '2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888'
+    SimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v58-2f407cc28495'
+    SimulationRunSha256 = 'ee3f5275a39982715f5e38a731ed9a1617de9163f05963e68a0a5a23c1ff0e5f'
+    EvidenceManifestSha256 = 'c74c3dd1bbe10949597fa938f4330856f6e6b3e18515468bf8ee4c84c772d90e'
     RunnerRelativePath = 'phase6-physical-runner.exe'
     ConfigRelativePath = 'configs\clean-windows-vm.run-config.json'
-    GuestRoot = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v57'
-    GuestRunner = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v57\phase6-physical-runner.exe'
-    GuestConfig = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v57\configs\clean-windows-vm.run-config.json'
+    GuestRoot = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v58'
+    GuestRunner = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v58\phase6-physical-runner.exe'
+    GuestConfig = 'C:\LiiiraaBoost\Phase6\physical-9f5464923978c943-managed-power-scheme-v58\configs\clean-windows-vm.run-config.json'
 }
 $ExpectedOperationVersion = $CurrentAuthority.OperationVersion
 $ExpectedBuildId = $CurrentAuthority.BuildId
@@ -50,6 +47,13 @@ $ExpectedArtifactManifestSha256 = $CurrentAuthority.ArtifactManifestSha256
 $ExpectedSimulationRunId = $CurrentAuthority.SimulationRunId
 $ExpectedSimulationRunSha256 = $CurrentAuthority.SimulationRunSha256
 $ExpectedEvidenceManifestSha256 = $CurrentAuthority.EvidenceManifestSha256
+$ExpectedNewestActivePredecessorOperationVersion = 'managed-power-scheme-v57'
+$ExpectedNewestActivePredecessorBuildId = 'physical-9f5464923978c943-managed-power-scheme-v57'
+$ExpectedNewestActivePredecessorArtifactManifestSha256 = '4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3'
+$ExpectedNewestActivePredecessorRunId = 'phase6-deterministic-simulation-managed-power-scheme-v57-4f291830874f'
+$ExpectedNewestActivePredecessorRunSha256 = '62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762'
+$ExpectedNewestActivePredecessorManifestSha256 = '0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1'
+$ExpectedNewestActivePredecessorManifestRelativePath = 'tooling/phase6-evidence/records/superseded/managed-power-scheme-v57-evidence-manifest.json'
 $ExpectedImmediateActivePredecessorOperationVersion = 'managed-power-scheme-v56'
 $ExpectedImmediateActivePredecessorBuildId = 'physical-c013840c872b6f81-managed-power-scheme-v56'
 $ExpectedImmediateActivePredecessorArtifactManifestSha256 = '4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f'
@@ -173,7 +177,6 @@ $CurrentAuthority | Add-Member -NotePropertyName ArtifactSignature -NoteProperty
 $CurrentAuthority | Add-Member -NotePropertyName EvidenceManifest -NotePropertyValue $ExpectedEvidenceManifest
 $LabRoot = 'C:\Users\Liiiraa\VM-Lab'
 $CompletedBoundaries = [Collections.Generic.List[string]]::new()
-$script:LateVisibleInstalledCheckpoint = $null
 $MaximumRunnerOutputLines = 32
 $MaximumRunnerOutputChars = 4096
 $RunnerFailureStage = 'preflight'
@@ -291,6 +294,9 @@ function Get-Authority {
         $ExpectedArtifactManifestSha256,
         $ExpectedSimulationRunSha256,
         $ExpectedEvidenceManifestSha256,
+        $ExpectedNewestActivePredecessorOperationVersion,
+        $ExpectedNewestActivePredecessorRunSha256,
+        $ExpectedNewestActivePredecessorManifestSha256,
         $ExpectedImmediateActivePredecessorOperationVersion,
         $ExpectedImmediateActivePredecessorRunSha256,
         $ExpectedImmediateActivePredecessorManifestSha256,
@@ -395,8 +401,8 @@ function Get-Authority {
         throw 'BLOCKED: deterministic admission schema is not the exact closed v3 authority.'
     }
     $admissions = @($evidenceManifest.deterministicAdmissions)
-    if ($admissions.Count -ne 14 -or @($admissions | Where-Object { $_.status -eq 'active' }).Count -ne 1) {
-        throw 'BLOCKED: deterministic admission chain must contain thirteen predecessors and one active successor.'
+    if ($admissions.Count -ne 15 -or @($admissions | Where-Object { $_.status -eq 'active' }).Count -ne 1) {
+        throw 'BLOCKED: deterministic admission chain must contain fourteen predecessors and one active successor.'
     }
     $expectedAdmissionKeys = @(
         'status', 'operationVersion', 'buildId', 'artifactManifestSha256', 'runEvidenceId',
@@ -421,7 +427,8 @@ function Get-Authority {
     $activePredecessor = $admissions[10]
     $latestActivePredecessor = $admissions[11]
     $immediateActivePredecessor = $admissions[12]
-    $active = $admissions[13]
+    $newestActivePredecessor = $admissions[13]
+    $active = $admissions[14]
     if ($historical.status -ne 'superseded' -or
         $historical.operationVersion -ne $ExpectedHistoricalOperationVersion -or
         $historical.buildId -ne $ExpectedHistoricalBuildId -or
@@ -573,10 +580,22 @@ function Get-Authority {
         $immediateActivePredecessor.runEvidenceId -ne $ExpectedImmediateActivePredecessorRunId -or
         $immediateActivePredecessor.runEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256 -or
         $immediateActivePredecessor.predecessorEvidenceSha256 -ne $ExpectedLatestActivePredecessorRunSha256 -or
-        $immediateActivePredecessor.successorEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
+        $immediateActivePredecessor.successorEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256 -or
         $immediateActivePredecessor.manifestRecord.path -ne $ExpectedImmediateActivePredecessorManifestRelativePath -or
         $immediateActivePredecessor.manifestRecord.sha256 -ne $ExpectedImmediateActivePredecessorManifestSha256) {
         throw 'BLOCKED: physically BLOCKED v56 predecessor identity is invalid or reactivated.'
+    }
+    if ($newestActivePredecessor.status -ne 'superseded' -or
+        $newestActivePredecessor.operationVersion -ne $ExpectedNewestActivePredecessorOperationVersion -or
+        $newestActivePredecessor.buildId -ne $ExpectedNewestActivePredecessorBuildId -or
+        $newestActivePredecessor.artifactManifestSha256 -ne $ExpectedNewestActivePredecessorArtifactManifestSha256 -or
+        $newestActivePredecessor.runEvidenceId -ne $ExpectedNewestActivePredecessorRunId -or
+        $newestActivePredecessor.runEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256 -or
+        $newestActivePredecessor.predecessorEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256 -or
+        $newestActivePredecessor.successorEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
+        $newestActivePredecessor.manifestRecord.path -ne $ExpectedNewestActivePredecessorManifestRelativePath -or
+        $newestActivePredecessor.manifestRecord.sha256 -ne $ExpectedNewestActivePredecessorManifestSha256) {
+        throw 'BLOCKED: physically BLOCKED v57 predecessor identity is invalid or reactivated.'
     }
     if ($active.status -ne 'active' -or
         $active.operationVersion -ne $ExpectedOperationVersion -or
@@ -584,10 +603,10 @@ function Get-Authority {
         $active.artifactManifestSha256 -ne $ExpectedArtifactManifestSha256 -or
         $active.runEvidenceId -ne $ExpectedSimulationRunId -or
         $active.runEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
-        $active.predecessorEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256 -or
+        $active.predecessorEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256 -or
         $null -ne $active.successorEvidenceSha256 -or
         $null -ne $active.manifestRecord) {
-        throw 'BLOCKED: active v57 deterministic admission tuple/hash/link mismatch.'
+        throw 'BLOCKED: active v58 deterministic admission tuple/hash/link mismatch.'
     }
     if (($admissions | ConvertTo-Json -Depth 8).IndexOf('managed-power-scheme-v42', [StringComparison]::Ordinal) -ge 0) {
         throw 'BLOCKED: rejected v42 cannot belong to the deterministic admission chain.'
@@ -910,6 +929,30 @@ function Get-Authority {
         $immediateActivePredecessorStage[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedLatestActivePredecessorRunSha256) {
         throw 'BLOCKED: immutable v56 predecessor record identity is invalid.'
     }
+    $newestActivePredecessorManifest = Join-Path $RepositoryRoot $ExpectedNewestActivePredecessorManifestRelativePath.Replace('/', '\')
+    if (-not (Test-Path -LiteralPath $newestActivePredecessorManifest -PathType Leaf) -or
+        (Get-FileSha256Hex -Path $newestActivePredecessorManifest) -ne $ExpectedNewestActivePredecessorManifestSha256) {
+        throw 'BLOCKED: immutable v57 predecessor record is missing or changed.'
+    }
+    $newestActivePredecessorDocument = [IO.File]::ReadAllText($newestActivePredecessorManifest) | ConvertFrom-Json
+    $newestActivePredecessorStage = @($newestActivePredecessorDocument.stages | Where-Object { $_.stage -eq 'deterministic-simulation' })
+    $newestActivePredecessorAdmissions = @($newestActivePredecessorDocument.deterministicAdmissions)
+    if ($newestActivePredecessorDocument.schemaVersion -ne 3 -or
+        $newestActivePredecessorDocument.operationVersion -ne $ExpectedNewestActivePredecessorOperationVersion -or
+        $newestActivePredecessorDocument.immutableBuild.id -ne $ExpectedNewestActivePredecessorBuildId -or
+        $newestActivePredecessorDocument.immutableBuild.artifactManifestSha256 -ne $ExpectedNewestActivePredecessorArtifactManifestSha256 -or
+        $newestActivePredecessorAdmissions.Count -ne 14 -or
+        $newestActivePredecessorAdmissions[12].operationVersion -ne $ExpectedImmediateActivePredecessorOperationVersion -or
+        $newestActivePredecessorAdmissions[12].status -ne 'superseded' -or
+        $newestActivePredecessorAdmissions[13].operationVersion -ne $ExpectedNewestActivePredecessorOperationVersion -or
+        $newestActivePredecessorAdmissions[13].status -ne 'active' -or
+        $newestActivePredecessorAdmissions[13].predecessorEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256 -or
+        $newestActivePredecessorStage.Count -ne 1 -or
+        @($newestActivePredecessorStage[0].runs).Count -ne 1 -or
+        $newestActivePredecessorStage[0].runs[0].id -ne $ExpectedNewestActivePredecessorRunId -or
+        $newestActivePredecessorStage[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256) {
+        throw 'BLOCKED: immutable v57 predecessor record identity is invalid.'
+    }
     $deterministic = @($evidenceManifest.stages | Where-Object { $_.stage -eq 'deterministic-simulation' })
     if ($evidenceManifest.operationVersion -ne $ExpectedOperationVersion -or
         $evidenceManifest.immutableBuild.id -ne $ExpectedBuildId -or
@@ -920,11 +963,11 @@ function Get-Authority {
         $deterministic[0].runs[0].operationVersion -ne $ExpectedOperationVersion -or
         $deterministic[0].runs[0].buildId -ne $ExpectedBuildId -or
         $deterministic[0].runs[0].artifactManifestSha256 -ne $ExpectedArtifactManifestSha256 -or
-        $deterministic[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedImmediateActivePredecessorRunSha256 -or
+        $deterministic[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256 -or
         @($evidenceManifest.stages | Select-Object -Skip 1 | Where-Object {
             @($_.runs).Count -ne 0 -or @($_.consents).Count -ne 0 -or @($_.reviews).Count -ne 0
         }).Count -ne 0) {
-        throw 'BLOCKED: deterministic simulation admission is not the exact active v57 authority.'
+        throw 'BLOCKED: deterministic simulation admission is not the exact active v58 authority.'
     }
 
     $CurrentAuthority | Add-Member -NotePropertyName Manifest -NotePropertyValue $manifest -Force
@@ -997,56 +1040,6 @@ function Assert-FreshSimulationAdmission {
     [void]$CompletedBoundaries.Add('simulation-admission-pass')
 }
 
-function Resolve-LateVisibleInstalledCheckpointRecovery {
-    param([Parameter(Mandatory)]$Checkpoint)
-
-    $evidenceDirectory = Join-Path $LabRoot 'Evidence\phase6'
-    $blockerPath = Join-Path $evidenceDirectory $ExpectedLateVisibleCheckpointBlocker
-    if (-not (Test-Path -LiteralPath $blockerPath -PathType Leaf) -or
-        (Get-Item -LiteralPath $blockerPath).Length -gt 4096 -or
-        (Get-FileSha256Hex -Path $blockerPath) -ne $ExpectedLateVisibleCheckpointBlockerSha256) {
-        throw 'BLOCKED: installed checkpoint exists without the exact late-visibility blocker.'
-    }
-    if (@(Get-ChildItem -LiteralPath $evidenceDirectory -Filter "*-$ExpectedPromptReadySuffix" -File -ErrorAction SilentlyContinue).Count -ne 0) {
-        throw 'BLOCKED: installed checkpoint recovery is forbidden after an apply prompt boundary.'
-    }
-
-    $blocker = [IO.File]::ReadAllText($blockerPath) | ConvertFrom-Json
-    $expectedBoundaries = @(
-        'artifact-verifier-pass',
-        'simulation-admission-pass',
-        'hyper-v-prestart-audit-pass',
-        'clean-checkpoint-restored',
-        'integration-services-healthy',
-        'exact-artifact-staged',
-        'guest-artifact-acl-provisioned',
-        'guest-artifact-acl-verified',
-        'installed-ready-verified'
-    )
-    $recordedAt = [DateTime]::Parse([string]$blocker.recordedAt).ToUniversalTime()
-    $checkpointCreatedAt = ([DateTime]$Checkpoint.CreationTime).ToUniversalTime()
-    $creationDelta = [Math]::Abs(($recordedAt - $checkpointCreatedAt).TotalSeconds)
-    if ($blocker.status -cne 'BLOCKED' -or
-        $blocker.operationVersion -cne $ExpectedOperationVersion -or
-        $blocker.buildId -cne $ExpectedBuildId -or
-        $blocker.vmName -cne $ExpectedVmName -or
-        $blocker.cleanCheckpoint -cne $ExpectedCleanCheckpoint -or
-        $blocker.installedCheckpoint -cne $ExpectedInstalledCheckpoint -or
-        $blocker.stage -cne 'installed-ready' -or
-        $null -ne $blocker.runnerExitCode -or
-        $null -ne $blocker.runnerFailureCode -or
-        $null -ne $blocker.installerDiagnostic -or
-        $null -ne $blocker.installedCustodyDiagnostic -or
-        @($blocker.completedBoundaries).Count -ne $expectedBoundaries.Count -or
-        @(Compare-Object -ReferenceObject $expectedBoundaries -DifferenceObject @($blocker.completedBoundaries) -SyncWindow 0).Count -ne 0 -or
-        $creationDelta -gt 5 -or
-        [string]$Checkpoint.Name -cne $ExpectedInstalledCheckpoint -or
-        [string]$Checkpoint.Id -notmatch '^[0-9a-fA-F-]{36}$') {
-        throw 'BLOCKED: installed checkpoint late-visibility recovery binding is invalid.'
-    }
-    return $Checkpoint
-}
-
 function Assert-ExactHyperVAudit {
     $vm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
     if ($vm.Name -ne $ExpectedVmName -or $vm.Generation -ne 2) {
@@ -1062,10 +1055,7 @@ function Assert-ExactHyperVAudit {
     }
     $installed = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue)
     if ($installed.Count -ne 0) {
-        if ($Action -cne 'RunCleanVm' -or $vm.State.ToString() -cne 'Off' -or $installed.Count -ne 1) {
-            throw 'BLOCKED: installed checkpoint must remain absent before clean-VM execution.'
-        }
-        $script:LateVisibleInstalledCheckpoint = Resolve-LateVisibleInstalledCheckpointRecovery -Checkpoint $installed[0]
+        throw 'BLOCKED: installed checkpoint must remain absent before clean-VM execution.'
     }
     $firmware = Get-VMFirmware -VMName $ExpectedVmName
     $security = Get-VMSecurity -VMName $ExpectedVmName
@@ -1083,7 +1073,7 @@ function Assert-ExactHyperVAudit {
         throw 'BLOCKED: exactly six enabled Hyper-V integration services are required before start.'
     }
     [void]$CompletedBoundaries.Add('hyper-v-prestart-audit-pass')
-    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; BackupCheckpoint = $backup[0]; InstalledCheckpoint = $script:LateVisibleInstalledCheckpoint; Integration = $integration }
+    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; BackupCheckpoint = $backup[0]; Integration = $integration }
 }
 
 function Wait-ExactIntegrationServicesHealthy {
@@ -2090,33 +2080,20 @@ function Invoke-CleanVmRun {
         [Parameter(Mandatory)][PSCredential]$Credential
     )
 
-    if ($null -ne $script:LateVisibleInstalledCheckpoint) {
-        Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -Confirm:$false -ErrorAction Stop
-        $vm = Get-VM -Name $ExpectedVmName
-        if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
-        Wait-ExactVmReady -Credential $Credential
-        [void](Wait-ExactIntegrationServicesHealthy)
-        Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
-        $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult ([pscustomobject]@{ State = 'InstalledReady' })
-        $installedCheckpoint = $script:LateVisibleInstalledCheckpoint
-        [void]$CompletedBoundaries.Add('late-visible-installed-checkpoint-recovered')
-    }
-    else {
-        Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedCleanCheckpoint -Confirm:$false -ErrorAction Stop
-        [void]$CompletedBoundaries.Add('clean-checkpoint-restored')
-        $vm = Get-VM -Name $ExpectedVmName
-        if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
-        Wait-ExactVmReady -Credential $Credential
-        [void](Wait-ExactIntegrationServicesHealthy)
-        [void]$CompletedBoundaries.Add('integration-services-healthy')
-        Copy-ExactArtifactToGuest -Authority $Authority
-        Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
-        Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedCleanCheckpoint -Confirm:$false -ErrorAction Stop
+    [void]$CompletedBoundaries.Add('clean-checkpoint-restored')
+    $vm = Get-VM -Name $ExpectedVmName
+    if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
+    Wait-ExactVmReady -Credential $Credential
+    [void](Wait-ExactIntegrationServicesHealthy)
+    [void]$CompletedBoundaries.Add('integration-services-healthy')
+    Copy-ExactArtifactToGuest -Authority $Authority
+    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
 
-        $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
-        $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
-        $installedCheckpoint = New-InstalledCheckpointOnce
-    }
+    $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
+    $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
+    $installedCheckpoint = New-InstalledCheckpointOnce
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $installedCheckpoint
 
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
