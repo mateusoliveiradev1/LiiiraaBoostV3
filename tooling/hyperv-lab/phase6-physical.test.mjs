@@ -838,6 +838,31 @@ test('RED: same-session installed custody sidecar is bounded and path-free', () 
   assert.equal(JSON.stringify(poisoned).includes('secret-user'), false);
 });
 
+test('RED: fixed installed-custody diagnostic is static-CRT and PE-gated before VM launch', () => {
+  const buildPath = 'tooling/hyperv-lab/Build-Phase6InstalledCustodyDiagnostic.ps1';
+  assert.equal(existsSync(buildPath), true, 'fixed diagnostic build entrypoint must exist');
+  const build = readFileSync(buildPath, 'utf8');
+  const collector = readFileSync(
+    'tooling/hyperv-lab/Collect-Phase6InstalledCustodyDiagnostic.ps1',
+    'utf8',
+  );
+
+  assert.match(build, /RUSTFLAGS[^\r\n]*-C target-feature=\+crt-static/u);
+  assert.match(
+    build,
+    /cargo(?:\.exe)?['"]?\s+build[\s\S]{0,512}phase6-installed-custody-diagnostic[\s\S]{0,256}x86_64-pc-windows-msvc/u,
+  );
+  assert.match(build, /dumpbin\.exe/u);
+  assert.match(build, /\/dependents/u);
+  assert.match(build, /vcruntime\|msvcp\|ucrtbase\|api-ms-win-crt-/u);
+  assert.match(build, /BLOCKED:diagnostic-dynamic-crt/u);
+
+  const buildIndex = collector.indexOf('Build-Phase6InstalledCustodyDiagnostic.ps1');
+  const sourceHashIndex = collector.indexOf('Get-FileHash -LiteralPath $diagnosticSource');
+  const credentialIndex = collector.indexOf('Get-Credential');
+  assert.ok(buildIndex >= 0 && buildIndex < sourceHashIndex && sourceHashIndex < credentialIndex);
+});
+
 test('RED: same-session MSI sidecar is always a bounded non-null diagnostic', () => {
   const safeHash = `sha256:${'a'.repeat(64)}`;
   const sidecarHash = `sha256:${'b'.repeat(64)}`;
