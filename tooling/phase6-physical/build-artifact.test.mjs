@@ -155,7 +155,7 @@ test('physical signing and lifecycle scripts remain compatible with Windows Powe
   );
   assert.match(
     builder,
-    /System32[\\/]'?,\s*'WindowsPowerShell',\s*'v1\.0',\s*'powershell\.exe'/u,
+    /const WINDOWS_POWERSHELL = join\(\s*SYSTEM_ROOT,\s*'System32',\s*'WindowsPowerShell',\s*'v1\.0',\s*'powershell\.exe'/u,
     'the physical builder must select the inbox Windows PowerShell 5.1 executable explicitly',
   );
   assert.match(

@@ -131,6 +131,21 @@ export const PORTABLE_ROLES = Object.freeze([
 ]);
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const SYSTEM_ROOT = process.env.SystemRoot || 'C:\\Windows';
+const WINDOWS_POWERSHELL = join(
+  SYSTEM_ROOT,
+  'System32',
+  'WindowsPowerShell',
+  'v1.0',
+  'powershell.exe',
+);
+const WINDOWS_POWERSHELL_MODULE_PATH = join(
+  SYSTEM_ROOT,
+  'System32',
+  'WindowsPowerShell',
+  'v1.0',
+  'Modules',
+);
 const PHYSICAL_CONFIG = 'apps/desktop/src-tauri/tauri.phase6-physical.conf.json';
 const WIX_FRAGMENT = 'apps/desktop/src-tauri/installer/optimizer-service.wxs';
 const LIFECYCLE_HELPER = 'tooling/phase6-physical/lifecycle-smoke.ps1';
@@ -247,6 +262,15 @@ const run = (command, args, options = {}) => {
   }
   return options.capture ? (result.stdout || '').trim() : '';
 };
+
+const runWindowsPowerShell = (args, options = {}) =>
+  run(WINDOWS_POWERSHELL, args, {
+    ...options,
+    env: {
+      ...process.env,
+      PSModulePath: WINDOWS_POWERSHELL_MODULE_PATH,
+    },
+  });
 
 const git = (...args) => run('git', args, { capture: true });
 
@@ -732,7 +756,7 @@ export function validateServiceRuntimeDependencies(output) {
 }
 
 const powershellJson = (script) => {
-  const output = run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
+  const output = runWindowsPowerShell(['-NoProfile', '-NonInteractive', '-Command', script], {
     capture: true,
   });
   return JSON.parse(output);
@@ -775,7 +799,7 @@ $arguments = @(
 $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
 if ($process.ExitCode -ne 0) { throw "artifact ACL helper exited $($process.ExitCode)" }
 `;
-  run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script]);
+  runWindowsPowerShell(['-NoProfile', '-NonInteractive', '-Command', script]);
   validatePortableRootAclSnapshot(readPortableRootAcl(workRoot), expectedUserSid);
 };
 
@@ -861,8 +885,7 @@ $certificates | ConvertTo-Json -Compress
 const fileVersion = (path) => {
   const escaped = path.replaceAll("'", "''");
   return (
-    run(
-      'powershell',
+    runWindowsPowerShell(
       [
         '-NoProfile',
         '-NonInteractive',
@@ -895,7 +918,7 @@ const signAuthenticode = (signtool, thumbprint, path) => {
 const signDetachedCms = (thumbprint, contentPath, signaturePath) => {
   const content = contentPath.replaceAll("'", "''");
   const signature = signaturePath.replaceAll("'", "''");
-  run('powershell', [
+  runWindowsPowerShell([
     '-NoProfile',
     '-NonInteractive',
     '-Command',
@@ -1001,8 +1024,7 @@ const locateTauriDriver = () => {
 };
 
 const edgeVersion = () =>
-  run(
-    'powershell',
+  runWindowsPowerShell(
     [
       '-NoProfile',
       '-NonInteractive',
@@ -1105,7 +1127,7 @@ if ($storageComponent -and $storageDirectory -and $storageCreate -and $storagePe
 
 const stripMsiCustomActions = (path) => {
   const escaped = path.replaceAll("'", "''");
-  run('powershell', [
+  runWindowsPowerShell([
     '-NoProfile',
     '-NonInteractive',
     '-Command',
@@ -1286,7 +1308,7 @@ const validateOriginalUpgradeRows = (inspection) => {
 const setMsiProductCode = (path, productCode) => {
   const escaped = path.replaceAll("'", "''");
   const msiProductCode = `{${productCode.toUpperCase()}}`;
-  run('powershell', [
+  runWindowsPowerShell([
     '-NoProfile',
     '-NonInteractive',
     '-Command',
@@ -1310,7 +1332,7 @@ const setMsiIdentity = (path, { productCode, packageCode, packageVersion }, orig
     normalizedMsiGuid(originalInspection.upgradeCode),
     'UpgradeCode',
   );
-  run('powershell', [
+  runWindowsPowerShell([
     '-NoProfile',
     '-NonInteractive',
     '-Command',
@@ -1372,7 +1394,7 @@ $arguments = @(
 $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -WindowStyle Normal -Wait -PassThru
 if ($process.ExitCode -ne 0) { throw "elevated lifecycle helper exited $($process.ExitCode)" }
 `;
-  run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script]);
+  runWindowsPowerShell(['-NoProfile', '-NonInteractive', '-Command', script]);
   if (!existsSync(resultPath)) fail('elevated lifecycle helper did not produce its result');
   const result = JSON.parse(readFileSync(resultPath, 'utf8').replace(/^\uFEFF/u, ''));
   if (
