@@ -153,6 +153,21 @@ test('physical signing and lifecycle scripts remain compatible with Windows Powe
     builder,
     /Add-Type -AssemblyName System\.Security[\s\S]*SignedCms[\s\S]*Add-Type -AssemblyName System\.Security[\s\S]*SignedCms/u,
   );
+  assert.match(
+    builder,
+    /System32[\\/]'?,\s*'WindowsPowerShell',\s*'v1\.0',\s*'powershell\.exe'/u,
+    'the physical builder must select the inbox Windows PowerShell 5.1 executable explicitly',
+  );
+  assert.match(
+    builder,
+    /PSModulePath:\s*WINDOWS_POWERSHELL_MODULE_PATH/u,
+    'the Windows PowerShell child must not inherit a PowerShell 7 module path',
+  );
+  assert.doesNotMatch(
+    builder,
+    /run\('powershell'/u,
+    'bare powershell resolution can inherit an incompatible module path from the host runtime',
+  );
 });
 
 const role = (name, relativePath, character = 'a') => {
