@@ -1915,7 +1915,8 @@ mod custody_failure_code_tests {
         installation_manifest::{CanonicalPathRole, CustodyError},
         installed_custody_diagnostic, installer_diagnostic_from_log,
         installer_diagnostic_sidecar_path, installer_exit_failure,
-        write_installer_diagnostic_create_once,
+        webdriver_diagnostic, write_installer_diagnostic_create_once,
+        write_webdriver_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
@@ -1937,6 +1938,67 @@ mod custody_failure_code_tests {
             assert!(!serialized.contains(forbidden));
         }
         assert!(serialized.len() <= 1024);
+    }
+
+    #[test]
+    fn webdriver_diagnostic_is_bounded_allowlisted_and_secret_free() {
+        let diagnostic = webdriver_diagnostic(
+            "reboot-pending",
+            Some(1),
+            "2.0.6",
+            "151.0.4129.86",
+            Some("150.0.4100.12"),
+            false,
+            false,
+            b"secret-user C:\\Users\\secret-user SID=S-1-5-21 token=secret",
+            b"This version of MSEdgeDriver only supports Microsoft Edge version 151",
+            false,
+        );
+        assert_eq!(diagnostic.process_exit_code, Some(1));
+        assert_eq!(diagnostic.stage, "reboot-pending");
+        assert_eq!(diagnostic.error_code, "webdriver-exited");
+        assert_eq!(diagnostic.detail_code, "native-driver-version-mismatch");
+        assert!(!diagnostic.webdriver_endpoint_ready);
+        assert!(!diagnostic.native_endpoint_ready);
+        let serialized = serde_json::to_string(&diagnostic).expect("safe sidecar should serialize");
+        for forbidden in ["secret-user", "C:\\Users", "S-1-5-21", "token=secret"] {
+            assert!(!serialized.contains(forbidden));
+        }
+        assert!(serialized.len() <= 16 * 1024);
+    }
+
+    #[test]
+    fn webdriver_diagnostic_sidecar_is_create_once() {
+        let root = std::env::temp_dir().join(format!(
+            "liiiraa-webdriver-diagnostic-{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&root).expect("temporary directory should exist");
+        let path = root.join("webdriver-launch.safe.json");
+        let diagnostic = webdriver_diagnostic(
+            "reboot-pending",
+            Some(1),
+            "2.0.6",
+            "151.0.4129.86",
+            None,
+            false,
+            false,
+            b"",
+            b"unknown failure",
+            false,
+        );
+        write_webdriver_diagnostic_create_once(&path, &diagnostic)
+            .expect("first diagnostic write should pass");
+        assert_eq!(
+            write_webdriver_diagnostic_create_once(&path, &diagnostic),
+            Err(super::PhysicalRunnerError::blocked(
+                "webdriver-diagnostic-create-once"
+            ))
+        );
+        let bytes = std::fs::read(&path).expect("diagnostic bytes should exist");
+        assert!(!bytes.is_empty() && bytes.len() <= 16 * 1024);
+        let _ = std::fs::remove_file(path);
+        let _ = std::fs::remove_dir(root);
     }
 
     #[test]
