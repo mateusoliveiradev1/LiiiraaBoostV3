@@ -8,6 +8,7 @@ $expectedVmName = 'LiiiraaBoost-W11-25H2-Clean'
 $expectedCheckpointName = 'Clean-Windows-Ready'
 $expectedCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+$diagnosticBuilder = Join-Path $repositoryRoot 'tooling\hyperv-lab\Build-Phase6InstalledCustodyDiagnostic.ps1'
 $diagnosticSource = Join-Path $repositoryRoot 'target\x86_64-pc-windows-msvc\release\phase6-installed-custody-diagnostic.exe'
 $diagnosticDestination = 'C:\Windows\Temp\liiiraa-phase6-installed-custody-diagnostic.exe'
 $evidenceDirectory = Join-Path $env:USERPROFILE 'VM-Lab\Evidence\phase6'
@@ -45,6 +46,8 @@ try {
     if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         throw 'BLOCKED:not-elevated'
     }
+    & $diagnosticBuilder | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'BLOCKED:diagnostic-build-failed' }
     $sourceItem = Get-Item -LiteralPath $diagnosticSource -ErrorAction Stop
     if ($sourceItem.Length -le 0 -or $sourceItem.Length -gt 16MB) { throw 'BLOCKED:diagnostic-source-bounds' }
     $sourceHash = (Get-FileHash -LiteralPath $diagnosticSource -Algorithm SHA256).Hash.ToLowerInvariant()
