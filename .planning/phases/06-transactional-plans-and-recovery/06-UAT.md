@@ -1223,3 +1223,25 @@ subsequent reservation. The immutable v55 attempt was not reused.
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v57` — CLEAN VM BLOCKED BEFORE APPLY
+
+- **First run:** reached `installed-ready-verified`; the create-once installed checkpoint became
+  visible 132 ms after the immediate lookup failed closed.
+- **First blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-015122-clean-vm-BLOCKED.json`,
+  SHA-256 `23765fcf6356c426c09810b0c0283f0fc87dfcebff47ffadcc6e7b81d88ce319`, 1261 bytes.
+- **Recovery run:** exact blocker/checkpoint binding passed, but PowerShell Direct did not become
+  ready within the former 60-second boundary after restoring and starting the installed snapshot.
+- **Recovery blocker:** `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-115722-clean-vm-BLOCKED.json`,
+  SHA-256 `1a7c6377b12149c8767a1b482518de0429491024835cd419d63c6208e541c271`, 870 bytes.
+- **APPLY prompt:** never reached; no `managed-power-scheme-v57-APPLY-PROMPT-READY.json` exists.
+- **Cleanup:** exact VM verified `Off`; clean checkpoint GUID
+  `a918f5c0-ade0-4bac-bca3-baa91686777e` and installed checkpoint GUID
+  `52bf64b5-dfd4-4fd4-9d0b-d859ee411528` were preserved.
+- **Correction:** RED `14522428`, GREEN `ed529a1c`; PowerShell Direct now polls for a bounded 180
+  seconds, reports credential rejection separately, and always restores the exact VM to `Off`.
+
+The blocked v57 operation was not retried. Its immutable artifact, deterministic admission, and
+both physical blockers remain historical evidence; only the next monotonic version may proceed.

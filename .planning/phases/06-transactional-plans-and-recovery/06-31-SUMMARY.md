@@ -546,3 +546,26 @@ The single monotonic v57 `build-and-smoke` then completed the full lifecycle wit
 | `configs/clean-windows-vm.run-config.json` | `7d89b256c877e5da0799eee4547954abe9d5981e31ad93078ee9af0fe1d99509` | 1593 |
 | `phase6-physical-runner.exe` | `5b3f59c43957deec430c8c43002c8729ac7fde2c84500cd76bad4f94bee3f7c7` | 7023912 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v58 PASSED
+
+The v57 clean-VM run and its bounded recovery remain immutably BLOCKED and were not relaunched.
+RED `14522428` and GREEN `ed529a1c` extended every PowerShell Direct readiness boundary to a
+bounded 180 seconds, separated rejected guest credentials from boot-not-ready failures, and made
+the exact VM return to `Off` from every clean-VM exit. The single monotonic v58
+`build-and-smoke` then completed the signed lifecycle with status `PASSED`, and the fixed 06-35
+inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/ed529a1c61d4d1b7d8dc59979db7058815a3814e/physical-9f5464923978c943-managed-power-scheme-v58`
+- **Build ID:** `physical-9f5464923978c943-managed-power-scheme-v58`
+- **Operation version:** `managed-power-scheme-v58`
+- **Source commit:** `ed529a1c61d4d1b7d8dc59979db7058815a3814e`
+- **Input tree:** `sha256:9f5464923978c943039c27b5338f768cd940022806d0153c6c0b307770a9d354`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888` | 3241 |
+| `liiiraa-boost.msi` | `a4e0e4345623cf57c692fece2b09553ccbc2bae5c6a27eb25a063744d36c2130` | 15765504 |
+| `configs/clean-windows-vm.run-config.json` | `d381c49499f9afc0c5d479833411e32f12cd879bdc572619cf3530a55c1115fe` | 1593 |
+| `phase6-physical-runner.exe` | `2c7bc13c0e71a6b79aba30a674fc82d1313978f1e4d3a8f642a17340f16da33c` | 7023912 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
