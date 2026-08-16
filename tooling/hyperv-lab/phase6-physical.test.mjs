@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    'ed529a1c61d4d1b7d8dc59979db7058815a3814e',
-    'physical-9f5464923978c943-managed-power-scheme-v58',
+    '22821094de8c0a5fbbaf3b673e69d2b52d7a225a',
+    'physical-7304c595be0d094e-managed-power-scheme-v65',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -138,6 +138,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v55-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v56-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v57-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v58-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -320,9 +321,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v65',
+    'physical-7304c595be0d094e-managed-power-scheme-v65',
+    '22821094de8c0a5fbbaf3b673e69d2b52d7a225a',
+    'd1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0',
+    '0aa34013eb5d3314ba31daa9382f439442d7c85df3337230c648e8190689a649',
+    '788f6b5392365829659c008755c909903d50f99179f934d59e4fa12937f4432a',
     'managed-power-scheme-v58',
     'physical-9f5464923978c943-managed-power-scheme-v58',
-    'ed529a1c61d4d1b7d8dc59979db7058815a3814e',
     '2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888',
     'ee3f5275a39982715f5e38a731ed9a1617de9163f05963e68a0a5a23c1ff0e5f',
     'c74c3dd1bbe10949597fa938f4330856f6e6b3e18515468bf8ee4c84c772d90e',
@@ -1066,7 +1072,7 @@ test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary',
   );
 });
 
-test('RED: v58 refuses every superseded installed checkpoint before clean execution', () => {
+test('RED: v65 refuses every superseded installed checkpoint before clean execution', () => {
   const source = readFileSync(bridgePath, 'utf8');
   assert.doesNotMatch(source, /Resolve-LateVisibleInstalledCheckpointRecovery/u);
   assert.doesNotMatch(source, /ExpectedLateVisibleCheckpointBlocker|LateVisibleInstalledCheckpoint/u);
@@ -1162,7 +1168,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v58 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v65 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -1174,7 +1180,7 @@ test('dry-run audits the exact immutable v58 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v58');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v65');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
