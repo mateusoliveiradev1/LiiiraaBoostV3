@@ -668,6 +668,10 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
     source,
     /copyFileSync\(built\.runner, portableRunner\)[\s\S]{0,512}existsSync\(portableRunner\)[\s\S]{0,512}validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner/u,
   );
+  assert.match(
+    source,
+    /validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner[\s\S]{0,512}built\.runner\s*=\s*portableRunner[\s\S]{0,256}rmSync\(runnerTargetDir/u,
+  );
   assert.doesNotMatch(source, /locateTauriDriver/u);
   for (const runtime of ['built.service', 'built.runner', 'portableDrivers.tauriDriver']) {
     assert.match(
