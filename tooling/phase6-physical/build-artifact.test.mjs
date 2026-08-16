@@ -672,6 +672,17 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
     source,
     /validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner[\s\S]{0,512}built\.runner\s*=\s*portableRunner[\s\S]{0,256}rmSync\(runnerTargetDir/u,
   );
+  assert.match(
+    source,
+    /built\.runner\s*=\s*portableRunner[\s\S]{0,512}copyFileSync\(built\.runner,\s*tauriBundleRunner\)[\s\S]{0,512}validateDependencyClosedRuntime\([\s\S]{0,256}tauriBundleRunner/u,
+  );
+  const bundleRunnerCustody = source.indexOf('const tauriBundleRunner');
+  const bundleInvocation = source.indexOf("'bundle'", bundleRunnerCustody);
+  assert.ok(bundleRunnerCustody >= 0 && bundleInvocation > bundleRunnerCustody);
+  assert.doesNotMatch(
+    source.slice(bundleRunnerCustody, bundleInvocation),
+    /(?:'cargo'|'build'|signAuthenticode|writeFileSync)/u,
+  );
   assert.doesNotMatch(source, /locateTauriDriver/u);
   for (const runtime of ['built.service', 'built.runner', 'portableDrivers.tauriDriver']) {
     assert.match(
@@ -688,6 +699,36 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
   );
   assert.match(diagnosticBuild, /target-feature=\+crt-static/u);
   assert.match(diagnosticBuild, /dumpbin[\s\S]{0,512}(?:vcruntime|api-ms-win-crt)/iu);
+});
+
+test('RED: MSI payload hashes must match the signed installation manifest before lifecycle', () => {
+  const manifest = {
+    files: {
+      desktop: { sha256: sha('a') },
+      service: { sha256: sha('b') },
+      runner: { sha256: sha('c') },
+    },
+  };
+  assert.equal(
+    artifactBuilder.validateMsiPayloadHashes(
+      { desktop: sha('a'), service: sha('b'), runner: sha('c') },
+      manifest,
+    ),
+    true,
+  );
+  assert.throws(
+    () =>
+      artifactBuilder.validateMsiPayloadHashes(
+        { desktop: sha('a'), service: sha('b'), runner: sha('d') },
+        manifest,
+      ),
+    /MSI payload runner hash does not match/u,
+  );
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  const payloadGate = source.indexOf('inspectMsiPayloadHashes(');
+  const lifecycle = source.indexOf('runLifecycleSmoke({');
+  assert.ok(payloadGate >= 0 && lifecycle > payloadGate);
 });
 
 test('RED: installed admission is readable without exposing service-only storage', () => {
