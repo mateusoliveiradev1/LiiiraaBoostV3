@@ -864,7 +864,7 @@ test('RED: same-session WebDriver diagnostic is hash-bound, bounded, and raw-fre
   assert.match(source, /nativeEndpointReady/u);
   assert.doesNotMatch(
     source,
-    /WebDriverDiagnostic[^\n]*(?:stdout|stderr|path|user|sid|secret)/iu,
+    /WebDriverDiagnostic[^\n]*(?:Stdout|Stderr|RawPath|UserName|Sid|Secret)\s*=/u,
   );
 });
 

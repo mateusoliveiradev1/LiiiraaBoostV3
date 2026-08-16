@@ -1,7 +1,7 @@
 use std::{
     ffi::OsString,
     fs::{self, OpenOptions},
-    io::{self, BufRead, Write},
+    io::{self, BufRead, Read, Write},
     net::TcpListener,
     path::{Component, Path, PathBuf},
     process::{Child, Command, Stdio},
@@ -42,6 +42,8 @@ const MAX_REDACTED_BYTES: usize = 64 * 1024;
 const MAX_INSTALLER_LOG_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_INSTALLER_DIAGNOSTIC_BYTES: usize = 4 * 1024;
 const MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES: usize = 4 * 1024;
+const MAX_WEBDRIVER_CAPTURE_BYTES: usize = 16 * 1024;
+const MAX_WEBDRIVER_DIAGNOSTIC_BYTES: usize = 16 * 1024;
 const ZERO_HASH: &str = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 const SOURCE: &str = "phase6-physical-runner-rust-1";
 
@@ -758,6 +760,8 @@ fn physical_config_from_generated(
 pub struct WindowsPhysicalRunnerIo {
     config: PhysicalRunConfig,
     artifact: Option<VerifiedArtifactManifest>,
+    tauri_driver_version: Option<String>,
+    msedge_driver_version: Option<String>,
     webdriver: Option<WebDriverSession>,
 }
 
@@ -772,6 +776,8 @@ impl WindowsPhysicalRunnerIo {
         Self {
             config,
             artifact: None,
+            tauri_driver_version: None,
+            msedge_driver_version: None,
             webdriver: None,
         }
     }
@@ -870,6 +876,24 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
             msedge_driver_path: role("msedgeDriver")?,
             desktop_path: r"C:\Program Files\Liiiraa Boost\liiiraa-desktop.exe".to_owned(),
         };
+        self.tauri_driver_version = Some(
+            required_string(
+                files
+                    .get("tauriDriver")
+                    .ok_or_else(|| PhysicalRunnerError::blocked("artifact-tauri-driver"))?,
+                "version",
+            )?
+            .to_owned(),
+        );
+        self.msedge_driver_version = Some(
+            required_string(
+                files
+                    .get("msedgeDriver")
+                    .ok_or_else(|| PhysicalRunnerError::blocked("artifact-msedge-driver"))?,
+                "version",
+            )?
+            .to_owned(),
+        );
         self.artifact = Some(verified);
         Ok(custody)
     }
@@ -1048,24 +1072,65 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
                 msedge_driver,
             ])
             .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .spawn()
             .map_err(|_| PhysicalRunnerError::blocked("webdriver-launch"))?;
         let deadline = Instant::now() + Duration::from_secs(15);
+        let mut webdriver_endpoint_ready = false;
+        let mut native_endpoint_ready = false;
         loop {
-            if child
+            if let Some(status) = child
                 .try_wait()
                 .map_err(|_| PhysicalRunnerError::blocked("webdriver-process"))?
-                .is_some()
             {
+                let (stdout, stdout_truncated) = child
+                    .stdout
+                    .take()
+                    .map_or((Vec::new(), false), read_webdriver_output_bounded);
+                let (stderr, stderr_truncated) = child
+                    .stderr
+                    .take()
+                    .map_or((Vec::new(), false), read_webdriver_output_bounded);
+                let diagnostic = webdriver_diagnostic(
+                    self.config.stage.as_str(),
+                    status.code(),
+                    self.tauri_driver_version
+                        .as_deref()
+                        .unwrap_or("unavailable"),
+                    self.msedge_driver_version
+                        .as_deref()
+                        .unwrap_or("unavailable"),
+                    None,
+                    webdriver_endpoint_ready,
+                    native_endpoint_ready,
+                    &stdout,
+                    &stderr,
+                    stdout_truncated || stderr_truncated,
+                );
+                let artifact_root = self
+                    .artifact
+                    .as_ref()
+                    .map(VerifiedArtifactManifest::root)
+                    .ok_or_else(|| PhysicalRunnerError::blocked("artifact-not-verified"))?;
+                let diagnostic_directory = artifact_root
+                    .join("state")
+                    .join(self.config.stage.as_str())
+                    .join("diagnostics");
+                fs::create_dir_all(&diagnostic_directory)
+                    .map_err(|_| PhysicalRunnerError::blocked("webdriver-diagnostic-directory"))?;
+                write_webdriver_diagnostic_create_once(
+                    &diagnostic_directory.join("webdriver-launch.safe.json"),
+                    &diagnostic,
+                )?;
                 return Err(PhysicalRunnerError::blocked("webdriver-exited"));
             }
-            if webdriver_request(port, "GET", "/status", None)
+            webdriver_endpoint_ready = webdriver_request(port, "GET", "/status", None)
                 .ok()
                 .and_then(|value| value.get("ready").and_then(Value::as_bool))
-                == Some(true)
-            {
+                == Some(true);
+            native_endpoint_ready = webdriver_request(native_port, "GET", "/status", None).is_ok();
+            if webdriver_endpoint_ready {
                 break;
             }
             if Instant::now() >= deadline {
@@ -1543,6 +1608,123 @@ fn persist_installed_custody_diagnostic(
         .map_err(|_| PhysicalRunnerError::blocked("installed-custody-diagnostic-durable"))
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct WebDriverDiagnosticSidecar {
+    kind: &'static str,
+    schema_version: &'static str,
+    stage: &'static str,
+    error_code: &'static str,
+    detail_code: &'static str,
+    process_exit_code: Option<i32>,
+    tauri_driver_version: String,
+    native_driver_version: String,
+    webview_runtime_version: Option<String>,
+    webdriver_endpoint_ready: bool,
+    native_endpoint_ready: bool,
+    output_truncated: bool,
+}
+
+fn safe_diagnostic_version(value: &str) -> String {
+    let safe = !value.is_empty()
+        && value.len() <= 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'.' | b'-' | b'+'));
+    if safe {
+        value.to_owned()
+    } else {
+        "unavailable".to_owned()
+    }
+}
+
+fn webdriver_diagnostic(
+    stage: &str,
+    process_exit_code: Option<i32>,
+    tauri_driver_version: &str,
+    native_driver_version: &str,
+    webview_runtime_version: Option<&str>,
+    webdriver_endpoint_ready: bool,
+    native_endpoint_ready: bool,
+    stdout: &[u8],
+    stderr: &[u8],
+    output_truncated: bool,
+) -> WebDriverDiagnosticSidecar {
+    let mut classified = String::from_utf8_lossy(stdout).to_lowercase();
+    classified.push_str(&String::from_utf8_lossy(stderr).to_lowercase());
+    let detail_code = if classified.contains("only supports microsoft edge version")
+        || classified.contains("version of msedgedriver") && classified.contains("not compatible")
+    {
+        "native-driver-version-mismatch"
+    } else if classified.contains("access is denied") || classified.contains("permission denied") {
+        "access-denied"
+    } else if classified.contains("address already in use") || classified.contains("cannot bind") {
+        "loopback-port-conflict"
+    } else if classified.contains("native driver") || classified.contains("msedgedriver") {
+        "native-driver-launch"
+    } else if output_truncated {
+        "output-truncated"
+    } else {
+        "other"
+    };
+    WebDriverDiagnosticSidecar {
+        kind: "phase6-webdriver-safe-diagnostic",
+        schema_version: "1.0",
+        stage: match stage {
+            "clean-windows-vm" => "clean-windows-vm",
+            "owner-pc" => "owner-pc",
+            "friends-pc" => "friends-pc",
+            "reboot-pending" => "reboot-pending",
+            "completed" => "completed",
+            _ => "unknown",
+        },
+        error_code: "webdriver-exited",
+        detail_code,
+        process_exit_code,
+        tauri_driver_version: safe_diagnostic_version(tauri_driver_version),
+        native_driver_version: safe_diagnostic_version(native_driver_version),
+        webview_runtime_version: webview_runtime_version.map(safe_diagnostic_version),
+        webdriver_endpoint_ready,
+        native_endpoint_ready,
+        output_truncated,
+    }
+}
+
+fn read_webdriver_output_bounded(mut reader: impl Read) -> (Vec<u8>, bool) {
+    let mut bytes = Vec::with_capacity(MAX_WEBDRIVER_CAPTURE_BYTES);
+    let mut limited = reader
+        .by_ref()
+        .take((MAX_WEBDRIVER_CAPTURE_BYTES + 1) as u64);
+    if limited.read_to_end(&mut bytes).is_err() {
+        return (Vec::new(), true);
+    }
+    let truncated = bytes.len() > MAX_WEBDRIVER_CAPTURE_BYTES;
+    bytes.truncate(MAX_WEBDRIVER_CAPTURE_BYTES);
+    (bytes, truncated)
+}
+
+fn write_webdriver_diagnostic_create_once(
+    path: &Path,
+    diagnostic: &WebDriverDiagnosticSidecar,
+) -> Result<(), PhysicalRunnerError> {
+    if path.file_name().and_then(|name| name.to_str()) != Some("webdriver-launch.safe.json") {
+        return Err(PhysicalRunnerError::blocked("webdriver-diagnostic-path"));
+    }
+    let bytes = serde_json::to_vec(diagnostic)
+        .map_err(|_| PhysicalRunnerError::blocked("webdriver-diagnostic-serialize"))?;
+    if bytes.is_empty() || bytes.len() > MAX_WEBDRIVER_DIAGNOSTIC_BYTES {
+        return Err(PhysicalRunnerError::blocked("webdriver-diagnostic-bounds"));
+    }
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| PhysicalRunnerError::blocked("webdriver-diagnostic-create-once"))?;
+    file.write_all(&bytes)
+        .and_then(|()| file.sync_all())
+        .map_err(|_| PhysicalRunnerError::blocked("webdriver-diagnostic-durable"))
+}
+
 fn hash_file(path: &Path) -> Result<String, PhysicalRunnerError> {
     fs::read(path)
         .map(|bytes| hash_bytes(&bytes))
@@ -1914,9 +2096,8 @@ mod custody_failure_code_tests {
         MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES, artifact_custody_failure_code,
         installation_manifest::{CanonicalPathRole, CustodyError},
         installed_custody_diagnostic, installer_diagnostic_from_log,
-        installer_diagnostic_sidecar_path, installer_exit_failure,
-        webdriver_diagnostic, write_installer_diagnostic_create_once,
-        write_webdriver_diagnostic_create_once,
+        installer_diagnostic_sidecar_path, installer_exit_failure, webdriver_diagnostic,
+        write_installer_diagnostic_create_once, write_webdriver_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};

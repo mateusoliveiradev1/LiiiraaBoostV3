@@ -184,6 +184,7 @@ $RunnerExitCode = $null
 $RunnerFailureCode = $null
 $InstallerDiagnostic = $null
 $InstalledCustodyDiagnostic = $null
+$WebDriverDiagnostic = $null
 
 function Assert-ClosedCurrentAuthority {
     $expectedKeys = @(
@@ -1639,6 +1640,84 @@ function Resolve-InstalledCustodySidecarSummary {
     }
 }
 
+function Resolve-WebDriverSidecarSummary {
+    param(
+        $Sidecar,
+        [Parameter(Mandatory)][string]$SidecarStatus,
+        $SidecarSha256,
+        $SidecarSizeBytes,
+        [Parameter(Mandatory)][string]$FailureCode
+    )
+
+    $fallback = [pscustomobject][ordered]@{
+        DiagnosticStatus = if ($SidecarStatus -cin @('sidecar-missing', 'sidecar-unparseable')) { $SidecarStatus } else { 'sidecar-unparseable' }
+        Stage = $null
+        ErrorCode = $null
+        DetailCode = $null
+        ProcessExitCode = $null
+        TauriDriverVersion = $null
+        NativeDriverVersion = $null
+        WebViewRuntimeVersion = $null
+        WebDriverEndpointReady = $null
+        NativeEndpointReady = $null
+        OutputTruncated = $null
+        SidecarSha256 = $null
+        SidecarSizeBytes = $null
+    }
+    if ($SidecarStatus -cne 'present' -or $null -eq $Sidecar) { return $fallback }
+
+    $expectedProperties = @(
+        'kind', 'schemaVersion', 'stage', 'errorCode', 'detailCode', 'processExitCode',
+        'tauriDriverVersion', 'nativeDriverVersion', 'webviewRuntimeVersion',
+        'webdriverEndpointReady', 'nativeEndpointReady', 'outputTruncated'
+    )
+    $actualProperties = @($Sidecar.PSObject.Properties | ForEach-Object { $_.Name })
+    $stage = [string]$Sidecar.stage
+    $errorCode = [string]$Sidecar.errorCode
+    $detailCode = [string]$Sidecar.detailCode
+    $exitCode = if ($null -eq $Sidecar.processExitCode) { $null } else { [int]$Sidecar.processExitCode }
+    $tauriVersion = [string]$Sidecar.tauriDriverVersion
+    $nativeVersion = [string]$Sidecar.nativeDriverVersion
+    $runtimeVersion = if ($null -eq $Sidecar.webviewRuntimeVersion) { $null } else { [string]$Sidecar.webviewRuntimeVersion }
+    $webdriverReady = if ($Sidecar.webdriverEndpointReady -is [bool]) { [bool]$Sidecar.webdriverEndpointReady } else { $null }
+    $nativeReady = if ($Sidecar.nativeEndpointReady -is [bool]) { [bool]$Sidecar.nativeEndpointReady } else { $null }
+    $truncated = if ($Sidecar.outputTruncated -is [bool]) { [bool]$Sidecar.outputTruncated } else { $null }
+    $sidecarHash = if ($null -eq $SidecarSha256) { $null } else { [string]$SidecarSha256 }
+    $sidecarSize = if ($null -eq $SidecarSizeBytes) { $null } else { [int64]$SidecarSizeBytes }
+    $versionPattern = '^(?:unavailable|[0-9]+(?:[.+-][0-9]+)*)$'
+    $invalid = $actualProperties.Count -ne $expectedProperties.Count -or
+        @($actualProperties | Where-Object { $expectedProperties -cnotcontains $_ }).Count -ne 0 -or
+        [string]$Sidecar.kind -cne 'phase6-webdriver-safe-diagnostic' -or
+        [string]$Sidecar.schemaVersion -cne '1.0' -or
+        $stage -cnotin @('clean-windows-vm', 'owner-pc', 'friends-pc', 'reboot-pending', 'completed', 'unknown') -or
+        $errorCode -cne 'webdriver-exited' -or
+        $FailureCode -cne 'BLOCKED:webdriver-exited' -or
+        $detailCode -cnotin @('native-driver-version-mismatch', 'access-denied', 'loopback-port-conflict', 'native-driver-launch', 'output-truncated', 'other') -or
+        ($null -ne $exitCode -and ($exitCode -lt -2147483648 -or $exitCode -gt 2147483647)) -or
+        $tauriVersion -cnotmatch $versionPattern -or $nativeVersion -cnotmatch $versionPattern -or
+        ($null -ne $runtimeVersion -and $runtimeVersion -cnotmatch $versionPattern) -or
+        $null -eq $webdriverReady -or $null -eq $nativeReady -or $null -eq $truncated -or
+        $sidecarHash -cnotmatch '^sha256:[a-f0-9]{64}$' -or
+        $null -eq $sidecarSize -or $sidecarSize -le 0 -or $sidecarSize -gt 16384
+    if ($invalid) { return $fallback }
+
+    return [pscustomobject][ordered]@{
+        DiagnosticStatus = 'present'
+        Stage = $stage
+        ErrorCode = $errorCode
+        DetailCode = $detailCode
+        ProcessExitCode = $exitCode
+        TauriDriverVersion = $tauriVersion
+        NativeDriverVersion = $nativeVersion
+        WebViewRuntimeVersion = $runtimeVersion
+        WebDriverEndpointReady = $webdriverReady
+        NativeEndpointReady = $nativeReady
+        OutputTruncated = $truncated
+        SidecarSha256 = $sidecarHash
+        SidecarSizeBytes = $sidecarSize
+    }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
@@ -1657,6 +1736,7 @@ function Invoke-ExactGuestRunner {
     $script:RunnerFailureCode = $null
     $script:InstallerDiagnostic = $null
     $script:InstalledCustodyDiagnostic = $null
+    $script:WebDriverDiagnostic = $null
     $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
         param($ClosedAuthority, $Approval, $MaximumLines, $MaximumChars)
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
@@ -1664,6 +1744,7 @@ function Invoke-ExactGuestRunner {
         $ConfigPath = [string]$ClosedAuthority.GuestConfig
         $sidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\msi-install.safe.json'
         $installedCustodySidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\installed-custody.safe.json'
+        $webDriverSidecarPath = Join-Path $expectedRoot 'state\clean-windows-vm\diagnostics\webdriver-launch.safe.json'
         if ([string]$ClosedAuthority.GuestRoot -cne $expectedRoot -or
             $RunnerPath -cne (Join-Path $expectedRoot 'phase6-physical-runner.exe') -or
             $ConfigPath -cne (Join-Path $expectedRoot 'configs\clean-windows-vm.run-config.json')) {
@@ -1753,6 +1834,35 @@ function Invoke-ExactGuestRunner {
                 $installedCustodySidecarSizeBytes = $null
             }
         }
+        $webDriverSidecar = $null
+        $webDriverSidecarStatus = 'sidecar-missing'
+        $webDriverSidecarSha256 = $null
+        $webDriverSidecarSizeBytes = $null
+        if ($process.ExitCode -ne 0 -and (Test-Path -LiteralPath $webDriverSidecarPath -PathType Leaf)) {
+            try {
+                $webDriverSidecarItem = Get-Item -LiteralPath $webDriverSidecarPath -ErrorAction Stop
+                if ($webDriverSidecarItem.Length -le 0 -or $webDriverSidecarItem.Length -gt 16384) {
+                    throw 'webdriver sidecar bounds'
+                }
+                $webDriverSidecarBytes = [IO.File]::ReadAllBytes($webDriverSidecarPath)
+                $webDriverSidecar = [Text.Encoding]::UTF8.GetString($webDriverSidecarBytes) | ConvertFrom-Json -ErrorAction Stop
+                $webDriverSidecarHasher = [Security.Cryptography.SHA256]::Create()
+                try {
+                    $webDriverSidecarSha256 = 'sha256:' + ([BitConverter]::ToString($webDriverSidecarHasher.ComputeHash($webDriverSidecarBytes))).Replace('-', '').ToLowerInvariant()
+                }
+                finally {
+                    $webDriverSidecarHasher.Dispose()
+                }
+                $webDriverSidecarSizeBytes = [int64]$webDriverSidecarBytes.Length
+                $webDriverSidecarStatus = 'present'
+            }
+            catch {
+                $webDriverSidecar = $null
+                $webDriverSidecarStatus = 'sidecar-unparseable'
+                $webDriverSidecarSha256 = $null
+                $webDriverSidecarSizeBytes = $null
+            }
+        }
         [pscustomobject]@{
             ExitCode = [int64]$process.ExitCode
             Stdout = $stdout
@@ -1766,6 +1876,10 @@ function Invoke-ExactGuestRunner {
             InstalledCustodySidecarStatus = $installedCustodySidecarStatus
             InstalledCustodySidecarSha256 = $installedCustodySidecarSha256
             InstalledCustodySidecarSizeBytes = $installedCustodySidecarSizeBytes
+            WebDriverSidecar = $webDriverSidecar
+            WebDriverSidecarStatus = $webDriverSidecarStatus
+            WebDriverSidecarSha256 = $webDriverSidecarSha256
+            WebDriverSidecarSizeBytes = $webDriverSidecarSizeBytes
         }
     } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
     if ($response.ExitCode -ne 0) {
@@ -1786,6 +1900,14 @@ function Invoke-ExactGuestRunner {
                 -SidecarStatus ([string]$response.InstalledCustodySidecarStatus) `
                 -SidecarSha256 $response.InstalledCustodySidecarSha256 `
                 -SidecarSizeBytes $response.InstalledCustodySidecarSizeBytes `
+                -FailureCode $diagnostic.RunnerFailureCode
+        }
+        if ($diagnostic.RunnerFailureCode -ceq 'BLOCKED:webdriver-exited') {
+            $script:WebDriverDiagnostic = Resolve-WebDriverSidecarSummary `
+                -Sidecar $response.WebDriverSidecar `
+                -SidecarStatus ([string]$response.WebDriverSidecarStatus) `
+                -SidecarSha256 $response.WebDriverSidecarSha256 `
+                -SidecarSizeBytes $response.WebDriverSidecarSizeBytes `
                 -FailureCode $diagnostic.RunnerFailureCode
         }
         throw $diagnostic.Reason
@@ -2015,6 +2137,7 @@ function Write-BlockedRecord {
         runnerExitCode = $RunnerExitCode; runnerFailureCode = $RunnerFailureCode
         installerDiagnostic = $InstallerDiagnostic
         installedCustodyDiagnostic = $InstalledCustodyDiagnostic
+        webDriverDiagnostic = $WebDriverDiagnostic
         reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
