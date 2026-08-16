@@ -1499,6 +1499,7 @@ const dryRun = (options) => {
 
 const buildAndSmoke = (options) => {
   const context = { mode: 'build-and-smoke', sourceCommit: null, operationVersionId: null };
+  let runnerTargetDir = null;
   try {
     if (process.platform !== 'win32') fail('physical artifact build requires Windows');
     const webView2Runtime = detectWebView2Runtime();
@@ -1581,7 +1582,8 @@ const buildAndSmoke = (options) => {
       ],
       { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
     );
-    const runnerTargetDir = join(workRoot, '.tools', 'runner-target');
+    const runnerTargetBase = join(ROOT, 'target', 'phase6-runner-static');
+    runnerTargetDir = join(runnerTargetBase, `${process.pid}-${randomUUID()}`);
     run(
       'cargo',
       [
@@ -1605,12 +1607,7 @@ const buildAndSmoke = (options) => {
     const built = {
       desktop: join(release, 'liiiraa-desktop.exe'),
       service: join(release, 'liiiraa-optimizer-service.exe'),
-      runner: join(
-        runnerTargetDir,
-        'x86_64-pc-windows-msvc',
-        'release',
-        'phase6-physical-runner.exe',
-      ),
+      runner: join(runnerTargetDir, 'release', 'phase6-physical-runner.exe'),
     };
     for (const path of Object.values(built))
       if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
@@ -1648,6 +1645,8 @@ const buildAndSmoke = (options) => {
       portableDrivers.msedgeDriver,
     );
     copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
+    rmSync(runnerTargetDir, { recursive: true, force: true });
+    runnerTargetDir = null;
     rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
 
     const productCode = PHYSICAL_PRODUCT_CODE;
@@ -1849,6 +1848,8 @@ const buildAndSmoke = (options) => {
     const reportPath = writeBlockedReport(error, context);
     process.stderr.write(`BLOCKED: ${error.message}\nBLOCKED report: ${reportPath}\n`);
     process.exitCode = 1;
+  } finally {
+    if (runnerTargetDir) rmSync(runnerTargetDir, { recursive: true, force: true });
   }
 };
 
