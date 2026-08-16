@@ -28,6 +28,7 @@ import {
   validatePhysicalProfile,
   validatePortableRootAclSnapshot,
   validateServiceRuntimeDependencies,
+  validateDependencyClosedRuntime,
   validateWebView2RuntimeEvidence,
   validateWixContract,
   verifyDetachedCmsEvidence,
@@ -629,6 +630,42 @@ test('RED: physical service uses static CRT and rejects clean-VM runtime depende
   const dependencyGateIndex = source.lastIndexOf('validateServiceRuntimeDependencies(');
   const signingIndex = source.indexOf('signAuthenticode(signtool, signer.thumbprint, path)');
   assert.ok(dependencyGateIndex >= 0 && dependencyGateIndex < signingIndex);
+});
+
+test('RED: every clean-VM Rust executable is dependency-closed before signing', () => {
+  const dynamic = [
+    'Image has the following dependencies:',
+    '  kernel32.dll',
+    '  VCRUNTIME140.dll',
+    '  api-ms-win-crt-runtime-l1-1-0.dll',
+  ].join('\r\n');
+  assert.throws(() => validateDependencyClosedRuntime(dynamic, 'tauri-driver'), /dynamic CRT/u);
+  assert.deepEqual(
+    validateDependencyClosedRuntime(
+      ['Image has the following dependencies:', '  kernel32.dll', '  ws2_32.dll'].join('\r\n'),
+      'runner',
+    ),
+    ['kernel32.dll', 'ws2_32.dll'],
+  );
+
+  const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
+  assert.match(source, /cargo[\s\S]{0,512}install[\s\S]{0,512}tauri-driver[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u);
+  assert.doesNotMatch(source, /locateTauriDriver/u);
+  for (const runtime of ['built.service', 'built.runner', 'portableDrivers.tauriDriver']) {
+    assert.match(
+      source,
+      new RegExp(
+        `validateDependencyClosedRuntime\\(run\\(dumpbin,[\\s\\S]{0,160}${runtime.replace('.', '\\.')}`,
+        'u',
+      ),
+    );
+  }
+  const diagnosticBuild = readFileSync(
+    'tooling/hyperv-lab/Build-Phase6InstalledCustodyDiagnostic.ps1',
+    'utf8',
+  );
+  assert.match(diagnosticBuild, /target-feature=\+crt-static/u);
+  assert.match(diagnosticBuild, /dumpbin[\s\S]{0,512}(?:vcruntime|api-ms-win-crt)/iu);
 });
 
 test('RED: installed admission is readable without exposing service-only storage', () => {

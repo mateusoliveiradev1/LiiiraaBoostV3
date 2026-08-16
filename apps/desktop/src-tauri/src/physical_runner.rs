@@ -2149,6 +2149,27 @@ mod custody_failure_code_tests {
     }
 
     #[test]
+    fn webdriver_diagnostic_classifies_windows_dll_not_found_without_raw_output() {
+        let diagnostic = webdriver_diagnostic(
+            "reboot-pending",
+            Some(-1_073_741_515),
+            "2.0.6",
+            "151.0.4129.86",
+            Some("151.0.4129.78"),
+            false,
+            false,
+            b"",
+            b"",
+            false,
+        );
+        assert_eq!(diagnostic.detail_code, "dll-not-found");
+        assert_eq!(diagnostic.process_exit_code, Some(-1_073_741_515));
+        assert!(!serde_json::to_string(&diagnostic)
+            .expect("safe sidecar should serialize")
+            .contains("C:\\Users"));
+    }
+
+    #[test]
     fn webdriver_diagnostic_sidecar_is_create_once() {
         let root = std::env::temp_dir().join(format!(
             "liiiraa-webdriver-diagnostic-{}",
