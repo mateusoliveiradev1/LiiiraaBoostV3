@@ -26,6 +26,9 @@ $ExpectedCleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $ExpectedBackupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43'
 $ExpectedBackupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef'
 $ExpectedInstalledCheckpoint = 'LiiiraaBoost-Installed'
+$ExpectedLateVisibleCheckpointBlocker = '20260816-015122-clean-vm-BLOCKED.json'
+$ExpectedLateVisibleCheckpointBlockerSha256 = '23765fcf6356c426c09810b0c0283f0fc87dfcebff47ffadcc6e7b81d88ce319'
+$ExpectedPromptReadySuffix = 'managed-power-scheme-v57-APPLY-PROMPT-READY.json'
 $CurrentAuthority = [pscustomobject][ordered]@{
     OperationVersion = 'managed-power-scheme-v57'
     BuildId = 'physical-9f5464923978c943-managed-power-scheme-v57'
@@ -170,6 +173,7 @@ $CurrentAuthority | Add-Member -NotePropertyName ArtifactSignature -NoteProperty
 $CurrentAuthority | Add-Member -NotePropertyName EvidenceManifest -NotePropertyValue $ExpectedEvidenceManifest
 $LabRoot = 'C:\Users\Liiiraa\VM-Lab'
 $CompletedBoundaries = [Collections.Generic.List[string]]::new()
+$script:LateVisibleInstalledCheckpoint = $null
 $MaximumRunnerOutputLines = 32
 $MaximumRunnerOutputChars = 4096
 $RunnerFailureStage = 'preflight'
@@ -993,6 +997,56 @@ function Assert-FreshSimulationAdmission {
     [void]$CompletedBoundaries.Add('simulation-admission-pass')
 }
 
+function Resolve-LateVisibleInstalledCheckpointRecovery {
+    param([Parameter(Mandatory)]$Checkpoint)
+
+    $evidenceDirectory = Join-Path $LabRoot 'Evidence\phase6'
+    $blockerPath = Join-Path $evidenceDirectory $ExpectedLateVisibleCheckpointBlocker
+    if (-not (Test-Path -LiteralPath $blockerPath -PathType Leaf) -or
+        (Get-Item -LiteralPath $blockerPath).Length -gt 4096 -or
+        (Get-FileSha256Hex -Path $blockerPath) -ne $ExpectedLateVisibleCheckpointBlockerSha256) {
+        throw 'BLOCKED: installed checkpoint exists without the exact late-visibility blocker.'
+    }
+    if (@(Get-ChildItem -LiteralPath $evidenceDirectory -Filter "*-$ExpectedPromptReadySuffix" -File -ErrorAction SilentlyContinue).Count -ne 0) {
+        throw 'BLOCKED: installed checkpoint recovery is forbidden after an apply prompt boundary.'
+    }
+
+    $blocker = [IO.File]::ReadAllText($blockerPath) | ConvertFrom-Json
+    $expectedBoundaries = @(
+        'artifact-verifier-pass',
+        'simulation-admission-pass',
+        'hyper-v-prestart-audit-pass',
+        'clean-checkpoint-restored',
+        'integration-services-healthy',
+        'exact-artifact-staged',
+        'guest-artifact-acl-provisioned',
+        'guest-artifact-acl-verified',
+        'installed-ready-verified'
+    )
+    $recordedAt = [DateTime]::Parse([string]$blocker.recordedAt).ToUniversalTime()
+    $checkpointCreatedAt = ([DateTime]$Checkpoint.CreationTime).ToUniversalTime()
+    $creationDelta = [Math]::Abs(($recordedAt - $checkpointCreatedAt).TotalSeconds)
+    if ($blocker.status -cne 'BLOCKED' -or
+        $blocker.operationVersion -cne $ExpectedOperationVersion -or
+        $blocker.buildId -cne $ExpectedBuildId -or
+        $blocker.vmName -cne $ExpectedVmName -or
+        $blocker.cleanCheckpoint -cne $ExpectedCleanCheckpoint -or
+        $blocker.installedCheckpoint -cne $ExpectedInstalledCheckpoint -or
+        $blocker.stage -cne 'installed-ready' -or
+        $null -ne $blocker.runnerExitCode -or
+        $null -ne $blocker.runnerFailureCode -or
+        $null -ne $blocker.installerDiagnostic -or
+        $null -ne $blocker.installedCustodyDiagnostic -or
+        @($blocker.completedBoundaries).Count -ne $expectedBoundaries.Count -or
+        @(Compare-Object -ReferenceObject $expectedBoundaries -DifferenceObject @($blocker.completedBoundaries) -SyncWindow 0).Count -ne 0 -or
+        $creationDelta -gt 5 -or
+        [string]$Checkpoint.Name -cne $ExpectedInstalledCheckpoint -or
+        [string]$Checkpoint.Id -notmatch '^[0-9a-fA-F-]{36}$') {
+        throw 'BLOCKED: installed checkpoint late-visibility recovery binding is invalid.'
+    }
+    return $Checkpoint
+}
+
 function Assert-ExactHyperVAudit {
     $vm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
     if ($vm.Name -ne $ExpectedVmName -or $vm.Generation -ne 2) {
@@ -1006,8 +1060,12 @@ function Assert-ExactHyperVAudit {
     if ($backup.Count -ne 1 -or $backup[0].Id.ToString() -ne $ExpectedBackupCheckpointId) {
         throw 'BLOCKED: immutable pre-account backup checkpoint identity is required.'
     }
-    if (@(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue).Count -ne 0) {
-        throw 'BLOCKED: installed checkpoint must remain absent before clean-VM execution.'
+    $installed = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue)
+    if ($installed.Count -ne 0) {
+        if ($Action -cne 'RunCleanVm' -or $vm.State.ToString() -cne 'Off' -or $installed.Count -ne 1) {
+            throw 'BLOCKED: installed checkpoint must remain absent before clean-VM execution.'
+        }
+        $script:LateVisibleInstalledCheckpoint = Resolve-LateVisibleInstalledCheckpointRecovery -Checkpoint $installed[0]
     }
     $firmware = Get-VMFirmware -VMName $ExpectedVmName
     $security = Get-VMSecurity -VMName $ExpectedVmName
@@ -1025,7 +1083,7 @@ function Assert-ExactHyperVAudit {
         throw 'BLOCKED: exactly six enabled Hyper-V integration services are required before start.'
     }
     [void]$CompletedBoundaries.Add('hyper-v-prestart-audit-pass')
-    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; BackupCheckpoint = $backup[0]; Integration = $integration }
+    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; BackupCheckpoint = $backup[0]; InstalledCheckpoint = $script:LateVisibleInstalledCheckpoint; Integration = $integration }
 }
 
 function Wait-ExactIntegrationServicesHealthy {
@@ -1817,7 +1875,13 @@ function New-InstalledCheckpointOnce {
         throw 'BLOCKED: installed checkpoint already exists; overwrite is forbidden.'
     }
     Checkpoint-VM -Name $ExpectedVmName -SnapshotName $ExpectedInstalledCheckpoint -ErrorAction Stop | Out-Null
-    $created = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction Stop)
+    $deadline = [DateTime]::UtcNow.AddSeconds(30)
+    do {
+        $created = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue)
+        if ($created.Count -eq 1) { break }
+        if ($created.Count -gt 1) { throw 'BLOCKED: installed checkpoint create-once identity became ambiguous.' }
+        Start-Sleep -Milliseconds 250
+    } while ([DateTime]::UtcNow -lt $deadline)
     if ($created.Count -ne 1) { throw 'BLOCKED: installed checkpoint create-once verification failed.' }
     [void]$CompletedBoundaries.Add('installed-checkpoint-created')
     return $created[0]
@@ -1987,23 +2051,33 @@ function Invoke-CleanVmRun {
         [Parameter(Mandatory)][PSCredential]$Credential
     )
 
-    if (@(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue).Count -ne 0) {
-        throw 'BLOCKED: installed checkpoint already exists; create-once policy forbids overwrite or reuse.'
+    if ($null -ne $script:LateVisibleInstalledCheckpoint) {
+        Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -Confirm:$false -ErrorAction Stop
+        $vm = Get-VM -Name $ExpectedVmName
+        if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
+        Wait-ExactVmReady -Credential $Credential
+        [void](Wait-ExactIntegrationServicesHealthy)
+        Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+        $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult ([pscustomobject]@{ State = 'InstalledReady' })
+        $installedCheckpoint = $script:LateVisibleInstalledCheckpoint
+        [void]$CompletedBoundaries.Add('late-visible-installed-checkpoint-recovered')
     }
-    Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedCleanCheckpoint -Confirm:$false -ErrorAction Stop
-    [void]$CompletedBoundaries.Add('clean-checkpoint-restored')
-    $vm = Get-VM -Name $ExpectedVmName
-    if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
-    Wait-ExactVmReady -Credential $Credential
-    [void](Wait-ExactIntegrationServicesHealthy)
-    [void]$CompletedBoundaries.Add('integration-services-healthy')
-    Copy-ExactArtifactToGuest -Authority $Authority
-    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
-    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    else {
+        Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedCleanCheckpoint -Confirm:$false -ErrorAction Stop
+        [void]$CompletedBoundaries.Add('clean-checkpoint-restored')
+        $vm = Get-VM -Name $ExpectedVmName
+        if ($vm.State -eq 'Off') { Start-VM -Name $ExpectedVmName | Out-Null }
+        Wait-ExactVmReady -Credential $Credential
+        [void](Wait-ExactIntegrationServicesHealthy)
+        [void]$CompletedBoundaries.Add('integration-services-healthy')
+        Copy-ExactArtifactToGuest -Authority $Authority
+        Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+        Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
 
-    $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
-    $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
-    $installedCheckpoint = New-InstalledCheckpointOnce
+        $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
+        $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
+        $installedCheckpoint = New-InstalledCheckpointOnce
+    }
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $installedCheckpoint
 
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
