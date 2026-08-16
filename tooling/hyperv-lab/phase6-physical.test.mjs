@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    'b6270f1b935cc3fd55dfd3d55f1847ffdf988db9',
-    'physical-c013840c872b6f81-managed-power-scheme-v56',
+    '9e3001ca2f9f50154696c8aca86c4d7f5284b988',
+    'physical-9f5464923978c943-managed-power-scheme-v57',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -318,17 +318,17 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v57',
+    'physical-9f5464923978c943-managed-power-scheme-v57',
+    '9e3001ca2f9f50154696c8aca86c4d7f5284b988',
+    '4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3',
+    '62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762',
+    '0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1',
     'managed-power-scheme-v56',
     'physical-c013840c872b6f81-managed-power-scheme-v56',
-    'b6270f1b935cc3fd55dfd3d55f1847ffdf988db9',
     '4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f',
     '858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940',
     '29d024104cc942ef34e5d5dd8ae0bb906b9375341818587e9e102320fd359be4',
-    'managed-power-scheme-v55',
-    'physical-4c88acfffc6c9dc2-managed-power-scheme-v55',
-    'e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a',
-    'a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb',
-    'eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8',
     'managed-power-scheme-v54',
     'physical-0fb27dbbc1f09383-managed-power-scheme-v54',
     '07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40',
@@ -1104,7 +1104,7 @@ test('dry-run audits the exact immutable v56 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v56');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v57');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
