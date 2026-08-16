@@ -1267,14 +1267,49 @@ function Assert-ExactGuestArtifactAclSnapshot {
     }
 }
 
+function Get-ExactGuestArtifactCustodyLayout {
+    param([Parameter(Mandatory)][string]$Lifecycle)
+
+    $files = @(
+        'artifact-manifest.json',
+        'artifact-manifest.json.p7s',
+        'configs\clean-windows-vm.run-config.json',
+        'configs\friends-pc.run-config.json',
+        'installation-manifest.json',
+        'installation-manifest.json.p7s',
+        'msedgedriver.exe',
+        'liiiraa-boost.msi',
+        'configs\owner-pc.run-config.json',
+        'phase6-physical-runner.exe',
+        'tauri-driver.exe'
+    )
+    $directories = @('configs')
+    if ($Lifecycle -ceq 'installed-ready') {
+        $files += @(
+            'state\clean-windows-vm\diagnostics\msi-install.log',
+            'state\clean-windows-vm\installed-ready.json'
+        )
+        $directories += @(
+            'state',
+            'state\clean-windows-vm',
+            'state\clean-windows-vm\diagnostics'
+        )
+    } elseif ($Lifecycle -cne 'staged') {
+        throw 'BLOCKED:guest-acl-lifecycle'
+    }
+    return [pscustomobject]@{ Files = @($files); Directories = @($directories) }
+}
+
 function Set-ExactGuestArtifactCustody {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
-        [Parameter(Mandatory)]$Authority
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)][string]$Lifecycle
     )
 
+    $layout = Get-ExactGuestArtifactCustodyLayout -Lifecycle $Lifecycle
     Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        param($ClosedAuthority)
+        param($ClosedAuthority, $ClosedLayout)
         $fixedRoot = [string]$ClosedAuthority.GuestRoot
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
         if ($fixedRoot -cne $expectedRoot -or
@@ -1282,30 +1317,16 @@ function Set-ExactGuestArtifactCustody {
             [string]$ClosedAuthority.GuestConfig -cne (Join-Path $fixedRoot 'configs\clean-windows-vm.run-config.json')) {
             throw 'BLOCKED:guest-root-mismatch'
         }
-        $fixedFiles = @(
-            'artifact-manifest.json',
-            'artifact-manifest.json.p7s',
-            'configs\clean-windows-vm.run-config.json',
-            'configs\friends-pc.run-config.json',
-            'installation-manifest.json',
-            'installation-manifest.json.p7s',
-            'msedgedriver.exe',
-            'liiiraa-boost.msi',
-            'configs\owner-pc.run-config.json',
-            'phase6-physical-runner.exe',
-            'tauri-driver.exe'
-        )
         if (-not (Test-Path -LiteralPath $fixedRoot -PathType Container)) {
             throw 'BLOCKED:guest-acl-cardinality'
         }
         $actualFiles = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -File)
-        if ($actualFiles.Count -ne 11) {
+        $actualDirectories = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -Directory)
+        $actualRelativeFiles = @($actualFiles | ForEach-Object { $_.FullName.Substring($fixedRoot.Length).TrimStart('\') })
+        $actualRelativeDirectories = @($actualDirectories | ForEach-Object { $_.FullName.Substring($fixedRoot.Length).TrimStart('\') })
+        if (@(Compare-Object -ReferenceObject @($ClosedLayout.Files) -DifferenceObject $actualRelativeFiles -CaseSensitive).Count -ne 0 -or
+            @(Compare-Object -ReferenceObject @($ClosedLayout.Directories) -DifferenceObject $actualRelativeDirectories -CaseSensitive).Count -ne 0) {
             throw 'BLOCKED:guest-acl-cardinality'
-        }
-        foreach ($relative in $fixedFiles) {
-            if (-not (Test-Path -LiteralPath (Join-Path $fixedRoot $relative) -PathType Leaf)) {
-                throw 'BLOCKED:guest-acl-cardinality'
-            }
         }
         $guestSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
         if ($guestSid -notmatch '^S-1-5-21-(?:[0-9]+-){3}[0-9]+$') {
@@ -1329,18 +1350,20 @@ function Set-ExactGuestArtifactCustody {
             }
         }
         Set-Acl -LiteralPath $fixedRoot -AclObject (New-FixedDirectorySecurity)
-    } -ArgumentList $Authority
+    } -ArgumentList $Authority, $layout
     [void]$CompletedBoundaries.Add('guest-artifact-acl-provisioned')
 }
 
 function Assert-ExactGuestArtifactCustody {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
-        [Parameter(Mandatory)]$Authority
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)][string]$Lifecycle
     )
 
+    $layout = Get-ExactGuestArtifactCustodyLayout -Lifecycle $Lifecycle
     $result = Invoke-Command -VMName 'LiiiraaBoost-W11-25H2-Clean' -Credential $Credential -ScriptBlock {
-        param($ClosedAuthority)
+        param($ClosedAuthority, $ClosedLayout)
         $fixedRoot = [string]$ClosedAuthority.GuestRoot
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
         if ($fixedRoot -cne $expectedRoot -or
@@ -1348,32 +1371,17 @@ function Assert-ExactGuestArtifactCustody {
             [string]$ClosedAuthority.GuestConfig -cne (Join-Path $fixedRoot 'configs\clean-windows-vm.run-config.json')) {
             throw 'BLOCKED:guest-root-mismatch'
         }
-        $fixedFiles = @(
-            'artifact-manifest.json',
-            'artifact-manifest.json.p7s',
-            'configs\clean-windows-vm.run-config.json',
-            'configs\friends-pc.run-config.json',
-            'installation-manifest.json',
-            'installation-manifest.json.p7s',
-            'msedgedriver.exe',
-            'liiiraa-boost.msi',
-            'configs\owner-pc.run-config.json',
-            'phase6-physical-runner.exe',
-            'tauri-driver.exe'
-        )
         $guestSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
         if ($guestSid -notmatch '^S-1-5-21-(?:[0-9]+-){3}[0-9]+$') {
             throw 'BLOCKED:guest-acl-principal-mismatch'
         }
         $actualFiles = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -File)
         $actualDirectories = @(Get-ChildItem -LiteralPath $fixedRoot -Force -Recurse -Directory)
-        if ($actualFiles.Count -ne 11 -or $actualDirectories.Count -ne 1) {
+        $actualRelativeFiles = @($actualFiles | ForEach-Object { $_.FullName.Substring($fixedRoot.Length).TrimStart('\') })
+        $actualRelativeDirectories = @($actualDirectories | ForEach-Object { $_.FullName.Substring($fixedRoot.Length).TrimStart('\') })
+        if (@(Compare-Object -ReferenceObject @($ClosedLayout.Files) -DifferenceObject $actualRelativeFiles -CaseSensitive).Count -ne 0 -or
+            @(Compare-Object -ReferenceObject @($ClosedLayout.Directories) -DifferenceObject $actualRelativeDirectories -CaseSensitive).Count -ne 0) {
             throw 'BLOCKED:guest-acl-cardinality'
-        }
-        foreach ($relative in $fixedFiles) {
-            if (-not (Test-Path -LiteralPath (Join-Path $fixedRoot $relative) -PathType Leaf)) {
-                throw 'BLOCKED:guest-acl-cardinality'
-            }
         }
         $items = @([pscustomobject]@{ Item = Get-Item -LiteralPath $fixedRoot; Kind = 'directory' })
         $items += @($actualDirectories | ForEach-Object { [pscustomobject]@{ Item = $_; Kind = 'directory' } })
@@ -1398,8 +1406,8 @@ function Assert-ExactGuestArtifactCustody {
             }
         }
         [pscustomobject]@{ guestSid = $guestSid; snapshots = @($snapshots) }
-    } -ArgumentList $Authority
-    if (@($result.snapshots).Count -ne 13) {
+    } -ArgumentList $Authority, $layout
+    if (@($result.snapshots).Count -ne (1 + @($layout.Files).Count + @($layout.Directories).Count)) {
         throw 'BLOCKED:guest-acl-cardinality'
     }
     foreach ($snapshot in @($result.snapshots)) {
@@ -2580,8 +2588,8 @@ function Invoke-CleanVmRun {
     [void](Wait-ExactIntegrationServicesHealthy)
     [void]$CompletedBoundaries.Add('integration-services-healthy')
     Copy-ExactArtifactToGuest -Authority $Authority
-    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
-    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'staged'
+    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'staged'
 
     $first = Invoke-ExactGuestRunner -Credential $Credential -Stage 'installed-ready' -Authority $Authority
     $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult $first
@@ -2625,7 +2633,8 @@ function Invoke-InstalledVmRecovery {
     [void](Wait-ExactIntegrationServicesHealthy)
     [void]$CompletedBoundaries.Add('integration-services-healthy')
     Wait-ExactVmReady -Credential $Credential
-    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'installed-ready'
+    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'installed-ready'
     $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult ([pscustomobject]@{ State = 'InstalledReady' })
     Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $restored[0]
 
