@@ -28,7 +28,7 @@ use artifact_manifest::{
 };
 pub use installation_manifest::TRUSTED_INSTALLER_SPKI_SHA256;
 use installation_manifest::{CustodyError, CustodyErrorCode};
-use installation_manifest::{same_closed_windows_path, verify_installed_manifest};
+use installation_manifest::{resolve_installed_runtime_sibling, same_closed_windows_path};
 
 // Plan 06-33 key-link witnesses (quoted because verify.key-links preserves YAML scalars):
 // 'compose_plan apply_plan restore_plan'
@@ -189,6 +189,8 @@ pub struct ArtifactCustody {
     pub manifest_sha256: String,
     pub config_sha256: String,
     pub runner_sha256: String,
+    pub installed_runner_relative_path: String,
+    pub installed_runner_sha256: String,
     pub msi_path: String,
     pub runner_path: String,
     pub tauri_driver_path: String,
@@ -203,6 +205,8 @@ impl ArtifactCustody {
             manifest_sha256: format!("sha256:{}", "a".repeat(64)),
             config_sha256: config.config_sha256.clone(),
             runner_sha256: format!("sha256:{}", "c".repeat(64)),
+            installed_runner_relative_path: "phase6-physical-runner.exe".to_owned(),
+            installed_runner_sha256: format!("sha256:{}", "c".repeat(64)),
             msi_path: r"C:\phase6\liiiraa-boost.msi".to_owned(),
             runner_path: r"C:\phase6\phase6-physical-runner.exe".to_owned(),
             tauri_driver_path: r"C:\phase6\tauri-driver.exe".to_owned(),
@@ -845,6 +849,8 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
         let config_identity = files
             .get(config_role)
             .ok_or_else(|| PhysicalRunnerError::blocked("artifact-config-role"))?;
+        let (installed_runner_relative_path, installed_runner_sha256) =
+            verified.installed_runner_identity();
         let custody = ArtifactCustody {
             root: verified.root().to_path_buf(),
             manifest_sha256: verified.manifest_sha256().to_owned(),
@@ -856,6 +862,8 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
                 "sha256",
             )?
             .to_owned(),
+            installed_runner_relative_path: installed_runner_relative_path.to_owned(),
+            installed_runner_sha256: installed_runner_sha256.to_owned(),
             msi_path: role("msi")?,
             runner_path: role("runner")?,
             tauri_driver_path: role("tauriDriver")?,
@@ -994,27 +1002,24 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
     }
 
     fn verify_installed(&mut self, artifact: &ArtifactCustody) -> Result<(), PhysicalRunnerError> {
-        let verified = match verify_installed_manifest() {
-            Ok(verified) => verified,
-            Err(error) => {
-                persist_installed_custody_diagnostic(
-                    &artifact.root,
-                    self.config.stage,
-                    &error,
-                )?;
-                return Err(installed_custody_failure(error));
-            }
-        };
-        let runner = verified
-            .files()
-            .iter()
-            .find(|path| {
-                path.file_name()
-                    .and_then(|name| name.to_str())
-                    .is_some_and(|name| name.contains("physical-runner"))
-            })
-            .ok_or_else(|| PhysicalRunnerError::blocked("installed-runner-role"))?;
-        (hash_file(runner)? == artifact.runner_sha256)
+        if artifact.installed_runner_relative_path != "phase6-physical-runner.exe"
+            || artifact.installed_runner_sha256 != artifact.runner_sha256
+        {
+            return Err(PhysicalRunnerError::blocked("installed-runner-identity"));
+        }
+        let runner =
+            match resolve_installed_runtime_sibling(&artifact.installed_runner_relative_path) {
+                Ok(path) => path,
+                Err(error) => {
+                    persist_installed_custody_diagnostic(
+                        &artifact.root,
+                        self.config.stage,
+                        &error,
+                    )?;
+                    return Err(installed_custody_failure(error));
+                }
+            };
+        (hash_file(&runner)? == artifact.installed_runner_sha256)
             .then_some(())
             .ok_or_else(|| PhysicalRunnerError::blocked("installed-runner-hash"))
     }
@@ -1907,9 +1912,10 @@ mod custody_failure_code_tests {
     use super::msiexec_compatible_path;
     use super::{
         MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES, artifact_custody_failure_code,
-        installation_manifest::{CanonicalPathRole, CustodyError}, installed_custody_diagnostic,
-        installer_diagnostic_from_log, installer_diagnostic_sidecar_path,
-        installer_exit_failure, write_installer_diagnostic_create_once,
+        installation_manifest::{CanonicalPathRole, CustodyError},
+        installed_custody_diagnostic, installer_diagnostic_from_log,
+        installer_diagnostic_sidecar_path, installer_exit_failure,
+        write_installer_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};

@@ -22,6 +22,7 @@ pub const TRUSTED_INSTALLER_SPKI_SHA256: &str =
 
 const INSTALLATION_MANIFEST_NAME: &str = "installation-manifest.json";
 const INSTALLATION_SIGNATURE_NAME: &str = "installation-manifest.json.p7s";
+const INSTALLED_RUNNER_NAME: &str = "phase6-physical-runner.exe";
 
 #[cfg(windows)]
 pub(crate) fn local_msi_database_path(path: &Path) -> Result<PathBuf, CustodyError> {
@@ -388,6 +389,49 @@ pub fn verify_installed_manifest() -> Result<VerifiedInstallationManifest, Custo
     }
     #[cfg(not(windows))]
     {
+        Err(CustodyError::path("windows-required"))
+    }
+}
+
+pub(crate) fn resolve_installed_runtime_sibling(
+    relative_path: &str,
+) -> Result<PathBuf, CustodyError> {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+
+        const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
+        if relative_path != INSTALLED_RUNNER_NAME {
+            return Err(CustodyError::path("installed-runtime-role"));
+        }
+        let requested_root = windows_backend::known_program_files()?.join("Liiiraa Boost");
+        let root = std::fs::canonicalize(&requested_root).map_err(|error| {
+            CustodyError::from_canonicalize_error(
+                CanonicalPathRole::InstalledRoot,
+                &requested_root,
+                &error,
+            )
+        })?;
+        let root_metadata = std::fs::symlink_metadata(&root)
+            .map_err(|_| CustodyError::missing("installed-root-metadata"))?;
+        if root_metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return Err(CustodyError::path("root-reparse"));
+        }
+        let expected = requested_root.join(INSTALLED_RUNNER_NAME);
+        let candidate = root.join(INSTALLED_RUNNER_NAME);
+        if !same_closed_windows_path(&expected, &candidate) {
+            return Err(CustodyError::path("installed-runtime-path"));
+        }
+        let metadata = std::fs::symlink_metadata(&candidate)
+            .map_err(|_| CustodyError::missing("installed-runtime-metadata"))?;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return Err(CustodyError::path("reparse-component"));
+        }
+        Ok(candidate)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = relative_path;
         Err(CustodyError::path("windows-required"))
     }
 }
@@ -770,8 +814,7 @@ pub(crate) mod windows_backend {
     use super::{
         AuthenticodeEvidence, CanonicalPathRole, CustodyBackend, CustodyError,
         INSTALLATION_MANIFEST_NAME, INSTALLATION_SIGNATURE_NAME, InstalledAdmissionState,
-        SignerEvidence,
-        same_closed_windows_path, sha256_prefixed,
+        SignerEvidence, same_closed_windows_path, sha256_prefixed,
     };
 
     const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
@@ -897,18 +940,19 @@ pub(crate) mod windows_backend {
                 .last_admitted_path
                 .parent()
                 .ok_or_else(|| CustodyError::path("last-admitted-parent"))?;
-            let expected = std::fs::canonicalize(last_admitted_parent).map_err(|error| {
-                CustodyError::from_canonicalize_error(
-                    CanonicalPathRole::LastAdmittedParent,
-                    last_admitted_parent,
-                    &error,
-                )
-            })?
-            .join(
-                self.last_admitted_path
-                    .file_name()
-                    .ok_or_else(|| CustodyError::path("last-admitted-name"))?,
-            );
+            let expected = std::fs::canonicalize(last_admitted_parent)
+                .map_err(|error| {
+                    CustodyError::from_canonicalize_error(
+                        CanonicalPathRole::LastAdmittedParent,
+                        last_admitted_parent,
+                        &error,
+                    )
+                })?
+                .join(
+                    self.last_admitted_path
+                        .file_name()
+                        .ok_or_else(|| CustodyError::path("last-admitted-name"))?,
+                );
             if !same_closed_windows_path(&canonical, &expected) {
                 return Err(CustodyError::path("last-admitted-path"));
             }
@@ -1333,7 +1377,7 @@ pub(crate) mod windows_backend {
         protected && owner_is_system_or_admin && system_full && !ordinary_write
     }
 
-    fn known_program_files() -> Result<PathBuf, CustodyError> {
+    pub(super) fn known_program_files() -> Result<PathBuf, CustodyError> {
         let pointer =
             unsafe { SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, None) }
                 .map_err(|_| CustodyError::path("program-files-known-folder"))?;

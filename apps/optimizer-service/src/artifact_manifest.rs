@@ -5,7 +5,7 @@ use std::{
 
 use liiiraa_contracts_rust::{
     ArtifactManifestDocument, FriendsPcRunConfigDocument, FriendsRosterDocument,
-    PhysicalRunConfigDocument, TransactionalRecoveryDocument,
+    InstallationManifestDocument, PhysicalRunConfigDocument, TransactionalRecoveryDocument,
     validate_transactional_recovery_document,
 };
 use serde_json::{Map, Value};
@@ -49,6 +49,7 @@ pub struct VerifiedArtifactManifest {
     manifest_sha256: String,
     files: Vec<PathBuf>,
     friends_config: VerifiedFriendsConfig,
+    installed: InstallationManifestDocument,
 }
 
 impl VerifiedArtifactManifest {
@@ -74,6 +75,13 @@ impl VerifiedArtifactManifest {
 
     pub fn friends_config(&self) -> &VerifiedFriendsConfig {
         &self.friends_config
+    }
+
+    pub fn installed_runner_identity(&self) -> (String, &str) {
+        (
+            self.installed.files.runner.relative_path.to_string(),
+            self.installed.files.runner.sha256.as_str(),
+        )
     }
 }
 
@@ -146,10 +154,8 @@ pub(crate) fn verify_artifact_manifest_with_backend(
         .parent()
         .ok_or_else(|| CustodyError::path("artifact-root"))?;
     let root = backend.canonicalize(requested_root, CanonicalPathRole::PortableRoot)?;
-    let manifest_path = backend.canonicalize(
-        requested_manifest_path,
-        CanonicalPathRole::PortableManifest,
-    )?;
+    let manifest_path =
+        backend.canonicalize(requested_manifest_path, CanonicalPathRole::PortableManifest)?;
     if manifest_path != root.join(ARTIFACT_MANIFEST_NAME)
         || backend.is_reparse_point(&root)?
         || backend.is_reparse_point(&manifest_path)?
@@ -210,7 +216,7 @@ pub(crate) fn verify_artifact_manifest_with_backend(
 
     // Interpret nested mutable JSON through generated contracts before checking
     // executable signatures, so malformed custody input fails without side effects.
-    verify_embedded_installation(
+    let installed = verify_embedded_installation(
         backend,
         &root,
         identity(identities, "installationManifest")?,
@@ -274,6 +280,7 @@ pub(crate) fn verify_artifact_manifest_with_backend(
         manifest_sha256: sha256_prefixed(&raw_manifest),
         files,
         friends_config,
+        installed,
     })
 }
 
@@ -406,7 +413,7 @@ fn verify_embedded_installation(
     manifest_identity: &Map<String, Value>,
     signature_identity: &Map<String, Value>,
     artifact: &ArtifactManifestDocument,
-) -> Result<(), CustodyError> {
+) -> Result<InstallationManifestDocument, CustodyError> {
     let manifest_path = resolve_below_root(
         backend,
         root,
@@ -433,7 +440,7 @@ fn verify_embedded_installation(
     {
         return Err(CustodyError::signature("nested-installation-binding"));
     }
-    Ok(())
+    Ok(document)
 }
 
 #[derive(Clone, Copy)]

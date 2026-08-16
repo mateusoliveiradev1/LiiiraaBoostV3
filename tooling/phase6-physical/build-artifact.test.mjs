@@ -654,7 +654,7 @@ test('RED: installed-ready preserves service-only manifest custody and verifies 
   assert.match(installation, /FILE_ATTRIBUTE_REPARSE_POINT/u);
   assert.match(installation, /same_closed_windows_path/u);
 
-  const verifyStart = runner.indexOf('fn verify_installed(&mut self, artifact: &ArtifactCustody)');
+  const verifyStart = runner.lastIndexOf('fn verify_installed(&mut self, artifact: &ArtifactCustody)');
   const verifyEnd = runner.indexOf('fn create_local_recovery_checkpoint', verifyStart);
   assert.ok(verifyStart >= 0 && verifyEnd > verifyStart);
   const verifyBody = runner.slice(verifyStart, verifyEnd);
@@ -663,7 +663,10 @@ test('RED: installed-ready preserves service-only manifest custody and verifies 
   assert.match(verifyBody, /installed_runner_relative_path/u);
   assert.match(verifyBody, /hash_file/u);
 
-  for (const fileId of ['InstallationManifestFile', 'InstallationManifestSignatureFile']) {
+  for (const fileId of [
+    'Phase6InstallationManifestFile',
+    'Phase6InstallationManifestSignatureFile',
+  ]) {
     const marker = `Id="${fileId}"`;
     const start = wix.indexOf(marker);
     const end = wix.indexOf('</File>', start);
