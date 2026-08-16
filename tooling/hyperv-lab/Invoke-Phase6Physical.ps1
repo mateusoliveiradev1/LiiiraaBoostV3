@@ -1938,18 +1938,40 @@ function Assert-RebootPendingRecord {
     return $record
 }
 
+function Test-IsGuestAuthenticationFailure {
+    param([Parameter(Mandatory)]$ErrorRecord)
+
+    $category = [string]$ErrorRecord.CategoryInfo.Category
+    if (@('AuthenticationError', 'PermissionDenied', 'SecurityError') -contains $category) {
+        return $true
+    }
+    $exception = $ErrorRecord.Exception
+    while ($null -ne $exception) {
+        if ([int]$exception.HResult -in @(-2147023570, -2147024891)) {
+            return $true
+        }
+        $exception = $exception.InnerException
+    }
+    return $false
+}
+
 function Wait-ExactVmReady {
     param([Parameter(Mandatory)][PSCredential]$Credential)
 
-    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    $deadline = [DateTime]::UtcNow.AddSeconds(180)
     do {
         try {
             $ready = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock { 'ready' } -ErrorAction Stop
             if ($ready -eq 'ready') { return }
         }
-        catch { Start-Sleep -Seconds 2 }
+        catch {
+            if (Test-IsGuestAuthenticationFailure -ErrorRecord $_) {
+                throw 'BLOCKED: guest credential was rejected by PowerShell Direct.'
+            }
+        }
+        Start-Sleep -Seconds 2
     } while ([DateTime]::UtcNow -lt $deadline)
-    throw 'BLOCKED: exact VM did not become available for observation-first continuation.'
+    throw 'BLOCKED: exact VM did not become PowerShell Direct ready within 180 seconds.'
 }
 
 function Copy-BoundedEvidenceAndIngest {
@@ -2006,6 +2028,23 @@ function Write-BlockedRecord {
         reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
+}
+
+function Stop-ExactVmAfterRun {
+    $currentVm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
+    if ($currentVm.State.ToString() -ne 'Off') {
+        Stop-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
+    }
+    $deadline = [DateTime]::UtcNow.AddSeconds(120)
+    do {
+        $currentVm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
+        if ($currentVm.State.ToString() -eq 'Off') {
+            [void]$CompletedBoundaries.Add('run-vm-state-restored')
+            return
+        }
+        Start-Sleep -Seconds 2
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw 'BLOCKED: clean-VM run did not restore the exact VM to Off within 120 seconds.'
 }
 
 function Write-ApplyPromptReadyRecordOnce {
@@ -2156,4 +2195,7 @@ try {
 catch {
     if ($Action -eq 'RunCleanVm') { Write-BlockedRecord -Reason $_.Exception.Message }
     throw
+}
+finally {
+    if ($Action -eq 'RunCleanVm') { Stop-ExactVmAfterRun }
 }
