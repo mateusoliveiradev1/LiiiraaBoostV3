@@ -223,6 +223,27 @@ const invokeAclSnapshotAssertion = (snapshot, expectedUserSid) => {
   return JSON.parse(result.stdout);
 };
 
+const invokeGuestCustodyLayout = (lifecycle) => {
+  const encoded = Buffer.from(JSON.stringify({ lifecycle }), 'utf8').toString('base64');
+  const escapedBridgePath = bridgePath.replaceAll("'", "''");
+  const command = [
+    '$tokens = $null; $errors = $null',
+    `$ast = [Management.Automation.Language.Parser]::ParseFile('${escapedBridgePath}', [ref]$tokens, [ref]$errors)`,
+    "$function = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Get-ExactGuestArtifactCustodyLayout' }, $true) | Select-Object -First 1",
+    "if ($null -eq $function) { throw 'required bridge function is missing' }",
+    'Invoke-Expression $function.Extent.Text',
+    `$input = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json`,
+    'try { $layout = Get-ExactGuestArtifactCustodyLayout -Lifecycle ([string]$input.lifecycle); [pscustomobject]@{ ok = $true; code = $null; files = @($layout.Files); directories = @($layout.Directories) } | ConvertTo-Json -Compress } catch { [pscustomobject]@{ ok = $false; code = $_.Exception.Message; files = @(); directories = @() } | ConvertTo-Json -Compress }',
+  ].join('; ');
+  const result = spawnSync(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', command],
+    { cwd: root, encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  return JSON.parse(result.stdout);
+};
+
 const invokeInstallerSidecarAssertion = (input) => {
   const encoded = Buffer.from(JSON.stringify(input), 'utf8').toString('base64');
   const escapedBridgePath = bridgePath.replaceAll("'", "''");
@@ -585,6 +606,69 @@ test('RED: exact normal directory and staged file ACL snapshots are accepted', (
     ok: true,
     code: null,
   });
+});
+
+test('RED: guest custody uses closed staged and installed-ready layouts', () => {
+  const staged = invokeGuestCustodyLayout('staged');
+  assert.equal(staged.ok, true);
+  assert.equal(staged.files.length, 11);
+  assert.deepEqual(staged.directories, ['configs']);
+
+  const installed = invokeGuestCustodyLayout('installed-ready');
+  assert.equal(installed.ok, true);
+  assert.equal(installed.files.length, 13);
+  assert.deepEqual(installed.directories, [
+    'configs',
+    'state',
+    'state\\clean-windows-vm',
+    'state\\clean-windows-vm\\diagnostics',
+  ]);
+  assert.equal(
+    installed.files.includes('state\\clean-windows-vm\\diagnostics\\msi-install.log'),
+    true,
+  );
+  assert.equal(
+    installed.files.includes('state\\clean-windows-vm\\installed-ready.json'),
+    true,
+  );
+  assert.deepEqual(invokeGuestCustodyLayout('completed'), {
+    ok: false,
+    code: 'BLOCKED:guest-acl-lifecycle',
+    files: [],
+    directories: [],
+  });
+
+  const source = bridgeSource();
+  const setter = source.slice(
+    source.indexOf('function Set-ExactGuestArtifactCustody'),
+    source.indexOf('function Assert-ExactGuestArtifactCustody'),
+  );
+  const assertion = source.slice(
+    source.indexOf('function Assert-ExactGuestArtifactCustody'),
+    source.indexOf('function Resolve-RunnerFailureDiagnostic'),
+  );
+  for (const body of [setter, assertion]) {
+    assert.match(body, /Get-ExactGuestArtifactCustodyLayout\s+-Lifecycle\s+\$Lifecycle/u);
+    assert.match(body, /Compare-Object[\s\S]*-CaseSensitive/u);
+    assert.match(body, /-ArgumentList\s+\$Authority,\s*\$layout/u);
+  }
+
+  const cleanBody = source.slice(
+    source.indexOf('function Invoke-CleanVmRun'),
+    source.indexOf('function Invoke-InstalledVmRecovery'),
+  );
+  assert.match(cleanBody, /Set-ExactGuestArtifactCustody[^\n]*-Lifecycle\s+'staged'/u);
+  assert.match(cleanBody, /Assert-ExactGuestArtifactCustody[^\n]*-Lifecycle\s+'staged'/u);
+
+  const recoveryBody = source.slice(
+    source.indexOf('function Invoke-InstalledVmRecovery'),
+    source.indexOf('Assert-ExactInvocation\n'),
+  );
+  assertInOrder(recoveryBody, [
+    "Set-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'installed-ready'",
+    "Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority -Lifecycle 'installed-ready'",
+    'Assert-InstalledReadyRecord',
+  ]);
 });
 
 test('RED: wrong owner, unprotected DACL, broad write, inherited drift, and principal mismatch fail closed', () => {
