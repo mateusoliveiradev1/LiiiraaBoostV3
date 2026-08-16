@@ -136,6 +136,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v53-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v54-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v55-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v56-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -329,6 +330,11 @@ const assertSourcePolicy = (source) => {
     '4bffc051607994b34a29f96afd2ac12f173815f84519ab1855090ff89fcb060f',
     '858c24f08a246793aff101183a0e6876fdb4189d3bae4ad48d30cf74d2b65940',
     '29d024104cc942ef34e5d5dd8ae0bb906b9375341818587e9e102320fd359be4',
+    'managed-power-scheme-v55',
+    'physical-4c88acfffc6c9dc2-managed-power-scheme-v55',
+    'e38830867effd2f71562a7732a12ab1645a6b88cc8c3f4ad36a44abd0197fb7a',
+    'a5d3de5a10249b0f7c7bf7cf922668eea3073e31fc2862ab31e9c667c0b5d3cb',
+    'eed0d494cae1778f4099a3ee90e97e22b81235b5fdc8ddc18876ce17cc75f8d8',
     'managed-power-scheme-v54',
     'physical-0fb27dbbc1f09383-managed-power-scheme-v54',
     '07e2e082d865bc3ccd22f167108f14e9ce9eb1b517ce624a79e64481b0687c40',
@@ -1092,7 +1098,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v56 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v57 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
