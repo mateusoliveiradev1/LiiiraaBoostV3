@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('Audit', 'RunCleanVm')]
+    [ValidateSet('Audit', 'RunCleanVm', 'RecoverInstalledVm')]
     [string]$Action,
 
     [switch]$DryRun,
@@ -26,6 +26,16 @@ $ExpectedCleanCheckpointId = 'a918f5c0-ade0-4bac-bca3-baa91686777e'
 $ExpectedBackupCheckpoint = 'Clean-Windows-Ready-PreLabAccount-v43'
 $ExpectedBackupCheckpointId = 'ebccd5f3-5645-4089-b469-fa4d851fc6ef'
 $ExpectedInstalledCheckpoint = 'LiiiraaBoost-Installed'
+$ExpectedRecoveryInstalledCheckpointId = 'adea1580-a076-40f9-8bb2-2458701f47ac'
+$ExpectedRecoveryPromptReadyFileName = '20260816-135745-306-managed-power-scheme-v65-APPLY-PROMPT-READY.json'
+$ExpectedRecoveryPromptReadySha256 = '16fa3d1c36f5b0d904b330a148e9a0d82ebc71a5e56d8e7f4ca7af6afd8c3ce9'
+$ExpectedRecoveryTranscriptFileName = '20260816-1658-managed-power-scheme-v65-run-transcript.txt'
+$ExpectedRecoveryTranscriptSha256 = 'c3b8f85bac7002bbc7880c45cd2c5c83f2dc4acd420ea8c201fa81b551b04bcf'
+$ExpectedRecoveryCleanupFileName = '20260816-1710-managed-power-scheme-v65-cancelled-run-cleanup.json'
+$ExpectedRecoveryCleanupSha256 = '33dbb3ef5535161d245b5862edeec9ea2b5a2f8ed779c6fe3e41b396f436c401'
+$ExpectedRecoveryRunResultFileName = '20260816-1658-managed-power-scheme-v65-run-result.json'
+$ExpectedRecoveryReadyFileName = 'managed-power-scheme-v65-RECOVERY-APPLY-PROMPT-READY.json'
+$ExpectedRecoveryAcceptedFileName = 'managed-power-scheme-v65-RECOVERY-APPLY-ACCEPTED.json'
 $CurrentAuthority = [pscustomobject][ordered]@{
     OperationVersion = 'managed-power-scheme-v65'
     BuildId = 'physical-7304c595be0d094e-managed-power-scheme-v65'
@@ -1089,6 +1099,8 @@ function Assert-FreshSimulationAdmission {
 }
 
 function Assert-ExactHyperVAudit {
+    param([switch]$AllowInstalledRecovery)
+
     $vm = Get-VM -Name $ExpectedVmName -ErrorAction Stop
     if ($vm.Name -ne $ExpectedVmName -or $vm.Generation -ne 2) {
         throw 'BLOCKED: exact Generation 2 VM audit failed.'
@@ -1102,7 +1114,14 @@ function Assert-ExactHyperVAudit {
         throw 'BLOCKED: immutable pre-account backup checkpoint identity is required.'
     }
     $installed = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction SilentlyContinue)
-    if ($installed.Count -ne 0) {
+    if ($AllowInstalledRecovery) {
+        if ($vm.State.ToString() -ne 'Off' -or
+            $installed.Count -ne 1 -or
+            $installed[0].Id.ToString().ToLowerInvariant() -ne $ExpectedRecoveryInstalledCheckpointId) {
+            throw 'BLOCKED: recovery requires the exact installed v65 checkpoint with the VM Off.'
+        }
+    }
+    elseif ($installed.Count -ne 0) {
         throw 'BLOCKED: installed checkpoint must remain absent before clean-VM execution.'
     }
     $firmware = Get-VMFirmware -VMName $ExpectedVmName
@@ -1121,7 +1140,13 @@ function Assert-ExactHyperVAudit {
         throw 'BLOCKED: exactly six enabled Hyper-V integration services are required before start.'
     }
     [void]$CompletedBoundaries.Add('hyper-v-prestart-audit-pass')
-    return [pscustomobject]@{ Vm = $vm; CleanCheckpoint = $clean[0]; BackupCheckpoint = $backup[0]; Integration = $integration }
+    return [pscustomobject]@{
+        Vm = $vm
+        CleanCheckpoint = $clean[0]
+        BackupCheckpoint = $backup[0]
+        InstalledCheckpoint = if ($AllowInstalledRecovery) { $installed[0] } else { $null }
+        Integration = $integration
+    }
 }
 
 function Wait-ExactIntegrationServicesHealthy {
@@ -2214,6 +2239,96 @@ function Stop-ExactVmAfterRun {
     throw 'BLOCKED: clean-VM run did not restore the exact VM to Off within 120 seconds.'
 }
 
+function Assert-ExactInstalledRecoveryPreflight {
+    param(
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)]$InstalledCheckpoint
+    )
+
+    $directory = Join-Path $LabRoot 'Evidence\phase6'
+    $promptPath = Join-Path $directory $ExpectedRecoveryPromptReadyFileName
+    $transcriptPath = Join-Path $directory $ExpectedRecoveryTranscriptFileName
+    $cleanupPath = Join-Path $directory $ExpectedRecoveryCleanupFileName
+    $runResultPath = Join-Path $directory $ExpectedRecoveryRunResultFileName
+    $recoveryReadyPath = Join-Path $directory $ExpectedRecoveryReadyFileName
+    $recoveryAcceptedPath = Join-Path $directory $ExpectedRecoveryAcceptedFileName
+
+    if ([string]$InstalledCheckpoint.Name -cne $ExpectedInstalledCheckpoint -or
+        [string]$InstalledCheckpoint.Id.ToString().ToLowerInvariant() -ne $ExpectedRecoveryInstalledCheckpointId -or
+        (Get-VM -Name $ExpectedVmName -ErrorAction Stop).State.ToString() -ne 'Off') {
+        throw 'BLOCKED: exact installed v65 recovery checkpoint custody is invalid.'
+    }
+    foreach ($expectedFile in @(
+        [pscustomobject]@{ Path = $promptPath; Sha256 = $ExpectedRecoveryPromptReadySha256; MaximumBytes = 4096 },
+        [pscustomobject]@{ Path = $transcriptPath; Sha256 = $ExpectedRecoveryTranscriptSha256; MaximumBytes = 4096 },
+        [pscustomobject]@{ Path = $cleanupPath; Sha256 = $ExpectedRecoveryCleanupSha256; MaximumBytes = 4096 }
+    )) {
+        if (-not (Test-Path -LiteralPath $expectedFile.Path -PathType Leaf)) {
+            throw 'BLOCKED: exact cancelled-run recovery evidence is missing.'
+        }
+        $length = (Get-Item -LiteralPath $expectedFile.Path).Length
+        if ($length -le 0 -or $length -gt $expectedFile.MaximumBytes -or
+            (Get-FileSha256Hex -Path $expectedFile.Path) -ne $expectedFile.Sha256) {
+            throw 'BLOCKED: exact cancelled-run recovery evidence changed or exceeded bounds.'
+        }
+    }
+    if ((Test-Path -LiteralPath $runResultPath) -or
+        (Test-Path -LiteralPath $recoveryReadyPath) -or
+        (Test-Path -LiteralPath $recoveryAcceptedPath) -or
+        (Test-Path -LiteralPath (Join-Path $Authority.ArtifactRoot 'evidence\clean-windows-vm\raw-run-envelope.json'))) {
+        throw 'BLOCKED: recovery is not create-once or prior physical output already exists.'
+    }
+
+    $prompt = [IO.File]::ReadAllText($promptPath) | ConvertFrom-Json
+    if ($prompt.kind -cne 'phase6-apply-prompt-ready' -or
+        $prompt.schemaVersion -cne '1.0' -or
+        $prompt.operationVersion -cne $ExpectedOperationVersion -or
+        $prompt.buildId -cne $ExpectedBuildId -or
+        $prompt.vmName -cne $ExpectedVmName -or
+        $prompt.installedCheckpoint -cne $ExpectedInstalledCheckpoint -or
+        $prompt.installedCheckpointId -cne $ExpectedRecoveryInstalledCheckpointId -or
+        $prompt.stage -cne 'approval-prompt-ready') {
+        throw 'BLOCKED: prior prompt-ready boundary is not the exact v65 checkpoint binding.'
+    }
+    $transcript = [IO.File]::ReadAllText($transcriptPath)
+    if ($transcript.IndexOf("PHASE6_APPLY_PROMPT_READY:${ExpectedOperationVersion}:$ExpectedRecoveryPromptReadyFileName", [StringComparison]::Ordinal) -lt 0 -or
+        $transcript.IndexOf('PHASE6_APPLY_ACCEPTED', [StringComparison]::Ordinal) -ge 0 -or
+        $transcript.IndexOf('RunCleanVm status=', [StringComparison]::Ordinal) -ge 0) {
+        throw 'BLOCKED: prior console transcript does not prove the exact unaccepted boundary.'
+    }
+    $cleanup = [IO.File]::ReadAllText($cleanupPath) | ConvertFrom-Json
+    $installedCustody = @($cleanup.checkpoints | Where-Object {
+        $_.name -ceq $ExpectedInstalledCheckpoint -and $_.id -ceq $ExpectedRecoveryInstalledCheckpointId
+    })
+    if ($cleanup.operationVersion -cne $ExpectedOperationVersion -or
+        $cleanup.result -cne 'PASS' -or
+        $cleanup.afterState -cne 'Off' -or
+        $cleanup.checkpointCountBefore -ne $cleanup.checkpointCountAfter -or
+        $cleanup.applyPromptMarkerSha256 -cne $ExpectedRecoveryPromptReadySha256 -or
+        $cleanup.applyAcceptance -cne 'not-proven-by-host-transcript' -or
+        $cleanup.readHostReturnObserved -ne $false -or
+        $installedCustody.Count -ne 1) {
+        throw 'BLOCKED: cleanup evidence does not bind the safe v65 recovery state.'
+    }
+    $currentBlockers = @(Get-ChildItem -LiteralPath $directory -Filter '*-clean-vm-BLOCKED.json' -File -ErrorAction Stop | Where-Object {
+        if ($_.Length -le 0 -or $_.Length -gt 64KB) { return $true }
+        try {
+            return (([IO.File]::ReadAllText($_.FullName) | ConvertFrom-Json).operationVersion -ceq $ExpectedOperationVersion)
+        }
+        catch { return $true }
+    })
+    if ($currentBlockers.Count -ne 0) {
+        throw 'BLOCKED: current-version blocker or malformed blocker evidence forbids recovery.'
+    }
+    [void]$CompletedBoundaries.Add('installed-recovery-preflight-pass')
+    return [pscustomobject]@{
+        PromptReadyPath = $promptPath
+        PromptReadySha256 = $ExpectedRecoveryPromptReadySha256
+        CleanupPath = $cleanupPath
+        CleanupSha256 = $ExpectedRecoveryCleanupSha256
+    }
+}
+
 function Write-ApplyPromptReadyRecordOnce {
     param(
         [Parameter(Mandatory)]$Authority,
@@ -2248,7 +2363,207 @@ function Write-ApplyPromptReadyRecordOnce {
     $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
     try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
     [void]$CompletedBoundaries.Add('apply-prompt-ready')
-    return $fileName
+    return [pscustomobject]@{
+        FileName = $fileName
+        Path = $path
+        Sha256 = Get-FileSha256Hex -Path $path
+    }
+}
+
+function Write-RecoveryApplyPromptReadyRecordOnce {
+    param(
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)]$InstalledCheckpoint,
+        [Parameter(Mandatory)]$RecoveryPreflight
+    )
+
+    $directory = Join-Path $LabRoot 'Evidence\phase6'
+    $path = Join-Path $directory $ExpectedRecoveryReadyFileName
+    $record = [ordered]@{
+        kind = 'phase6-apply-prompt-ready'
+        schemaVersion = '1.0'
+        attemptKind = 'installed-checkpoint-recovery'
+        operationVersion = $ExpectedOperationVersion
+        buildId = $ExpectedBuildId
+        artifactManifestSha256 = 'sha256:' + $ExpectedArtifactManifestSha256
+        vmName = $ExpectedVmName
+        installedCheckpoint = $ExpectedInstalledCheckpoint
+        installedCheckpointId = ([string]$InstalledCheckpoint.Id).ToLowerInvariant()
+        predecessorPromptReadySha256 = 'sha256:' + $RecoveryPreflight.PromptReadySha256
+        cleanupEvidenceSha256 = 'sha256:' + $RecoveryPreflight.CleanupSha256
+        stage = 'approval-prompt-ready'
+        recordedAt = [DateTime]::UtcNow.ToString('o')
+    }
+    $bytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Compress))
+    if ($bytes.Length -le 0 -or $bytes.Length -gt 4096) {
+        throw 'BLOCKED: recovery apply prompt boundary exceeds fixed bounds.'
+    }
+    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
+    try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+    [void]$CompletedBoundaries.Add('recovery-apply-prompt-ready')
+    return [pscustomobject]@{ FileName = $ExpectedRecoveryReadyFileName; Path = $path; Sha256 = Get-FileSha256Hex -Path $path }
+}
+
+function Invoke-VisibleApplyConfirmation {
+    param(
+        [Parameter(Mandatory)][string]$ExpectedPhrase,
+        [Parameter(Mandatory)]$PromptReady
+    )
+
+    if ($ExpectedPhrase -cne "APPLY phase6-physical-plan $ExpectedOperationVersion" -or
+        -not (Test-Path -LiteralPath $PromptReady.Path -PathType Leaf) -or
+        (Get-FileSha256Hex -Path $PromptReady.Path) -cne $PromptReady.Sha256) {
+        throw 'BLOCKED: visible confirmation prompt binding mismatch.'
+    }
+    if ([Threading.Thread]::CurrentThread.ApartmentState -ne [Threading.ApartmentState]::STA) {
+        throw 'BLOCKED: visible confirmation requires an STA Windows PowerShell process.'
+    }
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    [Windows.Forms.Application]::EnableVisualStyles()
+
+    $form = [Windows.Forms.Form]::new()
+    $form.Text = "Liiiraa Boost - confirmar APPLY $ExpectedOperationVersion"
+    $form.Size = [Drawing.Size]::new(760, 330)
+    $form.StartPosition = [Windows.Forms.FormStartPosition]::CenterScreen
+    $form.TopMost = $true
+    $form.FormBorderStyle = [Windows.Forms.FormBorderStyle]::FixedDialog
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $form.Tag = 'pending'
+
+    $instruction = [Windows.Forms.Label]::new()
+    $instruction.Location = [Drawing.Point]::new(24, 20)
+    $instruction.Size = [Drawing.Size]::new(700, 60)
+    $instruction.Font = [Drawing.Font]::new('Segoe UI', 11, [Drawing.FontStyle]::Bold)
+    $instruction.Text = "Confirmação humana obrigatória. Digite exatamente a frase abaixo. Nenhuma mutação ocorrerá antes da aceitação durável."
+    $form.Controls.Add($instruction)
+
+    $phraseLabel = [Windows.Forms.Label]::new()
+    $phraseLabel.Location = [Drawing.Point]::new(24, 88)
+    $phraseLabel.Size = [Drawing.Size]::new(700, 28)
+    $phraseLabel.Font = [Drawing.Font]::new('Consolas', 10)
+    $phraseLabel.Text = $ExpectedPhrase
+    $form.Controls.Add($phraseLabel)
+
+    $inputBox = [Windows.Forms.TextBox]::new()
+    $inputBox.Location = [Drawing.Point]::new(24, 124)
+    $inputBox.Size = [Drawing.Size]::new(700, 30)
+    $inputBox.Font = [Drawing.Font]::new('Consolas', 10)
+    $form.Controls.Add($inputBox)
+
+    $statusLabel = [Windows.Forms.Label]::new()
+    $statusLabel.Location = [Drawing.Point]::new(24, 164)
+    $statusLabel.Size = [Drawing.Size]::new(700, 26)
+    $statusLabel.Text = 'Aguardando a frase exata. A janela expira em 10:00.'
+    $form.Controls.Add($statusLabel)
+
+    $authorizeButton = [Windows.Forms.Button]::new()
+    $authorizeButton.Location = [Drawing.Point]::new(420, 215)
+    $authorizeButton.Size = [Drawing.Size]::new(145, 38)
+    $authorizeButton.Text = 'Autorizar APPLY'
+    $authorizeButton.Enabled = $false
+    $form.Controls.Add($authorizeButton)
+
+    $cancelButton = [Windows.Forms.Button]::new()
+    $cancelButton.Location = [Drawing.Point]::new(579, 215)
+    $cancelButton.Size = [Drawing.Size]::new(145, 38)
+    $cancelButton.Text = 'Cancelar com segurança'
+    $cancelButton.DialogResult = [Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    $deadline = [DateTime]::UtcNow.AddMinutes(10)
+    $timer = [Windows.Forms.Timer]::new()
+    $timer.Interval = 1000
+    $inputBox.Add_TextChanged({
+        $authorizeButton.Enabled = ($inputBox.Text -ceq $ExpectedPhrase)
+        $statusLabel.Text = if ($authorizeButton.Enabled) { 'Frase exata. Clique em Autorizar APPLY.' } else { 'A frase ainda não corresponde exatamente.' }
+    })
+    $authorizeButton.Add_Click({
+        if ($inputBox.Text -ceq $ExpectedPhrase) {
+            $form.Tag = 'accepted'
+            $form.DialogResult = [Windows.Forms.DialogResult]::OK
+            $form.Close()
+        }
+    })
+    $timer.Add_Tick({
+        $remaining = $deadline - [DateTime]::UtcNow
+        if ($remaining.TotalSeconds -le 0) {
+            $form.Tag = 'timed-out'
+            $form.DialogResult = [Windows.Forms.DialogResult]::Cancel
+            $form.Close()
+        }
+        else {
+            $statusLabel.Text = if ($authorizeButton.Enabled) {
+                'Frase exata. Clique em Autorizar APPLY.'
+            } else {
+                'Aguardando frase exata. Expira em {0:mm\:ss}.' -f $remaining
+            }
+        }
+    })
+    $timer.Start()
+    $form.Add_Shown({ $form.Activate(); $inputBox.Focus() })
+    try {
+        $dialogResult = $form.ShowDialog()
+        if ($dialogResult -ne [Windows.Forms.DialogResult]::OK -or $form.Tag -cne 'accepted') {
+            throw 'BLOCKED: visible recovery approval was cancelled or timed out.'
+        }
+        return $ExpectedPhrase
+    }
+    finally {
+        $inputBox.Text = ''
+        $timer.Stop()
+        $timer.Dispose()
+        $form.Dispose()
+    }
+}
+
+function Write-ApplyAcceptedRecordOnce {
+    param(
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)]$InstalledCheckpoint,
+        [Parameter(Mandatory)]$PromptReady,
+        [Parameter(Mandatory)][string]$Approval,
+        [string]$FileName
+    )
+
+    $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
+    if ($Approval -cne $expectedApproval -or
+        [string]$InstalledCheckpoint.Id.ToString().ToLowerInvariant() -notmatch '^[0-9a-f-]{36}$' -or
+        -not (Test-Path -LiteralPath $PromptReady.Path -PathType Leaf) -or
+        (Get-FileSha256Hex -Path $PromptReady.Path) -cne $PromptReady.Sha256) {
+        throw 'BLOCKED: accepted apply boundary binding mismatch.'
+    }
+    if ([string]::IsNullOrWhiteSpace($FileName)) {
+        $FileName = $PromptReady.FileName.Replace('PROMPT-READY', 'ACCEPTED')
+    }
+    if ($FileName -notmatch '^[0-9A-Za-z.-]+-APPLY-ACCEPTED\.json$') {
+        throw 'BLOCKED: accepted apply record file name is outside the fixed allowlist.'
+    }
+    $path = Join-Path (Join-Path $LabRoot 'Evidence\phase6') $FileName
+    $record = [ordered]@{
+        kind = 'phase6-apply-accepted-before-mutation'
+        schemaVersion = '1.0'
+        operationVersion = $ExpectedOperationVersion
+        buildId = $ExpectedBuildId
+        artifactManifestSha256 = 'sha256:' + $ExpectedArtifactManifestSha256
+        vmName = $ExpectedVmName
+        promptReadySha256 = 'sha256:' + $PromptReady.Sha256
+        installedCheckpoint = $ExpectedInstalledCheckpoint
+        installedCheckpointId = ([string]$InstalledCheckpoint.Id).ToLowerInvariant()
+        approvalPhraseSha256 = 'sha256:' + (Get-Sha256Hex -Bytes ([Text.Encoding]::UTF8.GetBytes($expectedApproval)))
+        stage = 'approval-accepted-before-mutation'
+        recordedAt = [DateTime]::UtcNow.ToString('o')
+    }
+    $bytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Compress))
+    if ($bytes.Length -le 0 -or $bytes.Length -gt 4096) {
+        throw 'BLOCKED: accepted apply boundary exceeds fixed bounds.'
+    }
+    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
+    try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+    [void]$CompletedBoundaries.Add('apply-accepted-before-mutation')
+    return [pscustomobject]@{ FileName = $FileName; Path = $path; Sha256 = Get-FileSha256Hex -Path $path }
 }
 
 function Invoke-CleanVmRun {
@@ -2275,12 +2590,54 @@ function Invoke-CleanVmRun {
 
     $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
     $promptReadyRecord = Write-ApplyPromptReadyRecordOnce -Authority $Authority -InstalledCheckpoint $installedCheckpoint
-    Write-Output "PHASE6_APPLY_PROMPT_READY:$($ExpectedOperationVersion):$promptReadyRecord"
-    $approval = Read-Host "Type this exact phrase to authorize the guest apply: $expectedApproval"
-    if ($approval -cne $expectedApproval) { throw 'BLOCKED: exact physical apply approval was refused.' }
+    Write-Output "PHASE6_APPLY_PROMPT_READY:$($ExpectedOperationVersion):$($promptReadyRecord.FileName)"
+    $approval = Invoke-VisibleApplyConfirmation -ExpectedPhrase $expectedApproval -PromptReady $promptReadyRecord
+    $acceptedRecord = Write-ApplyAcceptedRecordOnce -Authority $Authority -InstalledCheckpoint $installedCheckpoint -PromptReady $promptReadyRecord -Approval $approval
+    Write-Output "PHASE6_APPLY_ACCEPTED:$($ExpectedOperationVersion):$($acceptedRecord.FileName)"
     $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -Authority $Authority -ApprovalPhrase $approval
     [void](Assert-RebootPendingRecord -Credential $Credential -Authority $Authority -RunnerResult $second)
 
+    Restart-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
+    [void]$CompletedBoundaries.Add('operator-authorized-vm-restart')
+    Wait-ExactVmReady -Credential $Credential
+    $third = Invoke-ExactGuestRunner -Credential $Credential -Stage 'completed' -Authority $Authority
+    if ($third.State -ne 'Completed') { throw 'BLOCKED: post-boot observation-first runner did not complete.' }
+    [void]$CompletedBoundaries.Add('post-boot-observation-complete')
+    Copy-BoundedEvidenceAndIngest -Credential $Credential -Authority $Authority
+}
+
+function Invoke-InstalledVmRecovery {
+    param(
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)]$InstalledCheckpoint
+    )
+
+    $recoveryPreflight = Assert-ExactInstalledRecoveryPreflight -Authority $Authority -InstalledCheckpoint $InstalledCheckpoint
+    Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -Confirm:$false -ErrorAction Stop
+    $restored = @(Get-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint -ErrorAction Stop)
+    if ($restored.Count -ne 1 -or $restored[0].Id.ToString().ToLowerInvariant() -ne $ExpectedRecoveryInstalledCheckpointId) {
+        throw 'BLOCKED: installed recovery checkpoint identity changed after restore.'
+    }
+    [void]$CompletedBoundaries.Add('installed-checkpoint-restored')
+
+    Start-VM -Name $ExpectedVmName -ErrorAction Stop | Out-Null
+    [void](Wait-ExactIntegrationServicesHealthy)
+    [void]$CompletedBoundaries.Add('integration-services-healthy')
+    Wait-ExactVmReady -Credential $Credential
+    Assert-ExactGuestArtifactCustody -Credential $Credential -Authority $Authority
+    $installed = Assert-InstalledReadyRecord -Credential $Credential -Authority $Authority -RunnerResult ([pscustomobject]@{ State = 'InstalledReady' })
+    Write-CheckpointReadyRecordOnce -Credential $Credential -Authority $Authority -InstalledReadyBytes $installed.Bytes -InstalledCheckpoint $restored[0]
+
+    $expectedApproval = "APPLY phase6-physical-plan $ExpectedOperationVersion"
+    $promptReadyRecord = Write-RecoveryApplyPromptReadyRecordOnce -Authority $Authority -InstalledCheckpoint $restored[0] -RecoveryPreflight $recoveryPreflight
+    Write-Output "PHASE6_APPLY_PROMPT_READY:$($ExpectedOperationVersion):$($promptReadyRecord.FileName)"
+    $approval = Invoke-VisibleApplyConfirmation -ExpectedPhrase $expectedApproval -PromptReady $promptReadyRecord
+    $acceptedRecord = Write-ApplyAcceptedRecordOnce -Authority $Authority -InstalledCheckpoint $restored[0] -PromptReady $promptReadyRecord -Approval $approval -FileName $ExpectedRecoveryAcceptedFileName
+    Write-Output "PHASE6_APPLY_ACCEPTED:$($ExpectedOperationVersion):$($acceptedRecord.FileName)"
+
+    $second = Invoke-ExactGuestRunner -Credential $Credential -Stage 'reboot-pending' -Authority $Authority -ApprovalPhrase $approval
+    [void](Assert-RebootPendingRecord -Credential $Credential -Authority $Authority -RunnerResult $second)
     Restart-VM -Name $ExpectedVmName -Force -Confirm:$false -ErrorAction Stop
     [void]$CompletedBoundaries.Add('operator-authorized-vm-restart')
     Wait-ExactVmReady -Credential $Credential
@@ -2297,7 +2654,7 @@ $authority = Get-Authority
 if ($DryRun) {
     [ordered]@{
         mode = 'dry-run'
-        actions = @('Audit', 'RunCleanVm')
+        actions = @('Audit', 'RunCleanVm', 'RecoverInstalledVm')
         vmName = $ExpectedVmName
         cleanCheckpoint = $ExpectedCleanCheckpoint
         cleanCheckpointId = $ExpectedCleanCheckpointId
@@ -2324,7 +2681,8 @@ if (-not (Test-IsAdministrator)) {
 try {
     Assert-ArtifactVerifierPass -Authority $authority
     Assert-FreshSimulationAdmission
-    $hyperV = Assert-ExactHyperVAudit
+    $isInstalledRecovery = $Action -eq 'RecoverInstalledVm'
+    $hyperV = Assert-ExactHyperVAudit -AllowInstalledRecovery:$isInstalledRecovery
     if ($Action -eq 'Audit') {
         $hyperV.Integration = @(Assert-ExactReadOnlyIntegrationHealth)
         [void]$CompletedBoundaries.Add('hyper-v-audit-pass')
@@ -2343,13 +2701,18 @@ try {
         $GuestCredential = Get-Credential -Message 'Credencial local da VM (mantida somente na memoria deste processo)'
     }
     if ($null -eq $GuestCredential) { throw 'BLOCKED: in-memory guest credential is required.' }
-    Invoke-CleanVmRun -Authority $authority -Credential $GuestCredential
-    [ordered]@{ status = 'COMPLETED'; action = 'RunCleanVm'; completedBoundaries = @($CompletedBoundaries) } | ConvertTo-Json -Depth 4
+    if ($isInstalledRecovery) {
+        Invoke-InstalledVmRecovery -Authority $authority -Credential $GuestCredential -InstalledCheckpoint $hyperV.InstalledCheckpoint
+    }
+    else {
+        Invoke-CleanVmRun -Authority $authority -Credential $GuestCredential
+    }
+    [ordered]@{ status = 'COMPLETED'; action = $Action; completedBoundaries = @($CompletedBoundaries) } | ConvertTo-Json -Depth 4
 }
 catch {
-    if ($Action -eq 'RunCleanVm') { Write-BlockedRecord -Reason $_.Exception.Message }
+    if ($Action -in @('RunCleanVm', 'RecoverInstalledVm')) { Write-BlockedRecord -Reason $_.Exception.Message }
     throw
 }
 finally {
-    if ($Action -eq 'RunCleanVm') { Stop-ExactVmAfterRun }
+    if ($Action -in @('RunCleanVm', 'RecoverInstalledVm')) { Stop-ExactVmAfterRun }
 }
