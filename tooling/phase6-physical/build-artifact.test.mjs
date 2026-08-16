@@ -660,6 +660,14 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
   );
   assert.match(source, /join\(ROOT, 'target', 'phase6-runner-static'/u);
   assert.doesNotMatch(source, /join\(workRoot, '\.tools', 'runner-target'/u);
+  assert.match(
+    source,
+    /runner:\s*join\(\s*runnerTargetDir,\s*'x86_64-pc-windows-msvc',\s*'release',\s*'phase6-physical-runner\.exe'/u,
+  );
+  assert.match(
+    source,
+    /copyFileSync\(built\.runner, portableRunner\)[\s\S]{0,512}existsSync\(portableRunner\)[\s\S]{0,512}validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner/u,
+  );
   assert.doesNotMatch(source, /locateTauriDriver/u);
   for (const runtime of ['built.service', 'built.runner', 'portableDrivers.tauriDriver']) {
     assert.match(
