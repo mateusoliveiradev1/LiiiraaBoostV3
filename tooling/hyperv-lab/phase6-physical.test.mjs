@@ -850,6 +850,24 @@ test('RED: same-session installed custody sidecar is bounded and path-free', () 
   assert.equal(JSON.stringify(poisoned).includes('secret-user'), false);
 });
 
+test('RED: same-session WebDriver diagnostic is hash-bound, bounded, and raw-free', () => {
+  const source = bridgeSource();
+  assert.match(source, /webdriver-launch\.safe\.json/u);
+  assert.match(source, /Resolve-WebDriverSidecarSummary/u);
+  assert.match(source, /WebDriverDiagnostic/u);
+  assert.match(source, /WebDriverSidecarSha256/u);
+  assert.match(source, /WebDriverSidecarSizeBytes/u);
+  assert.match(source, /16384/u);
+  assert.match(source, /phase6-webdriver-safe-diagnostic/u);
+  assert.match(source, /native-driver-version-mismatch/u);
+  assert.match(source, /webdriverEndpointReady/u);
+  assert.match(source, /nativeEndpointReady/u);
+  assert.doesNotMatch(
+    source,
+    /WebDriverDiagnostic[^\n]*(?:stdout|stderr|path|user|sid|secret)/iu,
+  );
+});
+
 test('RED: fixed installed-custody diagnostic is static-CRT and PE-gated before VM launch', () => {
   const buildPath = 'tooling/hyperv-lab/Build-Phase6InstalledCustodyDiagnostic.ps1';
   assert.equal(existsSync(buildPath), true, 'fixed diagnostic build entrypoint must exist');
