@@ -623,10 +623,7 @@ test('RED: physical service uses static CRT and rejects clean-VM runtime depende
 
   const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
   assert.match(source, /STATIC_CRT_RUSTFLAGS\s*=\s*'-C target-feature=\+crt-static'/u);
-  assert.match(
-    source,
-    /liiiraa-optimizer-service[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u,
-  );
+  assert.match(source, /liiiraa-optimizer-service[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u);
   const dependencyGateIndex = source.lastIndexOf('validateServiceRuntimeDependencies(');
   const signingIndex = source.indexOf('signAuthenticode(signtool, signer.thumbprint, path)');
   assert.ok(dependencyGateIndex >= 0 && dependencyGateIndex < signingIndex);
@@ -649,7 +646,10 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
   );
 
   const source = readFileSync('tooling/phase6-physical/build-artifact.mjs', 'utf8');
-  assert.match(source, /cargo[\s\S]{0,512}install[\s\S]{0,512}tauri-driver[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u);
+  assert.match(
+    source,
+    /cargo[\s\S]{0,512}install[\s\S]{0,512}tauri-driver[\s\S]{0,512}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u,
+  );
   assert.match(
     source,
     /@liiiraa\/desktop[\s\S]{0,512}'tauri'[\s\S]{0,256}'build'[\s\S]{0,768}RUSTFLAGS:\s*STATIC_CRT_RUSTFLAGS/u,
@@ -710,7 +710,9 @@ test('RED: installed-ready preserves service-only manifest custody and verifies 
   assert.match(installation, /FILE_ATTRIBUTE_REPARSE_POINT/u);
   assert.match(installation, /same_closed_windows_path/u);
 
-  const verifyStart = runner.lastIndexOf('fn verify_installed(&mut self, artifact: &ArtifactCustody)');
+  const verifyStart = runner.lastIndexOf(
+    'fn verify_installed(&mut self, artifact: &ArtifactCustody)',
+  );
   const verifyEnd = runner.indexOf('fn create_local_recovery_checkpoint', verifyStart);
   assert.ok(verifyStart >= 0 && verifyEnd > verifyStart);
   const verifyBody = runner.slice(verifyStart, verifyEnd);
@@ -1401,10 +1403,7 @@ test('MSI ProductVersion inspection is fixed to the typed read-only persistence 
   const source = readFileSync('apps/optimizer-service/src/installation_manifest.rs', 'utf8');
   assert.match(source, /MsiOpenDatabaseW\([\s\S]*MSIDBOPEN_READONLY/u);
   assert.doesNotMatch(source, /let\s+read_only\s*=\s*\[0_u16\]/u);
-  assert.doesNotMatch(
-    source,
-    /MSIDBOPEN_(?:DIRECT|TRANSACT|CREATE|CREATEDIRECT|PATCHFILE)/u,
-  );
+  assert.doesNotMatch(source, /MSIDBOPEN_(?:DIRECT|TRANSACT|CREATE|CREATEDIRECT|PATCHFILE)/u);
 });
 
 test('builder alone emits the three closed canonical run configs', () => {

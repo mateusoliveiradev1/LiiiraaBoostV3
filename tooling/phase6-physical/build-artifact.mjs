@@ -1578,21 +1578,25 @@ const buildAndSmoke = (options) => {
       ],
       { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
     );
-    run(process.execPath, [
-      pnpmCli,
-      '--filter',
-      '@liiiraa/desktop',
-      'exec',
-      'tauri',
-      'build',
-      '--no-bundle',
-      '--target',
-      'x86_64-pc-windows-msvc',
-      '--features',
-      'phase6-physical',
-      '--config',
-      effectivePhysicalProfileJson,
-    ]);
+    run(
+      process.execPath,
+      [
+        pnpmCli,
+        '--filter',
+        '@liiiraa/desktop',
+        'exec',
+        'tauri',
+        'build',
+        '--no-bundle',
+        '--target',
+        'x86_64-pc-windows-msvc',
+        '--features',
+        'phase6-physical',
+        '--config',
+        effectivePhysicalProfileJson,
+      ],
+      { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
+    );
 
     const release = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release');
     const built = {
