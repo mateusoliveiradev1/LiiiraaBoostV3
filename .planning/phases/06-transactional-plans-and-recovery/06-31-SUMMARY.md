@@ -569,3 +569,31 @@ inspection-only verifier returned `verified` for the same live bytes.
 | `configs/clean-windows-vm.run-config.json` | `d381c49499f9afc0c5d479833411e32f12cd879bdc572619cf3530a55c1115fe` | 1593 |
 | `phase6-physical-runner.exe` | `2c7bc13c0e71a6b79aba30a674fc82d1313978f1e4d3a8f642a17340f16da33c` | 7023912 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v65 PASSED
+
+The v58 clean-VM blocker and the v59-v64 build blockers remain immutable and were not reused.
+The causal TDD sequence closed PowerShell Direct readiness, clean-VM WebDriver diagnostics,
+static-CRT dependency custody, isolated runner ordering/path ownership, and finally the exact
+Tauri MSI payload binding. RED `bbe30b2` and GREEN `2282109` specifically proved that the signed
+static runner must replace the shared target consumed by Tauri and that all three extracted MSI
+runtime hashes must equal the signed installation manifest before lifecycle begins.
+
+The single monotonic v65 `build-and-smoke` then completed install, four broker connections,
+repair/update, rollback-failure drill, downgrade rejection, uninstall, and residual cleanup with
+lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/22821094de8c0a5fbbaf3b673e69d2b52d7a225a/physical-7304c595be0d094e-managed-power-scheme-v65`
+- **Build ID:** `physical-7304c595be0d094e-managed-power-scheme-v65`
+- **Operation version:** `managed-power-scheme-v65`
+- **Source commit:** `22821094de8c0a5fbbaf3b673e69d2b52d7a225a`
+- **Input tree:** `sha256:7304c595be0d094e6684b18db944f52b5778cf23b805d3a133a31d1ea65c29c0`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `d1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0` | 3240 |
+| `liiiraa-boost.msi` | `52c0b99529eb02f4456ad4a20cf3c683c81f9e15fb1ccad42f5a56122a201dcf` | 15826944 |
+| `configs/clean-windows-vm.run-config.json` | `618e32025fdf2072e0d48b3f1adb0ddbd3104099d7ce0b0e8d9d2e7e71ae3086` | 1593 |
+| `phase6-physical-runner.exe` | `5798f9ed20a16bc7a3189d3d411ad47ad8083d717cd598b27cc3cd29839b49b7` | 7140136 |
+| `tauri-driver.exe` | `81966845a635ca45c6c023ce3d8a6a81d068181f384c094cefbd506b00a13b29` | 1627944 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |

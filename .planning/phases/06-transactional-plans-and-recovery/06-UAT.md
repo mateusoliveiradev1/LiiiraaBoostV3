@@ -1281,3 +1281,23 @@ both physical blockers remain historical evidence; only the next monotonic versi
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v65` — ARTIFACT LIFECYCLE AND VERIFIER PASSED
+
+- **Physical provenance:** not yet claimed
+- **Human review:** not yet claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not yet claimed
+- **Artifact root:** `target/phase6-physical/22821094de8c0a5fbbaf3b673e69d2b52d7a225a/physical-7304c595be0d094e-managed-power-scheme-v65`
+- **Build ID:** `physical-7304c595be0d094e-managed-power-scheme-v65`
+- **Artifact manifest SHA-256:** `d1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0`
+- **Lifecycle:** PASSED; install, four broker connections, repair/update, rollback drill,
+  downgrade rejection, uninstall, and residual cleanup all passed
+- **MSI payload custody:** extracted desktop, service, and runner hashes matched the signed
+  installation manifest before lifecycle
+- **Fixed verifier:** `verified` for `managed-power-scheme-v65`
+
+The v58 clean-VM blocker and every v59-v64 build blocker remain append-only and were not reused.
+No v65 VM action, APPLY prompt, ingestion, or review has occurred at this boundary.
