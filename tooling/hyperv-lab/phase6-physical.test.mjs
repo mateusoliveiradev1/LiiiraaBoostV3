@@ -1064,6 +1064,32 @@ test('RED: late-visible installed checkpoint resumes only the exact pre-prompt v
   assert.doesNotMatch(source, /Remove-VMSnapshot/u);
 });
 
+test('RED: every PowerShell Direct readiness wait is bounded, auth-aware, and cleanup-safe', () => {
+  const source = readFileSync(bridgePath, 'utf8');
+  const waitStart = source.indexOf('function Wait-ExactVmReady');
+  const waitEnd = source.indexOf('function Copy-BoundedEvidenceAndIngest');
+  assert.ok(waitStart >= 0 && waitEnd > waitStart);
+  const waitBody = source.slice(waitStart, waitEnd);
+
+  assert.match(waitBody, /AddSeconds\(180\)/u);
+  assert.match(waitBody, /Start-Sleep\s+-Seconds\s+2/u);
+  assert.match(waitBody, /Test-IsGuestAuthenticationFailure/u);
+  assert.match(waitBody, /guest credential was rejected/iu);
+  assert.match(waitBody, /PowerShell Direct ready within 180 seconds/iu);
+  assert.doesNotMatch(waitBody, /AddSeconds\(60\)/u);
+
+  const cleanupStart = source.indexOf('function Stop-ExactVmAfterRun');
+  const cleanupEnd = source.indexOf('function Write-ApplyPromptReadyRecordOnce');
+  assert.ok(cleanupStart >= 0 && cleanupEnd > cleanupStart);
+  const cleanupBody = source.slice(cleanupStart, cleanupEnd);
+  assert.match(cleanupBody, /Get-VM\s+-Name\s+\$ExpectedVmName/u);
+  assert.match(cleanupBody, /Stop-VM\s+-Name\s+\$ExpectedVmName\s+-Force/u);
+  assert.match(cleanupBody, /AddSeconds\(120\)/u);
+
+  const executionBody = source.slice(source.indexOf('try {\n    Assert-ArtifactVerifierPass'));
+  assert.match(executionBody, /finally\s*\{[\s\S]*Stop-ExactVmAfterRun/u);
+});
+
 test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
   const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 2,
