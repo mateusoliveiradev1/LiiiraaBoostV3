@@ -597,3 +597,30 @@ lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for t
 | `phase6-physical-runner.exe` | `5798f9ed20a16bc7a3189d3d411ad47ad8083d717cd598b27cc3cd29839b49b7` | 7140136 |
 | `tauri-driver.exe` | `81966845a635ca45c6c023ce3d8a6a81d068181f384c094cefbd506b00a13b29` | 1627944 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v66 PASSED
+
+The v65 clean-VM recovery blocker `BLOCKED:guest-acl-cardinality` remains immutable. Causal
+TDD split portable custody into closed `staged` and `installed-ready` layouts, preserving exact
+cardinality and case-sensitive path checks while normalizing the two expected installed-ready
+runtime records to the protected ACL contract. RED `922d0203` and GREEN `a34efd18` prove the
+recovery path performs protected `Set` then `Assert` before revalidating installed-ready.
+
+The single monotonic v66 `build-and-smoke` completed install, four broker connections,
+repair/update, rollback-failure drill, downgrade rejection, uninstall, and residual cleanup with
+lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/a34efd18e38ac38463358ec989af4ed818ab4311/physical-7304c595be0d094e-managed-power-scheme-v66`
+- **Build ID:** `physical-7304c595be0d094e-managed-power-scheme-v66`
+- **Operation version:** `managed-power-scheme-v66`
+- **Source commit:** `a34efd18e38ac38463358ec989af4ed818ab4311`
+- **Input tree:** `sha256:7304c595be0d094e6684b18db944f52b5778cf23b805d3a133a31d1ea65c29c0`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `f5093c1e464ea8dd563197283a2bdb7cfac4c68f7f30d398f5e3d5dc76137f4f` | 3240 |
+| `liiiraa-boost.msi` | `32e8053ec17cf88e96737544acd8d1867362c0d3bca4e971d0674156fd2f6a2b` | 15826944 |
+| `configs/clean-windows-vm.run-config.json` | `1a095cada09fbc5742507d1aab7c2056ef16fe9b002c54daf2d357800e5f4975` | 1593 |
+| `phase6-physical-runner.exe` | `7a726e4fd1a02c1116a136aa96ff175bc0751ee738aea4da1f50c39d2ac87226` | 7140136 |
+| `tauri-driver.exe` | `9168e5c779341479097ea9e748507af0afd413b737c3d68e08622773769a576c` | 1627944 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
