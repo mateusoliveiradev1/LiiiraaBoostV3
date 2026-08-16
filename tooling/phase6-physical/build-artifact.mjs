@@ -1563,22 +1563,6 @@ const buildAndSmoke = (options) => {
       },
     );
     run(
-      'cargo',
-      [
-        'build',
-        '--release',
-        '--target',
-        'x86_64-pc-windows-msvc',
-        '-p',
-        'liiiraa-desktop',
-        '--bin',
-        'phase6-physical-runner',
-        '--features',
-        'phase6-physical',
-      ],
-      { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
-    );
-    run(
       process.execPath,
       [
         pnpmCli,
@@ -1597,12 +1581,36 @@ const buildAndSmoke = (options) => {
       ],
       { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
     );
+    const runnerTargetDir = join(workRoot, '.tools', 'runner-target');
+    run(
+      'cargo',
+      [
+        'build',
+        '--release',
+        '--target',
+        'x86_64-pc-windows-msvc',
+        '-p',
+        'liiiraa-desktop',
+        '--bin',
+        'phase6-physical-runner',
+        '--features',
+        'phase6-physical',
+        '--target-dir',
+        runnerTargetDir,
+      ],
+      { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
+    );
 
     const release = join(ROOT, 'target', 'x86_64-pc-windows-msvc', 'release');
     const built = {
       desktop: join(release, 'liiiraa-desktop.exe'),
       service: join(release, 'liiiraa-optimizer-service.exe'),
-      runner: join(release, 'phase6-physical-runner.exe'),
+      runner: join(
+        runnerTargetDir,
+        'x86_64-pc-windows-msvc',
+        'release',
+        'phase6-physical-runner.exe',
+      ),
     };
     for (const path of Object.values(built))
       if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
@@ -1629,7 +1637,6 @@ const buildAndSmoke = (options) => {
       run(dumpbin, ['/dependents', portableDrivers.tauriDriver], { capture: true }),
       'tauri-driver',
     );
-    rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
     signatures.tauriDriver = signAuthenticode(
       signtool,
       signer.thumbprint,
@@ -1641,6 +1648,7 @@ const buildAndSmoke = (options) => {
       portableDrivers.msedgeDriver,
     );
     copyFileSync(built.runner, join(workRoot, 'phase6-physical-runner.exe'));
+    rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
 
     const productCode = PHYSICAL_PRODUCT_CODE;
     const createdAt = new Date().toISOString();
