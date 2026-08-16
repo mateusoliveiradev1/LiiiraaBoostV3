@@ -670,7 +670,7 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
   );
   assert.match(
     source,
-    /validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner[\s\S]{0,512}built\.runner\s*=\s*portableRunner[\s\S]{0,256}rmSync\(runnerTargetDir/u,
+    /validateDependencyClosedRuntime\([\s\S]{0,256}portableRunner[\s\S]{0,512}built\.runner\s*=\s*portableRunner[\s\S]{0,1024}rmSync\(runnerTargetDir/u,
   );
   assert.match(
     source,

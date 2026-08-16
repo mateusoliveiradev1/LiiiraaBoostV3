@@ -146,6 +146,7 @@ const WINDOWS_POWERSHELL_MODULE_PATH = join(
   'v1.0',
   'Modules',
 );
+const WINDOWS_INSTALLER = join(SYSTEM_ROOT, 'System32', 'msiexec.exe');
 const PHYSICAL_CONFIG = 'apps/desktop/src-tauri/tauri.phase6-physical.conf.json';
 const WIX_FRAGMENT = 'apps/desktop/src-tauri/installer/optimizer-service.wxs';
 const LIFECYCLE_HELPER = 'tooling/phase6-physical/lifecycle-smoke.ps1';
@@ -1244,6 +1245,51 @@ export function validateMsiInspection(inspection, expected) {
   return true;
 }
 
+export function validateMsiPayloadHashes(payloadHashes, installationManifest) {
+  for (const { key } of INSTALLED_ROLES) {
+    if (payloadHashes?.[key] !== installationManifest?.files?.[key]?.sha256)
+      fail(`MSI payload ${key} hash does not match the signed installation manifest`);
+  }
+  return true;
+}
+
+const inspectMsiPayloadHashes = (msiPath, outputRoot, installationManifest) => {
+  const administrativeRoot = join(outputRoot, 'msi-payload-inspection');
+  const logPath = join(outputRoot, 'msi-payload-inspection.log');
+  if (existsSync(administrativeRoot) || existsSync(logPath))
+    fail('MSI payload inspection destination must be create-once');
+  let verified = false;
+  try {
+    run(WINDOWS_INSTALLER, [
+      '/a',
+      msiPath,
+      '/qn',
+      `TARGETDIR=${administrativeRoot}`,
+      '/l*v',
+      logPath,
+    ]);
+    const extracted = walkFiles(administrativeRoot);
+    const payloadHashes = Object.fromEntries(
+      INSTALLED_ROLES.map(({ key, path }) => {
+        const matches = extracted.filter(
+          (candidate) => basename(candidate).toLowerCase() === path.toLowerCase(),
+        );
+        if (matches.length !== 1)
+          fail(`MSI payload ${key} must extract exactly one canonical runtime`);
+        return [key, sha256(readFileSync(matches[0]))];
+      }),
+    );
+    validateMsiPayloadHashes(payloadHashes, installationManifest);
+    verified = true;
+    return payloadHashes;
+  } finally {
+    if (verified) {
+      rmSync(administrativeRoot, { recursive: true, force: true });
+      rmSync(logPath, { force: true });
+    }
+  }
+};
+
 const normalizedMsiGuid = (value) =>
   String(value || '')
     .replace(/[{}]/gu, '')
@@ -1657,6 +1703,14 @@ const buildAndSmoke = (options) => {
       'final-runner',
     );
     built.runner = portableRunner;
+    const tauriBundleRunner = join(release, 'phase6-physical-runner.exe');
+    copyFileSync(built.runner, tauriBundleRunner);
+    validateDependencyClosedRuntime(
+      run(dumpbin, ['/dependents', tauriBundleRunner], { capture: true }),
+      'tauri-bundle-runner',
+    );
+    if (sha256(readFileSync(tauriBundleRunner)) !== sha256(readFileSync(built.runner)))
+      fail('Tauri bundler runner input does not retain the signed static runner bytes');
     rmSync(runnerTargetDir, { recursive: true, force: true });
     runnerTargetDir = null;
     rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
@@ -1724,6 +1778,7 @@ const buildAndSmoke = (options) => {
     setMsiProductCode(msiPath, productCode);
     const msiInspection = inspectMsi(msiPath);
     validateMsiInspection(msiInspection, { productCode, packageVersion });
+    inspectMsiPayloadHashes(msiPath, workRoot, installationManifest);
     signatures.msi = signAuthenticode(signtool, signer.thumbprint, msiPath);
 
     const configs = buildCanonicalRunConfigs({ operationVersionId, buildId, sourceCommit });
