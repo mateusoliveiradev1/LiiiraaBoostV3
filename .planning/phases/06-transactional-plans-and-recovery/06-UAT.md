@@ -1187,3 +1187,39 @@ subsequent reservation. The immutable v55 attempt was not reused.
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v57` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v57`
+- **Artifact manifest SHA-256:** `4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3`
+- **Run evidence SHA-256:** `62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762`
+- **Evidence manifest SHA-256:** `0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v57",
+  "buildId": "physical-9f5464923978c943-managed-power-scheme-v57",
+  "artifactManifestSha256": "4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3",
+  "runEvidenceSha256": "62aa6c83e3bd32022d238e75121f93ef2664712c707ed9ba29929b92cc59f762",
+  "evidenceManifestSha256": "0f1deb2d1fa9e15044fa11f30cee8143a464dc896068de7117146d2480f5d0a1",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
