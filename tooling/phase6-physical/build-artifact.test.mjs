@@ -655,7 +655,7 @@ test('RED: every clean-VM Rust executable is dependency-closed before signing', 
     assert.match(
       source,
       new RegExp(
-        `validateDependencyClosedRuntime\\(run\\(dumpbin,[\\s\\S]{0,160}${runtime.replace('.', '\\.')}`,
+        `validateDependencyClosedRuntime\\(\\s*run\\(dumpbin,[\\s\\S]{0,160}${runtime.replace('.', '\\.')}`,
         'u',
       ),
     );

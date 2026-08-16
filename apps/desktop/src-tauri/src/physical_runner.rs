@@ -1652,7 +1652,9 @@ fn webdriver_diagnostic(
 ) -> WebDriverDiagnosticSidecar {
     let mut classified = String::from_utf8_lossy(stdout).to_lowercase();
     classified.push_str(&String::from_utf8_lossy(stderr).to_lowercase());
-    let detail_code = if classified.contains("only supports microsoft edge version")
+    let detail_code = if process_exit_code == Some(-1_073_741_515) {
+        "dll-not-found"
+    } else if classified.contains("only supports microsoft edge version")
         || classified.contains("version of msedgedriver") && classified.contains("not compatible")
     {
         "native-driver-version-mismatch"
@@ -2164,9 +2166,11 @@ mod custody_failure_code_tests {
         );
         assert_eq!(diagnostic.detail_code, "dll-not-found");
         assert_eq!(diagnostic.process_exit_code, Some(-1_073_741_515));
-        assert!(!serde_json::to_string(&diagnostic)
-            .expect("safe sidecar should serialize")
-            .contains("C:\\Users"));
+        assert!(
+            !serde_json::to_string(&diagnostic)
+                .expect("safe sidecar should serialize")
+                .contains("C:\\Users")
+        );
     }
 
     #[test]

@@ -1692,7 +1692,7 @@ function Resolve-WebDriverSidecarSummary {
         $stage -cnotin @('clean-windows-vm', 'owner-pc', 'friends-pc', 'reboot-pending', 'completed', 'unknown') -or
         $errorCode -cne 'webdriver-exited' -or
         $FailureCode -cne 'BLOCKED:webdriver-exited' -or
-        $detailCode -cnotin @('native-driver-version-mismatch', 'access-denied', 'loopback-port-conflict', 'native-driver-launch', 'output-truncated', 'other') -or
+        $detailCode -cnotin @('dll-not-found', 'native-driver-version-mismatch', 'access-denied', 'loopback-port-conflict', 'native-driver-launch', 'output-truncated', 'other') -or
         ($null -ne $exitCode -and ($exitCode -lt -2147483648 -or $exitCode -gt 2147483647)) -or
         $tauriVersion -cnotmatch $versionPattern -or $nativeVersion -cnotmatch $versionPattern -or
         ($null -ne $runtimeVersion -and $runtimeVersion -cnotmatch $versionPattern) -or
@@ -1834,7 +1834,7 @@ function Invoke-ExactGuestRunner {
                 $installedCustodySidecarSizeBytes = $null
             }
         }
-        $webDriverSidecar = $null
+        $webDriverSidecarJson = $null
         $webDriverSidecarStatus = 'sidecar-missing'
         $webDriverSidecarSha256 = $null
         $webDriverSidecarSizeBytes = $null
@@ -1845,7 +1845,8 @@ function Invoke-ExactGuestRunner {
                     throw 'webdriver sidecar bounds'
                 }
                 $webDriverSidecarBytes = [IO.File]::ReadAllBytes($webDriverSidecarPath)
-                $webDriverSidecar = [Text.Encoding]::UTF8.GetString($webDriverSidecarBytes) | ConvertFrom-Json -ErrorAction Stop
+                $webDriverSidecarJson = [Text.Encoding]::UTF8.GetString($webDriverSidecarBytes)
+                $null = $webDriverSidecarJson | ConvertFrom-Json -ErrorAction Stop
                 $webDriverSidecarHasher = [Security.Cryptography.SHA256]::Create()
                 try {
                     $webDriverSidecarSha256 = 'sha256:' + ([BitConverter]::ToString($webDriverSidecarHasher.ComputeHash($webDriverSidecarBytes))).Replace('-', '').ToLowerInvariant()
@@ -1857,7 +1858,7 @@ function Invoke-ExactGuestRunner {
                 $webDriverSidecarStatus = 'present'
             }
             catch {
-                $webDriverSidecar = $null
+                $webDriverSidecarJson = $null
                 $webDriverSidecarStatus = 'sidecar-unparseable'
                 $webDriverSidecarSha256 = $null
                 $webDriverSidecarSizeBytes = $null
@@ -1876,7 +1877,7 @@ function Invoke-ExactGuestRunner {
             InstalledCustodySidecarStatus = $installedCustodySidecarStatus
             InstalledCustodySidecarSha256 = $installedCustodySidecarSha256
             InstalledCustodySidecarSizeBytes = $installedCustodySidecarSizeBytes
-            WebDriverSidecar = $webDriverSidecar
+            WebDriverSidecarJson = $webDriverSidecarJson
             WebDriverSidecarStatus = $webDriverSidecarStatus
             WebDriverSidecarSha256 = $webDriverSidecarSha256
             WebDriverSidecarSizeBytes = $webDriverSidecarSizeBytes
@@ -1903,8 +1904,14 @@ function Invoke-ExactGuestRunner {
                 -FailureCode $diagnostic.RunnerFailureCode
         }
         if ($diagnostic.RunnerFailureCode -ceq 'BLOCKED:webdriver-exited') {
+            $webDriverSidecar = if ($null -eq $response.WebDriverSidecarJson) {
+                $null
+            }
+            else {
+                [string]$response.WebDriverSidecarJson | ConvertFrom-Json -ErrorAction Stop
+            }
             $script:WebDriverDiagnostic = Resolve-WebDriverSidecarSummary `
-                -Sidecar $response.WebDriverSidecar `
+                -Sidecar $webDriverSidecar `
                 -SidecarStatus ([string]$response.WebDriverSidecarStatus) `
                 -SidecarSha256 $response.WebDriverSidecarSha256 `
                 -SidecarSizeBytes $response.WebDriverSidecarSizeBytes `

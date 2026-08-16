@@ -35,6 +35,7 @@ try {
     if ($item.Length -le 0 -or $item.Length -gt 16MB) { throw 'BLOCKED:diagnostic-build-bounds' }
 
     $stage = 'dumpbin'
+    $forbiddenRuntimePattern = 'vcruntime|msvcp|ucrtbase|api-ms-win-crt-'
     $dumpbin = Get-ChildItem -LiteralPath $visualStudioRoot -Directory -ErrorAction Stop |
         Sort-Object Name |
         ForEach-Object {
@@ -62,7 +63,6 @@ try {
         Where-Object { $_ -match '^[a-z0-9._-]+\.dll$' } |
         Sort-Object -Unique)
     if ($dependencies -cnotcontains 'kernel32.dll') { throw 'BLOCKED:diagnostic-dependency-set-invalid' }
-    $forbiddenRuntimePattern = 'vcruntime|msvcp|ucrtbase|api-ms-win-crt-'
     if (@($dependencies | Where-Object { $_ -match ('^(' + $forbiddenRuntimePattern + ')') }).Count -ne 0) {
         throw 'BLOCKED:diagnostic-dynamic-crt'
     }

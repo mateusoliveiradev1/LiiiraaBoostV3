@@ -733,9 +733,9 @@ const findDumpbin = () => {
   return null;
 };
 
-export function validateServiceRuntimeDependencies(output) {
+export function validateDependencyClosedRuntime(output, label = 'runtime') {
   if (typeof output !== 'string' || output.length === 0 || output.length > 256 * 1024)
-    fail('service dependency inspection output is missing or exceeds fixed bounds');
+    fail(`${label} dependency inspection output is missing or exceeds fixed bounds`);
   const dependencies = [
     ...new Set(
       output
@@ -745,14 +745,41 @@ export function validateServiceRuntimeDependencies(output) {
     ),
   ].sort();
   if (dependencies.length === 0 || !dependencies.includes('kernel32.dll'))
-    fail('service dependency inspection did not expose a bounded Windows import set');
+    fail(`${label} dependency inspection did not expose a bounded Windows import set`);
   const dynamicCrt = dependencies.filter(
-    (name) =>
-      /^(?:vcruntime|msvcp|ucrtbase)/u.test(name) || name.startsWith('api-ms-win-crt-'),
+    (name) => /^(?:vcruntime|msvcp|ucrtbase)/u.test(name) || name.startsWith('api-ms-win-crt-'),
   );
   if (dynamicCrt.length > 0)
-    fail(`service retains forbidden dynamic CRT dependencies: ${dynamicCrt.join(', ')}`);
+    fail(`${label} retains forbidden dynamic CRT dependencies: ${dynamicCrt.join(', ')}`);
+  const allowedSystemDlls = new Set([
+    'advapi32.dll',
+    'bcrypt.dll',
+    'bcryptprimitives.dll',
+    'combase.dll',
+    'crypt32.dll',
+    'kernel32.dll',
+    'msi.dll',
+    'ntdll.dll',
+    'ole32.dll',
+    'oleaut32.dll',
+    'powrprof.dll',
+    'sfc.dll',
+    'shell32.dll',
+    'version.dll',
+    'winhttp.dll',
+    'wintrust.dll',
+    'ws2_32.dll',
+  ]);
+  const nonSystem = dependencies.filter(
+    (name) => !allowedSystemDlls.has(name) && !name.startsWith('api-ms-win-core-'),
+  );
+  if (nonSystem.length > 0)
+    fail(`${label} retains non-system dependencies: ${nonSystem.join(', ')}`);
   return dependencies;
+}
+
+export function validateServiceRuntimeDependencies(output) {
+  return validateDependencyClosedRuntime(output, 'service');
 }
 
 const powershellJson = (script) => {
@@ -1004,18 +1031,26 @@ export function validateTauriDriverInstallReceipt(receipt, executableName = 'tau
   };
 }
 
-const locateTauriDriver = () => {
-  const candidates = [
-    join(process.env.USERPROFILE || '', '.cargo', 'bin', 'tauri-driver.exe'),
-    join(ROOT, 'target', 'phase6-tools', 'bin', 'tauri-driver.exe'),
-  ];
-  const path = candidates.find((candidate) => candidate && existsSync(candidate));
-  if (!path)
-    fail(
-      'tauri-driver 2.0.6 is unavailable; install the approved exact release before the physical build',
-    );
-  const receiptPath = join(dirname(dirname(path)), '.crates2.json');
-  if (!existsSync(receiptPath)) fail('tauri-driver Cargo install receipt is unavailable');
+const buildTauriDriver = (installRoot) => {
+  run(
+    'cargo',
+    [
+      'install',
+      'tauri-driver',
+      '--version',
+      TAURI_DRIVER_CARGO_INSTALL_RECEIPT.versionRequirement,
+      '--locked',
+      '--root',
+      installRoot,
+      '--target',
+      'x86_64-pc-windows-msvc',
+    ],
+    { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
+  );
+  const path = join(installRoot, 'bin', TAURI_DRIVER_CARGO_INSTALL_RECEIPT.binaryName);
+  const receiptPath = join(installRoot, '.crates2.json');
+  if (!existsSync(path) || !existsSync(receiptPath))
+    fail('dependency-closed tauri-driver build or Cargo install receipt is unavailable');
   const provenance = validateTauriDriverInstallReceipt(
     JSON.parse(readFileSync(receiptPath, 'utf8')),
     basename(path),
@@ -1505,7 +1540,8 @@ const buildAndSmoke = (options) => {
     );
     mkdirSync(join(workRoot, 'configs'), { recursive: true });
 
-    const tauriDriverSource = locateTauriDriver();
+    const tauriDriverInstallRoot = join(workRoot, '.tools', 'tauri-driver');
+    const tauriDriverSource = buildTauriDriver(tauriDriverInstallRoot);
     const msedgeDriverSource = locateMsEdgeDriver();
     const pnpmCli = locatePnpmCli();
     run(
@@ -1526,18 +1562,22 @@ const buildAndSmoke = (options) => {
         },
       },
     );
-    run('cargo', [
-      'build',
-      '--release',
-      '--target',
-      'x86_64-pc-windows-msvc',
-      '-p',
-      'liiiraa-desktop',
-      '--bin',
-      'phase6-physical-runner',
-      '--features',
-      'phase6-physical',
-    ]);
+    run(
+      'cargo',
+      [
+        'build',
+        '--release',
+        '--target',
+        'x86_64-pc-windows-msvc',
+        '-p',
+        'liiiraa-desktop',
+        '--bin',
+        'phase6-physical-runner',
+        '--features',
+        'phase6-physical',
+      ],
+      { env: { ...process.env, RUSTFLAGS: STATIC_CRT_RUSTFLAGS } },
+    );
     run(process.execPath, [
       pnpmCli,
       '--filter',
@@ -1562,7 +1602,14 @@ const buildAndSmoke = (options) => {
     };
     for (const path of Object.values(built))
       if (!existsSync(path)) fail(`release runtime is missing: ${path}`);
-    validateServiceRuntimeDependencies(run(dumpbin, ['/dependents', built.service], { capture: true }));
+    validateDependencyClosedRuntime(
+      run(dumpbin, ['/dependents', built.service], { capture: true }),
+      'service',
+    );
+    validateDependencyClosedRuntime(
+      run(dumpbin, ['/dependents', built.runner], { capture: true }),
+      'runner',
+    );
     patchTauriBundleTypeForMsi(built.desktop);
     const signatures = {};
     for (const [key, path] of Object.entries(built))
@@ -1574,6 +1621,11 @@ const buildAndSmoke = (options) => {
     };
     copyFileSync(tauriDriverSource.path, portableDrivers.tauriDriver);
     copyFileSync(msedgeDriverSource, portableDrivers.msedgeDriver);
+    validateDependencyClosedRuntime(
+      run(dumpbin, ['/dependents', portableDrivers.tauriDriver], { capture: true }),
+      'tauri-driver',
+    );
+    rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
     signatures.tauriDriver = signAuthenticode(
       signtool,
       signer.thumbprint,
