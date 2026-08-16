@@ -432,7 +432,7 @@ const assertSourcePolicy = (source) => {
   );
   assert.doesNotMatch(runtime, /C:\\LiiiraaBoost\\Phase6\\physical-/u);
 
-  assert.match(source, /ValidateSet\('Audit',\s*'RunCleanVm'\)/u);
+  assert.match(source, /ValidateSet\('Audit',\s*'RunCleanVm',\s*'RecoverInstalledVm'\)/u);
   assert.match(
     source,
     /phase6-physical-runner\.exe --run-config configs\\clean-windows-vm\.run-config\.json/u,
@@ -472,7 +472,7 @@ const assertSourcePolicy = (source) => {
   ]);
 };
 
-test('RED: dedicated bridge exposes only exact Audit and RunCleanVm authority', () => {
+test('RED: dedicated bridge exposes only exact Audit, clean run, and installed recovery authority', () => {
   assertSourcePolicy(bridgeSource());
 });
 
@@ -1050,13 +1050,20 @@ test('RED: MSI failure summary decodes bounded UTF-16LE and preserves byte ident
   });
 });
 
-test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary', () => {
+test('RED: visible apply confirmation is bounded and durably accepted before mutation', () => {
   const source = bridgeSource();
   for (const literal of [
     'Write-ApplyPromptReadyRecordOnce',
+    'Invoke-VisibleApplyConfirmation',
+    'Write-ApplyAcceptedRecordOnce',
     'apply-prompt-ready',
+    'apply-accepted-before-mutation',
     'FileMode]::CreateNew',
     'PHASE6_APPLY_PROMPT_READY',
+    'PHASE6_APPLY_ACCEPTED',
+    'System.Windows.Forms',
+    'TopMost',
+    'AddMinutes(10)',
   ]) {
     assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
   }
@@ -1064,24 +1071,60 @@ test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary',
     'Write-CheckpointReadyRecordOnce',
     'Write-ApplyPromptReadyRecordOnce',
     'PHASE6_APPLY_PROMPT_READY',
-    'Read-Host',
+    'Invoke-VisibleApplyConfirmation',
+    'Write-ApplyAcceptedRecordOnce',
+    'PHASE6_APPLY_ACCEPTED',
+    "-Stage 'reboot-pending'",
   ]);
   assert.match(
     source,
     /kind\s*=\s*'phase6-apply-prompt-ready'[\s\S]*operationVersion\s*=\s*\$ExpectedOperationVersion[\s\S]*buildId\s*=\s*\$ExpectedBuildId/u,
   );
+  assert.match(
+    source,
+    /kind\s*=\s*'phase6-apply-accepted-before-mutation'[\s\S]*promptReadySha256[\s\S]*installedCheckpointId/u,
+  );
+  const runBody = source.slice(
+    source.indexOf('function Invoke-CleanVmRun'),
+    source.indexOf('Assert-ExactInvocation\n'),
+  );
+  assert.doesNotMatch(runBody, /Read-Host/u);
 });
 
-test('RED: v65 refuses every superseded installed checkpoint before clean execution', () => {
+test('RED: v65 recovery restores only the exact installed checkpoint and revalidates before approval', () => {
   const source = readFileSync(bridgePath, 'utf8');
-  assert.doesNotMatch(source, /Resolve-LateVisibleInstalledCheckpointRecovery/u);
-  assert.doesNotMatch(source, /ExpectedLateVisibleCheckpointBlocker|LateVisibleInstalledCheckpoint/u);
-  const auditBody = source.slice(
-    source.indexOf('function Assert-ExactHyperVAudit'),
-    source.indexOf('function Wait-ExactIntegrationServicesHealthy'),
+  for (const literal of [
+    'adea1580-a076-40f9-8bb2-2458701f47ac',
+    '16fa3d1c36f5b0d904b330a148e9a0d82ebc71a5e56d8e7f4ca7af6afd8c3ce9',
+    'c3b8f85bac7002bbc7880c45cd2c5c83f2dc4acd420ea8c201fa81b551b04bcf',
+    '33dbb3ef5535161d245b5862edeec9ea2b5a2f8ed779c6fe3e41b396f436c401',
+    'Assert-ExactInstalledRecoveryPreflight',
+    'Invoke-InstalledVmRecovery',
+    'RECOVERY-APPLY-PROMPT-READY',
+    'RECOVERY-APPLY-ACCEPTED',
+  ]) {
+    assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  const recoveryBody = source.slice(
+    source.indexOf('function Invoke-InstalledVmRecovery'),
+    source.indexOf('Assert-ExactInvocation\n'),
   );
-  assert.match(auditBody, /installed checkpoint must remain absent before clean-VM execution/iu);
-  assert.doesNotMatch(auditBody, /Resolve-LateVisibleInstalledCheckpointRecovery/u);
+  assertInOrder(recoveryBody, [
+    'Assert-ExactInstalledRecoveryPreflight',
+    'Restore-VMSnapshot',
+    'Start-VM',
+    'Wait-ExactVmReady',
+    'Assert-ExactGuestArtifactCustody',
+    'Assert-InstalledReadyRecord',
+    'Write-CheckpointReadyRecordOnce',
+    'Write-RecoveryApplyPromptReadyRecordOnce',
+    'Invoke-VisibleApplyConfirmation',
+    'Write-ApplyAcceptedRecordOnce',
+    "-Stage 'reboot-pending'",
+  ]);
+  assert.doesNotMatch(recoveryBody, /Copy-ExactArtifactToGuest/u);
+  assert.doesNotMatch(recoveryBody, /Invoke-ExactGuestRunner[^\n]*-Stage\s+'installed-ready'/u);
+  assert.match(source, /finally\s*\{[\s\S]*\$Action\s+-in\s+@\('RunCleanVm',\s*'RecoverInstalledVm'\)[\s\S]*Stop-ExactVmAfterRun/u);
   assert.doesNotMatch(source, /Remove-VMSnapshot/u);
 });
 
@@ -1172,7 +1215,7 @@ test('dry-run audits the exact immutable v65 tuple without elevation or mutation
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
-  assert.deepEqual(report.actions, ['Audit', 'RunCleanVm']);
+  assert.deepEqual(report.actions, ['Audit', 'RunCleanVm', 'RecoverInstalledVm']);
   assert.equal(report.mode, 'dry-run');
   assert.equal(report.vmName, exactVm);
   assert.equal(report.cleanCheckpoint, cleanCheckpoint);
