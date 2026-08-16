@@ -1041,6 +1041,29 @@ test('RED: apply prompt is preceded by a durable bounded prompt-ready boundary',
   );
 });
 
+test('RED: late-visible installed checkpoint resumes only the exact pre-prompt v57 boundary', () => {
+  const source = readFileSync(bridgePath, 'utf8');
+  for (const literal of [
+    'Resolve-LateVisibleInstalledCheckpointRecovery',
+    'managed-power-scheme-v57-APPLY-PROMPT-READY.json',
+    'installed-ready-verified',
+    'late-visible-installed-checkpoint-recovered',
+    'AddSeconds(30)',
+  ]) {
+    assert.match(source, new RegExp(literal.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  assert.match(source, /CreationTime[\s\S]*TotalSeconds[\s\S]*-gt 5/u);
+  assertInOrder(source, [
+    'Resolve-LateVisibleInstalledCheckpointRecovery',
+    'Restore-VMSnapshot -VMName $ExpectedVmName -Name $ExpectedInstalledCheckpoint',
+    "State = 'InstalledReady'",
+    'Write-CheckpointReadyRecordOnce',
+    'Write-ApplyPromptReadyRecordOnce',
+    'Read-Host',
+  ]);
+  assert.doesNotMatch(source, /Remove-VMSnapshot/u);
+});
+
 test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
   const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 2,
