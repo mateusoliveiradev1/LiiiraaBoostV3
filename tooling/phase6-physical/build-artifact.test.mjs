@@ -642,6 +642,39 @@ test('RED: installed admission is readable without exposing service-only storage
   assert.doesNotMatch(runner, /installed-custody-\{.*detail/iu);
 });
 
+test('RED: installed-ready preserves service-only manifest custody and verifies the fixed runner sibling', () => {
+  const artifact = readFileSync('apps/optimizer-service/src/artifact_manifest.rs', 'utf8');
+  const installation = readFileSync('apps/optimizer-service/src/installation_manifest.rs', 'utf8');
+  const runner = readFileSync('apps/desktop/src-tauri/src/physical_runner.rs', 'utf8');
+  const wix = readFileSync('apps/desktop/src-tauri/installer/optimizer-service.wxs', 'utf8');
+
+  assert.match(artifact, /installed_runner_identity/u);
+  assert.match(installation, /resolve_installed_runtime_sibling/u);
+  assert.match(installation, /known_program_files[\s\S]{0,768}canonicalize[\s\S]{0,768}join/u);
+  assert.match(installation, /FILE_ATTRIBUTE_REPARSE_POINT/u);
+  assert.match(installation, /same_closed_windows_path/u);
+
+  const verifyStart = runner.indexOf('fn verify_installed(&mut self, artifact: &ArtifactCustody)');
+  const verifyEnd = runner.indexOf('fn create_local_recovery_checkpoint', verifyStart);
+  assert.ok(verifyStart >= 0 && verifyEnd > verifyStart);
+  const verifyBody = runner.slice(verifyStart, verifyEnd);
+  assert.doesNotMatch(verifyBody, /verify_installed_manifest/u);
+  assert.match(verifyBody, /resolve_installed_runtime_sibling/u);
+  assert.match(verifyBody, /installed_runner_relative_path/u);
+  assert.match(verifyBody, /hash_file/u);
+
+  for (const fileId of ['InstallationManifestFile', 'InstallationManifestSignatureFile']) {
+    const marker = `Id="${fileId}"`;
+    const start = wix.indexOf(marker);
+    const end = wix.indexOf('</File>', start);
+    assert.ok(start >= 0 && end > start);
+    const fileBody = wix.slice(start, end);
+    assert.match(fileBody, /\(A;;FA;;;SY\)/u);
+    assert.match(fileBody, /S-1-5-80-2609031853-1645808008-1428639046-3057950850-171131564/u);
+    assert.doesNotMatch(fileBody, /;;;(?:IU|BU)\)/u);
+  }
+});
+
 test('physical lifecycle proves the installed desktop owns a read-only broker lease across reconnect', () => {
   const lifecycle = readFileSync('tooling/phase6-physical/lifecycle-smoke.ps1', 'utf8');
   const desktop = readFileSync('apps/desktop/src-tauri/src/main.rs', 'utf8');
