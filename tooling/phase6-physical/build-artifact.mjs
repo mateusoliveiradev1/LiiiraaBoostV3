@@ -1656,6 +1656,7 @@ const buildAndSmoke = (options) => {
       run(dumpbin, ['/dependents', portableRunner], { capture: true }),
       'final-runner',
     );
+    built.runner = portableRunner;
     rmSync(runnerTargetDir, { recursive: true, force: true });
     runnerTargetDir = null;
     rmSync(join(workRoot, '.tools'), { recursive: true, force: true });
