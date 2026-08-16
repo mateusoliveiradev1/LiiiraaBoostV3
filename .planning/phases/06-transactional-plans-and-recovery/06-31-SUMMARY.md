@@ -522,3 +522,27 @@ The single monotonic v56 `build-and-smoke` completed the full lifecycle with sta
 | `configs/clean-windows-vm.run-config.json` | `2632e956ff1f0b145312ad696cdaf2bc7502c7dd17a2aee9bfdea3701017892f` | 1593 |
 | `phase6-physical-runner.exe` | `081e7328466fb6c724401a5ad1525b357e0ea1847e786b3990ce01cd62215524` | 7018792 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v57 PASSED
+
+The v56 clean-VM attempt remains immutably BLOCKED and was not relaunched. The first v57 build
+attempt stopped before reservation or publication because Windows PowerShell 5.1 inherited an
+incompatible PowerShell 7 module path. RED `82a47d0` and GREEN `9e3001c` pinned every signing,
+ACL, MSI, and lifecycle helper to the inbox executable and inbox module root. No artifact identity
+was minted by that blocked preflight.
+
+The single monotonic v57 `build-and-smoke` then completed the full lifecycle with status `PASSED`:
+
+- **Root:** `target/phase6-physical/9e3001ca2f9f50154696c8aca86c4d7f5284b988/physical-9f5464923978c943-managed-power-scheme-v57`
+- **Build ID:** `physical-9f5464923978c943-managed-power-scheme-v57`
+- **Operation version:** `managed-power-scheme-v57`
+- **Source commit:** `9e3001ca2f9f50154696c8aca86c4d7f5284b988`
+- **Input tree:** `sha256:9f5464923978c943039c27b5338f768cd940022806d0153c6c0b307770a9d354`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `4f291830874f31250147726467a1ce66e500d6657e0f4229124f280f1abd0cb3` | 3241 |
+| `liiiraa-boost.msi` | `89bd2db2d23e9cbda40f6a0c1b69a0c81186079b607293ffd8a5d3194ac4a129` | 15765504 |
+| `configs/clean-windows-vm.run-config.json` | `7d89b256c877e5da0799eee4547954abe9d5981e31ad93078ee9af0fe1d99509` | 1593 |
+| `phase6-physical-runner.exe` | `5b3f59c43957deec430c8c43002c8729ac7fde2c84500cd76bad4f94bee3f7c7` | 7023912 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
