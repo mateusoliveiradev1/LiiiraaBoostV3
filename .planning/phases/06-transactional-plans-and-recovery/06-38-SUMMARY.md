@@ -329,3 +329,10 @@ There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain
 - The active v68 run binds the immutable v67 predecessor; v67's evidence manifest moved unchanged to `records/superseded/managed-power-scheme-v67-evidence-manifest.json`. Current evidence manifest SHA-256: `f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b`.
 - This admission remains deterministic-only: no physical provenance, human approval, or owner/friends consent is claimed.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.
+
+## Append-Only Deterministic Authority Update — v69
+
+- `managed-power-scheme-v69` is the sole active deterministic admission for build `physical-5a94c1dc1ae583b7-managed-power-scheme-v69`, artifact manifest SHA-256 `600d63bf5c593d80200f1957c5f8da8c4712aaf23235ff26b61a761c92bb6596`, and run evidence SHA-256 `8948c5e4380f4038d5fada4b6cc1bbe458372c3d1c5506ea46398de1a157d085`.
+- The active v69 run binds the immutable v68 predecessor; v68's evidence manifest moved unchanged to `records/superseded/managed-power-scheme-v68-evidence-manifest.json`, SHA-256 `f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b`.
+- Current evidence manifest SHA-256 is `31ef01239e6ffc58a6c2e919764d8ba175191be80c6d692d20eb218782c6a398`; no physical provenance, human approval, or owner/friends consent is claimed.
+- The completed simulation command returned highest stage `deterministic-simulation`; all physical stages remain pending.

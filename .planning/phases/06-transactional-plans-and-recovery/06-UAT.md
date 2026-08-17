@@ -1440,3 +1440,39 @@ both physical blockers remain historical evidence; only the next monotonic versi
 - The bounded raw-free heartbeat identifies inner stage `webdriver-launch`; no raw WebDriver output, terminal physical evidence, or review was manufactured.
 - Cleanup-only evidence proves VM `Off`; installed checkpoint GUID `84635905-a816-4b4e-9cdd-acb05b3c1dbf` and all evidence remain preserved. v68 is terminal and must not be retried.
 - Causal RED `273ff42c` / GREEN `96882498` replace EOF waiting with a strict-cap `PeekNamedPipe` snapshot for the next monotonic artifact.
+
+---
+
+## Operation `managed-power-scheme-v69` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v69`
+- **Artifact manifest SHA-256:** `600d63bf5c593d80200f1957c5f8da8c4712aaf23235ff26b61a761c92bb6596`
+- **Run evidence SHA-256:** `8948c5e4380f4038d5fada4b6cc1bbe458372c3d1c5506ea46398de1a157d085`
+- **Evidence manifest SHA-256:** `31ef01239e6ffc58a6c2e919764d8ba175191be80c6d692d20eb218782c6a398`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v69",
+  "buildId": "physical-5a94c1dc1ae583b7-managed-power-scheme-v69",
+  "artifactManifestSha256": "600d63bf5c593d80200f1957c5f8da8c4712aaf23235ff26b61a761c92bb6596",
+  "runEvidenceSha256": "8948c5e4380f4038d5fada4b6cc1bbe458372c3d1c5506ea46398de1a157d085",
+  "evidenceManifestSha256": "31ef01239e6ffc58a6c2e919764d8ba175191be80c6d692d20eb218782c6a398",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
