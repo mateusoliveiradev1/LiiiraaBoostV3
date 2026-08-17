@@ -1278,6 +1278,43 @@ test('RED: every guest runner stage has nested deadlines and bounded durable bou
   assert.doesNotMatch(runnerBody, /rawOutput\s*=/iu);
 });
 
+test('RED: guest timeout ingests an atomic allowlisted inner runner heartbeat', () => {
+  const bridge = readFileSync(bridgePath, 'utf8');
+  const runner = readFileSync(
+    join(root, 'apps/desktop/src-tauri/src/physical_runner.rs'),
+    'utf8',
+  );
+  for (const stage of [
+    'webdriver-launch',
+    'webdriver-ready',
+    'plan-compose',
+    'plan-approve',
+    'apply-dispatch',
+    'apply-observe',
+    'subscribe-record',
+  ]) {
+    assert.match(runner, new RegExp(`RunnerInnerStage::${stage.replace(/-([a-z])/gu, (_, c) => c.toUpperCase()).replace(/^./u, (c) => c.toUpperCase())}`, 'u'));
+  }
+  for (const marker of [
+    'runner-stage.safe.json',
+    'MOVEFILE_REPLACE_EXISTING',
+    'MOVEFILE_WRITE_THROUGH',
+    'raw_output_captured: false',
+    'MAX_RUNNER_HEARTBEAT_BYTES',
+  ]) {
+    assert.match(runner, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  for (const marker of [
+    'Read-RunnerStageHeartbeatDiagnostic',
+    '$RunnerStageDiagnostic',
+    'runnerStageDiagnostic = $RunnerStageDiagnostic',
+    'BLOCKED:runner-stage-heartbeat',
+    'rawOutputCaptured',
+  ]) {
+    assert.match(bridge, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+});
+
 test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
   const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 2,
