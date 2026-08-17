@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-08-17T02:20:05.614Z",
+  "phase": "06",
+  "phase_name": "transactional-plans-and-recovery",
+  "phase_dir": ".planning/phases/06-transactional-plans-and-recovery",
+  "plan": 26,
+  "task": 1,
+  "total_tasks": 3,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": 1,
+      "name": "Causal WebDriver inherited-pipe repair",
+      "status": "done",
+      "commit": "96882498"
+    },
+    {
+      "id": 2,
+      "name": "Publish and verify immutable v69 artifact",
+      "status": "done",
+      "commit": "b25b3d8a"
+    },
+    {
+      "id": 3,
+      "name": "Admit v69 deterministic simulation",
+      "status": "done",
+      "commit": "8dd07133"
+    },
+    {
+      "id": 4,
+      "name": "06-26 Task 1 clean-VM evidence run",
+      "status": "in_progress",
+      "progress": "v69 artifact, fixed verifier, and deterministic simulation are complete; Hyper-V bridge rebind, checkpoint archival, Audit, and the single physical run have not started"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 5,
+      "name": "TDD rebind the Hyper-V bridge to exact v69 authority and run full gates",
+      "status": "not_started"
+    },
+    {
+      "id": 6,
+      "name": "Archive the preserved v68 Installed checkpoint by rename-only, then Audit v69",
+      "status": "not_started"
+    },
+    {
+      "id": 7,
+      "name": "Execute the single v69 RunCleanVm and persist terminal evidence",
+      "status": "not_started"
+    },
+    {
+      "id": 8,
+      "name": "06-26 Task 2 mandatory human review after physical PASS",
+      "status": "not_started"
+    },
+    {
+      "id": 9,
+      "name": "06-26 Task 3 plus plans 06-27 and 06-28 and phase verification",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "v68 is terminal after BLOCKED:guest-runner-total-deadline at webdriver-launch and must never be retried",
+      "type": "technical",
+      "workaround": "Continue only with the already published monotonic v69 authority"
+    },
+    {
+      "description": "The fixed LiiiraaBoost-Installed name is occupied by preserved v68 checkpoint GUID 84635905-a816-4b4e-9cdd-acb05b3c1dbf",
+      "type": "technical",
+      "workaround": "Before v69 Audit/run, perform the established rename-only archival to LiiiraaBoost-Installed-BLOCKED-v68 with before/after evidence and VM Off"
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Confirm future UAC prompts only after a PT-BR PRE-UAC notice",
+      "context": "Bridge checkpoint archival, Audit, and RunCleanVm require visible elevation",
+      "blocking": true
+    },
+    {
+      "action": "Enter the exact v69 APPLY phrase only after durable APPLY-PROMPT-READY is observed",
+      "context": "Human authorization must be durable before mutation",
+      "blocking": true
+    },
+    {
+      "action": "Perform 06-26 Task 2 evidence review after a physical PASS",
+      "context": "The executor may not self-approve the mandatory review checkpoint",
+      "blocking": true
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Never retry terminal physical versions; advance monotonically",
+      "rationale": "Every failed physical attempt is immutable evidence and reuse would break the authority ledger",
+      "phase": "06"
+    },
+    {
+      "decision": "Capture exited WebDriver pipe output with PeekNamedPipe rather than waiting for EOF",
+      "rationale": "A native descendant can inherit the pipe and keep EOF unavailable after the parent exits",
+      "phase": "06"
+    },
+    {
+      "decision": "Pause after v69 deterministic admission before bridge or VM work",
+      "rationale": "The user requested a clean cloud-save boundary; no physical stage was started",
+      "phase": "06"
+    }
+  ],
+  "uncommitted_files": [],
+  "next_action": "Read the phase handoff, then TDD-rebind tooling/hyperv-lab/Invoke-Phase6Physical.ps1 and phase6-physical.test.mjs from exact v68 authority to exact v69 artifact/evidence hashes; do not touch Hyper-V until full gates pass.",
+  "context_notes": "v69 build/lifecycle PASS, fixed artifact verifier verdict verified, and deterministic simulation are committed. No v69 bridge rebind, checkpoint archival, Audit, or RunCleanVm has begun. No Phase 6 build/run process remains active."
+}
