@@ -509,3 +509,10 @@ canonicalization still lacked `FILE_READ_ATTRIBUTES`. RED `6df924f` and GREEN `5
 only `SYNCHRONIZE | FILE_READ_ATTRIBUTES | FILE_TRAVERSE` (`0x001000A0`) to interactive users on
 the two directories. Directory listing, DB/secret reads, and writes remain denied. Full gates:
 optimizer 100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/51.
+
+## Append-Only v66 Bridge and Read-Only Audit Addendum
+
+- Bridge authority GREEN `683335e0` binds build `physical-7304c595be0d094e-managed-power-scheme-v66`, artifact manifest SHA-256 `f5093c1e464ea8dd563197283a2bdb7cfac4c68f7f30d398f5e3d5dc76137f4f`, deterministic run SHA-256 `faefe1cdfae5f546982ac31cdae3a627150d6a755e4de9d9b8a7fb1dd299bc64`, and evidence manifest SHA-256 `d76fb46767e525647df47f2c03efc8cefe42dec5a20832b554e98d72d96f6584`.
+- The v65 installed checkpoint was archived create-once as `LiiiraaBoost-Installed-BLOCKED-v65`, preserving GUID `adea1580-a076-40f9-8bb2-2458701f47ac`, VM `Off`, and checkpoint count 6→6. Durable evidence: `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-210929-220-managed-power-scheme-v65-checkpoint-archive.json`.
+- Read-only Audit PASS: `C:\Users\Liiiraa\VM-Lab\Evidence\20260816-211000-phase6audit-console.log`, SHA-256 `62a8770303b90de04b9dd8b46dbc714b23f4212003f1efc5b5bd143684cf87d1`.
+- Audit boundaries: `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`. The fixed installed checkpoint name remained absent and the exact VM returned to `Off`.
