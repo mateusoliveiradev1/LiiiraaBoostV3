@@ -1244,6 +1244,34 @@ test('RED: every PowerShell Direct readiness wait is bounded, auth-aware, and cl
   assert.match(executionBody, /finally\s*\{[\s\S]*Stop-ExactVmAfterRun/u);
 });
 
+test('RED: every guest runner stage has nested deadlines and bounded durable boundaries', () => {
+  const source = readFileSync(bridgePath, 'utf8');
+  const runnerBody = source.slice(
+    source.indexOf('function Invoke-ExactGuestRunner'),
+    source.indexOf('function Read-ExactGuestBytes'),
+  );
+  for (const marker of [
+    'function Write-RunnerStageBoundaryRecordOnce',
+    "$GuestProcessTimeoutSeconds = 600",
+    "$InvokeCommandTimeoutSeconds = 660",
+    "-State 'started'",
+    "-State 'completed'",
+    "-State 'timeout'",
+    'rawOutputCaptured = $false',
+    'FileMode]::CreateNew',
+  ]) {
+    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&'), 'u'));
+  }
+  assert.match(runnerBody, /Invoke-Command[\s\S]*-AsJob/u);
+  assert.match(runnerBody, /Wait-Job\s+-Job\s+\$job\s+-Timeout\s+\$InvokeCommandTimeoutSeconds/u);
+  assert.match(runnerBody, /WaitForExit\(\$GuestProcessTimeoutMilliseconds\)/u);
+  assert.match(runnerBody, /if\s*\(-not\s+\$exited\)[\s\S]*\$process\.Kill\(\)/u);
+  assert.match(runnerBody, /BLOCKED:guest-runner-total-deadline/u);
+  assert.match(runnerBody, /finally\s*\{[\s\S]*Remove-Job/u);
+  assert.doesNotMatch(runnerBody, /WaitForExit\(\)/u);
+  assert.doesNotMatch(runnerBody, /rawOutput\s*=/iu);
+});
+
 test('RED: MSI summary fails closed for unknown actions, secrets, and oversized logs', () => {
   const unknown = invokeBridgeFunction('Resolve-MsiLogSummary', {
     exitCode: 2,
