@@ -203,6 +203,8 @@ $LabRoot = 'C:\Users\Liiiraa\VM-Lab'
 $CompletedBoundaries = [Collections.Generic.List[string]]::new()
 $MaximumRunnerOutputLines = 32
 $MaximumRunnerOutputChars = 4096
+$GuestProcessTimeoutSeconds = 600
+$InvokeCommandTimeoutSeconds = 660
 $RunnerFailureStage = 'preflight'
 $RunnerExitCode = $null
 $RunnerFailureCode = $null
@@ -1845,6 +1847,38 @@ function Resolve-WebDriverSidecarSummary {
     }
 }
 
+function Write-RunnerStageBoundaryRecordOnce {
+    param(
+        [Parameter(Mandatory)][ValidateSet('installed-ready', 'reboot-pending', 'completed')][string]$Stage,
+        [Parameter(Mandatory)][ValidateSet('started', 'completed', 'timeout')][string]$State
+    )
+
+    $directory = Join-Path $LabRoot 'Evidence\phase6'
+    [IO.Directory]::CreateDirectory($directory) | Out-Null
+    $fileName = "$ExpectedOperationVersion-$Stage-RUNNER-$State.json"
+    $path = Join-Path $directory $fileName
+    $record = [ordered]@{
+        schemaVersion = '1.0'
+        kind = 'phase6-runner-stage-boundary'
+        operationVersion = $ExpectedOperationVersion
+        buildId = $ExpectedBuildId
+        stage = $Stage
+        state = $State
+        guestProcessTimeoutSeconds = $GuestProcessTimeoutSeconds
+        invokeCommandTimeoutSeconds = $InvokeCommandTimeoutSeconds
+        rawOutputCaptured = $false
+        recordedAt = [DateTime]::UtcNow.ToString('o')
+    }
+    $bytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Compress))
+    if ($bytes.Length -le 0 -or $bytes.Length -gt 4096) {
+        throw 'BLOCKED: runner stage boundary exceeds fixed bounds.'
+    }
+    $stream = [IO.File]::Open($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
+    try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+    [void]$CompletedBoundaries.Add("runner-$Stage-$State")
+    return [pscustomobject]@{ FileName = $fileName; Path = $path; Sha256 = Get-FileSha256Hex -Path $path }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
@@ -1864,8 +1898,11 @@ function Invoke-ExactGuestRunner {
     $script:InstallerDiagnostic = $null
     $script:InstalledCustodyDiagnostic = $null
     $script:WebDriverDiagnostic = $null
-    $response = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
-        param($ClosedAuthority, $Approval, $MaximumLines, $MaximumChars)
+    [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'started')
+    $job = $null
+    try {
+        $job = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
+        param($ClosedAuthority, $Approval, $MaximumLines, $MaximumChars, $GuestProcessTimeoutMilliseconds)
         $expectedRoot = 'C:\LiiiraaBoost\Phase6\' + [string]$ClosedAuthority.BuildId
         $RunnerPath = [string]$ClosedAuthority.GuestRunner
         $ConfigPath = [string]$ClosedAuthority.GuestConfig
@@ -1892,7 +1929,12 @@ function Invoke-ExactGuestRunner {
             $process.StandardInput.WriteLine($Approval)
         }
         $process.StandardInput.Close()
-        $process.WaitForExit()
+        $exited = $process.WaitForExit($GuestProcessTimeoutMilliseconds)
+        if (-not $exited) {
+            try { $process.Kill() } catch { }
+            [void]$process.WaitForExit(5000)
+            throw 'BLOCKED:guest-runner-total-deadline'
+        }
         $stdoutText = $stdoutTask.GetAwaiter().GetResult()
         $stderrText = $stderrTask.GetAwaiter().GetResult()
         $stdout = @($stdoutText -split '\r?\n' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
@@ -2009,7 +2051,36 @@ function Invoke-ExactGuestRunner {
             WebDriverSidecarSha256 = $webDriverSidecarSha256
             WebDriverSidecarSizeBytes = $webDriverSidecarSizeBytes
         }
-    } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars
+        } -ArgumentList $Authority, $ApprovalPhrase, $MaximumRunnerOutputLines, $MaximumRunnerOutputChars, ($GuestProcessTimeoutSeconds * 1000) -AsJob
+        $completedJob = Wait-Job -Job $job -Timeout $InvokeCommandTimeoutSeconds
+        if ($null -eq $completedJob -or $job.State -in @('Running', 'NotStarted')) {
+            $script:RunnerFailureCode = 'BLOCKED:guest-runner-total-deadline'
+            [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'timeout')
+            Stop-Job -Job $job -ErrorAction SilentlyContinue
+            throw 'BLOCKED:guest-runner-total-deadline'
+        }
+        $response = Receive-Job -Job $job -ErrorAction Stop
+        [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'completed')
+    }
+    catch {
+        if ($_.Exception.Message -cmatch 'BLOCKED:guest-runner-total-deadline') {
+            $script:RunnerFailureCode = 'BLOCKED:guest-runner-total-deadline'
+            $timeoutPath = Join-Path (Join-Path $LabRoot 'Evidence\phase6') "$ExpectedOperationVersion-$Stage-RUNNER-timeout.json"
+            if (-not (Test-Path -LiteralPath $timeoutPath -PathType Leaf)) {
+                [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'timeout')
+            }
+            throw 'BLOCKED:guest-runner-total-deadline'
+        }
+        throw
+    }
+    finally {
+        if ($null -ne $job) {
+            if ($job.State -in @('Running', 'NotStarted')) {
+                Stop-Job -Job $job -ErrorAction SilentlyContinue
+            }
+            Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+        }
+    }
     if ($response.ExitCode -ne 0) {
         $diagnostic = Resolve-RunnerFailureDiagnostic -ExitCode ([int64]$response.ExitCode) -Stdout @($response.Stdout) -Stderr @($response.Stderr) -BoundsExceeded ([bool]$response.BoundsExceeded)
         $script:RunnerExitCode = $diagnostic.RunnerExitCode
