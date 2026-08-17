@@ -322,4 +322,10 @@ There is no v48 retry and no v49; all physical stages, Task 2, and Task 3 remain
 - The physically BLOCKED v66 clean-VM attempt was not relaunched; its deterministic admission is preserved at `tooling/phase6-evidence/records/superseded/managed-power-scheme-v66-evidence-manifest.json`, SHA-256 `d76fb46767e525647df47f2c03efc8cefe42dec5a20832b554e98d72d96f6584`.
 - `managed-power-scheme-v67` is the sole active deterministic admission for build `physical-7304c595be0d094e-managed-power-scheme-v67`, artifact manifest SHA-256 `e2689db3ef625a3ef4b1d1bd3f7ad22278a0dc868d0eaedebd053fb0fc55984f`, and run evidence SHA-256 `7e93a708b039cb5caaa8a4417ac6fe59189a274eb179afe75a3700995b481ce0`.
 - The active v67 run binds predecessor evidence SHA-256 `faefe1cdfae5f546982ac31cdae3a627150d6a755e4de9d9b8a7fb1dd299bc64` from v66. Current evidence manifest SHA-256: `bfa8ddc06bab183857e653b1f44b0106c0e4707bc7e74a3752e89277340f92f4`.
+
+## Append-Only Deterministic Authority Update — v68
+
+- `managed-power-scheme-v68` is the sole active deterministic admission for build `physical-9f82fde77bf2940f-managed-power-scheme-v68`, artifact manifest SHA-256 `64f1cecd68757befba141cf3ff5179f6c6f693a9a1f6c29d9a9df9b094c25c9c`, and run evidence SHA-256 `20b8feea9edb5d64fa26b04fa235f5ea2115b038df5e17381d078b5a859172ce`.
+- The active v68 run binds the immutable v67 predecessor; v67's evidence manifest moved unchanged to `records/superseded/managed-power-scheme-v67-evidence-manifest.json`. Current evidence manifest SHA-256: `f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b`.
+- This admission remains deterministic-only: no physical provenance, human approval, or owner/friends consent is claimed.
 - `rtk pnpm phase6:verify -- --mode planned` returned `ok: true`, highest stage `deterministic-simulation`, no diagnostics, and all physical stages pending. No physical provenance, consent, review, or physical PASS was created.

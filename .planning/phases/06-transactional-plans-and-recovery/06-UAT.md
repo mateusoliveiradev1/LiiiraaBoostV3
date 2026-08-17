@@ -1396,3 +1396,39 @@ both physical blockers remain historical evidence; only the next monotonic versi
 - Immutable blocker: `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-221445-clean-vm-BLOCKED.json`, SHA-256 `d7114726d3f4c14c4627d59e792323a87a4436e58b9761f414a93579ca115790`, reason `BLOCKED:guest-runner-total-deadline`.
 - Cleanup-only evidence proves the exact VM returned to `Off`; installed checkpoint GUID `84b8d3b0-90d0-4850-8806-f373a28a38e9` and all evidence remain preserved. v67 is terminal and must not be retried.
 - Safe read-only diagnosis observed no requested power-scheme mutation and localized the missing visibility to the inner `apply_until_reboot` call sequence. RED `b2bdc31e` / GREEN `b9aad639` introduce a bounded raw-free inner heartbeat for the next monotonic artifact.
+
+---
+
+## Operation `managed-power-scheme-v68` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v68`
+- **Artifact manifest SHA-256:** `64f1cecd68757befba141cf3ff5179f6c6f693a9a1f6c29d9a9df9b094c25c9c`
+- **Run evidence SHA-256:** `20b8feea9edb5d64fa26b04fa235f5ea2115b038df5e17381d078b5a859172ce`
+- **Evidence manifest SHA-256:** `f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v68",
+  "buildId": "physical-9f82fde77bf2940f-managed-power-scheme-v68",
+  "artifactManifestSha256": "64f1cecd68757befba141cf3ff5179f6c6f693a9a1f6c29d9a9df9b094c25c9c",
+  "runEvidenceSha256": "20b8feea9edb5d64fa26b04fa235f5ea2115b038df5e17381d078b5a859172ce",
+  "evidenceManifestSha256": "f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
