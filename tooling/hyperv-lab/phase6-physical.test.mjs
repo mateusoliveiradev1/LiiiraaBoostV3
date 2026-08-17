@@ -344,9 +344,14 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v68',
+    'physical-9f82fde77bf2940f-managed-power-scheme-v68',
+    'f5d161f2d4acca90ed836f7a4ccccab6f514adea',
+    '64f1cecd68757befba141cf3ff5179f6c6f693a9a1f6c29d9a9df9b094c25c9c',
+    '20b8feea9edb5d64fa26b04fa235f5ea2115b038df5e17381d078b5a859172ce',
+    'f4af847c37850010c0f3c4b024d2533a4e69efee2b837e4f579b478e2a3c0b9b',
     'managed-power-scheme-v67',
     'physical-7304c595be0d094e-managed-power-scheme-v67',
-    'a5175995f82bb1720901f48618551d7d10583766',
     'e2689db3ef625a3ef4b1d1bd3f7ad22278a0dc868d0eaedebd053fb0fc55984f',
     '7e93a708b039cb5caaa8a4417ac6fe59189a274eb179afe75a3700995b481ce0',
     'bfa8ddc06bab183857e653b1f44b0106c0e4707bc7e74a3752e89277340f92f4',
@@ -1372,7 +1377,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v67 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v68 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -1384,7 +1389,7 @@ test('dry-run audits the exact immutable v67 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v67');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v68');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
