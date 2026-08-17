@@ -624,3 +624,32 @@ lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for t
 | `phase6-physical-runner.exe` | `7a726e4fd1a02c1116a136aa96ff175bc0751ee738aea4da1f50c39d2ac87226` | 7140136 |
 | `tauri-driver.exe` | `9168e5c779341479097ea9e748507af0afd413b737c3d68e08622773769a576c` | 1627944 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v67 PASSED
+
+The accepted v66 clean-VM run remained non-terminal for more than twenty minutes inside an
+unbounded guest runner invocation. It was classified once as
+`BLOCKED:guest-runner-total-deadline`; the exact elevated host was terminated and cleanup-only
+returned the VM to `Off` without restoring or deleting any checkpoint. Causal RED `7aba7716`
+and GREEN `a5175995` now enforce a 600-second guest process deadline inside a 660-second
+PowerShell Direct job deadline, with create-once `started`, `completed`, or `timeout` boundary
+records bounded to 4 KiB and explicitly excluding raw output.
+
+The single monotonic v67 `build-and-smoke` completed install, four broker connections,
+repair/update, rollback-failure drill, downgrade rejection, uninstall, and residual cleanup with
+lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/a5175995f82bb1720901f48618551d7d10583766/physical-7304c595be0d094e-managed-power-scheme-v67`
+- **Build ID:** `physical-7304c595be0d094e-managed-power-scheme-v67`
+- **Operation version:** `managed-power-scheme-v67`
+- **Source commit:** `a5175995f82bb1720901f48618551d7d10583766`
+- **Input tree:** `sha256:7304c595be0d094e6684b18db944f52b5778cf23b805d3a133a31d1ea65c29c0`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `e2689db3ef625a3ef4b1d1bd3f7ad22278a0dc868d0eaedebd053fb0fc55984f` | 3240 |
+| `liiiraa-boost.msi` | `06683245793dad9d5e7d38b8ad6d40c7b0b6f906369078cae84b86897b1faca2` | 15826944 |
+| `configs/clean-windows-vm.run-config.json` | `41be687ba90a13acc60cd3ee50ac7c5d2e06cc461a3116a00b6ed9aef51c927d` | 1593 |
+| `phase6-physical-runner.exe` | `23d2475d36a5dd050011d521773924a1cc18fb324d38789729df8390392c4fe5` | 7140136 |
+| `tauri-driver.exe` | `7b750fb913684e24a89b5b6ee4d4e5c07deece8b0cd7e3e9834bab091ae501e6` | 1627944 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |

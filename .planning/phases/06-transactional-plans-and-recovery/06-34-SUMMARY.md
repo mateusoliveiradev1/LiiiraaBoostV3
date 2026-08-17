@@ -516,3 +516,10 @@ optimizer 100/1 ignored, builder 30/30, Windows check 0 errors, architecture 51/
 - The v65 installed checkpoint was archived create-once as `LiiiraaBoost-Installed-BLOCKED-v65`, preserving GUID `adea1580-a076-40f9-8bb2-2458701f47ac`, VM `Off`, and checkpoint count 6→6. Durable evidence: `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-210929-220-managed-power-scheme-v65-checkpoint-archive.json`.
 - Read-only Audit PASS: `C:\Users\Liiiraa\VM-Lab\Evidence\20260816-211000-phase6audit-console.log`, SHA-256 `62a8770303b90de04b9dd8b46dbc714b23f4212003f1efc5b5bd143684cf87d1`.
 - Audit boundaries: `artifact-verifier-pass`, `simulation-admission-pass`, `hyper-v-prestart-audit-pass`, `integration-services-healthy`, `audit-vm-state-restored`, `hyper-v-audit-pass`. The fixed installed checkpoint name remained absent and the exact VM returned to `Off`.
+
+## Append-Only v66 Bounded-Hang Addendum
+
+- The v66 prompt-ready and accepted records were durably created before mutation; the accepted record SHA-256 is `16ad41d9bf9e7ee01a6afebcbecc795a3b775086067a73acb6554d42806b16f2`.
+- No terminal result, blocker, or transcript progress followed for more than twenty minutes. The bounded diagnosis `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-213436-985-managed-power-scheme-v66-bounded-hang.json` records exact host PID 19796 and reason `BLOCKED:guest-runner-total-deadline` without raw output.
+- Only PID 19796 was terminated. Cleanup-only log `C:\Users\Liiiraa\VM-Lab\Evidence\20260816-213542-phase6observationcleanup-console.log` has SHA-256 `6f70b57f7275b8d567a5cac3ed252422d83f74ab69317bbfce544e0fb79bf5a9`; VM state is `Off`, and every checkpoint/evidence byte was preserved.
+- The fixed `LiiiraaBoost-Installed` checkpoint remains preserved as GUID `775e131a-3485-45c1-85b1-9420b0cab47a` pending create-once archival before v67 physical execution. v66 is terminal and will not be retried.
