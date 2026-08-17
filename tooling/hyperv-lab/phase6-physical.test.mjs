@@ -105,8 +105,8 @@ const createMutationSandbox = () => {
   const artifactPrefix = join(
     'target',
     'phase6-physical',
-    '22821094de8c0a5fbbaf3b673e69d2b52d7a225a',
-    'physical-7304c595be0d094e-managed-power-scheme-v65',
+    'a34efd18e38ac38463358ec989af4ed818ab4311',
+    'physical-7304c595be0d094e-managed-power-scheme-v66',
   );
   const linkArtifactRelative = (relative) => {
     const artifactRelative = join(artifactPrefix, relative);
@@ -139,6 +139,7 @@ const createMutationSandbox = () => {
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v56-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v57-evidence-manifest.json',
     'tooling/phase6-evidence/records/superseded/managed-power-scheme-v58-evidence-manifest.json',
+    'tooling/phase6-evidence/records/superseded/managed-power-scheme-v65-evidence-manifest.json',
   ]) {
     copyRelative(relative);
   }
@@ -342,6 +343,12 @@ const assertSourcePolicy = (source) => {
     backupCheckpoint,
     backupCheckpointId,
     installedCheckpoint,
+    'managed-power-scheme-v66',
+    'physical-7304c595be0d094e-managed-power-scheme-v66',
+    'a34efd18e38ac38463358ec989af4ed818ab4311',
+    'f5093c1e464ea8dd563197283a2bdb7cfac4c68f7f30d398f5e3d5dc76137f4f',
+    'faefe1cdfae5f546982ac31cdae3a627150d6a755e4de9d9b8a7fb1dd299bc64',
+    'd76fb46767e525647df47f2c03efc8cefe42dec5a20832b554e98d72d96f6584',
     'managed-power-scheme-v65',
     'physical-7304c595be0d094e-managed-power-scheme-v65',
     '22821094de8c0a5fbbaf3b673e69d2b52d7a225a',
@@ -1295,7 +1302,7 @@ test('mutation corpus detects target, custody, lifecycle, command, and evidence 
   }
 });
 
-test('dry-run audits the exact immutable v65 tuple without elevation or mutation', () => {
+test('dry-run audits the exact immutable v66 tuple without elevation or mutation', () => {
   const result = runBridge();
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
@@ -1307,7 +1314,7 @@ test('dry-run audits the exact immutable v65 tuple without elevation or mutation
   assert.equal(report.backupCheckpoint, backupCheckpoint);
   assert.equal(report.backupCheckpointId, backupCheckpointId);
   assert.equal(report.installedCheckpoint, installedCheckpoint);
-  assert.equal(report.operationVersion, 'managed-power-scheme-v65');
+  assert.equal(report.operationVersion, 'managed-power-scheme-v66');
   assert.equal(
     report.runnerCommand,
     'phase6-physical-runner.exe --run-config configs\\clean-windows-vm.run-config.json',
