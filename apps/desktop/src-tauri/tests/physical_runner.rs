@@ -11,7 +11,8 @@ use std::{
 use physical_runner::{
     ArtifactCustody, FriendsRosterBinding, PhysicalGuestRunner, PhysicalRunConfig,
     PhysicalRunnerError, PhysicalRunnerIo, PhysicalRunnerState, PhysicalStage, RecordKind,
-    RunPaths, TRUSTED_INSTALLER_SPKI_SHA256, TauriCommandSet, load_run_config, parse_runner_args,
+    RunPaths, RunnerInnerStage, TRUSTED_INSTALLER_SPKI_SHA256, TauriCommandSet, load_run_config,
+    parse_runner_args,
 };
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -108,6 +109,14 @@ impl PhysicalRunnerIo for FakeIo {
         msedge_driver: &str,
     ) -> Result<(), PhysicalRunnerError> {
         self.event(format!("webdriver:{tauri_driver}:{msedge_driver}"));
+        Ok(())
+    }
+
+    fn write_runner_heartbeat(
+        &mut self,
+        stage: RunnerInnerStage,
+    ) -> Result<(), PhysicalRunnerError> {
+        self.event(format!("heartbeat:{}", stage.as_str()));
         Ok(())
     }
 
@@ -465,12 +474,19 @@ fn owner_cycle_is_checkpointed_and_writes_reboot_continuation_before_returning()
     let expected_order = [
         "create-checkpoint",
         "write-record:CheckpointReady",
+        "heartbeat:webdriver-launch",
+        "heartbeat:webdriver-ready",
         "observe",
         "confirm-apply:phase6-physical-plan:managed-power-scheme-v3",
+        "heartbeat:plan-compose",
         "tauri:compose_plan",
+        "heartbeat:plan-approve",
         "tauri:approve_plan",
+        "heartbeat:apply-dispatch",
         "tauri:apply_plan",
+        "heartbeat:apply-observe",
         "tauri:read_plan_execution",
+        "heartbeat:subscribe-record",
         "tauri:subscribe_plan_execution",
         "write-record:Continuation",
     ];

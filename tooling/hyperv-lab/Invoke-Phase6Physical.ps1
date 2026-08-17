@@ -218,6 +218,7 @@ $RunnerFailureCode = $null
 $InstallerDiagnostic = $null
 $InstalledCustodyDiagnostic = $null
 $WebDriverDiagnostic = $null
+$RunnerStageDiagnostic = $null
 
 function Assert-ClosedCurrentAuthority {
     $expectedKeys = @(
@@ -1926,6 +1927,111 @@ function Write-RunnerStageBoundaryRecordOnce {
     return [pscustomobject]@{ FileName = $fileName; Path = $path; Sha256 = Get-FileSha256Hex -Path $path }
 }
 
+function Read-RunnerStageHeartbeatDiagnostic {
+    param(
+        [Parameter(Mandatory)][PSCredential]$Credential,
+        [Parameter(Mandatory)]$Authority,
+        [Parameter(Mandatory)][ValidateSet('installed-ready', 'reboot-pending', 'completed')][string]$Stage
+    )
+
+    $fallback = [pscustomobject][ordered]@{
+        status = 'missing'
+        innerStage = $null
+        recordedAt = $null
+        sha256 = $null
+        sizeBytes = $null
+        rawOutputCaptured = $false
+        failureCode = $null
+    }
+    $heartbeatPath = Join-Path $Authority.GuestRoot 'state\clean-windows-vm\diagnostics\runner-stage.safe.json'
+    $job = $null
+    try {
+        $job = Invoke-Command -VMName $ExpectedVmName -Credential $Credential -ScriptBlock {
+            param($FixedPath, $ExpectedOperation, $ExpectedBuild, $ExpectedPhysicalStage)
+            if (-not (Test-Path -LiteralPath $FixedPath -PathType Leaf)) {
+                return [pscustomobject]@{ Status = 'missing' }
+            }
+            try {
+                $item = Get-Item -LiteralPath $FixedPath -ErrorAction Stop
+                if ($item.Length -le 0 -or $item.Length -gt 4096) { throw 'bounds' }
+                $bytes = [IO.File]::ReadAllBytes($FixedPath)
+                $record = [Text.Encoding]::UTF8.GetString($bytes) | ConvertFrom-Json -ErrorAction Stop
+                $expectedProperties = @(
+                    'schemaVersion', 'kind', 'operationVersionId', 'buildId', 'physicalStage',
+                    'innerStage', 'recordedAt', 'rawOutputCaptured'
+                )
+                $actualProperties = @($record.PSObject.Properties | ForEach-Object { $_.Name })
+                $allowedInnerStages = @(
+                    'webdriver-launch', 'webdriver-ready', 'plan-compose', 'plan-approve',
+                    'apply-dispatch', 'apply-observe', 'subscribe-record'
+                )
+                $recordedAt = [DateTime]::ParseExact(
+                    [string]$record.recordedAt,
+                    'yyyy-MM-ddTHH:mm:ssZ',
+                    [Globalization.CultureInfo]::InvariantCulture,
+                    [Globalization.DateTimeStyles]::AssumeUniversal
+                ).ToUniversalTime()
+                if ($actualProperties.Count -ne $expectedProperties.Count -or
+                    @($actualProperties | Where-Object { $expectedProperties -cnotcontains $_ }).Count -ne 0 -or
+                    [string]$record.schemaVersion -cne '1.0' -or
+                    [string]$record.kind -cne 'phase6-runner-stage-heartbeat' -or
+                    [string]$record.operationVersionId -cne $ExpectedOperation -or
+                    [string]$record.buildId -cne $ExpectedBuild -or
+                    [string]$record.physicalStage -cne $ExpectedPhysicalStage -or
+                    [string]$record.innerStage -cnotin $allowedInnerStages -or
+                    $record.rawOutputCaptured -isnot [bool] -or [bool]$record.rawOutputCaptured -or
+                    $recordedAt -gt [DateTime]::UtcNow.AddMinutes(1)) {
+                    throw 'identity'
+                }
+                $hasher = [Security.Cryptography.SHA256]::Create()
+                try {
+                    $sha256 = 'sha256:' + ([BitConverter]::ToString($hasher.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant()
+                }
+                finally { $hasher.Dispose() }
+                return [pscustomobject]@{
+                    Status = 'present'
+                    InnerStage = [string]$record.innerStage
+                    RecordedAt = $recordedAt.ToString('o')
+                    Sha256 = $sha256
+                    SizeBytes = [int64]$bytes.Length
+                }
+            }
+            catch { return [pscustomobject]@{ Status = 'invalid' } }
+        } -ArgumentList $heartbeatPath, $ExpectedOperationVersion, $ExpectedBuildId, 'clean-windows-vm' -AsJob
+        $completed = Wait-Job -Job $job -Timeout 30
+        if ($null -eq $completed -or $job.State -in @('Running', 'NotStarted')) {
+            Stop-Job -Job $job -ErrorAction SilentlyContinue
+            $fallback.status = 'deadline'
+            return $fallback
+        }
+        $response = Receive-Job -Job $job -ErrorAction Stop
+        if ($null -eq $response -or [string]$response.Status -cne 'present') {
+            $fallback.status = if ($null -ne $response -and [string]$response.Status -ceq 'invalid') { 'invalid' } else { 'missing' }
+            if ($fallback.status -ceq 'invalid') { $fallback.failureCode = 'BLOCKED:runner-stage-heartbeat' }
+            return $fallback
+        }
+        return [pscustomobject][ordered]@{
+            status = 'present'
+            innerStage = [string]$response.InnerStage
+            recordedAt = [string]$response.RecordedAt
+            sha256 = [string]$response.Sha256
+            sizeBytes = [int64]$response.SizeBytes
+            rawOutputCaptured = $false
+            failureCode = $null
+        }
+    }
+    catch {
+        $fallback.status = 'unavailable'
+        return $fallback
+    }
+    finally {
+        if ($null -ne $job) {
+            if ($job.State -in @('Running', 'NotStarted')) { Stop-Job -Job $job -ErrorAction SilentlyContinue }
+            Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 function Invoke-ExactGuestRunner {
     param(
         [Parameter(Mandatory)][PSCredential]$Credential,
@@ -1945,6 +2051,7 @@ function Invoke-ExactGuestRunner {
     $script:InstallerDiagnostic = $null
     $script:InstalledCustodyDiagnostic = $null
     $script:WebDriverDiagnostic = $null
+    $script:RunnerStageDiagnostic = $null
     [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'started')
     $job = $null
     try {
@@ -2104,6 +2211,7 @@ function Invoke-ExactGuestRunner {
             $script:RunnerFailureCode = 'BLOCKED:guest-runner-total-deadline'
             [void](Write-RunnerStageBoundaryRecordOnce -Stage $Stage -State 'timeout')
             Stop-Job -Job $job -ErrorAction SilentlyContinue
+            $script:RunnerStageDiagnostic = Read-RunnerStageHeartbeatDiagnostic -Credential $Credential -Authority $Authority -Stage $Stage
             throw 'BLOCKED:guest-runner-total-deadline'
         }
         $response = Receive-Job -Job $job -ErrorAction Stop
@@ -2390,6 +2498,7 @@ function Write-BlockedRecord {
         installerDiagnostic = $InstallerDiagnostic
         installedCustodyDiagnostic = $InstalledCustodyDiagnostic
         webDriverDiagnostic = $WebDriverDiagnostic
+        runnerStageDiagnostic = $RunnerStageDiagnostic
         reason = $safeReason; recordedAt = [DateTime]::UtcNow.ToString('o')
     }
     [IO.File]::WriteAllText($path, ($record | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))

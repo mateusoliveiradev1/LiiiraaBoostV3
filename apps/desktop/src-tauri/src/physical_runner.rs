@@ -44,6 +44,7 @@ const MAX_INSTALLER_DIAGNOSTIC_BYTES: usize = 4 * 1024;
 const MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES: usize = 4 * 1024;
 const MAX_WEBDRIVER_CAPTURE_BYTES: usize = 16 * 1024;
 const MAX_WEBDRIVER_DIAGNOSTIC_BYTES: usize = 16 * 1024;
+const MAX_RUNNER_HEARTBEAT_BYTES: usize = 4 * 1024;
 const ZERO_HASH: &str = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 const SOURCE: &str = "phase6-physical-runner-rust-1";
 
@@ -226,6 +227,44 @@ pub struct FriendsRosterBinding {
     pub match_count: usize,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RunnerInnerStage {
+    WebdriverLaunch,
+    WebdriverReady,
+    PlanCompose,
+    PlanApprove,
+    ApplyDispatch,
+    ApplyObserve,
+    SubscribeRecord,
+}
+
+impl RunnerInnerStage {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::WebdriverLaunch => "webdriver-launch",
+            Self::WebdriverReady => "webdriver-ready",
+            Self::PlanCompose => "plan-compose",
+            Self::PlanApprove => "plan-approve",
+            Self::ApplyDispatch => "apply-dispatch",
+            Self::ApplyObserve => "apply-observe",
+            Self::SubscribeRecord => "subscribe-record",
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RunnerStageHeartbeat<'a> {
+    schema_version: &'static str,
+    kind: &'static str,
+    operation_version_id: &'a str,
+    build_id: &'a str,
+    physical_stage: &'static str,
+    inner_stage: &'static str,
+    recorded_at: String,
+    raw_output_captured: bool,
+}
+
 pub trait PhysicalRunnerIo {
     fn verify_artifact_custody(
         &mut self,
@@ -250,6 +289,12 @@ pub trait PhysicalRunnerIo {
         tauri_driver: &str,
         msedge_driver: &str,
     ) -> Result<(), PhysicalRunnerError>;
+    fn write_runner_heartbeat(
+        &mut self,
+        _stage: RunnerInnerStage,
+    ) -> Result<(), PhysicalRunnerError> {
+        Ok(())
+    }
     fn invoke_tauri(
         &mut self,
         command: &str,
@@ -395,7 +440,9 @@ impl PhysicalGuestRunner {
         io: &mut dyn PhysicalRunnerIo,
         artifact: &ArtifactCustody,
     ) -> Result<PhysicalRunnerState, PhysicalRunnerError> {
+        io.write_runner_heartbeat(RunnerInnerStage::WebdriverLaunch)?;
         io.launch_webdriver(&artifact.tauri_driver_path, &artifact.msedge_driver_path)?;
+        io.write_runner_heartbeat(RunnerInnerStage::WebdriverReady)?;
         let prior_guid = io.observe_windows_state()?;
         let device_binding_id = io.local_device_binding_id()?;
         let compose = transactional_plan(
@@ -414,10 +461,15 @@ impl PhysicalGuestRunner {
             &self.config,
         );
         let apply = plan_transaction("apply");
+        io.write_runner_heartbeat(RunnerInnerStage::PlanCompose)?;
         io.invoke_tauri(&self.config.commands.compose_plan, &compose)?;
+        io.write_runner_heartbeat(RunnerInnerStage::PlanApprove)?;
         io.invoke_tauri(&self.config.commands.approve_plan, &approval)?;
+        io.write_runner_heartbeat(RunnerInnerStage::ApplyDispatch)?;
         io.invoke_tauri(&self.config.commands.apply_plan, &apply)?;
+        io.write_runner_heartbeat(RunnerInnerStage::ApplyObserve)?;
         io.invoke_tauri(&self.config.commands.read_plan_execution, &json!({}))?;
+        io.write_runner_heartbeat(RunnerInnerStage::SubscribeRecord)?;
         io.invoke_tauri(&self.config.commands.subscribe_plan_execution, &json!({}))?;
         let observation = io.observe_windows_state()?;
         if observation == prior_guid {
@@ -797,6 +849,18 @@ impl WindowsPhysicalRunnerIo {
             relative,
         )
     }
+
+    fn runner_heartbeat_path(&self) -> Result<PathBuf, PhysicalRunnerError> {
+        Ok(self
+            .config
+            .artifact_manifest_path
+            .parent()
+            .ok_or_else(|| PhysicalRunnerError::blocked("artifact-root"))?
+            .join("state")
+            .join(self.config.stage.as_str())
+            .join("diagnostics")
+            .join("runner-stage.safe.json"))
+    }
 }
 
 impl Drop for WindowsPhysicalRunnerIo {
@@ -1170,6 +1234,30 @@ impl PhysicalRunnerIo for WindowsPhysicalRunnerIo {
         Ok(())
     }
 
+    fn write_runner_heartbeat(
+        &mut self,
+        stage: RunnerInnerStage,
+    ) -> Result<(), PhysicalRunnerError> {
+        let heartbeat = RunnerStageHeartbeat {
+            schema_version: "1.0",
+            kind: "phase6-runner-stage-heartbeat",
+            operation_version_id: &self.config.operation_version_id,
+            build_id: &self.config.build_id,
+            physical_stage: self.config.stage.as_str(),
+            inner_stage: stage.as_str(),
+            recorded_at: timestamp(),
+            raw_output_captured: false,
+        };
+        let bytes = serde_json::to_vec(&heartbeat)
+            .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-json"))?;
+        if bytes.is_empty() || bytes.len() > MAX_RUNNER_HEARTBEAT_BYTES {
+            return Err(PhysicalRunnerError::blocked(
+                "runner-stage-heartbeat-bounds",
+            ));
+        }
+        write_runner_heartbeat_atomic(&self.runner_heartbeat_path()?, &bytes)
+    }
+
     fn invoke_tauri(
         &mut self,
         command: &str,
@@ -1331,6 +1419,63 @@ fn same_canonical_path(expected: &Path, actual: Option<&Path>) -> bool {
         return false;
     };
     same_closed_windows_path(expected, actual)
+}
+
+fn write_runner_heartbeat_atomic(path: &Path, bytes: &[u8]) -> Result<(), PhysicalRunnerError> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| PhysicalRunnerError::blocked("runner-stage-heartbeat-path"))?;
+    fs::create_dir_all(parent)
+        .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-parent"))?;
+    let temporary = parent.join("runner-stage.safe.json.next");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&temporary)
+        .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-create"))?;
+    file.write_all(bytes)
+        .and_then(|()| file.sync_all())
+        .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-durable"))?;
+    drop(file);
+    replace_runner_heartbeat(&temporary, path)
+}
+
+#[cfg(windows)]
+fn replace_runner_heartbeat(source: &Path, destination: &Path) -> Result<(), PhysicalRunnerError> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows::{
+        Win32::Storage::FileSystem::{
+            MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
+        },
+        core::PCWSTR,
+    };
+
+    let source = source
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect::<Vec<_>>();
+    let destination = destination
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect::<Vec<_>>();
+    // SAFETY: both paths are nul-terminated and remain alive for the duration of the call.
+    unsafe {
+        MoveFileExW(
+            PCWSTR(source.as_ptr()),
+            PCWSTR(destination.as_ptr()),
+            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        )
+    }
+    .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-replace"))
+}
+
+#[cfg(not(windows))]
+fn replace_runner_heartbeat(source: &Path, destination: &Path) -> Result<(), PhysicalRunnerError> {
+    fs::rename(source, destination)
+        .map_err(|_| PhysicalRunnerError::blocked("runner-stage-heartbeat-replace"))
 }
 
 #[cfg(windows)]
