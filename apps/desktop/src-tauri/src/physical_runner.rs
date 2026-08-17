@@ -2243,11 +2243,89 @@ mod custody_failure_code_tests {
         MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES, artifact_custody_failure_code,
         installation_manifest::{CanonicalPathRole, CustodyError},
         installed_custody_diagnostic, installer_diagnostic_from_log,
-        installer_diagnostic_sidecar_path, installer_exit_failure, webdriver_diagnostic,
+        installer_diagnostic_sidecar_path, installer_exit_failure,
+        read_webdriver_output_bounded, webdriver_diagnostic,
         write_installer_diagnostic_create_once, write_webdriver_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
+
+    #[cfg(windows)]
+    #[test]
+    fn webdriver_capture_does_not_wait_for_descendant_inherited_pipe_eof() {
+        use std::{
+            process::{Command, Stdio},
+            sync::mpsc,
+            thread,
+            time::Duration,
+        };
+
+        let script = concat!(
+            "$null = Start-Process -FilePath $env:ComSpec ",
+            "-ArgumentList '/d','/c','ping -n 5 127.0.0.1 >nul' ",
+            "-NoNewWindow -PassThru; ",
+            "[Console]::Out.Write('parent-exit'); exit 23"
+        );
+        let mut parent = Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-Command", script])
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("parent process should start");
+        let status = parent.wait().expect("parent process should exit");
+        assert_eq!(status.code(), Some(23));
+        let stdout = parent.stdout.take().expect("stdout pipe should exist");
+        let (sender, receiver) = mpsc::channel();
+        thread::spawn(move || {
+            let _ = sender.send(read_webdriver_output_bounded(stdout));
+        });
+
+        let (bytes, truncated) = receiver
+            .recv_timeout(Duration::from_secs(1))
+            .expect("capture must not wait for a descendant holding the inherited pipe open");
+        assert_eq!(bytes, b"parent-exit");
+        assert!(!truncated);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn webdriver_capture_preserves_ordinary_early_exit_diagnostic() {
+        use std::process::{Command, Stdio};
+
+        let mut child = Command::new("cmd.exe")
+            .args(["/d", "/c", "echo missing-runtime 1>&2 & exit /b 7"])
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("diagnostic process should start");
+        let status = child.wait().expect("diagnostic process should exit");
+        let (stdout, stdout_truncated) = read_webdriver_output_bounded(
+            child.stdout.take().expect("stdout pipe should exist"),
+        );
+        let (stderr, stderr_truncated) = read_webdriver_output_bounded(
+            child.stderr.take().expect("stderr pipe should exist"),
+        );
+        let diagnostic = webdriver_diagnostic(
+            "reboot-pending",
+            status.code(),
+            "2.0.6",
+            "151.0.4129.86",
+            None,
+            false,
+            false,
+            &stdout,
+            &stderr,
+            stdout_truncated || stderr_truncated,
+        );
+
+        assert_eq!(status.code(), Some(7));
+        assert!(stderr.starts_with(b"missing-runtime"));
+        assert_eq!(diagnostic.error_code, "webdriver-exited");
+        assert_eq!(diagnostic.process_exit_code, Some(7));
+        assert!(!diagnostic.output_truncated);
+    }
 
     #[test]
     fn installer_diagnostic_sidecar_is_bounded_allowlisted_and_secret_free() {
