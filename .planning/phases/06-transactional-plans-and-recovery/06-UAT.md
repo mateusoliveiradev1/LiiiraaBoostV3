@@ -1353,3 +1353,39 @@ both physical blockers remain historical evidence; only the next monotonic versi
   ]
 }
 ```
+
+---
+
+## Operation `managed-power-scheme-v67` — DETERMINISTIC SIMULATION ADMITTED
+
+- **Physical provenance:** not claimed
+- **Human review:** not claimed
+- **Owner/friends consent:** not claimed
+- **Physical PASS:** not claimed
+- **Command:** `rtk pnpm phase6:simulate -- --artifact-manifest-from-summary .planning/phases/06-transactional-plans-and-recovery/06-31-SUMMARY.md --minimum-version managed-power-scheme-v67`
+- **Artifact manifest SHA-256:** `e2689db3ef625a3ef4b1d1bd3f7ad22278a0dc868d0eaedebd053fb0fc55984f`
+- **Run evidence SHA-256:** `7e93a708b039cb5caaa8a4417ac6fe59189a274eb179afe75a3700995b481ce0`
+- **Evidence manifest SHA-256:** `bfa8ddc06bab183857e653b1f44b0106c0e4707bc7e74a3752e89277340f92f4`
+
+### Exact command output
+
+```json
+{
+  "operationVersion": "managed-power-scheme-v67",
+  "buildId": "physical-7304c595be0d094e-managed-power-scheme-v67",
+  "artifactManifestSha256": "e2689db3ef625a3ef4b1d1bd3f7ad22278a0dc868d0eaedebd053fb0fc55984f",
+  "runEvidenceSha256": "7e93a708b039cb5caaa8a4417ac6fe59189a274eb179afe75a3700995b481ce0",
+  "evidenceManifestSha256": "bfa8ddc06bab183857e653b1f44b0106c0e4707bc7e74a3752e89277340f92f4",
+  "highestAdmittedStage": "deterministic-simulation",
+  "requirementsCoverage": [
+    "PLAN-01",
+    "PLAN-02",
+    "PLAN-03",
+    "PLAN-04",
+    "PLAN-05",
+    "PLAN-06",
+    "PLAN-07",
+    "PLAN-08"
+  ]
+}
+```
