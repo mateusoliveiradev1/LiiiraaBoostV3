@@ -675,3 +675,26 @@ inspection-only verifier returned `verified` for the same live bytes.
 | `phase6-physical-runner.exe` | `63e4488c80ad0d0456574f23343122bb7dc6fad0572ef7048f156ef01ede42d5` | 7145256 |
 | `tauri-driver.exe` | `bf8cc19f67ff0a446265d02ed03c992aaa53f4c63cf897ff16f0eb4253a71f0b` | 1627944 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v69 PASSED
+
+After v68 terminated with the preserved bounded `webdriver-launch` timeout, causal TDD RED
+`273ff42c` and GREEN `96882498` replaced EOF waiting with bounded `PeekNamedPipe` capture. The
+next monotonic v69 `build-and-smoke` completed installation, broker binding, repair/update,
+rollback-failure and downgrade drills, uninstall, and residual cleanup with lifecycle `PASSED`.
+The fixed inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/c69cac97c3373c5f1b127fc2fc0e2c0e2e58544a/physical-5a94c1dc1ae583b7-managed-power-scheme-v69`
+- **Build ID:** `physical-5a94c1dc1ae583b7-managed-power-scheme-v69`
+- **Operation version:** `managed-power-scheme-v69`
+- **Source commit:** `c69cac97c3373c5f1b127fc2fc0e2c0e2e58544a`
+- **Input tree:** `sha256:5a94c1dc1ae583b70f2faab10971305ecd6b684978a93126beb0e2f94d9bc02d`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `600d63bf5c593d80200f1957c5f8da8c4712aaf23235ff26b61a761c92bb6596` | 3240 |
+| `liiiraa-boost.msi` | `24a9eadfe48fb2751dbc2ac2b4c23ea445c3061925ff3183bb35123913660215` | 15826944 |
+| `configs/clean-windows-vm.run-config.json` | `10b33e896e60e05ab4f5033f5ded403ec28ab17b00e154931009c39c4828f43d` | 1593 |
+| `phase6-physical-runner.exe` | `6765cae880656c8fe721007dd92618f25d6d69227255426f39b8363808c5db4f` | 7142184 |
+| `tauri-driver.exe` | `b5cec9a67a5e97144b29d256aaed074d66707c75bbbd6ac0783bda53b21a4632` | 1627944 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
