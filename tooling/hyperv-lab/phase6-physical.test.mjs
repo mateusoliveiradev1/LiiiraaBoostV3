@@ -351,7 +351,6 @@ const assertSourcePolicy = (source) => {
     'd76fb46767e525647df47f2c03efc8cefe42dec5a20832b554e98d72d96f6584',
     'managed-power-scheme-v65',
     'physical-7304c595be0d094e-managed-power-scheme-v65',
-    '22821094de8c0a5fbbaf3b673e69d2b52d7a225a',
     'd1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0',
     '0aa34013eb5d3314ba31daa9382f439442d7c85df3337230c648e8190689a649',
     '788f6b5392365829659c008755c909903d50f99179f934d59e4fa12937f4432a',

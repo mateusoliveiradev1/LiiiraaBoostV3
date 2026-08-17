@@ -37,18 +37,18 @@ $ExpectedRecoveryRunResultFileName = '20260816-1658-managed-power-scheme-v65-run
 $ExpectedRecoveryReadyFileName = 'managed-power-scheme-v65-RECOVERY-APPLY-PROMPT-READY.json'
 $ExpectedRecoveryAcceptedFileName = 'managed-power-scheme-v65-RECOVERY-APPLY-ACCEPTED.json'
 $CurrentAuthority = [pscustomobject][ordered]@{
-    OperationVersion = 'managed-power-scheme-v65'
-    BuildId = 'physical-7304c595be0d094e-managed-power-scheme-v65'
-    SourceCommit = '22821094de8c0a5fbbaf3b673e69d2b52d7a225a'
-    ArtifactManifestSha256 = 'd1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0'
-    SimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v65-d1001ae367af'
-    SimulationRunSha256 = '0aa34013eb5d3314ba31daa9382f439442d7c85df3337230c648e8190689a649'
-    EvidenceManifestSha256 = '788f6b5392365829659c008755c909903d50f99179f934d59e4fa12937f4432a'
+    OperationVersion = 'managed-power-scheme-v66'
+    BuildId = 'physical-7304c595be0d094e-managed-power-scheme-v66'
+    SourceCommit = 'a34efd18e38ac38463358ec989af4ed818ab4311'
+    ArtifactManifestSha256 = 'f5093c1e464ea8dd563197283a2bdb7cfac4c68f7f30d398f5e3d5dc76137f4f'
+    SimulationRunId = 'phase6-deterministic-simulation-managed-power-scheme-v66-f5093c1e464e'
+    SimulationRunSha256 = 'faefe1cdfae5f546982ac31cdae3a627150d6a755e4de9d9b8a7fb1dd299bc64'
+    EvidenceManifestSha256 = 'd76fb46767e525647df47f2c03efc8cefe42dec5a20832b554e98d72d96f6584'
     RunnerRelativePath = 'phase6-physical-runner.exe'
     ConfigRelativePath = 'configs\clean-windows-vm.run-config.json'
-    GuestRoot = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v65'
-    GuestRunner = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v65\phase6-physical-runner.exe'
-    GuestConfig = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v65\configs\clean-windows-vm.run-config.json'
+    GuestRoot = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v66'
+    GuestRunner = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v66\phase6-physical-runner.exe'
+    GuestConfig = 'C:\LiiiraaBoost\Phase6\physical-7304c595be0d094e-managed-power-scheme-v66\configs\clean-windows-vm.run-config.json'
 }
 $ExpectedOperationVersion = $CurrentAuthority.OperationVersion
 $ExpectedBuildId = $CurrentAuthority.BuildId
@@ -57,6 +57,13 @@ $ExpectedArtifactManifestSha256 = $CurrentAuthority.ArtifactManifestSha256
 $ExpectedSimulationRunId = $CurrentAuthority.SimulationRunId
 $ExpectedSimulationRunSha256 = $CurrentAuthority.SimulationRunSha256
 $ExpectedEvidenceManifestSha256 = $CurrentAuthority.EvidenceManifestSha256
+$ExpectedBlockedActivePredecessorOperationVersion = 'managed-power-scheme-v65'
+$ExpectedBlockedActivePredecessorBuildId = 'physical-7304c595be0d094e-managed-power-scheme-v65'
+$ExpectedBlockedActivePredecessorArtifactManifestSha256 = 'd1001ae367af98ab67ac022d0170dc1bbed8c351eb998a087ef2f06a016af7f0'
+$ExpectedBlockedActivePredecessorRunId = 'phase6-deterministic-simulation-managed-power-scheme-v65-d1001ae367af'
+$ExpectedBlockedActivePredecessorRunSha256 = '0aa34013eb5d3314ba31daa9382f439442d7c85df3337230c648e8190689a649'
+$ExpectedBlockedActivePredecessorManifestSha256 = '788f6b5392365829659c008755c909903d50f99179f934d59e4fa12937f4432a'
+$ExpectedBlockedActivePredecessorManifestRelativePath = 'tooling/phase6-evidence/records/superseded/managed-power-scheme-v65-evidence-manifest.json'
 $ExpectedSupersededActivePredecessorOperationVersion = 'managed-power-scheme-v58'
 $ExpectedSupersededActivePredecessorBuildId = 'physical-9f5464923978c943-managed-power-scheme-v58'
 $ExpectedSupersededActivePredecessorArtifactManifestSha256 = '2f407cc28495c09fdc8513c4dfd670749ba7b429d6133713af384f603e8aa888'
@@ -312,6 +319,9 @@ function Get-Authority {
         $ExpectedArtifactManifestSha256,
         $ExpectedSimulationRunSha256,
         $ExpectedEvidenceManifestSha256,
+        $ExpectedBlockedActivePredecessorOperationVersion,
+        $ExpectedBlockedActivePredecessorRunSha256,
+        $ExpectedBlockedActivePredecessorManifestSha256,
         $ExpectedSupersededActivePredecessorOperationVersion,
         $ExpectedSupersededActivePredecessorRunSha256,
         $ExpectedSupersededActivePredecessorManifestSha256,
@@ -422,8 +432,8 @@ function Get-Authority {
         throw 'BLOCKED: deterministic admission schema is not the exact closed v3 authority.'
     }
     $admissions = @($evidenceManifest.deterministicAdmissions)
-    if ($admissions.Count -ne 16 -or @($admissions | Where-Object { $_.status -eq 'active' }).Count -ne 1) {
-        throw 'BLOCKED: deterministic admission chain must contain fifteen predecessors and one active successor.'
+    if ($admissions.Count -ne 17 -or @($admissions | Where-Object { $_.status -eq 'active' }).Count -ne 1) {
+        throw 'BLOCKED: deterministic admission chain must contain sixteen predecessors and one active successor.'
     }
     $expectedAdmissionKeys = @(
         'status', 'operationVersion', 'buildId', 'artifactManifestSha256', 'runEvidenceId',
@@ -450,7 +460,8 @@ function Get-Authority {
     $immediateActivePredecessor = $admissions[12]
     $newestActivePredecessor = $admissions[13]
     $supersededActivePredecessor = $admissions[14]
-    $active = $admissions[15]
+    $blockedActivePredecessor = $admissions[15]
+    $active = $admissions[16]
     if ($historical.status -ne 'superseded' -or
         $historical.operationVersion -ne $ExpectedHistoricalOperationVersion -or
         $historical.buildId -ne $ExpectedHistoricalBuildId -or
@@ -626,10 +637,22 @@ function Get-Authority {
         $supersededActivePredecessor.runEvidenceId -ne $ExpectedSupersededActivePredecessorRunId -or
         $supersededActivePredecessor.runEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256 -or
         $supersededActivePredecessor.predecessorEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256 -or
-        $supersededActivePredecessor.successorEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
+        $supersededActivePredecessor.successorEvidenceSha256 -ne $ExpectedBlockedActivePredecessorRunSha256 -or
         $supersededActivePredecessor.manifestRecord.path -ne $ExpectedSupersededActivePredecessorManifestRelativePath -or
         $supersededActivePredecessor.manifestRecord.sha256 -ne $ExpectedSupersededActivePredecessorManifestSha256) {
         throw 'BLOCKED: physically BLOCKED v58 predecessor identity is invalid or reactivated.'
+    }
+    if ($blockedActivePredecessor.status -ne 'superseded' -or
+        $blockedActivePredecessor.operationVersion -ne $ExpectedBlockedActivePredecessorOperationVersion -or
+        $blockedActivePredecessor.buildId -ne $ExpectedBlockedActivePredecessorBuildId -or
+        $blockedActivePredecessor.artifactManifestSha256 -ne $ExpectedBlockedActivePredecessorArtifactManifestSha256 -or
+        $blockedActivePredecessor.runEvidenceId -ne $ExpectedBlockedActivePredecessorRunId -or
+        $blockedActivePredecessor.runEvidenceSha256 -ne $ExpectedBlockedActivePredecessorRunSha256 -or
+        $blockedActivePredecessor.predecessorEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256 -or
+        $blockedActivePredecessor.successorEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
+        $blockedActivePredecessor.manifestRecord.path -ne $ExpectedBlockedActivePredecessorManifestRelativePath -or
+        $blockedActivePredecessor.manifestRecord.sha256 -ne $ExpectedBlockedActivePredecessorManifestSha256) {
+        throw 'BLOCKED: physically BLOCKED v65 predecessor identity is invalid or reactivated.'
     }
     if ($active.status -ne 'active' -or
         $active.operationVersion -ne $ExpectedOperationVersion -or
@@ -637,10 +660,10 @@ function Get-Authority {
         $active.artifactManifestSha256 -ne $ExpectedArtifactManifestSha256 -or
         $active.runEvidenceId -ne $ExpectedSimulationRunId -or
         $active.runEvidenceSha256 -ne $ExpectedSimulationRunSha256 -or
-        $active.predecessorEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256 -or
+        $active.predecessorEvidenceSha256 -ne $ExpectedBlockedActivePredecessorRunSha256 -or
         $null -ne $active.successorEvidenceSha256 -or
         $null -ne $active.manifestRecord) {
-        throw 'BLOCKED: active v65 deterministic admission tuple/hash/link mismatch.'
+        throw 'BLOCKED: active v66 deterministic admission tuple/hash/link mismatch.'
     }
     if (($admissions | ConvertTo-Json -Depth 8).IndexOf('managed-power-scheme-v42', [StringComparison]::Ordinal) -ge 0) {
         throw 'BLOCKED: rejected v42 cannot belong to the deterministic admission chain.'
@@ -1011,6 +1034,30 @@ function Get-Authority {
         $supersededActivePredecessorStage[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedNewestActivePredecessorRunSha256) {
         throw 'BLOCKED: immutable v58 predecessor record identity is invalid.'
     }
+    $blockedActivePredecessorManifest = Join-Path $RepositoryRoot $ExpectedBlockedActivePredecessorManifestRelativePath.Replace('/', '\')
+    if (-not (Test-Path -LiteralPath $blockedActivePredecessorManifest -PathType Leaf) -or
+        (Get-FileSha256Hex -Path $blockedActivePredecessorManifest) -ne $ExpectedBlockedActivePredecessorManifestSha256) {
+        throw 'BLOCKED: immutable v65 predecessor record is missing or changed.'
+    }
+    $blockedActivePredecessorDocument = [IO.File]::ReadAllText($blockedActivePredecessorManifest) | ConvertFrom-Json
+    $blockedActivePredecessorStage = @($blockedActivePredecessorDocument.stages | Where-Object { $_.stage -eq 'deterministic-simulation' })
+    $blockedActivePredecessorAdmissions = @($blockedActivePredecessorDocument.deterministicAdmissions)
+    if ($blockedActivePredecessorDocument.schemaVersion -ne 3 -or
+        $blockedActivePredecessorDocument.operationVersion -ne $ExpectedBlockedActivePredecessorOperationVersion -or
+        $blockedActivePredecessorDocument.immutableBuild.id -ne $ExpectedBlockedActivePredecessorBuildId -or
+        $blockedActivePredecessorDocument.immutableBuild.artifactManifestSha256 -ne $ExpectedBlockedActivePredecessorArtifactManifestSha256 -or
+        $blockedActivePredecessorAdmissions.Count -ne 16 -or
+        $blockedActivePredecessorAdmissions[14].operationVersion -ne $ExpectedSupersededActivePredecessorOperationVersion -or
+        $blockedActivePredecessorAdmissions[14].status -ne 'superseded' -or
+        $blockedActivePredecessorAdmissions[15].operationVersion -ne $ExpectedBlockedActivePredecessorOperationVersion -or
+        $blockedActivePredecessorAdmissions[15].status -ne 'active' -or
+        $blockedActivePredecessorAdmissions[15].predecessorEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256 -or
+        $blockedActivePredecessorStage.Count -ne 1 -or
+        @($blockedActivePredecessorStage[0].runs).Count -ne 1 -or
+        $blockedActivePredecessorStage[0].runs[0].id -ne $ExpectedBlockedActivePredecessorRunId -or
+        $blockedActivePredecessorStage[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256) {
+        throw 'BLOCKED: immutable v65 predecessor record identity is invalid.'
+    }
     $deterministic = @($evidenceManifest.stages | Where-Object { $_.stage -eq 'deterministic-simulation' })
     if ($evidenceManifest.operationVersion -ne $ExpectedOperationVersion -or
         $evidenceManifest.immutableBuild.id -ne $ExpectedBuildId -or
@@ -1021,11 +1068,11 @@ function Get-Authority {
         $deterministic[0].runs[0].operationVersion -ne $ExpectedOperationVersion -or
         $deterministic[0].runs[0].buildId -ne $ExpectedBuildId -or
         $deterministic[0].runs[0].artifactManifestSha256 -ne $ExpectedArtifactManifestSha256 -or
-        $deterministic[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedSupersededActivePredecessorRunSha256 -or
+        $deterministic[0].runs[0].predecessorRunEvidenceSha256 -ne $ExpectedBlockedActivePredecessorRunSha256 -or
         @($evidenceManifest.stages | Select-Object -Skip 1 | Where-Object {
             @($_.runs).Count -ne 0 -or @($_.consents).Count -ne 0 -or @($_.reviews).Count -ne 0
         }).Count -ne 0) {
-        throw 'BLOCKED: deterministic simulation admission is not the exact active v65 authority.'
+        throw 'BLOCKED: deterministic simulation admission is not the exact active v66 authority.'
     }
 
     $CurrentAuthority | Add-Member -NotePropertyName Manifest -NotePropertyValue $manifest -Force
