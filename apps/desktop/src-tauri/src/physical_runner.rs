@@ -16,6 +16,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
+#[cfg(windows)]
+use std::os::windows::io::AsRawHandle;
+#[cfg(windows)]
+use windows::Win32::{
+    Foundation::{ERROR_BROKEN_PIPE, ERROR_NO_DATA, ERROR_PIPE_NOT_CONNECTED, HANDLE},
+    System::Pipes::PeekNamedPipe,
+};
+
 #[path = "../../../optimizer-service/src/artifact_manifest.rs"]
 mod artifact_manifest;
 #[path = "../../../optimizer-service/src/installation_manifest.rs"]
@@ -1837,6 +1845,34 @@ fn webdriver_diagnostic(
     }
 }
 
+#[cfg(windows)]
+fn read_webdriver_output_bounded(mut reader: impl Read + AsRawHandle) -> (Vec<u8>, bool) {
+    let mut available = 0_u32;
+    let handle = HANDLE(reader.as_raw_handle());
+    // The WebDriver may launch a native descendant that inherits this pipe. Once the
+    // parent exits, waiting for EOF would then wait for the descendant too. Snapshot
+    // only the bytes already available and let the owned pipe handle close on return.
+    if let Err(error) = unsafe { PeekNamedPipe(handle, None, 0, None, Some(&mut available), None) }
+    {
+        let win32_code = error.code().0 as u32 & 0xffff;
+        let pipe_closed = [
+            ERROR_BROKEN_PIPE.0,
+            ERROR_NO_DATA.0,
+            ERROR_PIPE_NOT_CONNECTED.0,
+        ]
+        .contains(&win32_code);
+        return (Vec::new(), !pipe_closed);
+    }
+    let truncated = available as usize > MAX_WEBDRIVER_CAPTURE_BYTES;
+    let capture_length = (available as usize).min(MAX_WEBDRIVER_CAPTURE_BYTES);
+    let mut bytes = vec![0_u8; capture_length];
+    if capture_length > 0 && reader.read_exact(&mut bytes).is_err() {
+        return (Vec::new(), true);
+    }
+    (bytes, truncated)
+}
+
+#[cfg(not(windows))]
 fn read_webdriver_output_bounded(mut reader: impl Read) -> (Vec<u8>, bool) {
     let mut bytes = Vec::with_capacity(MAX_WEBDRIVER_CAPTURE_BYTES);
     let mut limited = reader
@@ -2243,9 +2279,9 @@ mod custody_failure_code_tests {
         MAX_INSTALLED_CUSTODY_DIAGNOSTIC_BYTES, artifact_custody_failure_code,
         installation_manifest::{CanonicalPathRole, CustodyError},
         installed_custody_diagnostic, installer_diagnostic_from_log,
-        installer_diagnostic_sidecar_path, installer_exit_failure,
-        read_webdriver_output_bounded, webdriver_diagnostic,
-        write_installer_diagnostic_create_once, write_webdriver_diagnostic_create_once,
+        installer_diagnostic_sidecar_path, installer_exit_failure, read_webdriver_output_bounded,
+        webdriver_diagnostic, write_installer_diagnostic_create_once,
+        write_webdriver_diagnostic_create_once,
     };
     #[cfg(windows)]
     use std::path::{Path, PathBuf};
@@ -2301,12 +2337,10 @@ mod custody_failure_code_tests {
             .spawn()
             .expect("diagnostic process should start");
         let status = child.wait().expect("diagnostic process should exit");
-        let (stdout, stdout_truncated) = read_webdriver_output_bounded(
-            child.stdout.take().expect("stdout pipe should exist"),
-        );
-        let (stderr, stderr_truncated) = read_webdriver_output_bounded(
-            child.stderr.take().expect("stderr pipe should exist"),
-        );
+        let (stdout, stdout_truncated) =
+            read_webdriver_output_bounded(child.stdout.take().expect("stdout pipe should exist"));
+        let (stderr, stderr_truncated) =
+            read_webdriver_output_bounded(child.stderr.take().expect("stderr pipe should exist"));
         let diagnostic = webdriver_diagnostic(
             "reboot-pending",
             status.code(),
