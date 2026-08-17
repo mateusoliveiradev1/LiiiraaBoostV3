@@ -1389,3 +1389,10 @@ both physical blockers remain historical evidence; only the next monotonic versi
   ]
 }
 ```
+
+### Physical execution disposition — BLOCKED
+
+- The sole v67 physical attempt durably accepted the exact APPLY phrase, then timed out in the bounded `reboot-pending` guest-runner stage before any continuation or raw envelope existed.
+- Immutable blocker: `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-221445-clean-vm-BLOCKED.json`, SHA-256 `d7114726d3f4c14c4627d59e792323a87a4436e58b9761f414a93579ca115790`, reason `BLOCKED:guest-runner-total-deadline`.
+- Cleanup-only evidence proves the exact VM returned to `Off`; installed checkpoint GUID `84b8d3b0-90d0-4850-8806-f373a28a38e9` and all evidence remain preserved. v67 is terminal and must not be retried.
+- Safe read-only diagnosis observed no requested power-scheme mutation and localized the missing visibility to the inner `apply_until_reboot` call sequence. RED `b2bdc31e` / GREEN `b9aad639` introduce a bounded raw-free inner heartbeat for the next monotonic artifact.
