@@ -1432,3 +1432,11 @@ both physical blockers remain historical evidence; only the next monotonic versi
   ]
 }
 ```
+
+### Physical execution disposition — BLOCKED
+
+- The sole v68 physical attempt durably recorded prompt-ready and accepted-before-mutation, then timed out in the bounded `reboot-pending` runner stage.
+- Immutable blocker: `C:\Users\Liiiraa\VM-Lab\Evidence\phase6\20260816-225812-clean-vm-BLOCKED.json`, SHA-256 `e7b6c94fbec21f3e51dd7e7cfa589c33448b788ddd8d98551e57a3f606a2661f`, exact reason `BLOCKED:guest-runner-total-deadline`.
+- The bounded raw-free heartbeat identifies inner stage `webdriver-launch`; no raw WebDriver output, terminal physical evidence, or review was manufactured.
+- Cleanup-only evidence proves VM `Off`; installed checkpoint GUID `84635905-a816-4b4e-9cdd-acb05b3c1dbf` and all evidence remain preserved. v68 is terminal and must not be retried.
+- Causal RED `273ff42c` / GREEN `96882498` replace EOF waiting with a strict-cap `PeekNamedPipe` snapshot for the next monotonic artifact.
