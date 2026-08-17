@@ -653,3 +653,25 @@ lifecycle `PASSED`. The fixed inspection-only verifier returned `verified` for t
 | `phase6-physical-runner.exe` | `23d2475d36a5dd050011d521773924a1cc18fb324d38789729df8390392c4fe5` | 7140136 |
 | `tauri-driver.exe` | `7b750fb913684e24a89b5b6ee4d4e5c07deece8b0cd7e3e9834bab091ae501e6` | 1627944 |
 | `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
+
+## Append-only authority update: v68 PASSED
+
+After v67 terminated with the preserved bounded guest-runner timeout, causal TDD RED `b2bdc31e`
+and GREEN `b9aad639` added the atomic raw-free inner-stage heartbeat. The next monotonic v68
+`build-and-smoke` completed installation, broker binding, repair/update, rollback-failure and
+downgrade drills, uninstall, and residual cleanup with lifecycle `PASSED`. The fixed
+inspection-only verifier returned `verified` for the same live bytes.
+
+- **Root:** `target/phase6-physical/f5d161f2d4acca90ed836f7a4ccccab6f514adea/physical-9f82fde77bf2940f-managed-power-scheme-v68`
+- **Build ID:** `physical-9f82fde77bf2940f-managed-power-scheme-v68`
+- **Operation version:** `managed-power-scheme-v68`
+- **Source commit:** `f5d161f2d4acca90ed836f7a4ccccab6f514adea`
+
+| File | SHA-256 | Bytes |
+|---|---|---:|
+| `artifact-manifest.json` | `64f1cecd68757befba141cf3ff5179f6c6f693a9a1f6c29d9a9df9b094c25c9c` | 3240 |
+| `liiiraa-boost.msi` | `2731ce66a735393d213745501c33c32aa15b4311a9a3607c847c6a4533771cf4` | 15826944 |
+| `configs/clean-windows-vm.run-config.json` | `731f9400bea79c83db0256bf6ab013269cc80963fd489eef96e05bd393390b62` | 1593 |
+| `phase6-physical-runner.exe` | `63e4488c80ad0d0456574f23343122bb7dc6fad0572ef7048f156ef01ede42d5` | 7145256 |
+| `tauri-driver.exe` | `bf8cc19f67ff0a446265d02ed03c992aaa53f4c63cf897ff16f0eb4253a71f0b` | 1627944 |
+| `msedgedriver.exe` | `d5c91ea1e04575ea23fc0aa3a1bef2f2803a94bd9703c4378f82df480530a8ab` | 41818920 |
